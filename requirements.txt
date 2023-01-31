@@ -14,7 +14,7 @@ flake8-black==0.3.3
 flake8-isort==4.2.0
 identify==2.5.5
 iniconfig==1.1.1
-ipython==8.5.0
+ipython==8.9.0
 isort==5.10.1
 jedi==0.18.1
 matplotlib-inline==0.1.6
