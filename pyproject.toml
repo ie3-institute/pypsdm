@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "transense"
+version = "0.1.0"
+description = ""
+authors = ["Thomas <thomas.oberliessen@googlemail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+flake8 = "^6.0.0"
+flake8-black = "^0.3.6"
+flake8-isort = "^6.0.0"
+pre-commit = "^2.21.0"
+PyYAML = "^6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
