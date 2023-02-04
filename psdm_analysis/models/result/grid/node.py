@@ -16,14 +16,12 @@ from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 @dataclass(frozen=True)
 class NodeResult(ResultEntities):
-    resolution: int
 
     def __eq__(self, other):
         if not isinstance(other, NodeResult):
             return False
         return (
             (self.input_model == other.input_model)
-            & (self.resolution == other.resolution)
             & (self.name == other.name)
             & (self.data.equals(other.data))
         )
@@ -44,9 +42,7 @@ class NodeResult(ResultEntities):
                 lambda date_string: to_date_time(date_string)
             )
             data = data.set_index("time", drop=True)
-        start = data.iloc[0].name
-        resolution = (data.iloc[1].name - start).seconds / 60
-        return cls(RawGridElementsEnum.NODE, name, uuid, data, resolution)
+        return cls(RawGridElementsEnum.NODE, name, uuid, data)
 
     @staticmethod
     def build_from_nominal_data(
@@ -57,7 +53,7 @@ class NodeResult(ResultEntities):
         resolution: int,
     ) -> "NodeResult":
         data["v_mag"] = data["v_mag"].divide(rated_voltage)
-        return NodeResult(name, uuid, data, resolution)
+        return NodeResult(name, uuid, data)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         filtered_data = filter_data_for_time_interval(self.data, start, end)
