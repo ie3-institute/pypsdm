@@ -1,5 +1,6 @@
-from psdm_analysis.models.input.container.participants_container import \
-    SystemParticipantsContainer
+from psdm_analysis.models.input.container.participants_container import (
+    SystemParticipantsContainer,
+)
 from tests import utils
 from tests.utils import VN_SIMONA_DELIMITER, VN_SIMONA_INPUT_PATH
 

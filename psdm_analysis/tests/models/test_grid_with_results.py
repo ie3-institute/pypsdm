@@ -11,8 +11,6 @@ grid = GridWithResults.from_csv(
     utils.VN_SIMULATION_END,
 )
 
-print("")
-
 
 def test_nodal_result():
     nodal_res = grid.nodal_result(utils.TEST_NODE_UUID)

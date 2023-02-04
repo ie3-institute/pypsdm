@@ -1,6 +1,5 @@
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.flex_options import \
-    FlexOptionsResult
+from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from tests import utils
 
 

@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Set
 
-from psdm_analysis.models.input.container.grid_container import \
-    RawGridContainer
+from psdm_analysis.models.input.container.grid_container import RawGridContainer
 from psdm_analysis.models.result.grid.node import NodesResult
-from psdm_analysis.models.result.participant.participants_res_container import \
-    ParticipantsResultContainer
+from psdm_analysis.models.result.participant.participants_res_container import (
+    ParticipantsResultContainer,
+)
 
 
 @dataclass(frozen=True)

@@ -2,8 +2,9 @@ import datetime
 import math
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participants_res_container import \
-    ParticipantsResultContainer
+from psdm_analysis.models.result.participant.participants_res_container import (
+    ParticipantsResultContainer,
+)
 from tests import utils
 
 result_data = ParticipantsResultContainer.from_csv(
@@ -15,7 +16,7 @@ result_data = ParticipantsResultContainer.from_csv(
 
 def test_energy():
     energy_dict = result_data.energies()
-    assert len(energy_dict) == 3
+    assert len(energy_dict) == 7
 
 
 # todo: update test data: since time stamps don't match its hard to do sensible energy comparisons

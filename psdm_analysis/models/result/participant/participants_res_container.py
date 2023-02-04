@@ -6,10 +6,11 @@ from functools import partial
 from pandas import DataFrame, Series
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.flex_options import \
-    FlexOptionsResult
+from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult, ParticipantsWithSocResult)
+    ParticipantsResult,
+    ParticipantsWithSocResult,
+)
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import join_series
 
@@ -211,6 +212,7 @@ class ParticipantsResultContainer:
         return {
             sp_type: res.energy()
             for sp_type, res in self.to_dict(include_empty=False).items()
+            if sp_type != SystemParticipantsEnum.FLEX_OPTIONS
         }
 
     def load_and_generation_energies(self) -> {SystemParticipantsEnum, float}:

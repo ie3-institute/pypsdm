@@ -16,7 +16,6 @@ from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 @dataclass(frozen=True)
 class NodeResult(ResultEntities):
-
     def __eq__(self, other):
         if not isinstance(other, NodeResult):
             return False

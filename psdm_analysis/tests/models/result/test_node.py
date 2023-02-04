@@ -13,7 +13,7 @@ def test_filter_for_time_interval():
     test_node_res = nodes_res.nodes[utils.TEST_NODE_UUID]
     filtered_test_node_res = test_node_res.filter_for_time_interval(start, end)
     assert len(filtered_test_node_res) == 1
-    filtered = nodes_res.filter_result_entities_for_time_interval(start, end)
+    filtered = nodes_res.filter_for_time_interval(start, end)
     assert filtered.nodes[utils.TEST_NODE_UUID] == filtered_test_node_res
 
 

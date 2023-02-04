@@ -1,5 +1,4 @@
-from psdm_analysis.models.input.enums import (RawGridElementsEnum,
-                                              SystemParticipantsEnum)
+from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticipantsEnum
 
 
 def test_entities_enum():

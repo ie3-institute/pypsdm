@@ -10,10 +10,8 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import read_csv, to_date_time
-from psdm_analysis.models.input.enums import (EntitiesEnum,
-                                              SystemParticipantsEnum)
-from psdm_analysis.models.input.participant.charging import \
-    parse_evcs_type_info
+from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
 from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 

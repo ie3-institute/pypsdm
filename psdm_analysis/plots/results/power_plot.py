@@ -5,21 +5,31 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from psdm_analysis.models.input.participant.participant import \
-    SystemParticipantsWithCapacity
+from psdm_analysis.models.input.participant.participant import (
+    SystemParticipantsWithCapacity,
+)
 from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult, ParticipantsWithSocResult)
-from psdm_analysis.models.result.participant.participants_res_container import \
-    ParticipantsResultContainer
+    ParticipantsResult,
+    ParticipantsWithSocResult,
+)
+from psdm_analysis.models.result.participant.participants_res_container import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.utils import (FIGSIZE, FILL_ALPHA, LOAD_COLOR,
-                                       PV_COLOR, add_to_kwargs_if_not_exist,
-                                       get_label_and_color,
-                                       get_label_and_color_dict,
-                                       legend_with_distinct_labels,
-                                       plot_resample,
-                                       set_date_format_and_label, set_title)
+from psdm_analysis.plots.utils import (
+    FIGSIZE,
+    FILL_ALPHA,
+    LOAD_COLOR,
+    PV_COLOR,
+    add_to_kwargs_if_not_exist,
+    get_label_and_color,
+    get_label_and_color_dict,
+    legend_with_distinct_labels,
+    plot_resample,
+    set_date_format_and_label,
+    set_title,
+)
 
 sns.set_style("whitegrid")
 

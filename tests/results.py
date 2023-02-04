@@ -1,6 +1,5 @@
 from psdm_analysis.models.grid_with_results import GridWithResults
-from tests.utils import (VN_SIMONA_DELIMITER, VN_SIMONA_INPUT_PATH,
-                         VN_SIMONA_RESULT_PATH)
+from tests.utils import VN_SIMONA_DELIMITER, VN_SIMONA_INPUT_PATH, VN_SIMONA_RESULT_PATH
 
 
 def test_grid_with_results():

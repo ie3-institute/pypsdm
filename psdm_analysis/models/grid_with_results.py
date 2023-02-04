@@ -4,15 +4,16 @@ from datetime import datetime
 from typing import List
 
 from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.models.input.container.participants_container import \
-    SystemParticipantsContainer
+from psdm_analysis.models.input.container.participants_container import (
+    SystemParticipantsContainer,
+)
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
-from psdm_analysis.models.result.participant.participant import \
-    ParticipantsResult
-from psdm_analysis.models.result.participant.participants_res_container import \
-    ParticipantsResultContainer
+from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.participants_res_container import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.models.result.res_container import ResultContainer
 
 

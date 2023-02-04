@@ -10,8 +10,9 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import get_file_path
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.input.participant.participant import \
-    SystemParticipantsWithCapacity
+from psdm_analysis.models.input.participant.participant import (
+    SystemParticipantsWithCapacity,
+)
 from psdm_analysis.models.result.participant.dict import ResultDict
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.processing.dataframe import join_dataframes

@@ -4,8 +4,9 @@ from typing import Dict
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.transformer import Transformers2W
-from psdm_analysis.models.input.container.participants_container import \
-    SystemParticipantsContainer
+from psdm_analysis.models.input.container.participants_container import (
+    SystemParticipantsContainer,
+)
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.primary_data import PrimaryData
 from psdm_analysis.models.result.power import PQResult

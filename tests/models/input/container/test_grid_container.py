@@ -1,5 +1,7 @@
 from psdm_analysis.models.input.container.grid_container import (
-    GridContainer, RawGridContainer)
+    GridContainer,
+    RawGridContainer,
+)
 from tests import utils
 
 
