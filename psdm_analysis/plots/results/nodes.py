@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
+import plotly.express as px
+
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
-import plotly.express as px
 
 
 @dataclass(frozen=True)

@@ -7,8 +7,8 @@ import pandas as pd
 from pandas import DataFrame
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.dict import ResultDict
 from psdm_analysis.models.result.flex_option import FlexOptionResult
+from psdm_analysis.models.result.participant.dict import ResultDict
 
 
 @dataclass(frozen=True)

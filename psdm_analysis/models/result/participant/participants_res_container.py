@@ -3,16 +3,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 
-from pandas import DataFrame
+from pandas import DataFrame, Series
 
-from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
-from psdm_analysis.processing.series import join_series
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.result.participant.flex_options import \
+    FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult,
-    ParticipantsWithSocResult,
-)
+    ParticipantsResult, ParticipantsWithSocResult)
 from psdm_analysis.models.result.power import PQResult
+from psdm_analysis.processing.series import join_series
 
 
 @dataclass(frozen=True)
@@ -174,19 +173,25 @@ class ParticipantsResultContainer:
                 f"No return value for system participant of type: {sp_type}"
             )
 
-    def participants_p(self) -> DataFrame:
+    def p(self) -> DataFrame:
         p_series = [
             participants.p_sum().rename(participants.sp_type.value)
             for participants in self.to_list(include_flex=False)
         ]
         return join_series(p_series)
 
-    def participants_q(self) -> DataFrame:
+    def p_sum(self) -> Series:
+        return self.p().sum(axis=1).rename("p_sum")
+
+    def q(self) -> DataFrame:
         q_series = [
             participants.q_sum().rename(participants.sp_type.value)
             for participants in self.to_list(include_flex=False)
         ]
         return join_series(q_series)
+
+    def q_sum(self) -> Series:
+        return self.q().sum(axis=1).rename("q_sum")
 
     def find_participant_result(self, uuid: str):
         for participants_res in self.to_list(include_flex=False):

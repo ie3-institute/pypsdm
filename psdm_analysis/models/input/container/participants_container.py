@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import pandas as pd
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
@@ -7,11 +8,11 @@ from psdm_analysis.models.input.participant.em import EnergyManagementSystems
 from psdm_analysis.models.input.participant.evcs import EvChargingStations
 from psdm_analysis.models.input.participant.evs import ElectricVehicles
 from psdm_analysis.models.input.participant.fixed_feed_in import FixedFeedIns
+from psdm_analysis.models.input.participant.hp import HeatPumps
 from psdm_analysis.models.input.participant.load import Loads
 from psdm_analysis.models.input.participant.pv import PhotovoltaicPowerPlants
 from psdm_analysis.models.input.participant.storage import Storages
 from psdm_analysis.models.input.participant.wec import WindEnergyConverters
-from psdm_analysis.models.input.participant.hp import HeatPumps
 
 
 @dataclass(frozen=True)
@@ -54,7 +55,18 @@ class SystemParticipantsContainer:
 
     # todo: implement
     def to_list(self):
-        pass
+        return [
+            self.ems,
+            self.loads,
+            self.fixed_feed_ins,
+            self.pvs,
+            self.biomass_plants,
+            self.wecs,
+            self.storages,
+            self.evs,
+            self.evcs,
+            self.hps,
+        ]
 
     def filter_by_node(self, node_uuid: str):
         loads = self.loads.filer_for_node(node_uuid)
@@ -68,13 +80,13 @@ class SystemParticipantsContainer:
         evcs = self.evcs.filer_for_node(node_uuid)
         hps = self.hps.filer_for_node(node_uuid)
         return SystemParticipantsContainer(
+            ems,
             loads,
             fixed_feed_ins,
             pvs,
             biomass_plants,
             wecs,
             storages,
-            ems,
             evs,
             evcs,
             hps,
@@ -130,16 +142,7 @@ class SystemParticipantsContainer:
 
     def uuids(self):
         return pd.concat(
-            [
-                self.loads.uuids().to_series(),
-                self.fixed_feed_ins.uuids().to_series(),
-                self.pvs.uuids().to_series(),
-                self.wecs.uuids().to_series(),
-                self.biomass_plants.uuids().to_series(),
-                self.ems.uuids().to_series(),
-                self.storages.uuids().to_series(),
-                self.evcs.uuids().to_series(),
-            ]
+            [participants.uuids().to_series() for participants in self.to_list()]
         )
 
     def subset(self, uuids):

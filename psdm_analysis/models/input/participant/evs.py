@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.input.participant.participant import (
-    SystemParticipantsWithCapacity,
-)
+from psdm_analysis.models.input.participant.participant import \
+    SystemParticipantsWithCapacity
 
 
 @dataclass(frozen=True)

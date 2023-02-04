@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Dict
 
 import pandas as pd
-from pandas import Series, DataFrame
+from pandas import DataFrame, Series
 
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult

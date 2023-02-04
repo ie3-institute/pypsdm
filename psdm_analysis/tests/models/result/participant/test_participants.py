@@ -1,9 +1,8 @@
 import datetime
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participants_res_container import (
-    ParticipantsResultContainer,
-)
+from psdm_analysis.models.result.participant.participants_res_container import \
+    ParticipantsResultContainer
 from tests import utils
 
 result_data = ParticipantsResultContainer.from_csv(
@@ -20,7 +19,7 @@ def test_energy():
 
 # todo: update test data: since time stamps don't match its hard to do sensible energy comparisons
 def test_participants_p():
-    participants_p = result_data.participants_p()
+    participants_p = result_data.p()
     assert SystemParticipantsEnum.LOAD.value in participants_p
     loads_p = participants_p[SystemParticipantsEnum.LOAD.value]
     # assert duration_weighted_sum(loads_p) == duration_weighted_sum(result_data.loads.p_sum())
@@ -33,7 +32,7 @@ def test_participants_p():
 
 
 def test_participants_q():
-    participants_q = result_data.participants_q()
+    participants_q = result_data.q()
     assert SystemParticipantsEnum.LOAD.value in participants_q
     loads_q = participants_q[SystemParticipantsEnum.LOAD.value]
     # assert loads_q.dropna().equals(result_data.loads.q_sum())

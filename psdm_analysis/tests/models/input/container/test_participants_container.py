@@ -1,8 +1,7 @@
-from psdm_analysis.models.input.container.participants_container import (
-    SystemParticipantsContainer,
-)
+from psdm_analysis.models.input.container.participants_container import \
+    SystemParticipantsContainer
 from tests import utils
-from tests.utils import VN_SIMONA_INPUT_PATH, VN_SIMONA_DELIMITER
+from tests.utils import VN_SIMONA_DELIMITER, VN_SIMONA_INPUT_PATH
 
 participants = SystemParticipantsContainer.from_csv(
     VN_SIMONA_INPUT_PATH, VN_SIMONA_DELIMITER

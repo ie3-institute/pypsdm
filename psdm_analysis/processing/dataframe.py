@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from pandas import DataFrame
 import pandas as pd
+from pandas import DataFrame
 
 
 def divide_positive_negative(df: DataFrame):

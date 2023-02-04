@@ -10,14 +10,12 @@ from pandas import Series
 
 from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.entity import ResultEntities
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.enums import (EntitiesEnum,
+                                              SystemParticipantsEnum)
 from psdm_analysis.processing.dataframe import divide_positive_negative
-from psdm_analysis.processing.series import (
-    duration_weighted_sum,
-    add_series,
-    load_and_generation,
-    hourly_mean_resample,
-)
+from psdm_analysis.processing.series import (add_series, duration_weighted_sum,
+                                             hourly_mean_resample,
+                                             load_and_generation)
 
 
 @dataclass(frozen=True)
@@ -56,9 +54,7 @@ class PQResult(ResultEntities):
         return (self.data == other.data).all()
 
     @classmethod
-    def from_csv(
-        cls, file_path: str, sp_type: SystemParticipantsEnum, name: str = None
-    ):
+    def from_csv(cls, file_path: str, sp_type: EntitiesEnum, name: str = None):
         file_path = get_absolute_path(file_path)
         data = pd.read_csv(file_path)
         data["time"] = pd.to_datetime(data["time"])

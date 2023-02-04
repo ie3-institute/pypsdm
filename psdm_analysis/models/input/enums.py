@@ -49,6 +49,7 @@ class SystemParticipantsEnum(EntitiesEnum):
     HEATP_PUMP = "hp"
     PARTICIPANTS_SUM = "participants_sum"
     FLEX_OPTIONS = "flex_options"
+    PRIMARY_DATA = "primary_data"
 
     @staticmethod
     def values():

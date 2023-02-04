@@ -7,8 +7,9 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pandas import Series
 
+from psdm_analysis.models.input.enums import (EntitiesEnum,
+                                              SystemParticipantsEnum)
 from psdm_analysis.processing.series import hourly_mean_resample
-from psdm_analysis.models.input.enums import SystemParticipantsEnum, EntitiesEnum
 
 # === COLORS ===
 
@@ -88,7 +89,7 @@ FILL_ALPHA = 0.2
 
 
 def save_fig(figure: Figure, path: str, file_name: str, format="svg"):
-    figure.savefig(os.path.join(path, file_name), bbox_inches='tight', format=format)
+    figure.savefig(os.path.join(path, file_name), bbox_inches="tight", format=format)
 
 
 def plot_resample(res: Series, hourly_mean: bool):

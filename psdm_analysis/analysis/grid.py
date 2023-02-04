@@ -1,9 +1,7 @@
 import pandas as pd
 
 from psdm_analysis.models.input.container.grid_container import (
-    RawGridContainer,
-    GridContainer,
-)
+    GridContainer, RawGridContainer)
 
 
 def grid_structure_summary(grid: RawGridContainer):

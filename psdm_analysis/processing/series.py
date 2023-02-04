@@ -1,5 +1,5 @@
-from pandas import Series, DataFrame
 import pandas as pd
+from pandas import DataFrame, Series
 
 
 def duration_weighted_series(series: Series):
@@ -57,10 +57,10 @@ def load_and_generation(p_ts: Series) -> (float, float):
 
 
 def divide_positive_negative(series: Series):
-    positive = series.copy()
+    positive = series.copy(deep=True)
     positive[positive < 0] = 0
-    negative = series.copy()
-    series[series > 0] = 0
+    negative = series.copy(deep=True)
+    negative[negative > 0] = 0
     return positive, negative
 
 

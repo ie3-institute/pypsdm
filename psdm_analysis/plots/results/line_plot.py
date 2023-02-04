@@ -2,14 +2,10 @@ from matplotlib.axes import Axes
 from pandas import Series
 
 from psdm_analysis.models.input.enums import EntitiesEnum
-from psdm_analysis.plots.utils import (
-    get_label_and_color,
-    FILL_ALPHA,
-    plot_resample,
-    set_date_format_and_label,
-    get_label_and_color_dict,
-    add_to_kwargs_if_not_exist,
-)
+from psdm_analysis.plots.utils import (FILL_ALPHA, add_to_kwargs_if_not_exist,
+                                       get_label_and_color,
+                                       get_label_and_color_dict, plot_resample,
+                                       set_date_format_and_label)
 
 
 def ax_plot_time_series(

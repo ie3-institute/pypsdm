@@ -7,6 +7,7 @@ from functools import partial
 
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import to_date_time
+from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.power import PQResult
 
 
@@ -74,4 +75,4 @@ class PrimaryData:
         data = data.set_index("time")
         if not "q" in data.columns:
             data["q"] = 0
-        return PQResult(name, name, data)
+        return PQResult(SystemParticipantsEnum.PRIMARY_DATA, name, name, data)

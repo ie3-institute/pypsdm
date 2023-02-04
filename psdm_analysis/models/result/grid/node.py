@@ -39,8 +39,11 @@ class NodeResult(ResultEntities):
 
     @classmethod
     def build(cls, uuid: str, data: DataFrame, name: str = "") -> "NodeResult":
-        data["time"] = data["time"].apply(lambda date_string: to_date_time(date_string))
-        data = data.set_index("time", drop=True)
+        if "time" in data.columns:
+            data["time"] = data["time"].apply(
+                lambda date_string: to_date_time(date_string)
+            )
+            data = data.set_index("time", drop=True)
         start = data.iloc[0].name
         resolution = (data.iloc[1].name - start).seconds / 60
         return cls(RawGridElementsEnum.NODE, name, uuid, data, resolution)

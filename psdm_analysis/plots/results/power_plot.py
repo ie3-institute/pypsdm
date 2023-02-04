@@ -5,34 +5,21 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from psdm_analysis.models.input.participant.participant import (
-    SystemParticipantsWithCapacity,
-)
+from psdm_analysis.models.input.participant.participant import \
+    SystemParticipantsWithCapacity
 from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult,
-    ParticipantsWithSocResult,
-)
-from psdm_analysis.models.result.participant.participants_res_container import (
-    ParticipantsResultContainer,
-)
-from psdm_analysis.models.result.power import (
-    PQResult,
-    PQWithSocResult,
-)
+    ParticipantsResult, ParticipantsWithSocResult)
+from psdm_analysis.models.result.participant.participants_res_container import \
+    ParticipantsResultContainer
+from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.utils import (
-    get_label_and_color,
-    FIGSIZE,
-    FILL_ALPHA,
-    LOAD_COLOR,
-    PV_COLOR,
-    plot_resample,
-    set_date_format_and_label,
-    set_title,
-    legend_with_distinct_labels,
-    add_to_kwargs_if_not_exist,
-    get_label_and_color_dict,
-)
+from psdm_analysis.plots.utils import (FIGSIZE, FILL_ALPHA, LOAD_COLOR,
+                                       PV_COLOR, add_to_kwargs_if_not_exist,
+                                       get_label_and_color,
+                                       get_label_and_color_dict,
+                                       legend_with_distinct_labels,
+                                       plot_resample,
+                                       set_date_format_and_label, set_title)
 
 sns.set_style("whitegrid")
 
@@ -93,6 +80,7 @@ def plot_em(
         fill_from_index=True,
     )
     return fig
+
 
 def plot_aggregated_load_and_generation(
     participants: Union[ParticipantsResultContainer, list[PQResult]],

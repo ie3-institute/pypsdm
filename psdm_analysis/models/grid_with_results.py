@@ -4,17 +4,16 @@ from datetime import datetime
 from typing import List
 
 from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.models.input.container.participants_container import (
-    SystemParticipantsContainer,
-)
+from psdm_analysis.models.input.container.participants_container import \
+    SystemParticipantsContainer
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.res_container import ResultContainer
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
-from psdm_analysis.models.result.participant.participants_res_container import (
-    ParticipantsResultContainer,
-)
+from psdm_analysis.models.result.participant.participant import \
+    ParticipantsResult
+from psdm_analysis.models.result.participant.participants_res_container import \
+    ParticipantsResultContainer
+from psdm_analysis.models.result.res_container import ResultContainer
 
 
 @dataclass(frozen=True)
@@ -58,7 +57,7 @@ class GridWithResults:
         }
 
     def nodal_energy(self, uuid: str) -> dict[str:float]:
-        return self.nodal_result(uuid).energy_consumption()
+        return self.nodal_result(uuid).participants.sum().energy()
 
     def nodal_results(self) -> dict[str:ResultContainer]:
         return {
@@ -68,56 +67,15 @@ class GridWithResults:
 
     def nodal_result(self, node_uuid: str) -> "ResultContainer":
         node_participants = self.grid.node_participants_map[node_uuid]
-        ems = self._safe_get_result(
-            SystemParticipantsEnum.ENERGY_MANAGEMENT,
-            list(node_participants.ems.uuids()),
-            self.results.participants.ems,
-        )
-        loads = self._safe_get_result(
-            SystemParticipantsEnum.LOAD,
-            list(node_participants.loads.uuids()),
-            self.results.participants.loads,
-        )
-        pvs = self._safe_get_result(
-            SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT,
-            list(node_participants.pvs.uuids()),
-            self.results.participants.pvs,
-        )
-        wecs = self._safe_get_result(
-            SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
-            list(node_participants.wecs.uuids()),
-            self.results.participants.wecs,
-        )
-        storages = self._safe_get_result(
-            SystemParticipantsEnum.STORAGE,
-            list(node_participants.storages.uuids()),
-            self.results.participants.storages,
-        )
-        fixed_feed_ins = self._safe_get_result(
-            SystemParticipantsEnum.FIXED_FEED_IN,
-            list(node_participants.fixed_feed_ins.uuids()),
-            self.results.participants.fixed_feed_ins,
-        )
-        evcs = self._safe_get_result(
-            SystemParticipantsEnum.EV_CHARGING_STATION,
-            list(node_participants.evcs.uuids()),
-            self.results.participants.evcs,
-        )
-        hps = self._safe_get_result(
-            SystemParticipantsEnum.HEATP_PUMP,
-            list(node_participants.hps.uuids()),
-            self.results.participants.hps,
-        )
-        participants = ParticipantsResultContainer(
-            ems, loads, fixed_feed_ins, pvs, wecs, storages, evcs, hps
-        )
-
+        participants_uuids = node_participants.uuids()
+        participants = self.results.participants.subset(participants_uuids)
         return ResultContainer(
             name=node_uuid,
             nodes=NodesResult({node_uuid: self.results.nodes.nodes[node_uuid]}),
             participants=participants,
         )
 
+    # todo: this is not used so might be deleted
     @staticmethod
     def _safe_get_result(
         participant: SystemParticipantsEnum,
@@ -161,15 +119,10 @@ class GridWithResults:
         ]
 
     def build_enhanced_nodes_result(self):
-        nodal_results = self.nodal_results()
-        ps = {
-            uuid: nodal_result.participants_p_agg()
-            for uuid, nodal_result in nodal_results.items()
-        }
-        qs = {
-            uuid: nodal_result.participants_q_agg()
-            for uuid, nodal_result in nodal_results.items()
-        }
+        ps, qs = {}, {}
+        for uuid, nodal_result in self.nodal_results().items():
+            ps[uuid] = nodal_result.participants.p_sum()
+            qs[uuid] = nodal_result.participants.q_sum()
         return EnhancedNodesResult.from_nodes_result(self.results.nodes, ps, qs)
 
     def find_participant_result_pair(self, uuid: str):

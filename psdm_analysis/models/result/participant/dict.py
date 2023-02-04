@@ -6,7 +6,7 @@ from typing import Dict, Optional
 
 from pandas.core.groupby import DataFrameGroupBy
 
-from psdm_analysis.io.utils import get_file_path, csv_to_grpd_df
+from psdm_analysis.io.utils import csv_to_grpd_df, get_file_path
 from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 

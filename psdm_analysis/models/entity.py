@@ -10,7 +10,10 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import read_csv, to_date_time
-from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.input.enums import (EntitiesEnum,
+                                              SystemParticipantsEnum)
+from psdm_analysis.models.input.participant.charging import \
+    parse_evcs_type_info
 from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 
@@ -48,14 +51,6 @@ class Entities(ABC):
     def _data_from_csv(
         cls, entity: EntitiesEnum, path: str, delimiter: str
     ) -> DataFrame:
-        def parse_evcs_power(type_str: str):
-            if " kW" in type_str:
-                return float(type_str.split(" kW")[0])
-            elif " kVA" in type_str:
-                return float(type_str.split(" kVA")[0])
-            else:
-                raise ValueError(f"Can not determine power of {type_str}!")
-
         data = read_csv(path, entity.get_csv_input_file_name(), delimiter)
         if entity.has_type():
             type_data = read_csv(path, entity.get_type_file_name(), delimiter)
@@ -71,9 +66,10 @@ class Entities(ABC):
                 lambda x: x.split(" ")
             )
         if entity == SystemParticipantsEnum.EV_CHARGING_STATION:
-            data["s_rated"] = data["type"].apply(
-                lambda type_str: parse_evcs_power(type_str)
+            type_data = data["type"].apply(
+                lambda type_str: parse_evcs_type_info(type_str)
             )
+            data = pd.concat([data, type_data])
         return data.set_index("uuid")
 
     def uuids(self):
@@ -84,9 +80,6 @@ class Entities(ABC):
 
     def __repr__(self):
         return self.data
-
-    def __len__(self):
-        return len(self.data)
 
     def get(self, uuid: str) -> Series:
         return self.data.loc[uuid]
@@ -112,10 +105,6 @@ class ResultEntities(ABC):
     name: str
     input_model: str
     data: DataFrame
-
-    @abstractmethod
-    def __add__(self, other):
-        pass
 
     def __repr__(self):
         return self.data
@@ -162,7 +151,9 @@ class ResultEntities(ABC):
             return cls.create_empty(sp_type, name, input_model)
 
         if "time" in data.columns:
-            data["time"] = data["time"].apply(lambda date_string: to_date_time(date_string))
+            data["time"] = data["time"].apply(
+                lambda date_string: to_date_time(date_string)
+            )
             data = data.set_index("time", drop=True)
 
         last_state = data.iloc[len(data) - 1]

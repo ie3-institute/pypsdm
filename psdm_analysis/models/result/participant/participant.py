@@ -6,19 +6,15 @@ from datetime import datetime
 from typing import Dict
 
 import pandas as pd
-from pandas import Series, DataFrame
+from pandas import DataFrame, Series
 
-from psdm_analysis.models.result.participant.dict import ResultDict
-from psdm_analysis.processing.dataframe import join_dataframes
 from psdm_analysis.io.utils import get_file_path
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.input.participant.participant import (
-    SystemParticipantsWithCapacity,
-)
-from psdm_analysis.models.result.power import (
-    PQResult,
-    PQWithSocResult,
-)
+from psdm_analysis.models.input.participant.participant import \
+    SystemParticipantsWithCapacity
+from psdm_analysis.models.result.participant.dict import ResultDict
+from psdm_analysis.models.result.power import PQResult, PQWithSocResult
+from psdm_analysis.processing.dataframe import join_dataframes
 from psdm_analysis.processing.series import p_to_pq_frame
 
 
@@ -74,7 +70,6 @@ class ParticipantsResult(ResultDict):
                 participants,
             )
 
-
     def to_csv(self, path: str, resample_rate: str = None):
         file_name = self.sp_type.get_csv_result_file_name()
 
@@ -123,7 +118,7 @@ class ParticipantsResult(ResultDict):
     def p_sum(self) -> Series:
         if not self.participants:
             return Series(dtype=float)
-        return self.p().fillna(method="ffill").sum(axis=1).rename("p_agg")
+        return self.p().fillna(method="ffill").sum(axis=1).rename("p_sum")
 
     def q(self):
         return pd.DataFrame(
@@ -133,7 +128,7 @@ class ParticipantsResult(ResultDict):
     def q_sum(self):
         if not self.participants:
             return Series(dtype=float)
-        return self.q().fillna(method="ffill").sum(axis=1).rename("q_agg")
+        return self.q().fillna(method="ffill").sum(axis=1).rename("q_sum")
 
     def energy(self):
         # todo make concurrent
