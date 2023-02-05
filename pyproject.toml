@@ -23,6 +23,9 @@ flake8-isort = "^6.0.0"
 pre-commit = "^2.21.0"
 PyYAML = "^6.0"
 
+[tool.isort]
+profile= "black"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
