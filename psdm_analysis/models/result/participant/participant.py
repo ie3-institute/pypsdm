@@ -8,7 +8,6 @@ from typing import Dict
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.io.utils import get_file_path
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
     SystemParticipantsWithCapacity,
@@ -16,7 +15,6 @@ from psdm_analysis.models.input.participant.participant import (
 from psdm_analysis.models.result.participant.dict import ResultDict
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.processing.dataframe import join_dataframes
-from psdm_analysis.processing.series import p_to_pq_frame
 
 
 @dataclass(frozen=True)
@@ -40,7 +38,7 @@ class ParticipantsResult(ResultDict):
             agg_res = pd.read_csv(path)
             agg_res["time"] = pd.to_datetime(agg_res["time"])
             agg_res = agg_res.set_index("time", drop=True)
-            if not "q" in agg_res.columns:
+            if "q" not in agg_res.columns:
                 agg_res["q"] = 0
             agg_pq = PQResult(
                 sp_type, "aggregated_result", "aggregated_result", agg_res

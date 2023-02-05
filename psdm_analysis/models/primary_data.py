@@ -73,6 +73,6 @@ class PrimaryData:
         data = utils.read_csv(str(dir_path), ts_file, delimiter)
         data["time"] = data["time"].apply(lambda date_string: to_date_time(date_string))
         data = data.set_index("time")
-        if not "q" in data.columns:
+        if "q" not in data.columns:
             data["q"] = 0
         return PQResult(SystemParticipantsEnum.PRIMARY_DATA, name, name, data)

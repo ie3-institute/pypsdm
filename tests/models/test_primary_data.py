@@ -1,5 +1,3 @@
-from time import process_time
-
 from psdm_analysis.models.primary_data import PrimaryData
 from tests import utils
 

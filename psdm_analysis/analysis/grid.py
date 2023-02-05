@@ -1,7 +1,6 @@
 import pandas as pd
 
 from psdm_analysis.models.input.container.grid_container import (
-    GridContainer,
     RawGridContainer,
 )
 
@@ -36,7 +35,3 @@ def branching_index(grid: RawGridContainer):
         lambda node_grp: len(node_grp)
     )
     return nodal_connections.sum() / len(nodal_connections)
-
-
-def nodal_power_distribution(grid: GridContainer):
-    node_uuids = grid.raw_grid.nodes.uuids()

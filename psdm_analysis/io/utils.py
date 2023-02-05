@@ -32,7 +32,8 @@ def read_csv(path: str, file_name: str, delimiter: str) -> DataFrame:
 
 def to_date_time(zoned_date_time: str):
     """
-    Converts zoned date time string with format: "yyyy-MM-dd'T'HH:mm:ss[.S[S][S]]'Z'" e.g. '2022-02-01T00:15Z[UTC]' to python datetime
+    Converts zoned date time string with format: "yyyy-MM-dd'T'HH:mm:ss[.S[S][S]]'Z'"
+    e.g. '2022-02-01T00:15Z[UTC]' to python datetime
     :param zoned_date_time:
     :return:
     """

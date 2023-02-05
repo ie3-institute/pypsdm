@@ -85,8 +85,9 @@ class GridWithResults:
     ) -> ParticipantsResult:
         # todo: link to corresponding SIMONA issue
         """
-        Returns the corresponding participant results for a list of uuids. Missing results can happen in rare cases
-        where SIMONA does not output single results for a system participant.
+        Returns the corresponding participant results for a list of uuids.
+        Missing results can happen in rare caseswhere SIMONA does not
+        output single results for a system participant.
 
         :param participant_uuids: the participant uuids to look for
         :param participant_results: the corresponding results

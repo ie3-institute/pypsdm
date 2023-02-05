@@ -2,8 +2,8 @@ from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticip
 
 
 def test_entities_enum():
-    assert SystemParticipantsEnum.LOAD.has_type() == False
-    assert RawGridElementsEnum.LINE.has_type() == True
+    assert not SystemParticipantsEnum.LOAD.has_type()
+    assert RawGridElementsEnum.LINE.has_type()
 
 
 def test_get_plot_name():

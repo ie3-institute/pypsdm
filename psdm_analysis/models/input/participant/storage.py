@@ -2,7 +2,6 @@ from pandas import Series
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
-    SystemParticipants,
     SystemParticipantsWithCapacity,
 )
 

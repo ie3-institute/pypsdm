@@ -113,7 +113,7 @@ class ResultEntities(ABC):
     def __getitem__(self, slice_val: slice):
         if not isinstance(slice_val, slice):
             raise ValueError("Only slicing is supported!")
-        start, stop, step = slice_val.start, slice_val.stop, slice_val.step
+        start, stop, _ = slice_val.start, slice_val.stop, slice_val.step
         if not (isinstance(start, datetime) and isinstance(stop, datetime)):
             raise ValueError("Only datetime slicing is supported")
         return self.filter_for_time_interval(start, stop)
