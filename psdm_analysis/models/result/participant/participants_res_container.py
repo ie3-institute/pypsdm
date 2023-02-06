@@ -174,6 +174,7 @@ class ParticipantsResultContainer:
                 f"No return value for system participant of type: {sp_type}"
             )
 
+    @property
     def p(self) -> DataFrame:
         p_series = [
             participants.p_sum().rename(participants.sp_type.value)
@@ -182,8 +183,9 @@ class ParticipantsResultContainer:
         return join_series(p_series)
 
     def p_sum(self) -> Series:
-        return self.p().sum(axis=1).rename("p_sum")
+        return self.p.sum(axis=1).rename("p_sum")
 
+    @property
     def q(self) -> DataFrame:
         q_series = [
             participants.q_sum().rename(participants.sp_type.value)
@@ -192,7 +194,7 @@ class ParticipantsResultContainer:
         return join_series(q_series)
 
     def q_sum(self) -> Series:
-        return self.q().sum(axis=1).rename("q_sum")
+        return self.q.sum(axis=1).rename("q_sum")
 
     def find_participant_result(self, uuid: str):
         for participants_res in self.to_list(include_flex=False):

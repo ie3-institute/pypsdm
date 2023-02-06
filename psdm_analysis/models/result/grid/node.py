@@ -58,9 +58,11 @@ class NodeResult(ResultEntities):
         filtered_data = filter_data_for_time_interval(self.data, start, end)
         return NodeResult.build(self.input_model, filtered_data, self.name)
 
+    @property
     def v_mag(self) -> Series:
         return self.data["v_mag"]
 
+    @property
     def v_ang(self) -> Series:
         return self.data["v_ang"]
 
@@ -121,7 +123,7 @@ class NodesResult:
     def v_mags(self) -> DataFrame:
         return pd.concat(
             [
-                node_res.v_mag().rename(node_res.input_model)
+                node_res.v_mag.rename(node_res.input_model)
                 for node_res in self.nodes.values()
             ],
             axis=1,
@@ -130,7 +132,7 @@ class NodesResult:
     def v_angs(self) -> DataFrame:
         return pd.concat(
             [
-                node_res.v_ang().rename(node_res.input_model)
+                node_res.v_ang.rename(node_res.input_model)
                 for node_res in self.nodes.values()
             ],
             axis=1,

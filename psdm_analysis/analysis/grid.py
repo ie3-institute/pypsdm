@@ -7,7 +7,7 @@ def grid_structure_summary(grid: RawGridContainer):
     line_length_sum = grid.lines.aggregated_line_length()
     return """
     Grid Structure Summary:
-    
+    -----------------------
     {nr_2w_transformers} two-winding transformers
     {nr_nodes} nodes
     {nr_lines} lines

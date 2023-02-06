@@ -27,7 +27,7 @@ def compare_duration_weighted_sum(a, b):
 
 
 def test_participants_p():
-    participants_p = result_data.p()
+    participants_p = result_data.p
     assert SystemParticipantsEnum.LOAD.value in participants_p
     loads_p = participants_p[SystemParticipantsEnum.LOAD.value]
     compare_duration_weighted_sum(loads_p, result_data.loads.p_sum())
@@ -48,7 +48,7 @@ def test_participants_p_sum():
 
 
 def test_participants_q():
-    participants_q = result_data.q()
+    participants_q = result_data.q
     assert SystemParticipantsEnum.LOAD.value in participants_q
     loads_q = participants_q[SystemParticipantsEnum.LOAD.value]
     compare_duration_weighted_sum(loads_q, result_data.loads.q_sum())

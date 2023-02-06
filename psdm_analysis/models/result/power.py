@@ -22,8 +22,8 @@ from psdm_analysis.processing.series import (
 @dataclass(frozen=True)
 class PQResult(ResultEntities):
     def __add__(self, other: "PQResult"):
-        p_sum = add_series(self.p(), other.p(), "p")
-        q_sum = add_series(self.q(), other.q(), "q")
+        p_sum = add_series(self.p, other.p, "p")
+        q_sum = add_series(self.q, other.q, "q")
         summed_data = p_sum.to_frame().join(q_sum)
         return PQResult(
             self.type
@@ -74,9 +74,11 @@ class PQResult(ResultEntities):
     def get_default_output_name(self):
         return self.input_model + "_" + self.type.get_csv_result_file_name()
 
+    @property
     def p(self):
         return self.data["p"]
 
+    @property
     def q(self):
         return self.data["q"]
 
@@ -99,10 +101,10 @@ class PQResult(ResultEntities):
         return agg
 
     def energy(self) -> float:
-        return duration_weighted_sum(self.p())
+        return duration_weighted_sum(self.p)
 
     def load_and_generation(self) -> (float, float):
-        return load_and_generation(self.p())
+        return load_and_generation(self.p)
 
     def divide_load_generation(self):
         load, generation = divide_positive_negative(self.data)
@@ -113,14 +115,14 @@ class PQResult(ResultEntities):
     def daily_usage(self, device_power_mw):
         return (
             self.p()
-            .groupby(self.p().index.date)
+            .groupby(self.p.index.date)
             .apply(lambda series: duration_weighted_sum(series.abs()))
             / device_power_mw
         )
 
     def annual_duration_series(self, drop_index=True):
         return (
-            hourly_mean_resample(self.p())
+            hourly_mean_resample(self.p)
             .sort_values(ascending=False)
             .reset_index(drop=drop_index)
         )
@@ -135,8 +137,8 @@ class PQWithSocResult(PQResult):
     def add_with_soc(
         self, this_capacity: float, other: "PQWithSocResult", other_capacity: float
     ):
-        p_sum = add_series(self.p(), other.p(), "p")
-        q_sum = add_series(self.q(), other.q(), "q")
+        p_sum = add_series(self.p, other.p, "p")
+        q_sum = add_series(self.q, other.q, "q")
         total_capacity = this_capacity + other_capacity
         soc = add_series(
             self.soc() * this_capacity / total_capacity,

@@ -36,10 +36,6 @@ class SystemParticipantsEnum(EntitiesEnum):
     COMBINED_HEAT_AND_POWER = "chp"
     ELECTRIC_VEHICLE = "ev"
     EV_CHARGING_STATION = "evcs"
-    PUBLIC_EV_CHARGING_STATION = (
-        "public_evcs"  # denotation of the public subset of evcs
-    )
-    HOUSEHOLD_EV_CHARGING_STATION = "hh_evcs"  # denotation of the hh subset of evcs
     FIXED_FEED_IN = "fixed_feed_in"
     LOAD = "load"
     PHOTOVOLTAIC_POWER_PLANT = "pv"
@@ -47,9 +43,9 @@ class SystemParticipantsEnum(EntitiesEnum):
     STORAGE = "storage"
     ENERGY_MANAGEMENT = "em"
     HEATP_PUMP = "hp"
-    PARTICIPANTS_SUM = "participants_sum"
     FLEX_OPTIONS = "flex_options"
     PRIMARY_DATA = "primary_data"
+    PARTICIPANTS_SUM = "participants_sum"
 
     @staticmethod
     def values():

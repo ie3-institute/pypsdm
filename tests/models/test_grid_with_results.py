@@ -41,8 +41,8 @@ def test_build_enhanced_nodes_result():
     enhanced_node_results = grid.build_enhanced_nodes_result()
     assert len(enhanced_node_results) == 299
     node_res = grid.nodal_result(utils.TEST_NODE_UUID)
-    p = node_res.participants.sum().p()
-    q = node_res.participants.sum().q()
+    p = node_res.participants.sum().p
+    q = node_res.participants.sum().q
     expected = EnhancedNodeResult.from_node_result(
         node_res.nodes.nodes[utils.TEST_NODE_UUID], p, q
     )

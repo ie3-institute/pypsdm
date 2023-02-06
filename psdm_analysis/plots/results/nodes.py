@@ -12,14 +12,14 @@ class NodesResultPlotter:
 
     def boxplot_v_mag(self, uuid: str):
         node_res = self.results.nodes.get(uuid)
-        return px.box(node_res.v_mag())
+        return px.box(node_res.v_mag)
 
     def boxplots_v_mag(self):
         return px.box(self.results.v_mags())
 
     def boxplot_v_ang(self, uuid: str):
         node_res = self.results.nodes.get(uuid)
-        return px.box(node_res.v_ang())
+        return px.box(node_res.v_ang)
 
     def boxplots_v_ang(self):
         return px.box(self.results.v_angs)

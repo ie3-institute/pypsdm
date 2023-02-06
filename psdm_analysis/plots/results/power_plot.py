@@ -245,24 +245,24 @@ def ax_plot_stacked_pq(
     for idx, res in enumerate(results[1:]):
         load, generation = res.divide_load_generation()
 
-        if load.p().sum() > 0:
+        if load.p.sum() > 0:
             load_sum = PQResult(
                 res.type, "", "", PQResult.sum([load, residual_load]).data
             )
             plot_partial(
                 res=load_sum,
-                fill_between=residual_load.p(),
+                fill_between=residual_load.p,
                 **plot_kwargs[idx + 1] if plot_kwargs else {},
             )
             residual_load = load_sum
 
-        if generation.p().sum() < 0:
+        if generation.p.sum() < 0:
             generation_sum = PQResult(
                 res.type, "", "", PQResult.sum([generation, residual_generation]).data
             )
             plot_partial(
                 res=generation_sum,
-                fill_between=residual_generation.p(),
+                fill_between=residual_generation.p,
                 **plot_kwargs[idx + 1] if plot_kwargs else {},
             )
             residual_generation = generation_sum
@@ -341,12 +341,12 @@ def ax_plot_active_power_result(
     fill_between=None,
     **kwargs,
 ):
-    if len(res.p()) == 0:
+    if len(res.p) == 0:
         raise ValueError("Active power time series is empty. No data to plot")
 
     ax = ax_plot_time_series(
         ax,
-        res.p(),
+        res.p,
         res.type,
         resolution,
         hourly_mean,

@@ -104,11 +104,12 @@ class ParticipantsResult(ResultDict):
             },
         )
 
+    @property
     def p(self):
         if not self.participants.values():
             return None
         return pd.DataFrame(
-            {p_uuid: res.p() for p_uuid, res in self.participants.items()}
+            {p_uuid: res.p for p_uuid, res in self.participants.items()}
         )
 
     def sum(self) -> PQResult:
@@ -117,17 +118,18 @@ class ParticipantsResult(ResultDict):
     def p_sum(self) -> Series:
         if not self.participants:
             return Series(dtype=float)
-        return self.p().fillna(method="ffill").sum(axis=1).rename("p_sum")
+        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
 
+    @property
     def q(self):
         return pd.DataFrame(
-            {p_uuid: res.q() for p_uuid, res in self.participants.items()}
+            {p_uuid: res.q for p_uuid, res in self.participants.items()}
         )
 
     def q_sum(self):
         if not self.participants:
             return Series(dtype=float)
-        return self.q().fillna(method="ffill").sum(axis=1).rename("q_sum")
+        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
 
     def energy(self):
         # todo make concurrent
