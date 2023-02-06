@@ -186,7 +186,7 @@ class ParticipantsWithSocResult(ParticipantsResult):
         if not self.participants:
             return PQWithSocResult.create_empty(self.sp_type, "", "")
         capacity_participant = []
-        for uuid, res in self.participants.items():
-            capacity = inputs.get(uuid)[inputs.capacity_attribute()]
+        for participant_uuid, res in self.participants.items():
+            capacity = inputs.get(participant_uuid)[inputs.capacity_attribute()]
             capacity_participant.append((capacity, res))
         return PQWithSocResult.sum_with_soc(capacity_participant)

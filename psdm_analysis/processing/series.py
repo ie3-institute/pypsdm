@@ -7,7 +7,7 @@ def duration_weighted_series(series: Series):
     time = (
         (series.index[1::] - series.index[:-1])
         .to_series()
-        .apply(lambda x: x.seconds / 3600)
+        .apply(lambda x: x.total_seconds() / 3600)
         .reset_index(drop=True)
     )
     return pd.concat([values.rename("values"), time.rename("time")], axis=1)

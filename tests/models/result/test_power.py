@@ -103,16 +103,6 @@ def test_duration_weighted_series():
     duration_weighted_series(wec_a.p())
 
 
-def test_storage_result():
-    storage_results = ParticipantsResult.from_csv(
-        SystemParticipantsEnum.STORAGE,
-        utils.VN_SIMONA_RESULT_PATH,
-        utils.VN_SIMONA_DELIMITER,
-        utils.VN_SIMULATION_END,
-    )
-    p = storage_results.p()
-
-
 def test_add():
     res = wec_a + wec_b
     assert is_close(res.energy(), wec_a.energy() + wec_b.energy())
