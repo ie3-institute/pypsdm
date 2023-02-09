@@ -39,13 +39,15 @@ class GridContainer:
     node_participants_map: Dict[str, SystemParticipantsContainer]
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str):
+    def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
+        if not primary_data_delimiter:
+            primary_data_delimiter = delimiter
         raw_grid = RawGridContainer.from_csv(path, delimiter)
         participants = SystemParticipantsContainer.from_csv(path, delimiter)
         node_participants_map = {
             uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuids()
         }
-        primary_data = PrimaryData.from_csv(path, delimiter)
+        primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
         return cls(raw_grid, participants, primary_data, node_participants_map)
 
     def get_nodal_primary_data(self):

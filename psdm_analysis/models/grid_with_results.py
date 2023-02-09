@@ -30,9 +30,14 @@ class GridWithResults:
         grid_delimiter: str,
         result_path: str,
         result_delimiter: str,
+        primary_data_delimiter: str = None,
         simulation_end: datetime = None,
         from_agg_results: bool = False,
     ) -> "GridWithResults":
+
+        if not primary_data_delimiter:
+            primary_data_delimiter = grid_delimiter
+
         grid = GridContainer.from_csv(grid_path, grid_delimiter)
 
         if not grid:
