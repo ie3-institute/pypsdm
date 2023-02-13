@@ -38,7 +38,7 @@ class GridWithResults:
         if not primary_data_delimiter:
             primary_data_delimiter = grid_delimiter
 
-        grid = GridContainer.from_csv(grid_path, grid_delimiter)
+        grid = GridContainer.from_csv(grid_path, grid_delimiter, primary_data_delimiter=primary_data_delimiter)
 
         if not grid:
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
