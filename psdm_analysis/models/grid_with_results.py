@@ -34,7 +34,6 @@ class GridWithResults:
         simulation_end: datetime = None,
         from_agg_results: bool = False,
     ) -> "GridWithResults":
-
         if not primary_data_delimiter:
             primary_data_delimiter = grid_delimiter
 

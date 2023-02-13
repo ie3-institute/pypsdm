@@ -48,7 +48,6 @@ class ParticipantsResultContainer:
         simulation_end: datetime,
         from_agg_results: bool = False,
     ):
-
         with concurrent.futures.ProcessPoolExecutor() as executor:
             # warning: Breakpoints in the underlying method might not work when started from ipynb
             pa_from_csv_for_participant = partial(

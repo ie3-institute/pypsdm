@@ -30,7 +30,6 @@ class ParticipantsResult(ResultDict):
         simulation_end: datetime,
         from_agg_res: bool = False,
     ) -> "ParticipantsResult":
-
         if from_agg_res:
             path = ResultDict.safe_get_path(entity_type, simulation_data_path)
             if not path:
@@ -149,7 +148,6 @@ class ParticipantsWithSocResult(ParticipantsResult):
         simulation_end: datetime,
         from_agg_res: bool = False,
     ) -> "ParticipantsWithSocResult":
-
         if from_agg_res:
             raise ValueError(
                 "Aggregated results do not contain SOC information. Consider reading as `ParticipantsResult`"

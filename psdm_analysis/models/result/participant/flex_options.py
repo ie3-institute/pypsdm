@@ -24,7 +24,6 @@ class FlexOptionsResult(ResultDict):
         simulation_end: datetime,
         from_df: bool = False,
     ) -> "FlexOptionsResult":
-
         if from_df:
             path = os.path.join(simulation_data_path, "flex_df.csv")
             if not os.path.exists(path):

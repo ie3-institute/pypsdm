@@ -100,7 +100,6 @@ def get_common_charging_point_type(id: str):
 
 
 def parse_evcs_type(type_str: str) -> ChargingPointType:
-
     common_type = get_common_charging_point_type(type_str)
     if common_type:
         return common_type
