@@ -21,12 +21,12 @@ def test_filter_for_time_interval():
 
 
 def test_vmags():
-    v_mags = nodes_res.v_mags()
+    v_mags = nodes_res.v_mag
     assert len(v_mags) == 2
     assert len(v_mags.columns) == 299
 
 
 def test_vangs():
-    v_angs = nodes_res.v_angs()
+    v_angs = nodes_res.v_ang
     assert len(v_angs) == 2
     assert len(v_angs.columns) == 299

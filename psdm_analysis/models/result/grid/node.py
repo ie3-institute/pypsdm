@@ -87,7 +87,8 @@ class NodesResult(ResultDict):
         uuids = self.entities.keys()
         return [{"label": uuid, "value": uuid} for uuid in uuids]
 
-    def v_mags(self) -> DataFrame:
+    @property
+    def v_mag(self) -> DataFrame:
         return pd.concat(
             [
                 node_res.v_mag.rename(node_res.input_model)
@@ -96,7 +97,8 @@ class NodesResult(ResultDict):
             axis=1,
         )
 
-    def v_angs(self) -> DataFrame:
+    @property
+    def v_ang(self) -> DataFrame:
         return pd.concat(
             [
                 node_res.v_ang.rename(node_res.input_model)
@@ -106,10 +108,10 @@ class NodesResult(ResultDict):
         )
 
     def v_mag_describe(self) -> DataFrame:
-        return self._describe(self.v_mags())
+        return self._describe(self.v_mag)
 
     def v_ang_describe(self) -> DataFrame:
-        return self._describe(self.v_angs())
+        return self._describe(self.v_ang)
 
     @staticmethod
     def _describe(data: DataFrame):
