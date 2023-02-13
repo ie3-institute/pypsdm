@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List
+from typing import List
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -50,7 +50,7 @@ class NodeResult(ResultEntities):
 
 @dataclass(frozen=True)
 class NodesResult(ResultDict):
-    entities: Dict[str, NodeResult]
+    entities: dict[str, NodeResult]
 
     def uuids(self):
         return self.entities.keys()

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -41,11 +40,11 @@ class EnhancedNodeResult(NodeResult):
 
 @dataclass(frozen=True)
 class EnhancedNodesResult(NodesResult):
-    entities: Dict[str, EnhancedNodeResult]
+    entities: dict[str, EnhancedNodeResult]
 
     @classmethod
     def from_nodes_result(
-        cls, nodes_result: NodesResult, ps: dict[str:Series], qs: dict[str:Series]
+        cls, nodes_result: NodesResult, ps: dict[str, Series], qs: dict[str, Series]
     ):
         return cls(
             RawGridElementsEnum.NODE,

@@ -24,7 +24,7 @@ class ParticipantsResult(ResultDict):
     @classmethod
     def from_csv(
         cls,
-        sp_type: SystemParticipantsEnum,
+        entity_type: SystemParticipantsEnum,
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
@@ -32,32 +32,32 @@ class ParticipantsResult(ResultDict):
     ) -> "ParticipantsResult":
 
         if from_agg_res:
-            path = ResultDict.safe_get_path(sp_type, simulation_data_path)
+            path = ResultDict.safe_get_path(entity_type, simulation_data_path)
             if not path:
-                return cls.create_empty(sp_type)
+                return cls.create_empty(entity_type)
             agg_res = pd.read_csv(path)
             agg_res["time"] = pd.to_datetime(agg_res["time"])
             agg_res = agg_res.set_index("time", drop=True)
             if "q" not in agg_res.columns:
                 agg_res["q"] = 0
             agg_pq = PQResult(
-                sp_type, "aggregated_result", "aggregated_result", agg_res
+                entity_type, "aggregated_result", "aggregated_result", agg_res
             )
-            return ParticipantsResult(sp_type, {"aggregated": agg_pq})
+            return ParticipantsResult(entity_type, {"aggregated": agg_pq})
 
         else:
             participant_grpd_df = ResultDict.get_grpd_df(
-                sp_type,
+                entity_type,
                 simulation_data_path,
                 delimiter,
             )
             if not participant_grpd_df:
                 logging.debug("There are no " + str(cls))
-                return cls.create_empty(sp_type)
+                return cls.create_empty(entity_type)
             entities = dict(
                 participant_grpd_df.apply(
                     lambda grp: PQResult.build(
-                        sp_type,
+                        entity_type,
                         grp.name,
                         grp.drop(columns=["input_model"]),
                         simulation_end,
@@ -65,7 +65,7 @@ class ParticipantsResult(ResultDict):
                 )
             )
             return cls(
-                sp_type,
+                entity_type,
                 entities,
             )
 
@@ -179,7 +179,7 @@ class ParticipantsWithSocResult(ParticipantsResult):
 
     def sum_with_soc(self, inputs: SystemParticipantsWithCapacity) -> PQWithSocResult:
         if not self.entities:
-            return PQWithSocResult.create_empty(self.sp_type, "", "")
+            return PQWithSocResult.create_empty(self.entity_type, "", "")
         capacity_participant = []
         for participant_uuid, res in self.entities.items():
             capacity = inputs.get(participant_uuid)[inputs.capacity_attribute()]

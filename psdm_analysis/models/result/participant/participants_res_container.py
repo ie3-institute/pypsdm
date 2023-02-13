@@ -206,7 +206,7 @@ class ParticipantsResultContainer:
 
     def to_dict(
         self, include_empty: bool = True
-    ) -> {SystemParticipantsEnum, ParticipantsResult}:
+    ) -> dict[SystemParticipantsEnum, ParticipantsResult]:
         if include_empty:
             return {res.entity_type: res for res in self.to_list()}
         else:

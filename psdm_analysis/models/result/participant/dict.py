@@ -62,6 +62,7 @@ class ResultDict(ABC):
     def create_empty(cls, sp_type):
         return cls(sp_type, dict())
 
+    # noinspection PyArgumentList
     def subset(self, uuids):
         matched_participants = {
             uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
