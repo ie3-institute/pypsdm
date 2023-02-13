@@ -39,7 +39,6 @@ class EnhancedNodeResult(NodeResult):
         return self.data["q"]
 
 
-# todo: This should inherit from ResultDict -> rename participants and nodes to entities
 @dataclass(frozen=True)
 class EnhancedNodesResult(NodesResult):
     entities: Dict[str, EnhancedNodeResult]
