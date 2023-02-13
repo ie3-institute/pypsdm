@@ -67,7 +67,9 @@ class ParticipantsResultContainer:
             )
             participant_result_map = {}
             for participant_result in participant_results:
-                participant_result_map[participant_result.entity_type] = participant_result
+                participant_result_map[
+                    participant_result.entity_type
+                ] = participant_result
 
         return ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
