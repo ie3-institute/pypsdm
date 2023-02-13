@@ -67,7 +67,7 @@ class ParticipantsResultContainer:
             )
             participant_result_map = {}
             for participant_result in participant_results:
-                participant_result_map[participant_result.sp_type] = participant_result
+                participant_result_map[participant_result.entity_type] = participant_result
 
         return ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
@@ -177,7 +177,7 @@ class ParticipantsResultContainer:
     @property
     def p(self) -> DataFrame:
         p_series = [
-            participants.p_sum().rename(participants.sp_type.value)
+            participants.p_sum().rename(participants.entity_type.value)
             for participants in self.to_list(include_flex=False)
         ]
         return join_series(p_series)
@@ -188,7 +188,7 @@ class ParticipantsResultContainer:
     @property
     def q(self) -> DataFrame:
         q_series = [
-            participants.q_sum().rename(participants.sp_type.value)
+            participants.q_sum().rename(participants.entity_type.value)
             for participants in self.to_list(include_flex=False)
         ]
         return join_series(q_series)
@@ -206,9 +206,9 @@ class ParticipantsResultContainer:
         self, include_empty: bool = True
     ) -> {SystemParticipantsEnum, ParticipantsResult}:
         if include_empty:
-            return {res.sp_type: res for res in self.to_list()}
+            return {res.entity_type: res for res in self.to_list()}
         else:
-            return {res.sp_type: res for res in self.to_list() if res.entities}
+            return {res.entity_type: res for res in self.to_list() if res.entities}
 
     def energies(self) -> {SystemParticipantsEnum, float}:
         return {

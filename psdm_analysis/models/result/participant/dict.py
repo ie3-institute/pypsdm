@@ -13,7 +13,7 @@ from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnu
 
 @dataclass(frozen=True)
 class ResultDict(ABC):
-    sp_type: EntitiesEnum
+    entity_type: EntitiesEnum
     entities: Dict[str, ResultEntities]
 
     def __len__(self):
@@ -67,7 +67,7 @@ class ResultDict(ABC):
             uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
         }
 
-        return type(self)(self.sp_type, matched_participants)
+        return type(self)(self.entity_type, matched_participants)
 
     def subset_split(self, uuids: [str]):
         """
@@ -82,7 +82,7 @@ class ResultDict(ABC):
     # noinspection PyArgumentList
     def filter_for_time_interval(self, start: datetime, end: datetime):
         return type(self)(
-            self.sp_type,
+            self.entity_type,
             {
                 uuid: result.filter_for_time_interval(start, end)
                 for uuid, result in self.entities.items()

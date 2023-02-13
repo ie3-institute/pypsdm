@@ -36,7 +36,7 @@ def plot_all_participants_flex_range(
         for res in participants_res_container.to_list(
             include_em=False, include_flex=False, include_empty=False
         )
-        if res.sp_type != SystemParticipantsEnum.LOAD
+        if res.entity_type != SystemParticipantsEnum.LOAD
     ]
 
     plot_count = len(em_res_list)
@@ -51,7 +51,7 @@ def plot_all_participants_flex_range(
         )
         if participant_flex:
             flex_sum = participant_flex.sum()
-            axs[idx].set_title(f"{participant_res.sp_type.get_plot_name()}")
+            axs[idx].set_title(f"{participant_res.entity_type.get_plot_name()}")
             ax_plot_flex_range(axs[idx], flex_sum, "d", hourly_mean=hourly_mean)
         if include_actual_res:
             ax_plot_active_power_result(

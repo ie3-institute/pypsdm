@@ -68,8 +68,8 @@ class FlexOptionsResult(ResultDict):
 
     def to_df(self) -> DataFrame:
         return pd.concat(
-            [f.data for f in self.participants.values()],
-            keys=self.participants.keys(),
+            [f.data for f in self.entities.values()],
+            keys=self.entities.keys(),
             axis=1,
         ).ffill()
 
@@ -88,8 +88,8 @@ class FlexOptionsResult(ResultDict):
                     for uuid, flex in flex_res.entities.items()
                 ]
                 flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
-                flex_midfs[res.sp_type.value] = flex_midf
+                flex_midfs[res.entity_type.value] = flex_midf
         return pd.concat(flex_midfs.values(), keys=(flex_midfs.keys()), axis=1).ffill()
 
     def sum(self) -> FlexOptionResult:
-        return FlexOptionResult.sum(list(self.participants.values()))
+        return FlexOptionResult.sum(list(self.entities.values()))

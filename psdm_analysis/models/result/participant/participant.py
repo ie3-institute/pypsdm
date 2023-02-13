@@ -70,7 +70,7 @@ class ParticipantsResult(ResultDict):
             )
 
     def to_csv(self, path: str, resample_rate: str = None):
-        file_name = self.sp_type.get_csv_result_file_name()
+        file_name = self.entity_type.get_csv_result_file_name()
 
         def resample(data: DataFrame, input_model: str):
             data = (
@@ -97,7 +97,7 @@ class ParticipantsResult(ResultDict):
 
     def subset(self, uuids):
         return type(self)(
-            self.sp_type,
+            self.entity_type,
             {uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids},
         )
 
@@ -137,7 +137,7 @@ class ParticipantsResult(ResultDict):
 
 @dataclass(frozen=True)
 class ParticipantsWithSocResult(ParticipantsResult):
-    sp_type: SystemParticipantsEnum
+    entity_type: SystemParticipantsEnum
     entities: Dict[str, PQWithSocResult]
 
     @classmethod
