@@ -82,11 +82,6 @@ class NodesResult(ResultDict):
             logging.warning(f"No nodes result in {str(file_path)}")
             return cls(RawGridElementsEnum.NODE, dict())
 
-    # todo: this is plotting related and need to be moved
-    def get_node_uuid_dropdwon_options(self):
-        uuids = self.entities.keys()
-        return [{"label": uuid, "value": uuid} for uuid in uuids]
-
     @property
     def v_mag(self) -> DataFrame:
         return pd.concat(
