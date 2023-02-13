@@ -48,25 +48,26 @@ class EnhancedNodeResult(NodeResult):
 # todo: This should inherit from ResultDict -> rename participants and nodes to entities
 @dataclass(frozen=True)
 class EnhancedNodesResult(NodesResult):
-    nodes: Dict[str, EnhancedNodeResult]
+    entities: Dict[str, EnhancedNodeResult]
 
     @classmethod
     def from_nodes_result(
         cls, nodes_result: NodesResult, ps: dict[str:Series], qs: dict[str:Series]
     ):
         return cls(
+            RawGridElementsEnum.NODE,
             {
                 uuid: EnhancedNodeResult.from_node_result(result, ps[uuid], qs[uuid])
-                for uuid, result in nodes_result.nodes.items()
-            }
+                for uuid, result in nodes_result.entities.items()
+            },
         )
 
     @property
     def p(self) -> DataFrame:
         return pd.concat(
             [
-                node_res.p().rename(node_res.input_model)
-                for node_res in self.nodes.values()
+                node_res.p.rename(node_res.input_model)
+                for node_res in self.entities.values()
             ],
             axis=1,
         ).sort_index()
@@ -75,11 +76,11 @@ class EnhancedNodesResult(NodesResult):
     def q(self) -> DataFrame:
         return pd.concat(
             [
-                node_res.q().rename(node_res.input_model)
-                for node_res in self.nodes.values()
+                node_res.q.rename(node_res.input_model)
+                for node_res in self.entities.values()
             ],
             axis=1,
         ).sort_index()
 
     def filter(self, uuids: set[str]):
-        return EnhancedNodesResult({uuid: self.nodes[uuid] for uuid in uuids})
+        return EnhancedNodesResult({uuid: self.entities[uuid] for uuid in uuids})

@@ -22,10 +22,10 @@ class Lines(Entities):
     def nodes_b(self) -> Series:
         return self.data["node_b"]
 
-
     @property
     def parallel_devices(self) -> Series:
         return self.data["parallel_devices"]
+
     @property
     def length(self) -> Series:
         return self.data["length"]
@@ -66,7 +66,7 @@ class Lines(Entities):
             "type_id",
             "v_rated",
             "r",
-            "x"
+            "x",
         ]
 
     def aggregated_line_length(self) -> float:
@@ -76,4 +76,6 @@ class Lines(Entities):
         return self.data["length"] / len(self.data)
 
     def find_lines_by_nodes(self, node_uuids):
-        return self.data[(self.nodes_a.isin(node_uuids)) | (self.nodes_b.isin(node_uuids))]
+        return self.data[
+            (self.nodes_a.isin(node_uuids)) | (self.nodes_b.isin(node_uuids))
+        ]

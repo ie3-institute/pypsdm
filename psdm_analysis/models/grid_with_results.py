@@ -7,7 +7,7 @@ from psdm_analysis.models.input.container.grid_container import GridContainer
 from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
@@ -38,7 +38,9 @@ class GridWithResults:
         if not primary_data_delimiter:
             primary_data_delimiter = grid_delimiter
 
-        grid = GridContainer.from_csv(grid_path, grid_delimiter, primary_data_delimiter=primary_data_delimiter)
+        grid = GridContainer.from_csv(
+            grid_path, grid_delimiter, primary_data_delimiter=primary_data_delimiter
+        )
 
         if not grid:
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
@@ -48,7 +50,6 @@ class GridWithResults:
             result_path,
             result_delimiter,
             simulation_end,
-            grid.raw_grid,
             from_agg_results,
         )
 
@@ -77,7 +78,10 @@ class GridWithResults:
         participants = self.results.participants.subset(participants_uuids)
         return ResultContainer(
             name=node_uuid,
-            nodes=NodesResult({node_uuid: self.results.nodes.nodes[node_uuid]}),
+            nodes=NodesResult(
+                RawGridElementsEnum.NODE,
+                {node_uuid: self.results.nodes.entities[node_uuid]},
+            ),
             participants=participants,
         )
 
@@ -101,9 +105,7 @@ class GridWithResults:
         res = dict()
         for participant_uuid in participant_uuids:
             if participant_uuid in participant_results.entities:
-                res[participant_uuid] = participant_results.entities[
-                    participant_uuid
-                ]
+                res[participant_uuid] = participant_results.entities[participant_uuid]
             else:
                 logging.debug(
                     "There is no result for result for participant "

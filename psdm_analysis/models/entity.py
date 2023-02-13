@@ -153,7 +153,6 @@ class ResultEntities(ABC):
                 lambda date_string: to_date_time(date_string)
             )
             data = data.set_index("time", drop=True)
-
         last_state = data.iloc[len(data) - 1]
         if last_state.name != end:
             last_state.name = end

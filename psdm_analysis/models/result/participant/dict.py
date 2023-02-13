@@ -8,12 +8,12 @@ from pandas.core.groupby import DataFrameGroupBy
 
 from psdm_analysis.io.utils import csv_to_grpd_df, get_file_path
 from psdm_analysis.models.entity import ResultEntities
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
 
 
 @dataclass(frozen=True)
 class ResultDict(ABC):
-    sp_type: SystemParticipantsEnum
+    sp_type: EntitiesEnum
     entities: Dict[str, ResultEntities]
 
     def __len__(self):

@@ -16,7 +16,7 @@ def test_nodal_result():
     nodal_res = grid.nodal_result(utils.TEST_NODE_UUID)
     assert len(nodal_res.nodes) == 1
     assert len(nodal_res.nodes)
-    assert utils.TEST_NODE_UUID in nodal_res.nodes.nodes
+    assert utils.TEST_NODE_UUID in nodal_res.nodes.entities
     assert len(nodal_res.participants.wecs) == 1
     assert len(nodal_res.participants.loads) == 1
     assert len(nodal_res.participants.pvs) == 0
@@ -44,6 +44,6 @@ def test_build_enhanced_nodes_result():
     p = node_res.participants.sum().p
     q = node_res.participants.sum().q
     expected = EnhancedNodeResult.from_node_result(
-        node_res.nodes.nodes[utils.TEST_NODE_UUID], p, q
+        node_res.nodes.entities[utils.TEST_NODE_UUID], p, q
     )
-    assert enhanced_node_results.nodes[utils.TEST_NODE_UUID] == expected
+    assert enhanced_node_results.entities[utils.TEST_NODE_UUID] == expected

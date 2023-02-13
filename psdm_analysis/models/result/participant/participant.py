@@ -98,19 +98,14 @@ class ParticipantsResult(ResultDict):
     def subset(self, uuids):
         return type(self)(
             self.sp_type,
-            {
-                uuid: self.entities[uuid]
-                for uuid in self.entities.keys() & uuids
-            },
+            {uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids},
         )
 
     @property
     def p(self):
         if not self.entities.values():
             return None
-        return pd.DataFrame(
-            {p_uuid: res.p for p_uuid, res in self.entities.items()}
-        )
+        return pd.DataFrame({p_uuid: res.p for p_uuid, res in self.entities.items()})
 
     def sum(self) -> PQResult:
         return PQResult.sum(list(self.entities.values()))
@@ -122,9 +117,7 @@ class ParticipantsResult(ResultDict):
 
     @property
     def q(self):
-        return pd.DataFrame(
-            {p_uuid: res.q for p_uuid, res in self.entities.items()}
-        )
+        return pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
 
     def q_sum(self):
         if not self.entities:

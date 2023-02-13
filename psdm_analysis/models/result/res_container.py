@@ -29,15 +29,14 @@ class ResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime = None,
-        grid_data: RawGridContainer = None,
         from_agg_results: bool = True,
     ):
-        node_input = grid_data.nodes if grid_data else None
-        nodes = NodesResult.from_csv(simulation_data_path, delimiter, node_input)
+        nodes = NodesResult.from_csv(simulation_data_path, delimiter, simulation_end)
 
         if simulation_end is None:
             some_node_res = next(iter(nodes.nodes.values()))
-            simulation_end = some_node_res.end
+            # todo: this only works if we can guarantee order
+            simulation_end = some_node_res.data.iloc[-1].name
 
         participants = ParticipantsResultContainer.from_csv(
             simulation_data_path,
