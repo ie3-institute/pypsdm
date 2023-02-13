@@ -63,7 +63,7 @@ class GridWithResults:
             uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuids()
         }
 
-    def nodal_energy(self, uuid: str) -> dict[str:float]:
+    def nodal_energy(self, uuid: str) -> float:
         return self.nodal_result(uuid).participants.sum().energy()
 
     def nodal_results(self) -> dict[str:ResultContainer]:

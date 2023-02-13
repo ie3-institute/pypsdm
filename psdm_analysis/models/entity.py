@@ -169,9 +169,7 @@ class ResultEntities(ABC):
     # todo: find a way for parallel calculation
     def sum(cls, results: List["ResultEntities"]) -> "ResultEntities":
         if len(results) == 0:
-            return ResultEntities.create_empty(
-                SystemParticipantsEnum.PARTICIPANTS_SUM, "", ""
-            )
+            return cls.create_empty(SystemParticipantsEnum.PARTICIPANTS_SUM, "", "")
         if len(results) == 1:
             return results[0]
         agg = results[0]
