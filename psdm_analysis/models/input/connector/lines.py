@@ -22,16 +22,51 @@ class Lines(Entities):
     def nodes_b(self) -> Series:
         return self.data["node_b"]
 
+
+    @property
+    def parallel_devices(self) -> Series:
+        return self.data["parallel_devices"]
+    @property
+    def length(self) -> Series:
+        return self.data["length"]
+
+    @property
+    def geo_position(self) -> Series:
+        return self.data["geo_position"]
+
+    @property
+    def olm_characteristic(self) -> Series:
+        return self.data["olm_characteristic"]
+
+    @property
+    def type(self) -> Series:
+        return self.data["type_id"]
+
+    @property
+    def v_rated(self) -> Series:
+        return self.data["v_rated"]
+
+    @property
+    def r(self) -> Series:
+        return self.data["r"]
+
+    @property
+    def x(self) -> Series:
+        return self.data["x"]
+
     @staticmethod
     def attributes():
         return Entities.attributes() + [
             "node_a",
             "node_b",
-            "parallel_devices",
-            "type",
             "length",
             "geo_position",
             "olm_characteristic",
+            "parallel_devices",
+            "type_id",
+            "v_rated",
+            "r",
+            "x"
         ]
 
     def aggregated_line_length(self) -> float:
@@ -39,3 +74,6 @@ class Lines(Entities):
 
     def relative_line_length(self) -> float:
         return self.data["length"] / len(self.data)
+
+    def find_lines_by_nodes(self, node_uuids):
+        return self.data[(self.nodes_a.isin(node_uuids)) | (self.nodes_b.isin(node_uuids))]

@@ -13,7 +13,7 @@ from psdm_analysis.models.result.participant.dict import ResultDict
 
 @dataclass(frozen=True)
 class FlexOptionsResult(ResultDict):
-    participants: Dict[str, FlexOptionResult]
+    entities: Dict[str, FlexOptionResult]
 
     @classmethod
     def from_csv(
@@ -85,7 +85,7 @@ class FlexOptionsResult(ResultDict):
                 participant_uuids = []
                 [
                     (participant_uuids.append(uuid), flex_dfs.append(flex.data))
-                    for uuid, flex in flex_res.participants.items()
+                    for uuid, flex in flex_res.entities.items()
                 ]
                 flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
                 flex_midfs[res.sp_type.value] = flex_midf

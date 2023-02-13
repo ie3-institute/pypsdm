@@ -100,8 +100,8 @@ class GridWithResults:
         """
         res = dict()
         for participant_uuid in participant_uuids:
-            if participant_uuid in participant_results.participants:
-                res[participant_uuid] = participant_results.participants[
+            if participant_uuid in participant_results.entities:
+                res[participant_uuid] = participant_results.entities[
                     participant_uuid
                 ]
             else:

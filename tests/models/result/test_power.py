@@ -20,8 +20,8 @@ wec_results = ParticipantsResult.from_csv(
 )
 wec_a_uuid = "f9eaec6e-ce25-42d7-8265-2f8f4679a816"
 wec_b_uuid = "d6ad8c73-716a-4244-9ae2-4a3735e492ab"
-assert wec_a_uuid in wec_results.participants.keys()
-assert wec_b_uuid in wec_results.participants.keys()
+assert wec_a_uuid in wec_results.entities.keys()
+assert wec_b_uuid in wec_results.entities.keys()
 wec_a = wec_results.get(wec_a_uuid)
 wec_b = wec_results.get(wec_b_uuid)
 
@@ -62,7 +62,7 @@ def test_filter_for_time_interval():
     start = datetime(2011, 1, 1, 13, 30)
     end = datetime(2011, 1, 1, 14, 0)
     filtered = wec_results.filter_for_time_interval(start, end)
-    assert len(filtered.participants.keys()) == 2
+    assert len(filtered.entities.keys()) == 2
     filtered_wec_a = filtered.get(wec_a_uuid)
     filtered_wec_b = filtered.get(wec_b_uuid)
     assert len(filtered_wec_a.data) == 2

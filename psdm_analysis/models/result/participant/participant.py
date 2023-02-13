@@ -19,7 +19,7 @@ from psdm_analysis.processing.dataframe import join_dataframes
 
 @dataclass(frozen=True)
 class ParticipantsResult(ResultDict):
-    participants: Dict[str, PQResult]
+    entities: Dict[str, PQResult]
 
     @classmethod
     def from_csv(
@@ -54,7 +54,7 @@ class ParticipantsResult(ResultDict):
             if not participant_grpd_df:
                 logging.debug("There are no " + str(cls))
                 return cls.create_empty(sp_type)
-            participants = dict(
+            entities = dict(
                 participant_grpd_df.apply(
                     lambda grp: PQResult.build(
                         sp_type,
@@ -66,7 +66,7 @@ class ParticipantsResult(ResultDict):
             )
             return cls(
                 sp_type,
-                participants,
+                entities,
             )
 
     def to_csv(self, path: str, resample_rate: str = None):
@@ -84,7 +84,7 @@ class ParticipantsResult(ResultDict):
 
         resampled = [
             resample(participant.data, input_model)
-            for input_model, participant in self.participants.items()
+            for input_model, participant in self.entities.items()
         ]
         df = join_dataframes(resampled)
         df.to_csv(os.path.join(path, file_name))
@@ -93,48 +93,48 @@ class ParticipantsResult(ResultDict):
         pass
 
     def get(self, key: str) -> PQResult:
-        return self.participants[key]
+        return self.entities[key]
 
     def subset(self, uuids):
         return type(self)(
             self.sp_type,
             {
-                uuid: self.participants[uuid]
-                for uuid in self.participants.keys() & uuids
+                uuid: self.entities[uuid]
+                for uuid in self.entities.keys() & uuids
             },
         )
 
     @property
     def p(self):
-        if not self.participants.values():
+        if not self.entities.values():
             return None
         return pd.DataFrame(
-            {p_uuid: res.p for p_uuid, res in self.participants.items()}
+            {p_uuid: res.p for p_uuid, res in self.entities.items()}
         )
 
     def sum(self) -> PQResult:
-        return PQResult.sum(list(self.participants.values()))
+        return PQResult.sum(list(self.entities.values()))
 
     def p_sum(self) -> Series:
-        if not self.participants:
+        if not self.entities:
             return Series(dtype=float)
         return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
 
     @property
     def q(self):
         return pd.DataFrame(
-            {p_uuid: res.q for p_uuid, res in self.participants.items()}
+            {p_uuid: res.q for p_uuid, res in self.entities.items()}
         )
 
     def q_sum(self):
-        if not self.participants:
+        if not self.entities:
             return Series(dtype=float)
         return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
 
     def energy(self):
         # todo make concurrent
         sum = 0
-        for participant in self.participants.values():
+        for participant in self.entities.values():
             sum += participant.energy()
         return sum
 
@@ -145,7 +145,7 @@ class ParticipantsResult(ResultDict):
 @dataclass(frozen=True)
 class ParticipantsWithSocResult(ParticipantsResult):
     sp_type: SystemParticipantsEnum
-    participants: Dict[str, PQWithSocResult]
+    entities: Dict[str, PQWithSocResult]
 
     @classmethod
     def from_csv(
@@ -172,7 +172,7 @@ class ParticipantsWithSocResult(ParticipantsResult):
             logging.debug(f"There are no {sp_type.value} results.")
             return cls.create_empty(sp_type)
 
-        participants = dict(
+        entities = dict(
             participant_grpd_df.apply(
                 lambda grp: PQWithSocResult.build(
                     sp_type,
@@ -182,13 +182,13 @@ class ParticipantsWithSocResult(ParticipantsResult):
                 )
             )
         )
-        return cls(sp_type, participants)
+        return cls(sp_type, entities)
 
     def sum_with_soc(self, inputs: SystemParticipantsWithCapacity) -> PQWithSocResult:
-        if not self.participants:
+        if not self.entities:
             return PQWithSocResult.create_empty(self.sp_type, "", "")
         capacity_participant = []
-        for participant_uuid, res in self.participants.items():
+        for participant_uuid, res in self.entities.items():
             capacity = inputs.get(participant_uuid)[inputs.capacity_attribute()]
             capacity_participant.append((capacity, res))
         return PQWithSocResult.sum_with_soc(capacity_participant)

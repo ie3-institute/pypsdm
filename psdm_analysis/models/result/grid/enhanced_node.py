@@ -36,13 +36,16 @@ class EnhancedNodeResult(NodeResult):
         filtered_data = filter_data_for_time_interval(self.data, start, end)
         return EnhancedNodeResult.build(self.input_model, filtered_data, self.name)
 
+    @property
     def p(self) -> Series:
         return self.data["p"]
 
+    @property
     def q(self) -> Series:
         return self.data["q"]
 
 
+# todo: This should inherit from ResultDict -> rename participants and nodes to entities
 @dataclass(frozen=True)
 class EnhancedNodesResult(NodesResult):
     nodes: Dict[str, EnhancedNodeResult]
@@ -58,7 +61,8 @@ class EnhancedNodesResult(NodesResult):
             }
         )
 
-    def ps(self) -> DataFrame:
+    @property
+    def p(self) -> DataFrame:
         return pd.concat(
             [
                 node_res.p().rename(node_res.input_model)
@@ -67,7 +71,8 @@ class EnhancedNodesResult(NodesResult):
             axis=1,
         ).sort_index()
 
-    def qs(self) -> DataFrame:
+    @property
+    def q(self) -> DataFrame:
         return pd.concat(
             [
                 node_res.q().rename(node_res.input_model)

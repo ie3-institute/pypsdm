@@ -47,7 +47,7 @@ def plot_all_participants_flex_range(
 
     for idx, participant_res in enumerate(em_res_list):
         participant_flex = participants_res_container.flex.subset(
-            participant_res.participants.keys()
+            participant_res.entities.keys()
         )
         if participant_flex:
             flex_sum = participant_flex.sum()

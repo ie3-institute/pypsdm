@@ -14,13 +14,16 @@ from psdm_analysis.models.input.enums import SystemParticipantsEnum
 @dataclass(frozen=True)
 class ResultDict(ABC):
     sp_type: SystemParticipantsEnum
-    participants: Dict[str, ResultEntities]
+    entities: Dict[str, ResultEntities]
 
     def __len__(self):
-        return len(self.participants)
+        return len(self.entities)
 
     def __contains__(self, uuid):
-        return uuid in self.participants
+        return uuid in self.entities
+
+    def __getitem__(self, uuid):
+        return self.entities[uuid]
 
     @staticmethod
     def get_grpd_df(
@@ -61,7 +64,7 @@ class ResultDict(ABC):
 
     def subset(self, uuids):
         matched_participants = {
-            uuid: self.participants[uuid] for uuid in self.participants.keys() & uuids
+            uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
         }
 
         return type(self)(self.sp_type, matched_participants)
@@ -73,7 +76,7 @@ class ResultDict(ABC):
         :return:
         """
 
-        rmd_uuids = self.participants.keys() - uuids
+        rmd_uuids = self.entities.keys() - uuids
         return self.subset(uuids), self.subset(rmd_uuids)
 
     # noinspection PyArgumentList
@@ -82,6 +85,6 @@ class ResultDict(ABC):
             self.sp_type,
             {
                 uuid: result.filter_for_time_interval(start, end)
-                for uuid, result in self.participants.items()
+                for uuid, result in self.entities.items()
             },
         )

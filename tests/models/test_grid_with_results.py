@@ -8,7 +8,7 @@ grid = GridWithResults.from_csv(
     utils.VN_SIMONA_DELIMITER,
     utils.VN_SIMONA_RESULT_PATH,
     utils.VN_SIMONA_DELIMITER,
-    utils.VN_SIMULATION_END,
+    simulation_end=utils.VN_SIMULATION_END,
 )
 
 

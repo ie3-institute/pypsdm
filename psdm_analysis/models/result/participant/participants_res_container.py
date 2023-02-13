@@ -134,7 +134,7 @@ class ParticipantsResultContainer:
             all_participants = [
                 participants
                 for participants in all_participants
-                if participants.participants
+                if participants.entities
             ]
         return all_participants
 
@@ -208,7 +208,7 @@ class ParticipantsResultContainer:
         if include_empty:
             return {res.sp_type: res for res in self.to_list()}
         else:
-            return {res.sp_type: res for res in self.to_list() if res.participants}
+            return {res.sp_type: res for res in self.to_list() if res.entities}
 
     def energies(self) -> {SystemParticipantsEnum, float}:
         return {

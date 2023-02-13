@@ -80,6 +80,9 @@ class NodeResult(ResultEntities):
 class NodesResult:
     nodes: Dict[str, NodeResult]
 
+    def __getitem__(self, uuid):
+        return self.nodes[uuid]
+
     def __len__(self):
         return len(self.nodes)
 
