@@ -23,14 +23,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
       - name: Run image
         uses: abatilo/actions-poetry@v2.2.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
       - name: Install poetry dependencies
         run: poetry install
       - name: Lint with flake8 / black
