@@ -132,21 +132,21 @@ class ResultEntities(ABC):
         )
 
     @classmethod
-    def create_empty(cls, sp_type: SystemParticipantsEnum, name: str, input_model: str):
+    def create_empty(cls, entity_type: EntitiesEnum, name: str, input_model: str):
         data = cls.empty_data()
-        return cls(sp_type, name, input_model, data)
+        return cls(entity_type, name, input_model, data)
 
     @classmethod
     def build(
         cls,
-        sp_type: SystemParticipantsEnum,
+        entity_type: EntitiesEnum,
         input_model: str,
         data: DataFrame,
         end: datetime,
         name: str = "",
     ) -> "ResultEntities":
         if data.empty:
-            return cls.create_empty(sp_type, name, input_model)
+            return cls.create_empty(entity_type, name, input_model)
 
         if "time" in data.columns:
             data["time"] = data["time"].apply(
@@ -159,7 +159,7 @@ class ResultEntities(ABC):
             data = pd.concat([data, DataFrame(last_state).transpose()])
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
-        return cls(sp_type, name, input_model, data)
+        return cls(entity_type, name, input_model, data)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         filtered_data = filter_data_for_time_interval(self.data, start, end)

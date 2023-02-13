@@ -5,7 +5,6 @@ from psdm_analysis.models.input.enums import EntitiesEnum
 from psdm_analysis.plots.utils import (
     FILL_ALPHA,
     add_to_kwargs_if_not_exist,
-    get_label_and_color,
     get_label_and_color_dict,
     plot_resample,
     set_date_format_and_label,

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Dict
 
 import pandas as pd
@@ -7,7 +6,6 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
-from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 
 @dataclass(frozen=True)
@@ -31,10 +29,6 @@ class EnhancedNodeResult(NodeResult):
             node_res.input_model,
             pd.concat([node_res.data, p.rename("p"), q.rename("q")], axis=1),
         )
-
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        filtered_data = filter_data_for_time_interval(self.data, start, end)
-        return EnhancedNodeResult.build(self.input_model, filtered_data, self.name)
 
     @property
     def p(self) -> Series:
@@ -81,6 +75,3 @@ class EnhancedNodesResult(NodesResult):
             ],
             axis=1,
         ).sort_index()
-
-    def filter(self, uuids: set[str]):
-        return EnhancedNodesResult({uuid: self.entities[uuid] for uuid in uuids})

@@ -105,7 +105,7 @@ def parse_evcs_type(type_str: str) -> ChargingPointType:
     if common_type:
         return common_type
 
-    regex = "\(.*\)$"
+    regex = r"\(.*\)$"
     match = re.search(regex, type_str)
     if match:
         power, current_type = match.group().strip("()").split("|")
