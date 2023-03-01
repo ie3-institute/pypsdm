@@ -19,11 +19,13 @@ def ax_plot_time_series(
     hourly_mean: bool = False,
     fill_from_index=False,
     fill_between=None,
+    set_x_label: bool = True,
     **kwargs,
 ):
     args = get_label_and_color_dict(type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
-    set_date_format_and_label(ax, resolution)
+    if set_x_label:
+        set_date_format_and_label(ax, resolution)
     ts = plot_resample(res, hourly_mean)
     ax.plot(ts, **kwargs)
     if fill_from_index:

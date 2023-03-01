@@ -48,18 +48,18 @@ def plot_comparison(
     fig, axs = plt.subplots(
         subplot_count, 1, figsize=FIGSIZE, sharex=True, sharey=False
     )
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         axs[0], res_a, resolution, hourly_mean, label=label_a, color=LOAD_COLOR
     )
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         axs[0], res_b, resolution, hourly_mean, label=label_b, color=PV_COLOR
     )
     residual = res_a - res_b
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         axs[1], residual, resolution, hourly_mean, label="Residual Load"
     )
     if flex_signal:
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             axs[2], flex_signal, resolution, hourly_mean, label="Flex Signal"
         )
     fig.suptitle(title)
@@ -82,7 +82,7 @@ def plot_em(
     ax_plot_participants(
         axs[0], em_participant_results, resolution, hourly_mean=hourly_mean, stack=True
     )
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         axs[1],
         em_participant_results.ems.sum(),
         resolution,
@@ -107,7 +107,7 @@ def plot_aggregated_load_and_generation(
         )
         agg_load = PQResult.sum(all_load)
         agg_generation = PQResult.sum(all_generation)
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             axs[0],
             agg_load,
             resolution,
@@ -116,7 +116,7 @@ def plot_aggregated_load_and_generation(
             color=LOAD_COLOR,
             label="Aggregated Load",
         )
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             axs[0],
             agg_generation,
             resolution,
@@ -125,7 +125,7 @@ def plot_aggregated_load_and_generation(
             color=PV_COLOR,
             label="Aggregated Generation",
         )
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             axs[1],
             PQResult.sum([agg_load, agg_generation]),
             resolution,
@@ -161,7 +161,7 @@ def plot_all_participants(
             if not isinstance(participants, list)
             else PQResult.sum(participants)
         )
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             axs[1],
             participants_sum,
             resolution,
@@ -209,7 +209,7 @@ def ax_plot_participants(
         ax_plot_stacked_pq(ax, pq_results, resolution, hourly_mean, plot_kwargs)
     else:
         [
-            ax_plot_active_power_result(
+            ax_plot_active_power(
                 ax, pq_result, resolution, hourly_mean, **kwargs
             )
             for pq_result in pq_results
@@ -227,7 +227,7 @@ def ax_plot_stacked_pq(
     residual_load, residual_generation = results[0].divide_load_generation()
 
     plot_partial = partial(
-        ax_plot_active_power_result,
+        ax_plot_active_power,
         ax=ax,
         resolution=resolution,
         hourly_mean=hourly_mean,
@@ -284,7 +284,7 @@ def plot_participants_sum(
             "Data must be of type ParticipantsResult but is {}".format(type(res))
         )
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         ax, res.sum(), resolution, hourly_mean, fill_from_index, **kwargs
     )
     set_title(ax, title)
@@ -303,7 +303,7 @@ def plot_participants_with_soc_sum(
     fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
     axs[0].set_title(title)
     sum = ParticipantsWithSocResult.sum_with_soc(res, input)
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         axs[0],
         sum,
         resolution,
@@ -313,6 +313,29 @@ def plot_participants_with_soc_sum(
     )
     ax_plot_soc(axs[1], sum, resolution, hourly_mean, fill_from_index, **kwargs)
     return fig
+
+def plot_active_power_with_soc(
+        res: PQWithSocResult,
+        title: str,
+        resolution: str,
+        hourly_mean = False,
+        fill_from_index = False,
+        **kwargs
+):
+    fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
+    axs[0].set_title(title)
+    ax_plot_active_power(
+        axs[0],
+        res,
+        resolution,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        set_x_label=False,
+        **kwargs,
+    )
+    ax_plot_soc(axs[1], res, resolution, hourly_mean, fill_from_index, **kwargs)
+    return fig
+
 
 
 def plot_active_power(
@@ -325,20 +348,21 @@ def plot_active_power(
 ):
     fig, ax = plt.subplots(figsize=FIGSIZE)
     ax.set_ylabel("Power in MW")
-    ax_plot_active_power_result(
+    ax_plot_active_power(
         ax, res, resolution, hourly_mean, fill_from_index=fill_from_index, **kwargs
     )
     set_title(ax, title)
     return fig, ax
 
 
-def ax_plot_active_power_result(
+def ax_plot_active_power(
     ax: Axes,
     res: PQResult,
     resolution: str,
     hourly_mean: bool = False,
     fill_from_index: bool = False,
     fill_between=None,
+    set_x_label=True,
     **kwargs,
 ):
     if len(res.p) == 0:
@@ -349,9 +373,10 @@ def ax_plot_active_power_result(
         res.p,
         res.type,
         resolution,
-        hourly_mean,
-        fill_from_index,
-        fill_between,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
         **kwargs,
     )
     ax.set_ylabel("Power in MW")

@@ -10,7 +10,7 @@ from psdm_analysis.models.result.participant.participants_res_container import (
 )
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.results.power_plot import ax_plot_active_power_result
+from psdm_analysis.plots.results.power_plot import ax_plot_active_power
 from psdm_analysis.plots.utils import (
     FIGSIZE,
     FLEX_MAX,
@@ -54,7 +54,7 @@ def plot_all_participants_flex_range(
             axs[idx].set_title(f"{participant_res.entity_type.get_plot_name()}")
             ax_plot_flex_range(axs[idx], flex_sum, "d", hourly_mean=hourly_mean)
         if include_actual_res:
-            ax_plot_active_power_result(
+            ax_plot_active_power(
                 axs[idx],
                 participant_res.sum(),
                 resolution,
@@ -115,7 +115,7 @@ def ax_plot_flex_range(
     plot_func(res=p_ref, label="p_ref", color=FLEX_REF)
 
     if actual_res:
-        ax_plot_active_power_result(
+        ax_plot_active_power(
             ax,
             actual_res,
             resolution,
