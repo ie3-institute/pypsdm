@@ -1,4 +1,5 @@
 import dataclasses
+from functools import reduce
 import os
 import re
 from dataclasses import dataclass
@@ -95,10 +96,7 @@ class PQResult(ResultEntities):
             )
         if len(results) == 1:
             return results[0]
-        agg = results[0]
-        for result in results[1::]:
-            agg += result
-        return agg
+        return reduce(lambda a, b: a + b, results)
 
     def energy(self) -> float:
         return duration_weighted_sum(self.p)
