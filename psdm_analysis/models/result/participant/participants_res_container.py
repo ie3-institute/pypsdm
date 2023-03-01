@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 
+import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
@@ -12,7 +13,6 @@ from psdm_analysis.models.result.participant.participant import (
     ParticipantsWithSocResult,
 )
 from psdm_analysis.models.result.power import PQResult
-from psdm_analysis.processing.series import join_series
 
 
 @dataclass(frozen=True)
@@ -177,22 +177,22 @@ class ParticipantsResultContainer:
 
     @property
     def p(self) -> DataFrame:
-        p_series = [
-            participants.p_sum().rename(participants.entity_type.value)
+        p_series = {
+            participants.entity_type.value: participants.p_sum()
             for participants in self.to_list(include_flex=False)
-        ]
-        return join_series(p_series)
+        }
+        return pd.DataFrame(p_series).ffill().fillna(0)
 
     def p_sum(self) -> Series:
         return self.p.sum(axis=1).rename("p_sum")
 
     @property
     def q(self) -> DataFrame:
-        q_series = [
-            participants.q_sum().rename(participants.entity_type.value)
+        q_series = {
+            participants.entity_type.value: participants.p_sum()
             for participants in self.to_list(include_flex=False)
-        ]
-        return join_series(q_series)
+}
+        return pd.DataFrame(q_series).ffill().ffillna(0)
 
     def q_sum(self) -> Series:
         return self.q.sum(axis=1).rename("q_sum")
