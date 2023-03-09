@@ -56,20 +56,30 @@ class EnhancedNodesResult(NodesResult):
 
     @property
     def p(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.p.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        ).sort_index()
+        return (
+            pd.concat(
+                [
+                    node_res.p.rename(node_res.input_model)
+                    for node_res in self.entities.values()
+                ],
+                axis=1,
+            )
+            .sort_index()
+            .ffill()
+            .fillna(0)
+        )
 
     @property
     def q(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.q.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        ).sort_index()
+        return (
+            pd.concat(
+                [
+                    node_res.q.rename(node_res.input_model)
+                    for node_res in self.entities.values()
+                ],
+                axis=1,
+            )
+            .sort_index()
+            .ffill()
+            .fillna(0)
+        )

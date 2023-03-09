@@ -70,9 +70,11 @@ class Entities(ABC):
             data = pd.concat([data, type_data])
         return data.set_index("uuid")
 
+    @property
     def uuids(self):
         return self.data.index
 
+    @property
     def ids(self):
         return self.data["id"]
 
@@ -113,7 +115,9 @@ class ResultEntities(ABC):
     def __getitem__(self, slice_val: slice):
         if not isinstance(slice_val, slice):
             raise ValueError("Only slicing is supported!")
-        start, stop, _ = slice_val.start, slice_val.stop, slice_val.step
+        start, stop, step = slice_val.start, slice_val.stop, slice_val.step
+        if step is not None:
+            logging.warning("Step is not supported for slicing. Ignoring it.")
         if not (isinstance(start, datetime) and isinstance(stop, datetime)):
             raise ValueError("Only datetime slicing is supported")
         return self.filter_for_time_interval(start, stop)

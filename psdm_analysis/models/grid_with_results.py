@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
+from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
 from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
@@ -33,7 +34,11 @@ class GridWithResults:
         primary_data_delimiter: str = None,
         simulation_end: datetime = None,
         from_agg_results: bool = False,
+        filter_start: datetime = None,
+        filter_end: datetime = None,
     ) -> "GridWithResults":
+        check_filter(filter_start, filter_end)
+
         if not primary_data_delimiter:
             primary_data_delimiter = grid_delimiter
 
@@ -50,16 +55,22 @@ class GridWithResults:
             result_delimiter,
             simulation_end,
             from_agg_results,
+            filter_start=filter_start,
+            filter_end=filter_end,
         )
 
         if not results:
             raise ValueError(f"Results are empty. Is the path correct? {result_path}")
 
-        return GridWithResults(grid, results)
+        return (
+            GridWithResults(grid, results)
+            if not filter_start
+            else GridWithResults(grid, results)
+        )
 
     def nodal_energies(self) -> dict[str, float]:
         return {
-            uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuids()
+            uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuids
         }
 
     def nodal_energy(self, uuid: str) -> float:

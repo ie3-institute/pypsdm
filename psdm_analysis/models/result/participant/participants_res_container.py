@@ -6,6 +6,7 @@ from functools import partial
 import pandas as pd
 from pandas import DataFrame, Series
 
+from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
@@ -47,7 +48,10 @@ class ParticipantsResultContainer:
         delimiter: str,
         simulation_end: datetime,
         from_agg_results: bool = False,
+        filter_start: datetime = None,
+        filter_end: datetime = None,
     ):
+        check_filter(filter_start, filter_end)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             # warning: Breakpoints in the underlying method might not work when started from ipynb
             pa_from_csv_for_participant = partial(
@@ -70,7 +74,7 @@ class ParticipantsResultContainer:
                     participant_result.entity_type
                 ] = participant_result
 
-        return ParticipantsResultContainer(
+        res = ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
             fixed_feed_ins=participant_result_map[SystemParticipantsEnum.FIXED_FEED_IN],
             pvs=participant_result_map[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT],
@@ -86,6 +90,11 @@ class ParticipantsResultContainer:
                 delimiter,
                 simulation_end,
             ),
+        )
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)
         )
 
     @staticmethod
@@ -181,7 +190,7 @@ class ParticipantsResultContainer:
             participants.entity_type.value: participants.p_sum()
             for participants in self.to_list(include_flex=False)
         }
-        return pd.DataFrame(p_series).ffill().fillna(0)
+        return pd.DataFrame(p_series).sort_index().ffill().fillna(0)
 
     def p_sum(self) -> Series:
         return self.p.sum(axis=1).rename("p_sum")
@@ -189,10 +198,10 @@ class ParticipantsResultContainer:
     @property
     def q(self) -> DataFrame:
         q_series = {
-            participants.entity_type.value: participants.p_sum()
+            participants.entity_type.value: participants.q_sum()
             for participants in self.to_list(include_flex=False)
-}
-        return pd.DataFrame(q_series).ffill().ffillna(0)
+        }
+        return pd.DataFrame(q_series).sort_index().ffill().fillna(0)
 
     def q_sum(self) -> Series:
         return self.q.sum(axis=1).rename("q_sum")

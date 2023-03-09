@@ -30,14 +30,14 @@ def test_p():
     p = wec_results.p
     assert len(p) == 4
     assert len(p.columns) == 2
-    assert is_close(p.sum()[wec_a_uuid], -0.9)
+    assert is_close(p.sum()[wec_a_uuid], -1.1)
 
 
 def test_q():
     q = wec_results.q
     assert len(q) == 4
     assert len(q.columns) == 2
-    assert is_close(q.sum()[wec_a_uuid], -0.6)
+    assert is_close(q.sum()[wec_a_uuid], -0.7)
 
 
 def test_p_sum():

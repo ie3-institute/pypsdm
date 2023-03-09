@@ -53,9 +53,8 @@ class SystemParticipantsContainer:
             hps,
         )
 
-    # todo: implement
-    def to_list(self):
-        return [
+    def to_list(self, include_empty=True):
+        participants = [
             self.ems,
             self.loads,
             self.fixed_feed_ins,
@@ -67,6 +66,11 @@ class SystemParticipantsContainer:
             self.evcs,
             self.hps,
         ]
+        return (
+            participants
+            if include_empty
+            else [p for p in participants if not p.data.empty]
+        )
 
     def filter_by_node(self, node_uuid: str):
         loads = self.loads.filer_for_node(node_uuid)
@@ -142,7 +146,7 @@ class SystemParticipantsContainer:
 
     def uuids(self):
         return pd.concat(
-            [participants.uuids().to_series() for participants in self.to_list()]
+            [participants.uuids.to_series() for participants in self.to_list()]
         )
 
     def subset(self, uuids):

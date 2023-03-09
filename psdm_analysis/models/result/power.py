@@ -1,8 +1,8 @@
 import dataclasses
-from functools import reduce
 import os
 import re
 from dataclasses import dataclass
+from functools import reduce
 from typing import List, Union
 
 import pandas as pd

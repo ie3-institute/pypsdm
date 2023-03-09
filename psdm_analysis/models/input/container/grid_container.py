@@ -45,7 +45,7 @@ class GridContainer:
         raw_grid = RawGridContainer.from_csv(path, delimiter)
         participants = SystemParticipantsContainer.from_csv(path, delimiter)
         node_participants_map = {
-            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuids()
+            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuids
         }
         primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
         return cls(raw_grid, participants, primary_data, node_participants_map)
@@ -62,3 +62,20 @@ class GridContainer:
             node_primary_data_agg = PQResult.sum(node_primary_data)
             nodal_primary_data[node] = node_primary_data_agg
         return nodal_primary_data
+
+    def get_nodal_sp_count_and_power(self):
+        data = {}
+        for node_uuid, sps in self.node_participants_map.items():
+            nodal_data = {}
+            for sp in sps.to_list(include_empty=False):
+                sp_id = sp.get_enum().value
+                count = len(sp.data)
+                data_str = f"Count: {count}"
+                # check if sp has a property named s_rated
+                if hasattr(sp, "s_rated"):
+                    s_rated = round(sp.s_rated.sum(), 2)
+                    # round s_rated to 2 decimal places
+                    data_str += f", Rated Power: {s_rated} kw"
+                nodal_data[sp_id] = data_str
+            data[node_uuid] = nodal_data
+        return data

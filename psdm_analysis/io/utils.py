@@ -63,3 +63,12 @@ def csv_to_grpd_df(
     if "uuid" in data.columns:
         data = data.drop(columns=["uuid"])
     return data.groupby(by="input_model")
+
+
+def check_filter(filter_start: datetime, filter_end: datetime):
+    if (filter_start or filter_end) and not (filter_start and filter_end):
+        raise ValueError(
+            "Both start and end of the filter must be provided if one is provided."
+        )
+    if filter_start and filter_end and filter_start > filter_end:
+        raise ValueError("Filter start must be before end.")
