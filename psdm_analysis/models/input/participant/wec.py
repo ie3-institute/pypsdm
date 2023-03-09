@@ -7,11 +7,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class WindEnergyConverters(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "WindEnergyConverters":
-        return cls._from_csv(
-            path, delimiter, SystemParticipantsEnum.WIND_ENERGY_CONVERTER
-        )
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.WIND_ENERGY_CONVERTER
 
     @property
     def type(self):

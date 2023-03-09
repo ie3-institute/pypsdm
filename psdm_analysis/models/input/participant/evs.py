@@ -8,9 +8,9 @@ from psdm_analysis.models.input.participant.participant import (
 
 @dataclass(frozen=True)
 class ElectricVehicles(SystemParticipantsWithCapacity):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "ElectricVehicles":
-        return cls._from_csv(path, delimiter, SystemParticipantsEnum.ELECTRIC_VEHICLE)
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.ELECTRIC_VEHICLE
 
     @staticmethod
     def capacity_attribute() -> str:

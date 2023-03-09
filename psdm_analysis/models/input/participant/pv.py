@@ -7,11 +7,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class PhotovoltaicPowerPlants(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "PhotovoltaicPowerPlants":
-        return cls._from_csv(
-            path, delimiter, SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
-        )
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
 
     @property
     def s_rated(self):

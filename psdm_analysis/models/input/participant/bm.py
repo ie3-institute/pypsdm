@@ -7,9 +7,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class BiomassPlants(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "BiomassPlants":
-        return cls._from_csv(path, delimiter, SystemParticipantsEnum.BIOMASS_PLANT)
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.BIOMASS_PLANT
 
     @property
     def type(self):

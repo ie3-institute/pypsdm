@@ -7,9 +7,9 @@ from psdm_analysis.models.input.participant.participant import (
 
 
 class Storages(SystemParticipantsWithCapacity):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "Storages":
-        return cls._from_csv(path, delimiter, SystemParticipantsEnum.STORAGE)
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.STORAGE
 
     @property
     def type(self) -> Series:
