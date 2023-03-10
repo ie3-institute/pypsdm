@@ -1,22 +1,11 @@
-from psdm_analysis.models.input.container.grid_container import (
-    GridContainer,
-    RawGridContainer,
-)
-from tests import utils
-
-
-def test_raw_grid_container():
-    raw_grid_container = RawGridContainer.from_csv(
-        utils.VN_SIMONA_INPUT_PATH, utils.VN_SIMONA_DELIMITER
-    )
+def test_raw_grid_container(gwr):
+    raw_grid_container = gwr.grid.raw_grid
     assert len(raw_grid_container.lines) == 291
     assert len(raw_grid_container.nodes) == 299
 
 
-def test_grid_container():
-    grid_container = GridContainer.from_csv(
-        utils.VN_SIMONA_INPUT_PATH, utils.VN_SIMONA_DELIMITER
-    )
+def test_grid_container(gwr):
+    grid_container = gwr.grid
     assert len(grid_container.raw_grid.lines) == 291
     assert len(grid_container.raw_grid.nodes) == 299
     assert len(grid_container.participants.loads) == 496

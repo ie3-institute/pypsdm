@@ -3,6 +3,7 @@ from typing import Dict
 
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
+from psdm_analysis.models.input.connector.switches import Switches
 from psdm_analysis.models.input.connector.transformer import Transformers2W
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.container.participants_container import (
@@ -18,9 +19,10 @@ class RawGridContainer(ContainerMixin):
     nodes: Nodes
     lines: Lines
     transformers_2_w: Transformers2W
+    switches: Switches
 
     def to_list(self, include_empty: bool = False) -> list[Entities]:
-        grid_elements = [self.nodes, self.lines, self.transformers_2_w]
+        grid_elements = [self.nodes, self.lines, self.transformers_2_w, self.switches]
         return grid_elements if include_empty else [e for e in grid_elements if e]
 
     @classmethod
@@ -28,7 +30,8 @@ class RawGridContainer(ContainerMixin):
         nodes = Nodes.from_csv(path, delimiter)
         lines = Lines.from_csv(path, delimiter)
         transformers_2_w = Transformers2W.from_csv(path, delimiter)
-        return cls(nodes=nodes, lines=lines, transformers_2_w=transformers_2_w)
+        switches = Switches.from_csv(path, delimiter)
+        return cls(nodes=nodes, lines=lines, transformers_2_w=transformers_2_w, switches=switches)
 
 
 @dataclass(frozen=True)

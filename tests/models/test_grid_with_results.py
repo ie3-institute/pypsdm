@@ -1,49 +1,43 @@
-from psdm_analysis.models.grid_with_results import GridWithResults
+import pytest
+
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodeResult
-from tests import utils
 
-grid = GridWithResults.from_csv(
-    "vn_simona",
-    utils.VN_SIMONA_INPUT_PATH,
-    utils.VN_SIMONA_DELIMITER,
-    utils.VN_SIMONA_RESULT_PATH,
-    utils.VN_SIMONA_DELIMITER,
-    simulation_end=utils.VN_SIMULATION_END,
-)
+@pytest.fixture
+def node_uuid():
+    return "401f37f8-6f2c-4564-bc78-6736cb9cbf8d"
 
-
-def test_nodal_result():
-    nodal_res = grid.nodal_result(utils.TEST_NODE_UUID)
+def test_nodal_result(gwr, node_uuid):
+    nodal_res = gwr.nodal_result(node_uuid)
     assert len(nodal_res.nodes) == 1
     assert len(nodal_res.nodes)
-    assert utils.TEST_NODE_UUID in nodal_res.nodes.entities
+    assert node_uuid in nodal_res.nodes.entities
     assert len(nodal_res.participants.wecs) == 1
     assert len(nodal_res.participants.loads) == 1
     assert len(nodal_res.participants.pvs) == 0
 
 
-def test_nodal_results():
-    nodal_results = grid.nodal_results()
-    assert len(nodal_results) == len(grid.grid.raw_grid.nodes)
-    assert nodal_results[utils.TEST_NODE_UUID] == grid.nodal_result(
-        utils.TEST_NODE_UUID
+def test_nodal_results(gwr, node_uuid):
+    nodal_results = gwr.nodal_results()
+    assert len(nodal_results) == len(gwr.grid.raw_grid.nodes)
+    assert nodal_results[node_uuid] == gwr.nodal_result(
+        node_uuid
     )
 
 
-def test_nodal_energies():
-    nodal_energies = grid.nodal_energies()
-    assert nodal_energies[utils.TEST_NODE_UUID] == grid.nodal_energy(
-        utils.TEST_NODE_UUID
+def test_nodal_energies(gwr, node_uuid):
+    nodal_energies = gwr.nodal_energies()
+    assert nodal_energies[node_uuid] == gwr.nodal_energy(
+        node_uuid
     )
 
 
-def test_build_enhanced_nodes_result():
-    enhanced_node_results = grid.build_enhanced_nodes_result()
+def test_build_enhanced_nodes_result(gwr, node_uuid):
+    enhanced_node_results = gwr.build_enhanced_nodes_result()
     assert len(enhanced_node_results) == 299
-    node_res = grid.nodal_result(utils.TEST_NODE_UUID)
+    node_res = gwr.nodal_result(node_uuid)
     p = node_res.participants.sum().p
     q = node_res.participants.sum().q
     expected = EnhancedNodeResult.from_node_result(
-        node_res.nodes.entities[utils.TEST_NODE_UUID], p, q
+        node_res.nodes.entities[node_uuid], p, q
     )
-    assert enhanced_node_results.entities[utils.TEST_NODE_UUID] == expected
+    assert enhanced_node_results.entities[node_uuid] == expected

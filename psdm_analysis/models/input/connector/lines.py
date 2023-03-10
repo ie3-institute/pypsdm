@@ -17,11 +17,11 @@ class Lines(Entities, HasTypeMixin):
         return RawGridElementsEnum.LINE
 
     @property
-    def nodes_a(self) -> Series:
+    def node_a(self) -> Series:
         return self.data["node_a"]
 
     @property
-    def nodes_b(self) -> Series:
+    def node_b(self) -> Series:
         return self.data["node_b"]
 
     @property
@@ -83,5 +83,5 @@ class Lines(Entities, HasTypeMixin):
 
     def find_lines_by_nodes(self, node_uuids):
         return self.data[
-            (self.nodes_a.isin(node_uuids)) | (self.nodes_b.isin(node_uuids))
+            (self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))
         ]

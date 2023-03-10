@@ -16,7 +16,7 @@ class SystemParticipants(Entities):
     def q_characteristics(self):
         return self.data["q_characteristic"]
 
-    def filer_for_node(self, uuid: str):
+    def filter_for_node(self, uuid: str):
         data = self.data[self.nodes() == str(uuid)]
         return type(self)(data)
 

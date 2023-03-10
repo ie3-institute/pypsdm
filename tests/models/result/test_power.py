@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 import pandas as pd
+import pytest
 
 from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
@@ -12,35 +13,45 @@ from psdm_analysis.processing.series import duration_weighted_series
 from tests import utils
 from tests.utils import is_close
 
-wec_results = ParticipantsResult.from_csv(
-    SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
-    utils.VN_SIMONA_RESULT_PATH,
-    utils.VN_SIMONA_DELIMITER,
-    utils.VN_SIMULATION_END,
-)
+@pytest.fixture
+def wec_results(result_path, delimiter):
+    simulation_end = datetime(year=2011, month=1, day=1, hour=14)
+    wecs = ParticipantsResult.from_csv(
+        SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
+        result_path,
+        delimiter,
+        simulation_end
+    )
+    return wecs
+
 wec_a_uuid = "f9eaec6e-ce25-42d7-8265-2f8f4679a816"
 wec_b_uuid = "d6ad8c73-716a-4244-9ae2-4a3735e492ab"
-assert wec_a_uuid in wec_results.entities.keys()
-assert wec_b_uuid in wec_results.entities.keys()
-wec_a = wec_results.get(wec_a_uuid)
-wec_b = wec_results.get(wec_b_uuid)
 
+@pytest.fixture
+def wec_a(wec_results):
+    assert wec_a_uuid in wec_results
+    return wec_results.get(wec_a_uuid)
 
-def test_p():
+@pytest.fixture
+def wec_b(wec_results):
+    assert wec_b_uuid in wec_results
+    return wec_results.get(wec_b_uuid)
+
+def test_p(wec_results):
     p = wec_results.p
     assert len(p) == 4
     assert len(p.columns) == 2
     assert is_close(p.sum()[wec_a_uuid], -1.1)
 
 
-def test_q():
+def test_q(wec_results):
     q = wec_results.q
     assert len(q) == 4
     assert len(q.columns) == 2
     assert is_close(q.sum()[wec_a_uuid], -0.7)
 
 
-def test_p_sum():
+def test_p_sum(wec_results):
     p = wec_results.p
     p_sum = wec_results.p_sum()
     now = datetime(2011, 1, 1, 13, 30)
@@ -49,7 +60,7 @@ def test_p_sum():
     assert p_sum[now] == p[wec_a_uuid][now] + p[wec_b_uuid][previous]
 
 
-def test_q_sum():
+def test_q_sum(wec_results):
     q = wec_results.q
     q_sum = wec_results.q_sum()
     now = datetime(2011, 1, 1, 13, 30)
@@ -58,7 +69,7 @@ def test_q_sum():
     assert q_sum[now] == q[wec_a_uuid][now] + q[wec_b_uuid][previous]
 
 
-def test_filter_for_time_interval():
+def test_filter_for_time_interval(wec_results):
     start = datetime(2011, 1, 1, 13, 30)
     end = datetime(2011, 1, 1, 14, 0)
     filtered = wec_results.filter_for_time_interval(start, end)
@@ -90,7 +101,7 @@ def test_filter_data_for_time_interval_non_overlapping():
     assert filtered_after.data.empty
 
 
-def test_energy():
+def test_energy(wec_a):
     actual = wec_a.energy()
     dt_a = datetime(2011, 1, 1, 12, 0)
     dt_b = datetime(2011, 1, 1, 13, 30)
@@ -98,44 +109,40 @@ def test_energy():
     assert is_close(actual, expected)
 
 
-def test_duration_weighted_series():
+def test_duration_weighted_series(wec_a):
     duration_weighted_series(wec_a.p)
 
 
-def test_add():
+def test_add(wec_a, wec_b):
     res = wec_a + wec_b
     assert is_close(res.energy(), wec_a.energy() + wec_b.energy())
 
 
-def test_sum_add():
+def test_sum_add(wec_a, wec_b):
     res = PQResult.sum([wec_a, wec_b])
     sum = wec_a + wec_b
     assert (res.p == sum.p).all()
     assert (res.q == sum.q).all()
 
 
-def test_drop_non_unique_time_stamp():
-    ffi_results = ParticipantsResult.from_csv(
-        SystemParticipantsEnum.FIXED_FEED_IN,
-        utils.VN_SIMONA_RESULT_PATH,
-        utils.VN_SIMONA_DELIMITER,
-        utils.VN_SIMULATION_END,
-    ).get("9abe950d-362e-4efe-b686-500f84d8f368")
-    assert ffi_results.data.iloc[0]["p"] == -0.3
+def test_drop_non_unique_time_stamp(gwr):
+    ffis = gwr.results.participants.fixed_feed_ins
+    ffi_result = ffis.get("9abe950d-362e-4efe-b686-500f84d8f368")
+    assert ffi_result.data.iloc[0]["p"] == -0.3
 
 
-def test_subset():
+def test_subset(wec_results):
     wec_subset = wec_results.subset([wec_a_uuid, "no_uuid"])
     assert len(wec_subset) == 1
 
 
-def test_to_csv():
+def test_to_csv(wec_a):
     output_dir = os.path.join(get_absolute_path("tests"), "temp")
     os.makedirs(output_dir, exist_ok=True)
     wec_a.to_csv(output_dir)
 
 
-def test_from_csv():
+def test_from_csv(wec_a):
     output_dir = os.path.join(get_absolute_path("tests"), "temp")
     os.makedirs(output_dir, exist_ok=True)
     wec_a.to_csv(output_dir)

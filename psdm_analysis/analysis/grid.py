@@ -26,7 +26,7 @@ def branching_index(grid: RawGridContainer):
     :return: average amount of branches connected to the nodes
     """
     # all connections to nodes
-    connections = pd.concat((grid.lines.nodes_a, grid.lines.nodes_b))
+    connections = pd.concat((grid.lines.node_a, grid.lines.node_b))
     # todo: add switch evaluation
     # group connections by node uuid and calculate their amount
     nodal_connections = connections.groupby(connections).apply(

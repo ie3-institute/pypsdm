@@ -63,5 +63,5 @@ class RawGridElementsEnum(EntitiesEnum):
     LINE = "line"
     TRANSFORMER_2_W = "transformer_2_w"
     TRANSFROMER_3_W = "transformer_3_w"
-    SWITCHES = "switches"
+    SWITCH = "switch"
     MEASUREMENT_UNIT = "measurement_unit"

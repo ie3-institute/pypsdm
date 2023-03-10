@@ -10,7 +10,7 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
-from psdm_analysis.io.utils import read_csv, to_date_time
+from psdm_analysis.io.utils import read_csv, to_date_time, df_to_csv
 from psdm_analysis.models.input.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
@@ -40,8 +40,7 @@ class Entities(ABC):
         pass
 
     def to_csv(self, path: str, delimiter: str = ","):
-        file_path = utils.get_file_path(path, self.get_enum().get_csv_input_file_name())
-        self.data.to_csv(file_path, sep=delimiter, index=True, index_label="uuid")
+        df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
 
     @classmethod
     def _from_csv(cls, path: str, delimiter: str, entity: EntitiesEnum):
@@ -92,7 +91,13 @@ class Entities(ABC):
                 )
                 data = pd.concat([data, type_data])
 
-        return data.set_index("uuid")
+        try:
+            return data.set_index("uuid")
+        except KeyError as e:
+            raise KeyError(
+                "Column 'uuid' not found. This might be due to wrong csv delimiter!",
+                e
+            )
 
     @property
     def uuids(self):
@@ -101,6 +106,18 @@ class Entities(ABC):
     @property
     def ids(self):
         return self.data["id"]
+
+    @property
+    def operates_from(self):
+        return self.data["operates_from"]
+
+    @property
+    def operates_until(self):
+        return self.data["operates_until"]
+
+    @property
+    def operator(self):
+        return self.data["operator"]
 
     def __repr__(self):
         return self.data

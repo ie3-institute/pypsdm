@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from psdm_analysis.io import utils
+from psdm_analysis.io.utils import df_to_csv
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum
 from psdm_analysis.models.input.participant.participant import SystemParticipants
@@ -36,6 +37,8 @@ class HasTypeMixin(ABC):
         return self.data["type_uuid"]
 
     def to_csv(self, path: str, delimiter: str = ","):
+
+        # persist entity_input.csv
         all_entity_attributes = self.attributes(include_type_attrs=False)
         all_entity_attributes.append("type_uuid"), all_entity_attributes.remove(
             "uuid"
@@ -43,19 +46,15 @@ class HasTypeMixin(ABC):
         entity_data = self.data[all_entity_attributes].rename(
             columns={"type_uuid": "type"}
         )
-        entity_path = utils.get_file_path(
-            path, self.get_enum().get_csv_input_file_name()
-        )
-        entity_data.to_csv(entity_path, sep=delimiter, index=True, index_label="uuid")
+        df_to_csv(entity_data, path, self.get_enum().get_csv_input_file_name(), delimiter)
+
+        # persist entity_type_input.csv
         type_data = (
             self.data[self.type_attributes()]
             .set_index("type_uuid", drop=True)
             .rename(columns={"type_id": "id"})
         )
-        type_path = utils.get_file_path(path, self.get_enum().get_type_file_name())
-        type_data.drop_duplicates().to_csv(
-            type_path, sep=delimiter, index=True, index_label="uuid"
-        )
+        df_to_csv(type_data.drop_duplicates(), path, self.get_enum().get_type_file_name(), delimiter)
 
     @classmethod
     def attributes(cls, include_type_attrs: bool = True) -> [str]:
