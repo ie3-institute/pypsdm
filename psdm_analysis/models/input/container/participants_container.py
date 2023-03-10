@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems
@@ -16,7 +17,7 @@ from psdm_analysis.models.input.participant.wec import WindEnergyConverters
 
 
 @dataclass(frozen=True)
-class SystemParticipantsContainer:
+class SystemParticipantsContainer(ContainerMixin):
     ems: EnergyManagementSystems
     loads: Loads
     fixed_feed_ins: FixedFeedIns
@@ -53,7 +54,7 @@ class SystemParticipantsContainer:
             hps,
         )
 
-    def to_list(self, include_empty=True):
+    def to_list(self, include_empty=False):
         participants = [
             self.ems,
             self.loads,
@@ -146,7 +147,10 @@ class SystemParticipantsContainer:
 
     def uuids(self):
         return pd.concat(
-            [participants.uuids.to_series() for participants in self.to_list()]
+            [
+                participants.uuids.to_series()
+                for participants in self.to_list(include_empty=True)
+            ]
         )
 
     def subset(self, uuids):

@@ -1,3 +1,5 @@
+import os
+
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.wec import WindEnergyConverters
 from tests import utils
@@ -23,3 +25,18 @@ def test_filter_for_node():
 def test_subset():
     subset = wecs.subset(["d6ad8c73-716a-4244-9ae2-4a3735e492ab", "not_in_df"])
     assert len(subset) == 1
+
+
+def test_to_csv():
+    path = os.path.join(utils.TEMP_DIR, "wecs")
+    os.makedirs(path, exist_ok=True)
+    wecs.to_csv(path, utils.VN_SIMONA_DELIMITER)
+    wecs2 = WindEnergyConverters.from_csv(path, utils.VN_SIMONA_DELIMITER)
+    # todo this needs to be tested for other participants
+    assert (wecs.data.index.sort_values() == wecs2.data.index.sort_values()).all()
+    assert (wecs.data.columns.sort_values() == wecs2.data.columns.sort_values()).all()
+    assert (
+        wecs.data.sort_index()
+        .sort_index(axis=1)
+        .equals(wecs2.data.sort_index().sort_index(axis=1))
+    )

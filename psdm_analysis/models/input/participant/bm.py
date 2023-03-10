@@ -1,31 +1,16 @@
 from dataclasses import dataclass
 from typing import List
 
+from psdm_analysis.models.input.container.mixins import HasTypeMixin, SpTypeMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import SystemParticipants
 
 
 @dataclass(frozen=True)
-class BiomassPlants(SystemParticipants):
+class BiomassPlants(SystemParticipants, SpTypeMixin):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.BIOMASS_PLANT
-
-    @property
-    def type(self):
-        return self.data["type"]
-
-    @property
-    def type_id(self):
-        return self.data["type_id"]
-
-    @property
-    def capex(self):
-        return self.data["capex"]
-
-    @property
-    def opex(self):
-        return self.data["opex"]
 
     @property
     def market_reaction(self):
@@ -44,29 +29,23 @@ class BiomassPlants(SystemParticipants):
         return self.data["active_power_gradient"]
 
     @property
-    def s_rated(self):
-        return self.data["s_rated"]
-
-    @property
-    def cos_phi_rated(self):
-        return self.data["cos_phi_rated"]
-
-    @property
     def eta_conv(self):
         return self.data["eta_conv"]
 
     @staticmethod
-    def attributes() -> List[str]:
+    def entity_attributes() -> List[str]:
         return SystemParticipants.attributes() + [
             "type",
             "market_reaction",
             "cost_controlled",
             "feed_in_tariff",
             "type_id",
-            "capex",
-            "opex",
             "active_power_gradient",
-            "s_rated",
-            "cos_phi_rated",
+        ]
+
+    @staticmethod
+    def type_attributes() -> [str]:
+        return SpTypeMixin.type_attributes() + [
+            "active_power_gradient",
             "eta_conv",
         ]

@@ -4,6 +4,7 @@ from typing import Dict
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.transformer import Transformers2W
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
@@ -13,7 +14,7 @@ from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
-class RawGridContainer:
+class RawGridContainer(ContainerMixin):
     nodes: Nodes
     lines: Lines
     transformers_2_w: Transformers2W
@@ -31,7 +32,7 @@ class RawGridContainer:
 
 
 @dataclass(frozen=True)
-class GridContainer:
+class GridContainer(ContainerMixin):
     raw_grid: RawGridContainer
     # todo: we keep the participant containers effectively twice with the mapping
     participants: SystemParticipantsContainer
@@ -49,6 +50,10 @@ class GridContainer:
         }
         primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
         return cls(raw_grid, participants, primary_data, node_participants_map)
+
+    def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
+        grid = [self.raw_grid, self.participants]
+        return grid if not include_primary_data else grid + [self.primary_data]
 
     def get_nodal_primary_data(self):
         time_series = []
@@ -74,7 +79,6 @@ class GridContainer:
                 # check if sp has a property named s_rated
                 if hasattr(sp, "s_rated"):
                     s_rated = round(sp.s_rated.sum(), 2)
-                    # round s_rated to 2 decimal places
                     data_str += f", Rated Power: {s_rated} kw"
                 nodal_data[sp_id] = data_str
             data[node_uuid] = nodal_data

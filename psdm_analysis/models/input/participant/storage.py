@@ -1,19 +1,16 @@
 from pandas import Series
 
+from psdm_analysis.models.input.container.mixins import HasTypeMixin, SpTypeMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
     SystemParticipantsWithCapacity,
 )
 
 
-class Storages(SystemParticipantsWithCapacity):
+class Storages(SystemParticipantsWithCapacity, SpTypeMixin):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.STORAGE
-
-    @property
-    def type(self) -> Series:
-        return self.data["type"]
 
     @property
     def behaviour(self) -> Series:
@@ -23,18 +20,13 @@ class Storages(SystemParticipantsWithCapacity):
     def capacity_attribute() -> str:
         return "e_storage"
 
-    # in kVA
-    @property
-    def s_rated(self) -> Series:
-        return self.data["s_rated"]
-
-    @property
-    def cos_phi_rated(self) -> Series:
-        return self.data["cos_phi_rated"]
-
     @property
     def p_max(self) -> Series:
         return self.data["p_max"]
+
+    @property
+    def active_power_gradient(self) -> Series:
+        return self.data["active_power_gradient"]
 
     @property
     def eta(self) -> Series:
@@ -51,3 +43,21 @@ class Storages(SystemParticipantsWithCapacity):
     @property
     def life_cycle(self) -> Series:
         return self.data["life_cycle"]
+
+    @staticmethod
+    def entity_attributes() -> [str]:
+        return [
+            "behaviour",
+        ]
+
+    @staticmethod
+    def type_attributes() -> [str]:
+        return SpTypeMixin.type_attributes() + [
+            "p_max",
+            "active_power_gradient",
+            "e_storage",
+            "eta",
+            "dod",
+            "life_time",
+            "life_cycle",
+        ]

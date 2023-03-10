@@ -1,28 +1,19 @@
-import json
 from dataclasses import dataclass
 from typing import List
 
 from pandas import DataFrame
 
-from psdm_analysis.io.utils import read_csv
 from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
 class Nodes(Entities):
     data: DataFrame
 
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str):
-        data = read_csv(path, "node_input.csv", delimiter)
-        # todo: deal with nans
-        data["longitude"] = data["geo_position"].apply(
-            lambda geo_json: json.loads(geo_json)["coordinates"][0]
-        )
-        data["latitude"] = data["geo_position"].apply(
-            lambda geo_json: json.loads(geo_json)["coordinates"][1]
-        )
-        return Nodes(data.set_index("uuid"))
+    @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.NODE
 
     @staticmethod
     def attributes() -> List[str]:

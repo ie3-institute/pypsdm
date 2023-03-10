@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from psdm_analysis.models.input.container.mixins import HasTypeMixin, SpTypeMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
     SystemParticipantsWithCapacity,
@@ -7,7 +8,7 @@ from psdm_analysis.models.input.participant.participant import (
 
 
 @dataclass(frozen=True)
-class ElectricVehicles(SystemParticipantsWithCapacity):
+class ElectricVehicles(SystemParticipantsWithCapacity, SpTypeMixin):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.ELECTRIC_VEHICLE
@@ -16,14 +17,21 @@ class ElectricVehicles(SystemParticipantsWithCapacity):
     def capacity_attribute() -> str:
         return "e_storage"
 
-    def s_rated(self):
-        return self.data["s_rated"]
-
+    @property
     def e_storage(self):
         return self.data["e_storage"]
 
+    @property
     def e_cons(self):
         return self.data["e_cons"]
 
-    def ev_type(self):
-        return self.data["type_id"]
+    @staticmethod
+    def entity_attributes() -> [str]:
+        return []
+
+    @staticmethod
+    def type_attributes() -> [str]:
+        return SpTypeMixin.type_attributes() + [
+            "e_storage",
+            "e_cons",
+        ]

@@ -1,18 +1,20 @@
 from dataclasses import dataclass
+from typing import List
 
 from pandas import DataFrame, Series
 
 from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.container.mixins import HasTypeMixin
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
-class Lines(Entities):
+class Lines(Entities, HasTypeMixin):
     data: DataFrame
 
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str):
-        return cls._from_csv(path, delimiter, RawGridElementsEnum.LINE)
+    @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.LINE
 
     @property
     def nodes_a(self) -> Series:
@@ -39,10 +41,6 @@ class Lines(Entities):
         return self.data["olm_characteristic"]
 
     @property
-    def type(self) -> Series:
-        return self.data["type_id"]
-
-    @property
     def v_rated(self) -> Series:
         return self.data["v_rated"]
 
@@ -54,20 +52,28 @@ class Lines(Entities):
     def x(self) -> Series:
         return self.data["x"]
 
+    @property
+    def b(self) -> Series:
+        return self.data["b"]
+
+    @property
+    def i_max(self) -> Series:
+        return self.data["i_max"]
+
     @staticmethod
-    def attributes():
-        return Entities.attributes() + [
+    def entity_attributes() -> List[str]:
+        return [
             "node_a",
             "node_b",
             "length",
             "geo_position",
             "olm_characteristic",
             "parallel_devices",
-            "type_id",
-            "v_rated",
-            "r",
-            "x",
         ]
+
+    @staticmethod
+    def type_attributes() -> List[str]:
+        return HasTypeMixin.attributes() + ["r", "x", "b", "i_max", "v_rated"]
 
     def aggregated_line_length(self) -> float:
         return self.data["length"].sum()
