@@ -11,6 +11,7 @@ from tests.utils import compare_dfs
 def wecs(gwr) -> WindEnergyConverters:
     return gwr.grid.participants.wecs
 
+
 def test_sp_enum():
     bm = SystemParticipantsEnum.BIOMASS_PLANT
     pv = SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT

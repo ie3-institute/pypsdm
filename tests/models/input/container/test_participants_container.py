@@ -7,6 +7,7 @@ from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
 
+
 @pytest.fixture(scope="module")
 def participants(gwr):
     return gwr.grid.participants
@@ -28,7 +29,5 @@ def test_filter_by_node(participants):
 
 def test_empty_participants(participants):
     empty_grid_path = os.path.join(ROOT_DIR, "tests", "resources", "empty_grid")
-    empty_participants = SystemParticipantsContainer.from_csv(
-        empty_grid_path, ","
-    )
+    empty_participants = SystemParticipantsContainer.from_csv(empty_grid_path, ",")
     assert len(empty_participants.biomass_plants) == 0

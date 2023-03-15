@@ -44,9 +44,8 @@ class ResultContainer:
         )
 
         if simulation_end is None:
-            some_node_res = next(iter(nodes.nodes.values()))
-            # todo: this only works if we can guarantee order
-            simulation_end = some_node_res.data.iloc[-1].name
+            some_node_res = next(iter(nodes.entities.values()))
+            simulation_end = some_node_res.data.index.max()
 
         participants = ParticipantsResultContainer.from_csv(
             simulation_data_path,
@@ -60,7 +59,7 @@ class ResultContainer:
         return cls(name, nodes, participants)
 
     def uuids(self) -> set[str]:
-        return set(self.nodes.nodes.keys())
+        return set(self.nodes.entities.keys())
 
     # todo: implement
     def filter_by_nodes(self, nodes: Set[str]):

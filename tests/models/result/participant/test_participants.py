@@ -10,10 +10,11 @@ from psdm_analysis.models.result.participant.participants_res_container import (
 from psdm_analysis.processing.series import duration_weighted_sum
 from tests import utils
 
+
 @pytest.fixture
 def participants_results(gwr):
     return gwr.results.participants
-    
+
 
 def test_energy(participants_results):
     energy_dict = participants_results.energies()
@@ -24,6 +25,7 @@ def compare_duration_weighted_sum(a, b):
     assert math.isclose(
         duration_weighted_sum(a), duration_weighted_sum(b), rel_tol=1e-6
     )
+
 
 def test_participants_p(participants_results):
     participants_p = participants_results.p

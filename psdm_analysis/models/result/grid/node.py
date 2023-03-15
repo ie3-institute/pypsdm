@@ -6,7 +6,12 @@ from typing import List
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.io.utils import check_filter, csv_to_grpd_df, get_file_path
+from psdm_analysis.io.utils import (
+    check_filter,
+    csv_to_grpd_df,
+    get_file_path,
+    to_date_time,
+)
 from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.participant.dict import ResultDict
@@ -69,6 +74,8 @@ class NodesResult(ResultDict):
             node_data = csv_to_grpd_df("node_res.csv", simulation_data_path, delimiter)
             if not node_data:
                 return cls.create_empty(RawGridElementsEnum.NODE)
+            if not simulation_end:
+                simulation_end = to_date_time(node_data["time"].max().max())
             res = cls(
                 RawGridElementsEnum.NODE,
                 node_data.apply(

@@ -73,6 +73,7 @@ def check_filter(filter_start: datetime, filter_end: datetime):
     if filter_start and filter_end and filter_start > filter_end:
         raise ValueError("Filter start must be before end.")
 
+
 def df_to_csv(df: DataFrame, path: str, file_name: str, delimiter: str):
     full_path = get_file_path(path, file_name)
     df = df.replace(True, "true")

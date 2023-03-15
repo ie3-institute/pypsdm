@@ -10,7 +10,7 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
-from psdm_analysis.io.utils import read_csv, to_date_time, df_to_csv
+from psdm_analysis.io.utils import df_to_csv, read_csv, to_date_time
 from psdm_analysis.models.input.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
@@ -95,8 +95,7 @@ class Entities(ABC):
             return data.set_index("uuid")
         except KeyError as e:
             raise KeyError(
-                "Column 'uuid' not found. This might be due to wrong csv delimiter!",
-                e
+                "Column 'uuid' not found. This might be due to wrong csv delimiter!", e
             )
 
     @property

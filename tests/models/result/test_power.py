@@ -13,6 +13,7 @@ from psdm_analysis.processing.series import duration_weighted_series
 from tests import utils
 from tests.utils import is_close
 
+
 @pytest.fixture
 def wec_results(result_path, delimiter):
     simulation_end = datetime(year=2011, month=1, day=1, hour=14)
@@ -20,22 +21,26 @@ def wec_results(result_path, delimiter):
         SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
         result_path,
         delimiter,
-        simulation_end
+        simulation_end,
     )
     return wecs
 
+
 wec_a_uuid = "f9eaec6e-ce25-42d7-8265-2f8f4679a816"
 wec_b_uuid = "d6ad8c73-716a-4244-9ae2-4a3735e492ab"
+
 
 @pytest.fixture
 def wec_a(wec_results):
     assert wec_a_uuid in wec_results
     return wec_results.get(wec_a_uuid)
 
+
 @pytest.fixture
 def wec_b(wec_results):
     assert wec_b_uuid in wec_results
     return wec_results.get(wec_b_uuid)
+
 
 def test_p(wec_results):
     p = wec_results.p

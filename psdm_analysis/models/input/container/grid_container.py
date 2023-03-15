@@ -31,7 +31,12 @@ class RawGridContainer(ContainerMixin):
         lines = Lines.from_csv(path, delimiter)
         transformers_2_w = Transformers2W.from_csv(path, delimiter)
         switches = Switches.from_csv(path, delimiter)
-        return cls(nodes=nodes, lines=lines, transformers_2_w=transformers_2_w, switches=switches)
+        return cls(
+            nodes=nodes,
+            lines=lines,
+            transformers_2_w=transformers_2_w,
+            switches=switches,
+        )
 
 
 @dataclass(frozen=True)

@@ -2,9 +2,11 @@ import pytest
 
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodeResult
 
+
 @pytest.fixture
 def node_uuid():
     return "401f37f8-6f2c-4564-bc78-6736cb9cbf8d"
+
 
 def test_nodal_result(gwr, node_uuid):
     nodal_res = gwr.nodal_result(node_uuid)
@@ -19,16 +21,12 @@ def test_nodal_result(gwr, node_uuid):
 def test_nodal_results(gwr, node_uuid):
     nodal_results = gwr.nodal_results()
     assert len(nodal_results) == len(gwr.grid.raw_grid.nodes)
-    assert nodal_results[node_uuid] == gwr.nodal_result(
-        node_uuid
-    )
+    assert nodal_results[node_uuid] == gwr.nodal_result(node_uuid)
 
 
 def test_nodal_energies(gwr, node_uuid):
     nodal_energies = gwr.nodal_energies()
-    assert nodal_energies[node_uuid] == gwr.nodal_energy(
-        node_uuid
-    )
+    assert nodal_energies[node_uuid] == gwr.nodal_energy(node_uuid)
 
 
 def test_build_enhanced_nodes_result(gwr, node_uuid):
