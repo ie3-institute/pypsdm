@@ -44,6 +44,8 @@ class ResultContainer:
         )
 
         if simulation_end is None:
+            if len(nodes.entities) == 0:
+                raise ValueError("Can't determine simulation end time. No node results to base it on.")
             some_node_res = next(iter(nodes.entities.values()))
             simulation_end = some_node_res.data.index.max()
 
