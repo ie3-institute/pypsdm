@@ -191,7 +191,7 @@ class ParticipantsResultContainer:
         q_series = {
             participants.entity_type.value: participants.q_sum()
             for participants in self.to_list(include_flex=False)
-}
+        }
         return pd.DataFrame(q_series).ffill().fillna(0)
 
     def q_sum(self) -> Series:

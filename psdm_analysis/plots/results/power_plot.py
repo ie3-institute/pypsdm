@@ -209,9 +209,7 @@ def ax_plot_participants(
         ax_plot_stacked_pq(ax, pq_results, resolution, hourly_mean, plot_kwargs)
     else:
         [
-            ax_plot_active_power(
-                ax, pq_result, resolution, hourly_mean, **kwargs
-            )
+            ax_plot_active_power(ax, pq_result, resolution, hourly_mean, **kwargs)
             for pq_result in pq_results
         ]
     legend_with_distinct_labels(ax)
@@ -314,13 +312,14 @@ def plot_participants_with_soc_sum(
     ax_plot_soc(axs[1], sum, resolution, hourly_mean, fill_from_index, **kwargs)
     return fig
 
+
 def plot_active_power_with_soc(
-        res: PQWithSocResult,
-        title: str,
-        resolution: str,
-        hourly_mean = False,
-        fill_from_index = False,
-        **kwargs
+    res: PQWithSocResult,
+    title: str,
+    resolution: str,
+    hourly_mean=False,
+    fill_from_index=False,
+    **kwargs,
 ):
     fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
     axs[0].set_title(title)
@@ -335,7 +334,6 @@ def plot_active_power_with_soc(
     )
     ax_plot_soc(axs[1], res, resolution, hourly_mean, fill_from_index, **kwargs)
     return fig
-
 
 
 def plot_active_power(
