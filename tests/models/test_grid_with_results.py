@@ -46,4 +46,5 @@ def test_build_enhanced_nodes_result():
     expected = EnhancedNodeResult.from_node_result(
         node_res.nodes.entities[utils.TEST_NODE_UUID], p, q
     )
-    assert enhanced_node_results.entities[utils.TEST_NODE_UUID] == expected
+    actual = enhanced_node_results.entities[utils.TEST_NODE_UUID]
+    assert actual.data.equals(expected.data)

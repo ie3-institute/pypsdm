@@ -26,7 +26,9 @@ class EnhancedNodeResult(NodeResult):
             RawGridElementsEnum.NODE,
             node_res.name,
             node_res.input_model,
-            pd.concat([node_res.data, p.rename("p"), q.rename("q")], axis=1),
+            pd.concat(
+                [node_res.data, p.rename("p"), q.rename("q")], axis=1
+            ).sort_index(),
         )
 
     @property

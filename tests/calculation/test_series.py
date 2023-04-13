@@ -23,3 +23,9 @@ def test_add_series():
     series_short = series.copy(deep=True)[start:end]
     res = add_series(series, series_short, "test")
     assert res.sum() == 7
+
+    # adding works with unsorted index
+    series_unsorted = series[::-1]
+    res_a = add_series(series, series_unsorted, "test")
+    res_b = add_series(series, series, "test")
+    assert res_a.equals(res_b)
