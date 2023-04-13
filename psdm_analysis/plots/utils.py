@@ -38,8 +38,8 @@ FLEX_REF = YELLOW
 
 
 def set_style(style: str = "whitegrid", context: str = "notebook"):
-    sns.set_style("whitegrid")
-    sns.set_context("notebook")
+    sns.set_style(style)
+    sns.set_context(context)
 
 
 def get_label_and_color(sp_type: EntitiesEnum):

@@ -34,10 +34,9 @@ class NodeResult(ResultEntities):
         uuid: str,
         data: DataFrame,
         rated_voltage: float,
-        resolution: int,
     ) -> "NodeResult":
         data["v_mag"] = data["v_mag"].divide(rated_voltage)
-        return NodeResult(name, uuid, data)
+        return NodeResult(RawGridElementsEnum.NODE, name, uuid, data)
 
     @property
     def v_mag(self) -> Series:

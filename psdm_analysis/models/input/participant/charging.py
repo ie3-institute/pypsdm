@@ -109,7 +109,7 @@ def parse_evcs_type(type_str: str) -> ChargingPointType:
     if match:
         power, current_type = match.group().strip("()").split("|")
         current_type = CurrentType[current_type]
-        return ChargingPointType(type_str, power, current_type, set())
+        return ChargingPointType(type_str, float(power), current_type, set())
     else:
         raise ValueError(f"Can not determine power of {type_str}!")
 

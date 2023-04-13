@@ -47,7 +47,7 @@ class ResultContainer:
         return cls(name, nodes, participants)
 
     def uuids(self) -> set[str]:
-        return set(self.nodes.nodes.keys())
+        return set(self.nodes.entities.keys())
 
     # todo: implement
     def filter_by_nodes(self, nodes: Set[str]):
