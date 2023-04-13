@@ -23,9 +23,7 @@ def test_energy():
 def compare_duration_weighted_sum(a, b):
     a_res = duration_weighted_sum(a)
     b_res = duration_weighted_sum(b)
-    assert math.isclose(
-        a_res, b_res, rel_tol=1e-6
-    )
+    assert math.isclose(a_res, b_res, rel_tol=1e-6)
 
 
 def test_participants_p():
