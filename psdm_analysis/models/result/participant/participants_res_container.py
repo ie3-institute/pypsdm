@@ -181,7 +181,7 @@ class ParticipantsResultContainer:
             participants.entity_type.value: participants.p_sum()
             for participants in self.to_list(include_flex=False)
         }
-        return pd.DataFrame(p_series).ffill().fillna(0)
+        return pd.DataFrame(p_series).sort_index().ffill().fillna(0)
 
     def p_sum(self) -> Series:
         return self.p.sum(axis=1).rename("p_sum")
@@ -192,7 +192,7 @@ class ParticipantsResultContainer:
             participants.entity_type.value: participants.q_sum()
             for participants in self.to_list(include_flex=False)
         }
-        return pd.DataFrame(q_series).ffill().fillna(0)
+        return pd.DataFrame(q_series).sort_index().ffill().fillna(0)
 
     def q_sum(self) -> Series:
         return self.q.sum(axis=1).rename("q_sum")

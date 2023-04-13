@@ -21,8 +21,10 @@ def test_energy():
 
 
 def compare_duration_weighted_sum(a, b):
+    a_res = duration_weighted_sum(a)
+    b_res = duration_weighted_sum(b)
     assert math.isclose(
-        duration_weighted_sum(a), duration_weighted_sum(b), rel_tol=1e-6
+        a_res, b_res, rel_tol=1e-6
     )
 
 

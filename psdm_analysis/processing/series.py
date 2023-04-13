@@ -3,6 +3,7 @@ from pandas import DataFrame, Series
 
 
 def duration_weighted_series(series: Series):
+    series.sort_index(inplace=True)
     values = series[:-1].reset_index(drop=True)
     time = (
         (series.index[1::] - series.index[:-1])
