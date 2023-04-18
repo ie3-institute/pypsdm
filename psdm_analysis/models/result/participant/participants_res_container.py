@@ -124,7 +124,7 @@ class ParticipantsResultContainer:
 
     def to_list(
         self, include_em: bool = True, include_flex=True, include_empty=True
-    ) -> [ParticipantsResult]:
+    ) -> list[ParticipantsResult]:
         optional = []
         if include_em:
             optional.append(self.ems)
@@ -220,14 +220,14 @@ class ParticipantsResultContainer:
         else:
             return {res.entity_type: res for res in self.to_list() if res.entities}
 
-    def energies(self) -> {SystemParticipantsEnum, float}:
+    def energies(self) -> dict[SystemParticipantsEnum, float]:
         return {
             sp_type: res.energy()
             for sp_type, res in self.to_dict(include_empty=False).items()
             if sp_type != SystemParticipantsEnum.FLEX_OPTIONS
         }
 
-    def load_and_generation_energies(self) -> {SystemParticipantsEnum, float}:
+    def load_and_generation_energies(self) -> dict[SystemParticipantsEnum, float]:
         return {
             sp_type: res.load_and_generation()
             for sp_type, res in self.to_dict(include_empty=False).items()

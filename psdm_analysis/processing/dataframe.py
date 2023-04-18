@@ -12,7 +12,7 @@ def divide_positive_negative(df: DataFrame):
     return positive, negative
 
 
-def join_dataframes(dfs: [DataFrame]):
+def join_dataframes(dfs: list[DataFrame]):
     return pd.concat(dfs)
 
 

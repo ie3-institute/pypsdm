@@ -88,7 +88,7 @@ class Transformers2W(Entities, HasTypeMixin):
         return self.data["tap_max"]
 
     @staticmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         return [
             "node_a",
             "node_b",
@@ -99,7 +99,7 @@ class Transformers2W(Entities, HasTypeMixin):
         ]
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return [
             "r_sc",
             "x_sc",

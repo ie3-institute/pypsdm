@@ -26,11 +26,11 @@ class ElectricVehicles(SystemParticipantsWithCapacity, SpTypeMixin):
         return self.data["e_cons"]
 
     @staticmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         return []
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + [
             "e_storage",
             "e_cons",

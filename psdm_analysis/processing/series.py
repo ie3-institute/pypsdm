@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pandas as pd
 from pandas import DataFrame, Series
 
@@ -34,7 +36,7 @@ def add_series(this: Series, that: Series, name: str) -> Series:
     )
 
 
-def join_series(series: [Series]) -> DataFrame:
+def join_series(series: list[Series]) -> DataFrame:
     first_series = series[0]
     df = first_series.rename(first_series.name).to_frame()
     for series in series[1:]:
@@ -46,7 +48,7 @@ def hourly_mean_resample(series: Series) -> Series:
     return series.resample("60s").ffill().resample("1h").mean()
 
 
-def load_and_generation(p_ts: Series) -> (float, float):
+def load_and_generation(p_ts: Series) -> Tuple[float, float]:
     weighted_series = duration_weighted_series(p_ts)
     load_filter = weighted_series["values"] > 0
     weighted_load = weighted_series[load_filter]

@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -32,10 +32,10 @@ class GridWithResults:
         result_path: str,
         result_delimiter: str,
         primary_data_delimiter: str = None,
-        simulation_end: datetime = None,
+        simulation_end: datetime = Optional[None],
         from_agg_results: bool = False,
-        filter_start: datetime = None,
-        filter_end: datetime = None,
+        filter_start: datetime = Optional[None],
+        filter_end: datetime = Optional[None],
     ) -> "GridWithResults":
         check_filter(filter_start, filter_end)
 

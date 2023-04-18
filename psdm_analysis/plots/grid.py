@@ -1,8 +1,8 @@
 import json
 
-from pandas import Series
 import plotly.express as px
 import plotly.graph_objs as go
+from pandas import Series
 
 from psdm_analysis.models.input.container.grid_container import GridContainer
 

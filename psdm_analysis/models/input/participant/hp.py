@@ -20,9 +20,9 @@ class HeatPumps(SystemParticipants, SpTypeMixin):
         return self.data["p_thermal"]
 
     @staticmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         return ["thermal_bus"]
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + ["p_thermal"]

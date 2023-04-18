@@ -217,10 +217,10 @@ def ax_plot_participants(
 
 def ax_plot_stacked_pq(
     ax: Axes,
-    results: [PQResult],
+    results: list[PQResult],
     resolution: str,
     hourly_mean: bool = False,
-    plot_kwargs: [dict] = None,
+    plot_kwargs: list[dict] = None,
 ):
     residual_load, residual_generation = results[0].divide_load_generation()
 

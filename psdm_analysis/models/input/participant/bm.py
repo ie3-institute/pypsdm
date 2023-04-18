@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from psdm_analysis.models.input.container.mixins import SpTypeMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
@@ -33,7 +32,7 @@ class BiomassPlants(SystemParticipants, SpTypeMixin):
         return self.data["eta_conv"]
 
     @staticmethod
-    def entity_attributes() -> List[str]:
+    def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + [
             "type",
             "market_reaction",
@@ -44,7 +43,7 @@ class BiomassPlants(SystemParticipants, SpTypeMixin):
         ]
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + [
             "active_power_gradient",
             "eta_conv",

@@ -62,7 +62,7 @@ class HasTypeMixin(ABC):
         )
 
     @classmethod
-    def attributes(cls, include_type_attrs: bool = True) -> [str]:
+    def attributes(cls, include_type_attrs: bool = True) -> list[str]:
         base_attributes = []
         # check if cls is a subclass of SystemParticipants
         if issubclass(cls, SystemParticipants):
@@ -82,11 +82,11 @@ class HasTypeMixin(ABC):
 
     @staticmethod
     @abstractmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         pass
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return ["type_uuid", "type_id"]
 
 
@@ -109,11 +109,11 @@ class SpTypeMixin(HasTypeMixin):
 
     @staticmethod
     @abstractmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         pass
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return HasTypeMixin.type_attributes() + [
             "capex",
             "opex",

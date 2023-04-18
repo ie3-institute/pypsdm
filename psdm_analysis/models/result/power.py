@@ -3,7 +3,7 @@ import os
 import re
 from dataclasses import dataclass
 from functools import reduce
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import pandas as pd
 from pandas import Series
@@ -101,7 +101,7 @@ class PQResult(ResultEntities):
     def energy(self) -> float:
         return duration_weighted_sum(self.p)
 
-    def load_and_generation(self) -> (float, float):
+    def load_and_generation(self) -> Tuple[float, float]:
         return load_and_generation(self.p)
 
     def divide_load_generation(self):
@@ -153,7 +153,9 @@ class PQWithSocResult(PQResult):
 
     @staticmethod
     # todo: find a way for parallel calculation
-    def sum_with_soc(results: [(float, "PQWithSocResult")]) -> "PQWithSocResult":
+    def sum_with_soc(
+        results: list[Tuple[float, "PQWithSocResult"]]
+    ) -> "PQWithSocResult":
         if len(results) == 0:
             return PQWithSocResult.create_empty(
                 SystemParticipantsEnum.PARTICIPANTS_SUM, "", ""
