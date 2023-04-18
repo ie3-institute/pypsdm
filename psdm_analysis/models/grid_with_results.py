@@ -127,7 +127,7 @@ class GridWithResults:
 
     def em_results(
         self,
-    ) -> Tuple[SystemParticipantsContainer, ParticipantsResultContainer]:
+    ) -> List[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
         uuid_to_connected_asset = self.grid.participants.ems.uuid_to_connected_assets()
         return [
             (
