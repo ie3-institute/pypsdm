@@ -1,7 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
 
-from psdm_analysis.io import utils
 from psdm_analysis.io.utils import df_to_csv
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum

@@ -1,8 +1,5 @@
 from datetime import datetime
 
-from psdm_analysis.models.result.grid.node import NodesResult
-from tests import utils
-
 
 def test_filter_for_time_interval(gwr):
     nodes_res = gwr.results.nodes

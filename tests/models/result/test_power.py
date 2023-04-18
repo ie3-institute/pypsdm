@@ -10,7 +10,6 @@ from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import duration_weighted_series
-from tests import utils
 from tests.utils import is_close
 
 

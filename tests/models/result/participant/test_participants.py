@@ -4,11 +4,7 @@ import math
 import pytest
 
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participants_res_container import (
-    ParticipantsResultContainer,
-)
 from psdm_analysis.processing.series import duration_weighted_sum
-from tests import utils
 
 
 @pytest.fixture
