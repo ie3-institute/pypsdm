@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 from pandas import DataFrame
@@ -65,12 +66,12 @@ def csv_to_grpd_df(
     return data.groupby(by="input_model")
 
 
-def check_filter(filter_start: datetime, filter_end: datetime):
+def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime]):
     if (filter_start or filter_end) and not (filter_start and filter_end):
         raise ValueError(
             "Both start and end of the filter must be provided if one is provided."
         )
-    if filter_start and filter_end and filter_start > filter_end:
+    if (filter_start and filter_end) and (filter_start > filter_end):
         raise ValueError("Filter start must be before end.")
 
 

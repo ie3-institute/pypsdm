@@ -34,8 +34,8 @@ class GridWithResults:
         primary_data_delimiter: str = None,
         simulation_end: datetime = Optional[None],
         from_agg_results: bool = False,
-        filter_start: datetime = Optional[None],
-        filter_end: datetime = Optional[None],
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
     ) -> "GridWithResults":
         check_filter(filter_start, filter_end)
 
