@@ -73,6 +73,7 @@ class Entities(ABC):
     def uuids(self):
         return self.data.index
 
+    @property
     def ids(self):
         return self.data["id"]
 

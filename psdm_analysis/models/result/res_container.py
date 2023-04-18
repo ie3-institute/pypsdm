@@ -19,7 +19,7 @@ class ResultContainer:
 
     # todo: implement slicing
     def __getitem__(self, slice_val):
-        pass
+        raise NotImplementedError
 
     @classmethod
     def from_csv(
