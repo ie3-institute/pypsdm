@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -127,7 +127,7 @@ class GridWithResults:
 
     def em_results(
         self,
-    ) -> [(SystemParticipantsContainer, ParticipantsResultContainer)]:
+    ) -> Tuple[SystemParticipantsContainer, ParticipantsResultContainer]:
         uuid_to_connected_asset = self.grid.participants.ems.uuid_to_connected_assets()
         return [
             (
