@@ -6,6 +6,7 @@ from functools import partial
 import pandas as pd
 from pandas import DataFrame, Series
 
+from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
@@ -47,7 +48,10 @@ class ParticipantsResultContainer:
         delimiter: str,
         simulation_end: datetime,
         from_agg_results: bool = False,
+        filter_start: datetime = None,
+        filter_end: datetime = None,
     ):
+        check_filter(filter_start, filter_end)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             # warning: Breakpoints in the underlying method might not work when started from ipynb
             pa_from_csv_for_participant = partial(
@@ -70,7 +74,7 @@ class ParticipantsResultContainer:
                     participant_result.entity_type
                 ] = participant_result
 
-        return ParticipantsResultContainer(
+        res = ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
             fixed_feed_ins=participant_result_map[SystemParticipantsEnum.FIXED_FEED_IN],
             pvs=participant_result_map[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT],
@@ -86,6 +90,11 @@ class ParticipantsResultContainer:
                 delimiter,
                 simulation_end,
             ),
+        )
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)
         )
 
     @staticmethod

@@ -7,9 +7,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class Loads(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "Loads":
-        return cls._from_csv(path, delimiter, SystemParticipantsEnum.LOAD)
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.LOAD
 
     @property
     def s_rated(self):

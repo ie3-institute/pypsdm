@@ -6,9 +6,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class EnergyManagementSystems(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "EnergyManagementSystems":
-        return cls._from_csv(path, delimiter, SystemParticipantsEnum.ENERGY_MANAGEMENT)
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.ENERGY_MANAGEMENT
 
     @property
     def connected_assets(self):

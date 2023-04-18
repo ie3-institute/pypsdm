@@ -22,8 +22,26 @@ class ResultDict(ABC):
     def __contains__(self, uuid):
         return uuid in self.entities
 
-    def __getitem__(self, uuid):
-        return self.entities[uuid]
+    def __getitem__(self, get):
+        print(get)
+        match get:
+            case str():
+                return self.entities[get]
+            case slice():
+                start, stop, step = get.start, get.stop, get.step
+                if step is not None:
+                    logging.warning("Step is not supported for slicing. Ignoring it.")
+                if not (isinstance(start, datetime) and isinstance(stop, datetime)):
+                    raise ValueError("Only datetime slicing is supported")
+                entities = {
+                    key: e.filter_for_time_interval(start, stop)
+                    for key, e in self.entities.items()
+                }
+                return type(self)(self.entity_type, entities)
+            case _:
+                raise ValueError(
+                    "Only get by uuid or datetime slice for filtering is supported."
+                )
 
     @staticmethod
     def get_grpd_df(

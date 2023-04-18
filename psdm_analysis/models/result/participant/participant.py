@@ -106,7 +106,7 @@ class ParticipantsResult(ResultDict):
             return None
         return pd.DataFrame(
             {p_uuid: res.p for p_uuid, res in self.entities.items()}
-        ).sort_index()
+        ).fillna(method="ffill").sort_index()
 
     def sum(self) -> PQResult:
         return PQResult.sum(list(self.entities.values()))
@@ -120,7 +120,7 @@ class ParticipantsResult(ResultDict):
     def q(self):
         return pd.DataFrame(
             {p_uuid: res.q for p_uuid, res in self.entities.items()}
-        ).sort_index()
+        ).fillna(method="ffill").sort_index()
 
     def q_sum(self):
         if not self.entities:

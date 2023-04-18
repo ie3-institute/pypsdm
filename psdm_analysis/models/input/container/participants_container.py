@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems
@@ -16,7 +17,7 @@ from psdm_analysis.models.input.participant.wec import WindEnergyConverters
 
 
 @dataclass(frozen=True)
-class SystemParticipantsContainer:
+class SystemParticipantsContainer(ContainerMixin):
     ems: EnergyManagementSystems
     loads: Loads
     fixed_feed_ins: FixedFeedIns
@@ -53,9 +54,8 @@ class SystemParticipantsContainer:
             hps,
         )
 
-    # todo: implement
-    def to_list(self):
-        return [
+    def to_list(self, include_empty=False):
+        participants = [
             self.ems,
             self.loads,
             self.fixed_feed_ins,
@@ -67,18 +67,23 @@ class SystemParticipantsContainer:
             self.evcs,
             self.hps,
         ]
+        return (
+            participants
+            if include_empty
+            else [p for p in participants if not p.data.empty]
+        )
 
     def filter_by_node(self, node_uuid: str):
-        loads = self.loads.filer_for_node(node_uuid)
-        fixed_feed_ins = self.fixed_feed_ins.filer_for_node(node_uuid)
-        pvs = self.pvs.filer_for_node(node_uuid)
-        biomass_plants = self.biomass_plants.filer_for_node(node_uuid)
-        wecs = self.wecs.filer_for_node(node_uuid)
-        storages = self.storages.filer_for_node(node_uuid)
-        ems = self.ems.filer_for_node(node_uuid)
-        evs = self.evs.filer_for_node(node_uuid)
-        evcs = self.evcs.filer_for_node(node_uuid)
-        hps = self.hps.filer_for_node(node_uuid)
+        loads = self.loads.filter_for_node(node_uuid)
+        fixed_feed_ins = self.fixed_feed_ins.filter_for_node(node_uuid)
+        pvs = self.pvs.filter_for_node(node_uuid)
+        biomass_plants = self.biomass_plants.filter_for_node(node_uuid)
+        wecs = self.wecs.filter_for_node(node_uuid)
+        storages = self.storages.filter_for_node(node_uuid)
+        ems = self.ems.filter_for_node(node_uuid)
+        evs = self.evs.filter_for_node(node_uuid)
+        evcs = self.evcs.filter_for_node(node_uuid)
+        hps = self.hps.filter_for_node(node_uuid)
         return SystemParticipantsContainer(
             ems,
             loads,
@@ -142,7 +147,10 @@ class SystemParticipantsContainer:
 
     def uuids(self):
         return pd.concat(
-            [participants.uuids().to_series() for participants in self.to_list()]
+            [
+                participants.uuids.to_series()
+                for participants in self.to_list(include_empty=True)
+            ]
         )
 
     def subset(self, uuids):

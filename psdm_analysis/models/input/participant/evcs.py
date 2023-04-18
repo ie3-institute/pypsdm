@@ -6,11 +6,9 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 @dataclass(frozen=True)
 class EvChargingStations(SystemParticipants):
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "EvChargingStations":
-        return cls._from_csv(
-            path, delimiter, SystemParticipantsEnum.EV_CHARGING_STATION
-        )
+    @staticmethod
+    def get_enum() -> SystemParticipantsEnum:
+        return SystemParticipantsEnum.EV_CHARGING_STATION
 
     @property
     def charging_points(self):

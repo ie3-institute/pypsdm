@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from psdm_analysis.models.entity import Entities
 
 
-# todo: require system participants enum reference
 @dataclass(frozen=True)
 class SystemParticipants(Entities):
     @staticmethod
@@ -17,7 +16,7 @@ class SystemParticipants(Entities):
     def q_characteristics(self):
         return self.data["q_characteristic"]
 
-    def filer_for_node(self, uuid: str):
+    def filter_for_node(self, uuid: str):
         data = self.data[self.nodes() == str(uuid)]
         return type(self)(data)
 
