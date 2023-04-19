@@ -2,6 +2,7 @@ import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
+from typing import Optional
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -48,8 +49,8 @@ class ParticipantsResultContainer:
         delimiter: str,
         simulation_end: datetime,
         from_agg_results: bool = False,
-        filter_start: datetime = None,
-        filter_end: datetime = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
     ):
         check_filter(filter_start, filter_end)
         with concurrent.futures.ProcessPoolExecutor() as executor:

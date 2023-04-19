@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Set
+from typing import Optional, Set
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.result.grid.node import NodesResult
@@ -28,10 +28,10 @@ class ResultContainer:
         name: str,
         simulation_data_path: str,
         delimiter: str,
-        simulation_end: datetime = None,
+        simulation_end: Optional[datetime] = None,
         from_agg_results: bool = True,
-        filter_start: datetime = None,
-        filter_end: datetime = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
     ):
         check_filter(filter_start, filter_end)
         # todo: load async
