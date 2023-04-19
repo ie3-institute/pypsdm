@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -65,8 +65,8 @@ class NodesResult(ResultDict):
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        filter_start: datetime = None,
-        filter_end: datetime = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
     ):
         check_filter(filter_start, filter_end)
         file_path = get_file_path(simulation_data_path, "node_res.csv")
