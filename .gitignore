@@ -367,6 +367,9 @@ $RECYCLE.BIN/
 evaluation/
 pickle/
 figures/
-psdm_analysis/projects/
 tests/temp/
 .idea/
+
+# can be removed later
+psdm_analysis/projects/
+transense_analysis/
