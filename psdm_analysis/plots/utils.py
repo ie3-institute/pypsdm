@@ -70,7 +70,7 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
         case SystemParticipantsEnum.PARTICIPANTS_SUM:
             return "Participants Sum", LOAD_COLOR
         case _:
-            return sp_type, UNKNOWN_COLOR
+            return sp_type.value, UNKNOWN_COLOR
 
 
 def get_label_and_color_dict(sp_type: EntitiesEnum):
