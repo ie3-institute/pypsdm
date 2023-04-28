@@ -11,6 +11,8 @@ from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
 from psdm_analysis.models.result.power import PQResult
 
+# These are just some early quite specific conversions. Additional ones will be added as needed.
+
 
 def pp_load_to_participants_result(
     pp_net_file: str,  # pp net xlsx export
