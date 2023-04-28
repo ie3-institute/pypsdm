@@ -17,6 +17,7 @@ from psdm_analysis.processing.series import hourly_mean_resample
 # === COLORS ===
 
 COLOR_PALETTE = sns.color_palette()
+
 BLUE = COLOR_PALETTE[0]
 ORANGE = COLOR_PALETTE[1]
 GREEN = COLOR_PALETTE[2]
@@ -28,7 +29,8 @@ GREY = COLOR_PALETTE[7]
 YELLOW = COLOR_PALETTE[8]
 LIGHT_BLUE = COLOR_PALETTE[9]
 
-COLOR_PALETTE = sns.color_palette()
+# === COLOR MATCHING ===
+
 NODE_COLOR = BLUE
 LOAD_COLOR = BLUE
 PV_COLOR = GREEN
