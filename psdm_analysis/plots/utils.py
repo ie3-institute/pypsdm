@@ -1,5 +1,5 @@
 import os.path
-from typing import Dict
+from typing import Dict, NewType, Tuple
 
 import seaborn as sns
 from matplotlib import dates as mdates
@@ -7,12 +7,17 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pandas import Series
 
-from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.input.enums import (
+    EntitiesEnum,
+    RawGridElementsEnum,
+    SystemParticipantsEnum,
+)
 from psdm_analysis.processing.series import hourly_mean_resample
 
 # === COLORS ===
 
 COLOR_PALETTE = sns.color_palette()
+
 BLUE = COLOR_PALETTE[0]
 ORANGE = COLOR_PALETTE[1]
 GREEN = COLOR_PALETTE[2]
@@ -24,7 +29,9 @@ GREY = COLOR_PALETTE[7]
 YELLOW = COLOR_PALETTE[8]
 LIGHT_BLUE = COLOR_PALETTE[9]
 
-COLOR_PALETTE = sns.color_palette()
+# === COLOR MATCHING ===
+
+NODE_COLOR = BLUE
 LOAD_COLOR = BLUE
 PV_COLOR = GREEN
 BS_COLOR = ORANGE
@@ -36,31 +43,36 @@ FLEX_MAX = BLUE
 FLEX_MIN = GREEN
 FLEX_REF = YELLOW
 
+RGB = NewType("RGB", Tuple[float, float, float])
+
 
 def set_style(style: str = "whitegrid", context: str = "notebook"):
     sns.set_style(style)
     sns.set_context(context)
 
 
-def get_label_and_color(sp_type: EntitiesEnum):
-    if sp_type == SystemParticipantsEnum.LOAD:
-        return "Load", LOAD_COLOR
-    elif sp_type == SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
-        return "PV", PV_COLOR
-    elif sp_type == SystemParticipantsEnum.STORAGE:
-        return "Battery", BS_COLOR
-    elif sp_type == SystemParticipantsEnum.EV_CHARGING_STATION:
-        return "EV Charging Station", EVCS_COLOR
-    elif sp_type == SystemParticipantsEnum.ELECTRIC_VEHICLE:
-        return "Electric Vehicle", EVCS_COLOR
-    elif sp_type == SystemParticipantsEnum.HEATP_PUMP:
-        return "Heat Pump", HP_COLOR
-    elif sp_type == SystemParticipantsEnum.ENERGY_MANAGEMENT:
-        return "Energy Management", LOAD_COLOR
-    elif sp_type == SystemParticipantsEnum.PARTICIPANTS_SUM:
-        return "Participants Sum", LOAD_COLOR
-    else:
-        return sp_type, UNKNOWN_COLOR
+def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
+    match sp_type:
+        case RawGridElementsEnum.NODE:
+            return "Node", NODE_COLOR
+        case SystemParticipantsEnum.LOAD:
+            return "Load", LOAD_COLOR
+        case SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
+            return "PV", PV_COLOR
+        case SystemParticipantsEnum.STORAGE:
+            return "Battery", BS_COLOR
+        case SystemParticipantsEnum.EV_CHARGING_STATION:
+            return "EV Charging Station", EVCS_COLOR
+        case SystemParticipantsEnum.ELECTRIC_VEHICLE:
+            return "Electric Vehicle", EVCS_COLOR
+        case SystemParticipantsEnum.HEATP_PUMP:
+            return "Heat Pump", HP_COLOR
+        case SystemParticipantsEnum.ENERGY_MANAGEMENT:
+            return "Energy Management", LOAD_COLOR
+        case SystemParticipantsEnum.PARTICIPANTS_SUM:
+            return "Participants Sum", LOAD_COLOR
+        case _:
+            return sp_type.value, UNKNOWN_COLOR
 
 
 def get_label_and_color_dict(sp_type: EntitiesEnum):
