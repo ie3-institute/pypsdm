@@ -28,45 +28,29 @@ class ParticipantsResult(ResultDict):
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        from_agg_res: bool = False,
     ) -> "ParticipantsResult":
-        if from_agg_res:
-            path = ResultDict.safe_get_path(entity_type, simulation_data_path)
-            if not path:
-                return cls.create_empty(entity_type)
-            agg_res = pd.read_csv(path)
-            agg_res["time"] = pd.to_datetime(agg_res["time"])
-            agg_res = agg_res.set_index("time", drop=True)
-            if "q" not in agg_res.columns:
-                agg_res["q"] = 0
-            agg_pq = PQResult(
-                entity_type, "aggregated_result", "aggregated_result", agg_res
-            )
-            return ParticipantsResult(entity_type, {"aggregated": agg_pq})
-
-        else:
-            participant_grpd_df = ResultDict.get_grpd_df(
-                entity_type,
-                simulation_data_path,
-                delimiter,
-            )
-            if not participant_grpd_df:
-                logging.debug("There are no " + str(cls))
-                return cls.create_empty(entity_type)
-            entities = dict(
-                participant_grpd_df.apply(
-                    lambda grp: PQResult.build(
-                        entity_type,
-                        grp.name,
-                        grp.drop(columns=["input_model"]),
-                        simulation_end,
-                    )
+        participant_grpd_df = ResultDict.get_grpd_df(
+            entity_type,
+            simulation_data_path,
+            delimiter,
+        )
+        if not participant_grpd_df:
+            logging.debug("There are no " + str(cls))
+            return cls.create_empty(entity_type)
+        entities = dict(
+            participant_grpd_df.apply(
+                lambda grp: PQResult.build(
+                    entity_type,
+                    grp.name,
+                    grp.drop(columns=["input_model"]),
+                    simulation_end,
                 )
             )
-            return cls(
-                entity_type,
-                entities,
-            )
+        )
+        return cls(
+            entity_type,
+            entities,
+        )
 
     def to_csv(self, path: str, resample_rate: str = None):
         file_name = self.entity_type.get_csv_result_file_name()
