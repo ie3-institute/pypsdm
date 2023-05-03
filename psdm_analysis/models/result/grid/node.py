@@ -1,17 +1,9 @@
-import logging
 from dataclasses import dataclass
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.io.utils import (
-    check_filter,
-    csv_to_grpd_df,
-    get_file_path,
-    to_date_time,
-)
 from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.participant.dict import ResultDict
@@ -55,46 +47,6 @@ class NodeResult(ResultEntities):
 @dataclass(frozen=True)
 class NodesResult(ResultDict):
     entities: dict[str, NodeResult]
-
-    def uuids(self):
-        return self.entities.keys()
-
-    @classmethod
-    def from_csv(
-        cls,
-        simulation_data_path: str,
-        delimiter: str,
-        simulation_end: datetime,
-        filter_start: Optional[datetime] = None,
-        filter_end: Optional[datetime] = None,
-    ):
-        check_filter(filter_start, filter_end)
-        file_path = get_file_path(simulation_data_path, "node_res.csv")
-        if file_path.exists():
-            node_data = csv_to_grpd_df("node_res.csv", simulation_data_path, delimiter)
-            if not node_data:
-                return cls.create_empty(RawGridElementsEnum.NODE)
-            if not simulation_end:
-                simulation_end = to_date_time(node_data["time"].max().max())
-            res = cls(
-                RawGridElementsEnum.NODE,
-                node_data.apply(
-                    lambda grp: NodeResult.build(
-                        RawGridElementsEnum.NODE,
-                        grp.name,
-                        grp.drop(columns=["input_model"]),
-                        simulation_end,
-                    )
-                ).to_dict(),
-            )
-            return (
-                res
-                if not filter_start
-                else res.filter_for_time_interval(filter_start, filter_end)
-            )
-        else:
-            logging.warning(f"No nodes result in {str(file_path)}")
-            return cls(RawGridElementsEnum.NODE, dict())
 
     @property
     def v_mag(self) -> DataFrame:

@@ -112,7 +112,7 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.storages
         elif sp_type == SystemParticipantsEnum.EV_CHARGING_STATION:
             return self.evcs
-        elif sp_type == SystemParticipantsEnum.HEATP_PUMP:
+        elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
         else:
             raise ValueError(

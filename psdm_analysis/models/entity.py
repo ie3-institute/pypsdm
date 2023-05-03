@@ -4,7 +4,7 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, TypeVar
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -139,6 +139,9 @@ class Entities(ABC):
         return cls(data)
 
 
+ResultType = TypeVar("ResultType", bound="ResultEntities")
+
+
 @dataclass(frozen=True)
 class ResultEntities(ABC):
     # todo: type is a reserved keyword -> rename
@@ -212,7 +215,7 @@ class ResultEntities(ABC):
 
     @classmethod
     # todo: find a way for parallel calculation
-    def sum(cls, results: List["ResultEntities"]) -> "ResultEntities":
+    def sum(cls, results: list[ResultType]) -> ResultType:
         if len(results) == 0:
             return cls.create_empty(SystemParticipantsEnum.PARTICIPANTS_SUM, "", "")
         if len(results) == 1:

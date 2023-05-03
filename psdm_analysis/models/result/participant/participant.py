@@ -1,8 +1,6 @@
-import logging
 import os.path
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Dict
 
 import pandas as pd
@@ -20,37 +18,6 @@ from psdm_analysis.processing.dataframe import join_dataframes
 @dataclass(frozen=True)
 class ParticipantsResult(ResultDict):
     entities: Dict[str, PQResult]
-
-    @classmethod
-    def from_csv(
-        cls,
-        entity_type: SystemParticipantsEnum,
-        simulation_data_path: str,
-        delimiter: str,
-        simulation_end: datetime,
-    ) -> "ParticipantsResult":
-        participant_grpd_df = ResultDict.get_grpd_df(
-            entity_type,
-            simulation_data_path,
-            delimiter,
-        )
-        if not participant_grpd_df:
-            logging.debug("There are no " + str(cls))
-            return cls.create_empty(entity_type)
-        entities = dict(
-            participant_grpd_df.apply(
-                lambda grp: PQResult.build(
-                    entity_type,
-                    grp.name,
-                    grp.drop(columns=["input_model"]),
-                    simulation_end,
-                )
-            )
-        )
-        return cls(
-            entity_type,
-            entities,
-        )
 
     def to_csv(self, path: str, resample_rate: str = None):
         file_name = self.entity_type.get_csv_result_file_name()
@@ -130,42 +97,6 @@ class ParticipantsResult(ResultDict):
 class ParticipantsWithSocResult(ParticipantsResult):
     entity_type: SystemParticipantsEnum
     entities: Dict[str, PQWithSocResult]
-
-    @classmethod
-    def from_csv(
-        cls,
-        sp_type: SystemParticipantsEnum,
-        simulation_data_path: str,
-        delimiter: str,
-        simulation_end: datetime,
-        from_agg_res: bool = False,
-    ) -> "ParticipantsWithSocResult":
-        if from_agg_res:
-            raise ValueError(
-                "Aggregated results do not contain SOC information. Consider reading as `ParticipantsResult`"
-            )
-
-        participant_grpd_df = ResultDict.get_grpd_df(
-            sp_type,
-            simulation_data_path,
-            delimiter,
-        )
-
-        if not participant_grpd_df:
-            logging.debug(f"There are no {sp_type.value} results.")
-            return cls.create_empty(sp_type)
-
-        entities = dict(
-            participant_grpd_df.apply(
-                lambda grp: PQWithSocResult.build(
-                    sp_type,
-                    grp.name,
-                    grp.drop(columns=["input_model"]),
-                    simulation_end,
-                )
-            )
-        )
-        return cls(sp_type, entities)
 
     def sum_with_soc(self, inputs: SystemParticipantsWithCapacity) -> PQWithSocResult:
         if not self.entities:

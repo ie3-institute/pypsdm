@@ -1,9 +1,12 @@
+import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Set
 
 from psdm_analysis.io.utils import check_filter
+from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.node import NodesResult
+from psdm_analysis.models.result.grid.transformer import Transformers2WResult
 from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,
 )
@@ -13,6 +16,7 @@ from psdm_analysis.models.result.participant.participants_res_container import (
 class ResultContainer:
     name: str
     nodes: NodesResult
+    transformers_2w: Transformers2WResult
     participants: ParticipantsResultContainer
 
     def __len__(self):
@@ -29,19 +33,33 @@ class ResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: Optional[datetime] = None,
-        from_agg_results: bool = True,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
         check_filter(filter_start, filter_end)
-        # todo: load async
-        nodes = NodesResult.from_csv(
-            simulation_data_path,
-            delimiter,
-            simulation_end,
-            filter_start=filter_start,
-            filter_end=filter_end,
-        )
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            nodes_future = executor.submit(
+                NodesResult.from_csv,
+                RawGridElementsEnum.NODE,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                filter_start,
+                filter_end,
+            )
+            transformers_2_w_future = executor.submit(
+                Transformers2WResult.from_csv,
+                RawGridElementsEnum.TRANSFORMER_2_W,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                filter_start,
+                filter_end,
+            )
+
+            nodes = nodes_future.result()
+            transformers_2_w = transformers_2_w_future.result()
 
         if simulation_end is None:
             if len(nodes.entities) == 0:
@@ -55,12 +73,11 @@ class ResultContainer:
             simulation_data_path,
             delimiter,
             simulation_end,
-            from_agg_results=from_agg_results,
             filter_start=filter_start,
             filter_end=filter_end,
         )
 
-        return cls(name, nodes, participants)
+        return cls(name, nodes, transformers_2_w, participants)
 
     def uuids(self) -> set[str]:
         return set(self.nodes.entities.keys())

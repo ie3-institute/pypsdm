@@ -2,13 +2,15 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, TypeVar
 
 from pandas.core.groupby import DataFrameGroupBy
 
-from psdm_analysis.io.utils import csv_to_grpd_df, get_file_path
+from psdm_analysis.io.utils import check_filter, csv_to_grpd_df, get_file_path
 from psdm_analysis.models.entity import ResultEntities
-from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.input.enums import EntitiesEnum, EntityType
+
+ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 
 
 @dataclass(frozen=True)
@@ -43,13 +45,52 @@ class ResultDict(ABC):
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
 
+    @classmethod
+    def from_csv(
+        cls,
+        entity_type: EntityType,
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: datetime,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+    ) -> ResultDictType:
+        check_filter(filter_start, filter_end)
+        grpd_df = ResultDict.get_grpd_df(
+            entity_type,
+            simulation_data_path,
+            delimiter,
+        )
+        if not grpd_df:
+            logging.debug("There are no " + str(cls))
+            return cls.create_empty(entity_type)
+        entities = dict(
+            grpd_df.apply(
+                lambda grp: entity_type.get_result_type().build(
+                    entity_type,
+                    grp.name,
+                    grp.drop(columns=["input_model"]),
+                    simulation_end,
+                )
+            )
+        )
+        res = cls(
+            entity_type,
+            entities,
+        )
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)
+        )
+
     @staticmethod
     def get_grpd_df(
-        sp_type: SystemParticipantsEnum,
+        entity_type: EntityType,
         simulation_data_path: str,
         delimiter: str,
     ) -> Optional[DataFrameGroupBy]:
-        file_name = sp_type.get_csv_result_file_name()
+        file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(simulation_data_path, file_name)
 
         if not path.exists():
@@ -63,8 +104,8 @@ class ResultDict(ABC):
         return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
-    def safe_get_path(sp_type: SystemParticipantsEnum, data_path: str) -> Optional[str]:
-        file_name = sp_type.get_csv_result_file_name()
+    def safe_get_path(entity_type: EntityType, data_path: str) -> Optional[str]:
+        file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(data_path, file_name)
         if path.exists():
             return path
@@ -79,6 +120,12 @@ class ResultDict(ABC):
     @classmethod
     def create_empty(cls, sp_type):
         return cls(sp_type, dict())
+
+    def uuids(self):
+        return list(self.entities.keys())
+
+    def results(self):
+        return list(self.entities.values())
 
     # noinspection PyArgumentList
     def subset(self, uuids):

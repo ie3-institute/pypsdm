@@ -65,12 +65,14 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
             return "EV Charging Station", EVCS_COLOR
         case SystemParticipantsEnum.ELECTRIC_VEHICLE:
             return "Electric Vehicle", EVCS_COLOR
-        case SystemParticipantsEnum.HEATP_PUMP:
+        case SystemParticipantsEnum.HEAT_PUMP:
             return "Heat Pump", HP_COLOR
         case SystemParticipantsEnum.ENERGY_MANAGEMENT:
             return "Energy Management", LOAD_COLOR
         case SystemParticipantsEnum.PARTICIPANTS_SUM:
             return "Participants Sum", LOAD_COLOR
+        case SystemParticipantsEnum.PRIMARY_DATA:
+            return "Primary Data", LOAD_COLOR
         case _:
             return sp_type.value, UNKNOWN_COLOR
 

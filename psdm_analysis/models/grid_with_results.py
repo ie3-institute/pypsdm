@@ -11,6 +11,7 @@ from psdm_analysis.models.input.container.participants_container import (
 from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
+from psdm_analysis.models.result.grid.transformer import Transformers2WResult
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
 from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,
@@ -33,7 +34,6 @@ class GridWithResults:
         result_delimiter: str,
         primary_data_delimiter: Optional[str] = None,
         simulation_end: Optional[datetime] = None,
-        from_agg_results: bool = False,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ) -> "GridWithResults":
@@ -54,7 +54,6 @@ class GridWithResults:
             result_path,
             result_delimiter,
             simulation_end,
-            from_agg_results,
             filter_start=filter_start,
             filter_end=filter_end,
         )
@@ -91,6 +90,9 @@ class GridWithResults:
             nodes=NodesResult(
                 RawGridElementsEnum.NODE,
                 {node_uuid: self.results.nodes.entities[node_uuid]},
+            ),
+            transformers_2w=Transformers2WResult.create_empty(
+                RawGridElementsEnum.TRANSFORMER_2_W
             ),
             participants=participants,
         )

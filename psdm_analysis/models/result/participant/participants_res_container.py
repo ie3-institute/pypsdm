@@ -48,7 +48,6 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        from_agg_results: bool = False,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -60,7 +59,6 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
@@ -84,7 +82,7 @@ class ParticipantsResultContainer:
             ems=participant_result_map[SystemParticipantsEnum.ENERGY_MANAGEMENT],
             evcs=participant_result_map[SystemParticipantsEnum.EV_CHARGING_STATION],
             evs=participant_result_map[SystemParticipantsEnum.ELECTRIC_VEHICLE],
-            hps=participant_result_map[SystemParticipantsEnum.HEATP_PUMP],
+            hps=participant_result_map[SystemParticipantsEnum.HEAT_PUMP],
             flex=FlexOptionsResult.from_csv(
                 SystemParticipantsEnum.FLEX_OPTIONS,
                 simulation_data_path,
@@ -103,16 +101,14 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        from_agg_results: bool,
         participant: SystemParticipantsEnum,
     ):
-        if participant.has_soc() and not from_agg_results:
+        if participant.has_soc():
             return ParticipantsWithSocResult.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
             )
         else:
             return ParticipantsResult.from_csv(
@@ -120,7 +116,6 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
             )
 
     def to_list(
@@ -178,7 +173,7 @@ class ParticipantsResultContainer:
             return self.storages
         elif sp_type == SystemParticipantsEnum.EV_CHARGING_STATION:
             return self.evcs
-        elif sp_type == SystemParticipantsEnum.HEATP_PUMP:
+        elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
         else:
             raise ValueError(
