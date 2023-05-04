@@ -6,7 +6,12 @@ from typing import Dict, Optional, TypeVar
 
 from pandas.core.groupby import DataFrameGroupBy
 
-from psdm_analysis.io.utils import check_filter, csv_to_grpd_df, get_file_path
+from psdm_analysis.io.utils import (
+    check_filter,
+    csv_to_grpd_df,
+    get_file_path,
+    to_date_time,
+)
 from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import EntitiesEnum, EntityType
 
@@ -51,7 +56,7 @@ class ResultDict(ABC):
         entity_type: EntityType,
         simulation_data_path: str,
         delimiter: str,
-        simulation_end: datetime,
+        simulation_end: Optional[datetime] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ) -> ResultDictType:
@@ -64,6 +69,8 @@ class ResultDict(ABC):
         if not grpd_df:
             logging.debug("There are no " + str(cls))
             return cls.create_empty(entity_type)
+        if simulation_end is None:
+            simulation_end = to_date_time(grpd_df["time"].max().max())
         entities = dict(
             grpd_df.apply(
                 lambda grp: entity_type.get_result_type().build(

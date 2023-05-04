@@ -17,7 +17,7 @@ class Nodes(Entities):
 
     @staticmethod
     def attributes() -> List[str]:
-        return super().attributes() + [
+        return Entities.attributes() + [
             "v_target",
             "slack",
             "geo_position",
