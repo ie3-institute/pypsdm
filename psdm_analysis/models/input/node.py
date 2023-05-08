@@ -18,6 +18,7 @@ class Nodes(Entities):
     @staticmethod
     def attributes() -> List[str]:
         return Entities.attributes() + [
+            "v_rated",
             "v_target",
             "slack",
             "geo_position",
@@ -46,8 +47,19 @@ class Nodes(Entities):
         return self.data["subnet"]
 
     @property
+    def v_rated(self):
+        return self.data["v_rated"]
+
+    @property
+    def v_target(self):  # in kV
+        return self.data["v_target"]
+
+    @property
     def volt_lvl(self):
         return self.data["volt_lvl"]
 
     def get_slack_nodes(self):
         return Nodes(self.data[self.slack])
+
+    def nodes(self):
+        return self.data.index

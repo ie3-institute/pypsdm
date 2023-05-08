@@ -13,7 +13,7 @@ from psdm_analysis.io.utils import (
     to_date_time,
 )
 from psdm_analysis.models.entity import ResultEntities
-from psdm_analysis.models.input.enums import EntitiesEnum, EntityType
+from psdm_analysis.models.input.enums import EntitiesEnum, EntityEnumType
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 
@@ -30,7 +30,6 @@ class ResultDict(ABC):
         return uuid in self.entities
 
     def __getitem__(self, get):
-        print(get)
         match get:
             case str():
                 return self.entities[get]
@@ -53,7 +52,7 @@ class ResultDict(ABC):
     @classmethod
     def from_csv(
         cls,
-        entity_type: EntityType,
+        entity_type: EntityEnumType,
         simulation_data_path: str,
         delimiter: str,
         simulation_end: Optional[datetime] = None,
@@ -93,7 +92,7 @@ class ResultDict(ABC):
 
     @staticmethod
     def get_grpd_df(
-        entity_type: EntityType,
+        entity_type: EntityEnumType,
         simulation_data_path: str,
         delimiter: str,
     ) -> Optional[DataFrameGroupBy]:
@@ -111,7 +110,7 @@ class ResultDict(ABC):
         return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
-    def safe_get_path(entity_type: EntityType, data_path: str) -> Optional[str]:
+    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[str]:
         file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(data_path, file_name)
         if path.exists():

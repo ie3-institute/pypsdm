@@ -1,11 +1,13 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.result.participant.dict import ResultDict
 
 
@@ -36,12 +38,20 @@ class NodeResult(ResultEntities):
         return NodeResult(RawGridElementsEnum.NODE, name, uuid, data)
 
     @property
-    def v_mag(self) -> Series:
+    def v_mag(self) -> Series:  # in Ampere
         return self.data["v_mag"]
 
     @property
     def v_ang(self) -> Series:
         return self.data["v_ang"]
+
+    def v_complex(self, v_rated_kv_src: Union[float, Nodes]) -> Series:
+        v_rated_kv = (
+            v_rated_kv_src
+            if isinstance(v_rated_kv_src, float)
+            else v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
+        )
+        return (self.v_mag * v_rated_kv) * np.exp(1j * np.radians(self.v_ang))
 
 
 @dataclass(frozen=True)

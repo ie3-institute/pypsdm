@@ -1,80 +1,49 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
+from typing import TYPE_CHECKING, List
 
-import pandas as pd
-from pandas import DataFrame, Series
+from pandas import Series
 
-from psdm_analysis.models.entity import ResultEntities
-from psdm_analysis.models.result.participant.dict import ResultDict
+from psdm_analysis.models.result.grid.connector import ConnectorResult, ConnectorsResult
+
+if TYPE_CHECKING:
+    from psdm_analysis.models.grid_with_results import GridWithResults
 
 
 @dataclass(frozen=True)
-class Transformer2WResult(ResultEntities):
+class Transformer2WResult(ConnectorResult):
     @staticmethod
     def attributes() -> List[str]:
-        return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag", "tap_pos"]
-
-    @property
-    def i_a_ang(self) -> Series:
-        return self.data["i_a_ang"]
-
-    @property
-    def i_a_mag(self) -> Series:
-        return self.data["i_a_mag"]
-
-    @property
-    def i_b_ang(self) -> Series:
-        return self.data["i_b_ang"]
-
-    @property
-    def i_b_mag(self) -> Series:
-        return self.data["i_b_mag"]
+        return ConnectorResult.attributes() + ["tap_pos"]
 
     @property
     def tap_pos(self) -> Series:
         return self.data["tap_pos"]
 
+    def calc_rated_power_gwr(self, gwr: GridWithResults, side="hv", absolute=True):
+        if side == "hv":
+            node = "a"
+        elif side == "lv":
+            node = "b"
+        else:
+            raise ValueError('Side has to be either "hv" or "lv"')
+        transformer = gwr.grid.raw_grid.transformers_2_w.subset(self.input_model)
+        node_uuid = transformer.node_a if side == "hv" else transformer.node_b
+        node_uuid = node_uuid.to_list()[0]
+        v_rated = gwr.grid.raw_grid.nodes.v_rated.loc[node_uuid]
+        node_res = gwr.results.nodes[node_uuid]
+        return self.calc_rated_power(node_res, v_rated, node, absolute)
+
+    def calc_transformer_utilisation(
+        self, gwr: GridWithResults, side="hv", absolute=True
+    ):
+        transformer = gwr.grid.raw_grid.transformers_2_w.subset(self.input_model)
+        # todo: adjust to real prefix
+        s_rated = transformer.s_rated.to_list()[0]
+        return self.calc_rated_power_gwr(gwr, side, absolute) / s_rated
+
 
 @dataclass(frozen=True)
-class Transformers2WResult(ResultDict):
+class Transformers2WResult(ConnectorsResult):
     entities: dict[str, Transformer2WResult]
-
-    @property
-    def i_a_ang(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.i_a_ang.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        )
-
-    @property
-    def i_a_mag(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.i_a_mag.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        )
-
-    @property
-    def i_b_ang(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.i_b_ang.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        )
-
-    @property
-    def i_b_mag(self) -> DataFrame:
-        return pd.concat(
-            [
-                node_res.i_b_mag.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
-            axis=1,
-        )

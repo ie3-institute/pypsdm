@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, TypeVar
+from typing import TYPE_CHECKING, List, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -18,6 +20,11 @@ from psdm_analysis.models.input.enums import (
 )
 from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
 from psdm_analysis.processing.dataframe import filter_data_for_time_interval
+
+if TYPE_CHECKING:
+    from psdm_analysis.models.input.node import Nodes
+
+EntityType = TypeVar("EntityType", bound="Entities")
 
 
 @dataclass(frozen=True)
@@ -138,6 +145,18 @@ class Entities(ABC):
         data = pd.DataFrame(columns=cls.attributes())
         return cls(data)
 
+    def subset(self, uuids: Union[list[str], str]):
+        if isinstance(uuids, str):
+            uuids = [uuids]
+        return type(self)(self.data.loc[uuids])
+
+    @abstractmethod
+    def nodes(self):
+        pass
+
+    def find_nodes(self, nodes: Nodes):
+        return nodes.subset(self.nodes())
+
 
 ResultType = TypeVar("ResultType", bound="ResultEntities")
 
@@ -225,3 +244,8 @@ class ResultEntities(ABC):
         for result in results[1::]:
             agg += result
         return agg
+
+    def find_input_entity(self, input_model: EntityType):
+        if self.type != input_model.get_enum():
+            logging.warning("Input model type does not match result type!")
+        return input_model.subset([self.input_model])

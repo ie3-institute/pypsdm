@@ -9,6 +9,7 @@ from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
 from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticipantsEnum
+from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
@@ -91,6 +92,7 @@ class GridWithResults:
                 RawGridElementsEnum.NODE,
                 {node_uuid: self.results.nodes.entities[node_uuid]},
             ),
+            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
             transformers_2w=Transformers2WResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),
@@ -152,8 +154,6 @@ class GridWithResults:
         ), self.results.participants.find_participant_result(uuid)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
-        nodes_res = self.results.nodes.filter_for_time_interval(start, end)
-        participant_res = self.results.participants.filter_for_time_interval(start, end)
         return GridWithResults(
-            self.grid, ResultContainer(self.results.name, nodes_res, participant_res)
+            self.grid, self.results.filter_for_time_interval(start, end)
         )

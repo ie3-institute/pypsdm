@@ -33,6 +33,7 @@ class EntitiesEnum(Enum):
 
     def get_result_type(self):
         # locally to avoid circular imports
+        from psdm_analysis.models.result.grid.connector import ConnectorResult
         from psdm_analysis.models.result.grid.node import NodeResult
         from psdm_analysis.models.result.grid.transformer import Transformer2WResult
         from psdm_analysis.models.result.power import PQResult, PQWithSocResult
@@ -48,6 +49,8 @@ class EntitiesEnum(Enum):
                     return NodeResult
                 case RawGridElementsEnum.TRANSFORMER_2_W:
                     return Transformer2WResult
+                case RawGridElementsEnum.LINE:
+                    return ConnectorResult
                 case _:
                     raise NotImplementedError(
                         f"Result type {self} not implemented yet!"
@@ -56,7 +59,7 @@ class EntitiesEnum(Enum):
             raise ValueError(f"Entity type {self} not supported!")
 
 
-EntityType = TypeVar("EntityType", bound=EntitiesEnum)
+EntityEnumType = TypeVar("EntityEnumType", bound=EntitiesEnum)
 
 
 class SystemParticipantsEnum(EntitiesEnum):
