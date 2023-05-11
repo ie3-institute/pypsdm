@@ -164,3 +164,17 @@ def add_to_kwargs_if_not_exist(kwargs: Dict, to_add: Dict):
         if key not in kwargs:
             kwargs[key] = value
     return kwargs
+
+
+def ax_plot_secondary_axis(
+    ax: Axes, series: Series, ax_y_label: str, show_secondary_grid_lines: bool = False
+):
+    ax2 = ax.twinx()
+    (line_plot,) = ax2.plot(series)
+    line_plot.set_visible(False)
+    ax2.set_zorder(ax.get_zorder() - 1)
+    ax2.set_ylabel(ax_y_label, labelpad=10)
+    if show_secondary_grid_lines:
+        # Make the background of the original y-axis transparent so the gridlines are visible
+        ax.patch.set_visible(False)
+    return ax2
