@@ -104,7 +104,7 @@ class ResultDict(ABC):
         name = None
         if input_entities is not None:
             if input_model not in input_entities.ids.index:
-                logging.warning(
+                logging.debug(
                     f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
                 )
             else:

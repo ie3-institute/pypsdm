@@ -16,8 +16,8 @@ from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
-from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.utils import (
+from psdm_analysis.plots.common.line_plot import ax_plot_time_series
+from psdm_analysis.plots.common.utils import (
     FIGSIZE,
     FILL_ALPHA,
     LOAD_COLOR,
