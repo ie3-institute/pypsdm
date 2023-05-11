@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 import pandas as pd
@@ -102,6 +103,8 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.ems
         elif sp_type == SystemParticipantsEnum.LOAD:
             return self.loads
+        elif sp_type == SystemParticipantsEnum.BIOMASS_PLANT:
+            return self.biomass_plants
         elif sp_type == SystemParticipantsEnum.FIXED_FEED_IN:
             return self.fixed_feed_ins
         elif sp_type == SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
@@ -112,12 +115,13 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.storages
         elif sp_type == SystemParticipantsEnum.EV_CHARGING_STATION:
             return self.evcs
+        elif sp_type == SystemParticipantsEnum.ELECTRIC_VEHICLE:
+            return self.evs
         elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
         else:
-            raise ValueError(
-                f"No return value for system participant of type: {sp_type}"
-            )
+            logging.error(f"No return value for system participant of type: {sp_type}")
+            return None
 
     def find_participant(self, uuid: str):
         if uuid in self.loads:

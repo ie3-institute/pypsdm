@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Optional, TypeVar
 
+from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 from psdm_analysis.io.utils import (
@@ -12,7 +13,7 @@ from psdm_analysis.io.utils import (
     get_file_path,
     to_date_time,
 )
-from psdm_analysis.models.entity import ResultEntities
+from psdm_analysis.models.entity import Entities, ResultEntities
 from psdm_analysis.models.input.enums import EntitiesEnum, EntityEnumType
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
@@ -56,6 +57,7 @@ class ResultDict(ABC):
         simulation_data_path: str,
         delimiter: str,
         simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ) -> ResultDictType:
@@ -72,11 +74,12 @@ class ResultDict(ABC):
             simulation_end = to_date_time(grpd_df["time"].max().max())
         entities = dict(
             grpd_df.apply(
-                lambda grp: entity_type.get_result_type().build(
+                lambda grp: ResultDict.build_for_entity(
                     entity_type,
                     grp.name,
                     grp.drop(columns=["input_model"]),
                     simulation_end,
+                    input_entities=input_entities,
                 )
             )
         )
@@ -88,6 +91,27 @@ class ResultDict(ABC):
             res
             if not filter_start
             else res.filter_for_time_interval(filter_start, filter_end)
+        )
+
+    @staticmethod
+    def build_for_entity(
+        entity_type: EntityEnumType,
+        input_model: str,
+        data: DataFrame,
+        simulation_end: datetime,
+        input_entities=Optional[Entities],
+    ) -> ResultDictType:
+        name = None
+        if input_entities is not None:
+            if input_model not in input_entities.ids.index:
+                logging.warning(
+                    f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
+                )
+            else:
+                name = input_entities.ids.loc[input_model]
+
+        return entity_type.get_result_type().build(
+            entity_type, input_model, data, simulation_end, name=name
         )
 
     @staticmethod

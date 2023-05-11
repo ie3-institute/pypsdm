@@ -6,7 +6,7 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, List, TypeVar, Union
+from typing import TYPE_CHECKING, List, Optional, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -166,7 +166,7 @@ class ResultEntities(ABC):
     # todo: type is a reserved keyword -> rename
     type: EntitiesEnum
     name: str
-    input_model: str
+    input_model: Optional[str]
     data: DataFrame
 
     def __repr__(self):

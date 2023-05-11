@@ -8,6 +8,7 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
+from psdm_analysis.models.input.container.grid_container import GridContainer
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
@@ -48,6 +49,7 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
+        grid_container: Optional[GridContainer] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -59,6 +61,7 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                grid_container,
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
@@ -101,14 +104,20 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
+        grid_container: Optional[GridContainer],
         participant: SystemParticipantsEnum,
     ):
+        if grid_container:
+            input_entities = grid_container.participants.get_participants(participant)
+        else:
+            input_entities = None
         if participant.has_soc():
             return ParticipantsWithSocResult.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                input_entities,
             )
         else:
             return ParticipantsResult.from_csv(
@@ -116,6 +125,7 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                input_entities=input_entities,
             )
 
     def to_list(

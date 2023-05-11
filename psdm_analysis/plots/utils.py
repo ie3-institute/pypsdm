@@ -32,8 +32,9 @@ LIGHT_BLUE = COLOR_PALETTE[9]
 # === COLOR MATCHING ===
 
 NODE_COLOR = BLUE
+TRANSFORMER_COLOR = BLUE
+LINE_COLOR = BLUE
 LOAD_COLOR = BLUE
-TRANSFORMER_COLOR = RED
 PV_COLOR = GREEN
 BS_COLOR = ORANGE
 HP_COLOR = PURPLE
@@ -58,6 +59,8 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
             return "Node", NODE_COLOR
         case RawGridElementsEnum.TRANSFORMER_2_W:
             return "Transformer", TRANSFORMER_COLOR
+        case RawGridElementsEnum.LINE:
+            return "Line", LINE_COLOR
         case SystemParticipantsEnum.LOAD:
             return "Load", LOAD_COLOR
         case SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:

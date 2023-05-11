@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional, Set
 
 from psdm_analysis.io.utils import check_filter
+from psdm_analysis.models.input.container.grid_container import GridContainer
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.node import NodesResult
@@ -40,6 +41,7 @@ class ResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: Optional[datetime] = None,
+        grid_container: Optional[GridContainer] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -52,6 +54,7 @@ class ResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                grid_container.raw_grid.nodes if grid_container else None,
                 filter_start,
                 filter_end,
             )
@@ -61,6 +64,7 @@ class ResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                grid_container.raw_grid.transformers_2_w if grid_container else None,
                 filter_start,
                 filter_end,
             )
@@ -70,6 +74,7 @@ class ResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
+                grid_container.raw_grid.lines if grid_container else None,
                 filter_start,
                 filter_end,
             )
@@ -90,6 +95,7 @@ class ResultContainer:
             simulation_data_path,
             delimiter,
             simulation_end,
+            grid_container=grid_container,
             filter_start=filter_start,
             filter_end=filter_end,
         )

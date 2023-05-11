@@ -55,6 +55,7 @@ class GridWithResults:
             result_path,
             result_delimiter,
             simulation_end,
+            grid_container=grid,
             filter_start=filter_start,
             filter_end=filter_end,
         )
