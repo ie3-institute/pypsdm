@@ -4,6 +4,10 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
+from typing import Union
+
+import pandas as pd
+from pandas import Series
 
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import to_date_time
@@ -19,6 +23,37 @@ class PrimaryData:
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
 
+    @property
+    def p(self):
+        if not self.time_series.values():
+            return None
+        return (
+            pd.DataFrame({p_uuid: res.p for p_uuid, res in self.time_series.items()})
+            .fillna(method="ffill")
+            .sort_index()
+        )
+
+    def sum(self) -> PQResult:
+        return PQResult.sum(list(self.time_series.values()))
+
+    def p_sum(self) -> Series:
+        if not self.time_series:
+            return Series(dtype=float)
+        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
+
+    @property
+    def q(self):
+        return (
+            pd.DataFrame({p_uuid: res.q for p_uuid, res in self.time_series.items()})
+            .fillna(method="ffill")
+            .sort_index()
+        )
+
+    def q_sum(self):
+        if not self.time_series:
+            return Series(dtype=float)
+        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
+
     def get_for_participant(self, participant: str):
         time_series_id = self.participant_mapping[participant]
         return self.time_series[time_series_id]
@@ -29,6 +64,18 @@ class PrimaryData:
             if participant in self.participant_mapping:
                 time_series.append(self.get_for_participant(participant))
         return time_series
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        """
+        Filters the result by the given datetime or list of datetimes.
+        :param time: the time or list of times to filter by
+        :return: a new result containing only the given time or times
+        """
+        return PrimaryData(
+            self.name,
+            {uuid: result[time] for uuid, result in self.time_series.items()},
+            self.participant_mapping,
+        )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         filtered_time_series = {

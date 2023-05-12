@@ -175,15 +175,37 @@ class ResultEntities(ABC):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, slice_val: slice):
-        if not isinstance(slice_val, slice):
-            raise ValueError("Only slicing is supported!")
-        start, stop, step = slice_val.start, slice_val.stop, slice_val.step
-        if step is not None:
-            logging.warning("Step is not supported for slicing. Ignoring it.")
-        if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-            raise ValueError("Only datetime slicing is supported")
-        return self.filter_for_time_interval(start, stop)
+    def __getitem__(self, where: Union[slice, datetime, list[datetime]]):
+        if isinstance(where, slice):
+            start, stop, step = where.start, where.stop, where.step
+            if step is not None:
+                logging.warning("Step is not supported for slicing. Ignoring it.")
+            if not (isinstance(start, datetime) and isinstance(stop, datetime)):
+                raise ValueError("Only datetime slicing is supported")
+            return self.filter_for_time_interval(start, stop)
+        elif isinstance(where, datetime):
+            filtered, dt = self._get_data_by_datetime(where)
+            data = pd.DataFrame(filtered).T
+            return self.build(self.type, self.input_model, data, dt, self.name)
+        elif isinstance(where, list):
+            filtered = [self._get_data_by_datetime(time)[0] for time in where]
+            data = pd.DataFrame(pd.concat(filtered, axis=1)).T
+            max_dt = sorted(data.index)[-1]
+            return self.build(self.type, self.input_model, data, max_dt, self.name)
+
+    def _get_data_by_datetime(self, dt: datetime) -> (Series, datetime):
+        if dt > self.data.index[-1]:
+            logging.warning(
+                "Trying to access data after last time step. Returning last time step."
+            )
+            return self.data.iloc[-1], self.data.index[-1]
+        if dt < self.data.index[0]:
+            logging.warning(
+                "Trying to access data before first time step. Returning first time step."
+            )
+            return self.data.iloc[0], self.data.index[0]
+        else:
+            return self.data.asof(dt), dt
 
     @staticmethod
     @abstractmethod
@@ -227,6 +249,7 @@ class ResultEntities(ABC):
             data = pd.concat([data, DataFrame(last_state).transpose()])
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
+        data.sort_index(inplace=True)
         return cls(entity_type, name, input_model, data)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):

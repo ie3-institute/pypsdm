@@ -2,7 +2,7 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, TypeVar
+from typing import Dict, Optional, TypeVar, Union
 
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
@@ -165,7 +165,7 @@ class ResultDict(ABC):
 
         return type(self)(self.entity_type, matched_participants)
 
-    def subset_split(self, uuids: [str]):
+    def subset_split(self, uuids: list[str]):
         """
         Returns a results result containing the given uuids and a results result containing the remaining uuids.
         :param uuids: the uuids with which to split the result
@@ -174,6 +174,17 @@ class ResultDict(ABC):
 
         rmd_uuids = self.entities.keys() - uuids
         return self.subset(uuids), self.subset(rmd_uuids)
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        """
+        Filters the result by the given datetime or list of datetimes.
+        :param time: the time or list of times to filter by
+        :return: a new result containing only the given time or times
+        """
+        return type(self)(
+            self.entity_type,
+            {uuid: result[time] for uuid, result in self.entities.items()},
+        )
 
     # noinspection PyArgumentList
     def filter_for_time_interval(self, start: datetime, end: datetime):

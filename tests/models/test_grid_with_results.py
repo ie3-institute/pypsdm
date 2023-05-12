@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import pytest
 
+from psdm_analysis.models.grid_with_results import GridWithResults
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodeResult
 
 
@@ -40,3 +43,11 @@ def test_build_enhanced_nodes_result(gwr, node_uuid):
     )
     actual = enhanced_node_results.entities[node_uuid]
     assert actual.data.equals(expected.data)
+
+
+def test_filter_by_date_time(gwr):
+    dt = datetime(year=2011, month=1, day=1, hour=13, minute=30)
+    filtered = gwr.filter_by_date_time(dt)
+    assert isinstance(filtered, GridWithResults)
+    assert len(list(filtered.grid.primary_data.time_series.values())[0]) == 1
+    assert len(filtered.results.participants.pvs.results()[0]) == 1

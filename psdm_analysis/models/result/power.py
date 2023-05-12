@@ -129,6 +129,9 @@ class PQResult(ResultEntities):
         updated_data = self.data.apply(lambda col: hourly_mean_resample(col), axis=0)
         return PQResult(self.type, self.name, self.input_model, updated_data)
 
+    def complex_power(self):
+        return self.p + 1j * self.q
+
 
 @dataclass(frozen=True)
 class PQWithSocResult(PQResult):

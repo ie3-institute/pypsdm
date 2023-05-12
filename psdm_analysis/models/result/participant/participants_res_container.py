@@ -2,7 +2,7 @@ import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -244,6 +244,20 @@ class ParticipantsResultContainer:
         for participant in self.to_list(include_em=False, include_flex=False):
             participant_res.append(participant.sum())
         return PQResult.sum(participant_res)
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        return ParticipantsResultContainer(
+            self.ems.filter_by_date_time(time),
+            self.loads.filter_by_date_time(time),
+            self.fixed_feed_ins.filter_by_date_time(time),
+            self.pvs.filter_by_date_time(time),
+            self.wecs.filter_by_date_time(time),
+            self.storages.filter_by_date_time(time),
+            self.evcs.filter_by_date_time(time),
+            self.evs.filter_by_date_time(time),
+            self.hps.filter_by_date_time(time),
+            self.flex.filter_by_date_time(time),
+        )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         return ParticipantsResultContainer(

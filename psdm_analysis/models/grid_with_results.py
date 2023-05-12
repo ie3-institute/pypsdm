@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -153,6 +153,11 @@ class GridWithResults:
         return self.grid.participants.find_participant(
             uuid
         ), self.results.participants.find_participant_result(uuid)
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        return GridWithResults(
+            self.grid.filter_by_date_time(time), self.results.filter_by_date_time(time)
+        )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         return GridWithResults(
