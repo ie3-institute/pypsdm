@@ -17,8 +17,10 @@ def grid_plot(grid: GridContainer):
     """
     Plots the grid on an OpenStreetMap. Lines that are disconnected due to open switches will be grey.
 
-    ATTENTION: We currently consider the node_b of the switches to be the auxiliary switch node.
+    ATTENTION:
+    We currently consider the node_b of the switches to be the auxiliary switch node.
     This is not enforced within the PSDM so might not work as expected.
+    If that is the case the wrong lines might be grey.
     """
     fig = go.Figure()
 
