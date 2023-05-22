@@ -70,6 +70,6 @@ class Lines(Connector, HasTypeMixin):
         return self.data["length"] / len(self.data)
 
     def find_lines_by_nodes(self, node_uuids):
-        return self.data[
-            (self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))
-        ]
+        return Lines(
+            self.data[(self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))]
+        )

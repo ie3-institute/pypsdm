@@ -1,11 +1,12 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.node import Nodes
 
 
 @dataclass(frozen=True)
-class SystemParticipants(Entities):
+class SystemParticipants(Entities, ABC):
     @staticmethod
     def attributes():
         return Entities.attributes() + ["node", "q_characteristics"]
@@ -16,13 +17,16 @@ class SystemParticipants(Entities):
     def q_characteristics(self):
         return self.data["q_characteristic"]
 
-    def filter_for_node(self, uuid: str):
-        data = self.data[self.nodes() == str(uuid)]
-        return type(self)(data)
-
-    def subset(self, uuids: [str]):
+    def subset(self, uuids: list[str]):
         data = self.data.loc[self.data.index.intersection(uuids)]
         return type(self)(data)
+
+    def insert_node_id_columns(self, nodes: Nodes) -> None:
+        index_to_id = nodes.ids.to_dict()
+
+        if "node_id" not in self.data.columns:
+            self.data.insert(self.data.columns.get_loc("node") + 1, "node_id", None)
+        self.data["node_id"] = self.nodes().map(index_to_id)
 
 
 @dataclass(frozen=True)

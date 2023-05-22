@@ -17,3 +17,9 @@ class Switches(Connector):
     @property
     def closed(self):
         return self.data["closed"]
+
+    def get_closed(self) -> "Switches":
+        return self.subset(self.data.query("closed == True").index)
+
+    def get_opened(self) -> "Switches":
+        return self.subset(self.data.query("closed == False").index)
