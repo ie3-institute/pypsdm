@@ -6,7 +6,7 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -150,11 +150,19 @@ class Entities(ABC):
             uuids = [uuids]
         return type(self)(self.data.loc[uuids])
 
+    def subset_split(self, uuids: list[str]):
+        rmd = set(self.uuids) - set(uuids)
+        return self.subset(uuids), self.subset(list(rmd))
+
     @abstractmethod
     def nodes(self):
         pass
 
-    def find_nodes(self, nodes: Nodes):
+    def filter_for_node(self, uuid: str):
+        data = self.data[self.nodes() == str(uuid)]
+        return type(self)(data)
+
+    def find_nodes(self, nodes: Nodes) -> Nodes:
         return nodes.subset(self.nodes())
 
 
@@ -193,7 +201,7 @@ class ResultEntities(ABC):
             max_dt = sorted(data.index)[-1]
             return self.build(self.type, self.input_model, data, max_dt, self.name)
 
-    def _get_data_by_datetime(self, dt: datetime) -> (Series, datetime):
+    def _get_data_by_datetime(self, dt: datetime) -> Tuple(Series, datetime):
         if dt > self.data.index[-1]:
             logging.warning(
                 "Trying to access data after last time step. Returning last time step."
