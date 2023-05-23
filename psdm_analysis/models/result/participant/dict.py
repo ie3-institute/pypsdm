@@ -2,7 +2,7 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, TypeVar, Union
+from typing import Dict, Optional, Type, TypeVar, Union
 
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
@@ -52,7 +52,7 @@ class ResultDict(ABC):
 
     @classmethod
     def from_csv(
-        cls,
+        cls: Type[ResultDictType],
         entity_type: EntityEnumType,
         simulation_data_path: str,
         delimiter: str,
