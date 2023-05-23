@@ -173,8 +173,8 @@ ResultType = TypeVar("ResultType", bound="ResultEntities")
 class ResultEntities(ABC):
     # todo: type is a reserved keyword -> rename
     type: EntitiesEnum
-    name: str
-    input_model: Optional[str]
+    input_model: str
+    name: Optional[str]
     data: DataFrame
 
     def __repr__(self):
@@ -199,9 +199,9 @@ class ResultEntities(ABC):
             filtered = [self._get_data_by_datetime(time)[0] for time in where]
             data = pd.DataFrame(pd.concat(filtered, axis=1)).T
             max_dt = sorted(data.index)[-1]
-            return self.build(self.type, self.input_model, data, max_dt, self.name)
+            return self.build(self.type, self.input_model, data, max_dt, name=self.name)
 
-    def _get_data_by_datetime(self, dt: datetime) -> Tuple(Series, datetime):
+    def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
         if dt > self.data.index[-1]:
             logging.warning(
                 "Trying to access data after last time step. Returning last time step."
@@ -240,7 +240,7 @@ class ResultEntities(ABC):
         input_model: str,
         data: DataFrame,
         end: datetime,
-        name: str = "",
+        name: Optional[str] = None,
     ) -> "ResultEntities":
         if data.empty:
             return cls.create_empty(entity_type, name, input_model)
@@ -258,7 +258,7 @@ class ResultEntities(ABC):
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
         data.sort_index(inplace=True)
-        return cls(entity_type, name, input_model, data)
+        return cls(entity_type, input_model, name, data)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         filtered_data = filter_data_for_time_interval(self.data, start, end)
