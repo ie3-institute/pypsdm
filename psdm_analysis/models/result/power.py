@@ -41,7 +41,7 @@ class PQResult(ResultEntities):
     def __mul__(self, other: Union[float, int]):
         if isinstance(other, float) or isinstance(other, int):
             updated_data = self.data * other
-            return PQResult(self.type, self.name, self.input_model, updated_data)
+            return PQResult(self.type, self.input_model, self.name, updated_data)
         else:
             raise ValueError(
                 f"Multiplication with type {type(other)} not or not yet supported"
@@ -127,7 +127,7 @@ class PQResult(ResultEntities):
 
     def hourly_resample(self):
         updated_data = self.data.apply(lambda col: hourly_mean_resample(col), axis=0)
-        return PQResult(self.type, self.name, self.input_model, updated_data)
+        return PQResult(self.type, self.input_model, self.name, updated_data)
 
     def complex_power(self):
         return self.p + 1j * self.q

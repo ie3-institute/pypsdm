@@ -229,9 +229,11 @@ class ResultEntities(ABC):
         )
 
     @classmethod
-    def create_empty(cls, entity_type: EntitiesEnum, name: str, input_model: str):
+    def create_empty(
+        cls, entity_type: EntitiesEnum, name: Optional[str], input_model: str
+    ):
         data = cls.empty_data()
-        return cls(entity_type, name, input_model, data)
+        return cls(entity_type, input_model, name, data)
 
     @classmethod
     def build(

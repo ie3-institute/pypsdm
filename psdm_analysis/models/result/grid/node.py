@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -29,13 +29,13 @@ class NodeResult(ResultEntities):
     # todo: fix me
     @staticmethod
     def build_from_nominal_data(
-        name,
         uuid: str,
+        name: Optional[str],
         data: DataFrame,
         rated_voltage: float,
     ) -> "NodeResult":
         data["v_mag"] = data["v_mag"].divide(rated_voltage)
-        return NodeResult(RawGridElementsEnum.NODE, name, uuid, data)
+        return NodeResult(RawGridElementsEnum.NODE, uuid, name, data)
 
     @property
     def v_mag(self) -> Series:  # in Ampere
