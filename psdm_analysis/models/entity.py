@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import TYPE_CHECKING, List, Optional, Tuple, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -18,6 +20,11 @@ from psdm_analysis.models.input.enums import (
 )
 from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
 from psdm_analysis.processing.dataframe import filter_data_for_time_interval
+
+if TYPE_CHECKING:
+    from psdm_analysis.models.input.node import Nodes
+
+EntityType = TypeVar("EntityType", bound="Entities")
 
 
 @dataclass(frozen=True)
@@ -138,13 +145,36 @@ class Entities(ABC):
         data = pd.DataFrame(columns=cls.attributes())
         return cls(data)
 
+    def subset(self, uuids: Union[list[str], str]):
+        if isinstance(uuids, str):
+            uuids = [uuids]
+        return type(self)(self.data.loc[uuids])
+
+    def subset_split(self, uuids: list[str]):
+        rmd = set(self.uuids) - set(uuids)
+        return self.subset(uuids), self.subset(list(rmd))
+
+    @abstractmethod
+    def nodes(self):
+        pass
+
+    def filter_for_node(self, uuid: str):
+        data = self.data[self.nodes() == str(uuid)]
+        return type(self)(data)
+
+    def find_nodes(self, nodes: Nodes) -> Nodes:
+        return nodes.subset(self.nodes())
+
+
+ResultType = TypeVar("ResultType", bound="ResultEntities")
+
 
 @dataclass(frozen=True)
 class ResultEntities(ABC):
     # todo: type is a reserved keyword -> rename
     type: EntitiesEnum
-    name: str
     input_model: str
+    name: Optional[str]
     data: DataFrame
 
     def __repr__(self):
@@ -153,15 +183,37 @@ class ResultEntities(ABC):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, slice_val: slice):
-        if not isinstance(slice_val, slice):
-            raise ValueError("Only slicing is supported!")
-        start, stop, step = slice_val.start, slice_val.stop, slice_val.step
-        if step is not None:
-            logging.warning("Step is not supported for slicing. Ignoring it.")
-        if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-            raise ValueError("Only datetime slicing is supported")
-        return self.filter_for_time_interval(start, stop)
+    def __getitem__(self, where: Union[slice, datetime, list[datetime]]):
+        if isinstance(where, slice):
+            start, stop, step = where.start, where.stop, where.step
+            if step is not None:
+                logging.warning("Step is not supported for slicing. Ignoring it.")
+            if not (isinstance(start, datetime) and isinstance(stop, datetime)):
+                raise ValueError("Only datetime slicing is supported")
+            return self.filter_for_time_interval(start, stop)
+        elif isinstance(where, datetime):
+            filtered, dt = self._get_data_by_datetime(where)
+            data = pd.DataFrame(filtered).T
+            return self.build(self.type, self.input_model, data, dt, self.name)
+        elif isinstance(where, list):
+            filtered = [self._get_data_by_datetime(time)[0] for time in where]
+            data = pd.DataFrame(pd.concat(filtered, axis=1)).T
+            max_dt = sorted(data.index)[-1]
+            return self.build(self.type, self.input_model, data, max_dt, name=self.name)
+
+    def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
+        if dt > self.data.index[-1]:
+            logging.warning(
+                "Trying to access data after last time step. Returning last time step."
+            )
+            return self.data.iloc[-1], self.data.index[-1]
+        if dt < self.data.index[0]:
+            logging.warning(
+                "Trying to access data before first time step. Returning first time step."
+            )
+            return self.data.iloc[0], self.data.index[0]
+        else:
+            return self.data.asof(dt), dt
 
     @staticmethod
     @abstractmethod
@@ -177,9 +229,11 @@ class ResultEntities(ABC):
         )
 
     @classmethod
-    def create_empty(cls, entity_type: EntitiesEnum, name: str, input_model: str):
+    def create_empty(
+        cls, entity_type: EntitiesEnum, name: Optional[str], input_model: str
+    ):
         data = cls.empty_data()
-        return cls(entity_type, name, input_model, data)
+        return cls(entity_type, input_model, name, data)
 
     @classmethod
     def build(
@@ -188,7 +242,7 @@ class ResultEntities(ABC):
         input_model: str,
         data: DataFrame,
         end: datetime,
-        name: str = "",
+        name: Optional[str] = None,
     ) -> "ResultEntities":
         if data.empty:
             return cls.create_empty(entity_type, name, input_model)
@@ -198,13 +252,15 @@ class ResultEntities(ABC):
                 lambda date_string: to_date_time(date_string)
             )
             data = data.set_index("time", drop=True)
+
         last_state = data.iloc[len(data) - 1]
         if last_state.name != end:
             last_state.name = end
             data = pd.concat([data, DataFrame(last_state).transpose()])
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
-        return cls(entity_type, name, input_model, data)
+        data.sort_index(inplace=True)
+        return cls(entity_type, input_model, name, data)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         filtered_data = filter_data_for_time_interval(self.data, start, end)
@@ -212,7 +268,7 @@ class ResultEntities(ABC):
 
     @classmethod
     # todo: find a way for parallel calculation
-    def sum(cls, results: List["ResultEntities"]) -> "ResultEntities":
+    def sum(cls, results: list[ResultType]) -> ResultType:
         if len(results) == 0:
             return cls.create_empty(SystemParticipantsEnum.PARTICIPANTS_SUM, "", "")
         if len(results) == 1:
@@ -221,3 +277,8 @@ class ResultEntities(ABC):
         for result in results[1::]:
             agg += result
         return agg
+
+    def find_input_entity(self, input_model: EntityType):
+        if self.type != input_model.get_enum():
+            logging.warning("Input model type does not match result type!")
+        return input_model.subset([self.input_model])

@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -9,8 +9,10 @@ from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
 from psdm_analysis.models.input.enums import RawGridElementsEnum, SystemParticipantsEnum
+from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
+from psdm_analysis.models.result.grid.transformer import Transformers2WResult
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
 from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,
@@ -33,7 +35,6 @@ class GridWithResults:
         result_delimiter: str,
         primary_data_delimiter: Optional[str] = None,
         simulation_end: Optional[datetime] = None,
-        from_agg_results: bool = False,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ) -> "GridWithResults":
@@ -54,7 +55,7 @@ class GridWithResults:
             result_path,
             result_delimiter,
             simulation_end,
-            from_agg_results,
+            grid_container=grid,
             filter_start=filter_start,
             filter_end=filter_end,
         )
@@ -91,6 +92,10 @@ class GridWithResults:
             nodes=NodesResult(
                 RawGridElementsEnum.NODE,
                 {node_uuid: self.results.nodes.entities[node_uuid]},
+            ),
+            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
+            transformers_2w=Transformers2WResult.create_empty(
+                RawGridElementsEnum.TRANSFORMER_2_W
             ),
             participants=participants,
         )
@@ -149,9 +154,12 @@ class GridWithResults:
             uuid
         ), self.results.participants.find_participant_result(uuid)
 
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        nodes_res = self.results.nodes.filter_for_time_interval(start, end)
-        participant_res = self.results.participants.filter_for_time_interval(start, end)
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridWithResults(
-            self.grid, ResultContainer(self.results.name, nodes_res, participant_res)
+            self.grid.filter_by_date_time(time), self.results.filter_by_date_time(time)
+        )
+
+    def filter_for_time_interval(self, start: datetime, end: datetime):
+        return GridWithResults(
+            self.grid, self.results.filter_for_time_interval(start, end)
         )

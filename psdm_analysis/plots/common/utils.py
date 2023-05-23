@@ -32,6 +32,8 @@ LIGHT_BLUE = COLOR_PALETTE[9]
 # === COLOR MATCHING ===
 
 NODE_COLOR = BLUE
+TRANSFORMER_COLOR = BLUE
+LINE_COLOR = BLUE
 LOAD_COLOR = BLUE
 PV_COLOR = GREEN
 BS_COLOR = ORANGE
@@ -55,6 +57,10 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
     match sp_type:
         case RawGridElementsEnum.NODE:
             return "Node", NODE_COLOR
+        case RawGridElementsEnum.TRANSFORMER_2_W:
+            return "Transformer", TRANSFORMER_COLOR
+        case RawGridElementsEnum.LINE:
+            return "Line", LINE_COLOR
         case SystemParticipantsEnum.LOAD:
             return "Load", LOAD_COLOR
         case SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
@@ -65,12 +71,14 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
             return "EV Charging Station", EVCS_COLOR
         case SystemParticipantsEnum.ELECTRIC_VEHICLE:
             return "Electric Vehicle", EVCS_COLOR
-        case SystemParticipantsEnum.HEATP_PUMP:
+        case SystemParticipantsEnum.HEAT_PUMP:
             return "Heat Pump", HP_COLOR
         case SystemParticipantsEnum.ENERGY_MANAGEMENT:
             return "Energy Management", LOAD_COLOR
         case SystemParticipantsEnum.PARTICIPANTS_SUM:
             return "Participants Sum", LOAD_COLOR
+        case SystemParticipantsEnum.PRIMARY_DATA:
+            return "Primary Data", LOAD_COLOR
         case _:
             return sp_type.value, UNKNOWN_COLOR
 
@@ -156,3 +164,17 @@ def add_to_kwargs_if_not_exist(kwargs: Dict, to_add: Dict):
         if key not in kwargs:
             kwargs[key] = value
     return kwargs
+
+
+def ax_plot_secondary_axis(
+    ax: Axes, series: Series, ax_y_label: str, show_secondary_grid_lines: bool = False
+):
+    ax2 = ax.twinx()
+    (line_plot,) = ax2.plot(series)
+    line_plot.set_visible(False)
+    ax2.set_zorder(ax.get_zorder() - 1)
+    ax2.set_ylabel(ax_y_label, labelpad=10)
+    if show_secondary_grid_lines:
+        # Make the background of the original y-axis transparent so the gridlines are visible
+        ax.patch.set_visible(False)
+    return ax2

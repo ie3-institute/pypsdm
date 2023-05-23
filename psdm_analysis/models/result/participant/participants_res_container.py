@@ -2,12 +2,13 @@ import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
+from psdm_analysis.models.input.container.grid_container import GridContainer
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
@@ -48,7 +49,7 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        from_agg_results: bool = False,
+        grid_container: Optional[GridContainer] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -60,7 +61,7 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
+                grid_container,
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
@@ -84,7 +85,7 @@ class ParticipantsResultContainer:
             ems=participant_result_map[SystemParticipantsEnum.ENERGY_MANAGEMENT],
             evcs=participant_result_map[SystemParticipantsEnum.EV_CHARGING_STATION],
             evs=participant_result_map[SystemParticipantsEnum.ELECTRIC_VEHICLE],
-            hps=participant_result_map[SystemParticipantsEnum.HEATP_PUMP],
+            hps=participant_result_map[SystemParticipantsEnum.HEAT_PUMP],
             flex=FlexOptionsResult.from_csv(
                 SystemParticipantsEnum.FLEX_OPTIONS,
                 simulation_data_path,
@@ -103,16 +104,20 @@ class ParticipantsResultContainer:
         simulation_data_path: str,
         delimiter: str,
         simulation_end: datetime,
-        from_agg_results: bool,
+        grid_container: Optional[GridContainer],
         participant: SystemParticipantsEnum,
     ):
-        if participant.has_soc() and not from_agg_results:
+        if grid_container:
+            input_entities = grid_container.participants.get_participants(participant)
+        else:
+            input_entities = None
+        if participant.has_soc():
             return ParticipantsWithSocResult.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
+                input_entities,
             )
         else:
             return ParticipantsResult.from_csv(
@@ -120,7 +125,7 @@ class ParticipantsResultContainer:
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                from_agg_results,
+                input_entities=input_entities,
             )
 
     def to_list(
@@ -178,7 +183,7 @@ class ParticipantsResultContainer:
             return self.storages
         elif sp_type == SystemParticipantsEnum.EV_CHARGING_STATION:
             return self.evcs
-        elif sp_type == SystemParticipantsEnum.HEATP_PUMP:
+        elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
         else:
             raise ValueError(
@@ -239,6 +244,20 @@ class ParticipantsResultContainer:
         for participant in self.to_list(include_em=False, include_flex=False):
             participant_res.append(participant.sum())
         return PQResult.sum(participant_res)
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        return ParticipantsResultContainer(
+            self.ems.filter_by_date_time(time),
+            self.loads.filter_by_date_time(time),
+            self.fixed_feed_ins.filter_by_date_time(time),
+            self.pvs.filter_by_date_time(time),
+            self.wecs.filter_by_date_time(time),
+            self.storages.filter_by_date_time(time),
+            self.evcs.filter_by_date_time(time),
+            self.evs.filter_by_date_time(time),
+            self.hps.filter_by_date_time(time),
+            self.flex.filter_by_date_time(time),
+        )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         return ParticipantsResultContainer(

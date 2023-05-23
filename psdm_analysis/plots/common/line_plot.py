@@ -2,7 +2,7 @@ from matplotlib.axes import Axes
 from pandas import Series
 
 from psdm_analysis.models.input.enums import EntitiesEnum
-from psdm_analysis.plots.utils import (
+from psdm_analysis.plots.common.utils import (
     FILL_ALPHA,
     add_to_kwargs_if_not_exist,
     get_label_and_color_dict,

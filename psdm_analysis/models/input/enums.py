@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypeVar
 
 
 class EntitiesEnum(Enum):
@@ -11,7 +12,7 @@ class EntitiesEnum(Enum):
             SystemParticipantsEnum.BIOMASS_PLANT,
             SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
             SystemParticipantsEnum.STORAGE,
-            SystemParticipantsEnum.HEATP_PUMP,
+            SystemParticipantsEnum.HEAT_PUMP,
         }:
             return True
         else:
@@ -30,6 +31,36 @@ class EntitiesEnum(Enum):
     def get_plot_name(self):
         return self.value.replace("_", " ").title()
 
+    def get_result_type(self):
+        # locally to avoid circular imports
+        from psdm_analysis.models.result.grid.connector import ConnectorResult
+        from psdm_analysis.models.result.grid.node import NodeResult
+        from psdm_analysis.models.result.grid.transformer import Transformer2WResult
+        from psdm_analysis.models.result.power import PQResult, PQWithSocResult
+
+        if isinstance(self, SystemParticipantsEnum):
+            if self.has_soc():
+                return PQWithSocResult
+            else:
+                return PQResult
+        elif isinstance(self, RawGridElementsEnum):
+            match self:
+                case RawGridElementsEnum.NODE:
+                    return NodeResult
+                case RawGridElementsEnum.TRANSFORMER_2_W:
+                    return Transformer2WResult
+                case RawGridElementsEnum.LINE:
+                    return ConnectorResult
+                case _:
+                    raise NotImplementedError(
+                        f"Result type {self} not implemented yet!"
+                    )
+        else:
+            raise ValueError(f"Entity type {self} not supported!")
+
+
+EntityEnumType = TypeVar("EntityEnumType", bound=EntitiesEnum)
+
 
 class SystemParticipantsEnum(EntitiesEnum):
     BIOMASS_PLANT = "bm"
@@ -42,7 +73,7 @@ class SystemParticipantsEnum(EntitiesEnum):
     WIND_ENERGY_CONVERTER = "wec"
     STORAGE = "storage"
     ENERGY_MANAGEMENT = "em"
-    HEATP_PUMP = "hp"
+    HEAT_PUMP = "hp"
     FLEX_OPTIONS = "flex_options"
     PRIMARY_DATA = "primary_data"
     PARTICIPANTS_SUM = "participants_sum"

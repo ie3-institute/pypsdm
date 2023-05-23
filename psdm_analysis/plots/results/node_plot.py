@@ -5,8 +5,8 @@ import seaborn as sns
 from matplotlib.axes import Axes
 
 from psdm_analysis.models.result.grid.node import NodeResult
-from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.utils import FIGSIZE, set_title
+from psdm_analysis.plots.common.line_plot import ax_plot_time_series
+from psdm_analysis.plots.common.utils import FIGSIZE, set_title
 
 sns.set_style("whitegrid")
 

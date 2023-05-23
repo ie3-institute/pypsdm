@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict
+from datetime import datetime
+from typing import Dict, Union
 
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
@@ -91,3 +92,11 @@ class GridContainer(ContainerMixin):
                 nodal_data[sp_id] = data_str
             data[node_uuid] = nodal_data
         return data
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        return GridContainer(
+            raw_grid=self.raw_grid,
+            participants=self.participants,
+            primary_data=self.primary_data.filter_by_date_time(time),
+            node_participants_map=self.node_participants_map,
+        )

@@ -9,7 +9,7 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 class HeatPumps(SystemParticipants, SpTypeMixin):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
-        return SystemParticipantsEnum.HEATP_PUMP
+        return SystemParticipantsEnum.HEAT_PUMP
 
     @property
     def thermal_bus(self):

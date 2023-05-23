@@ -3,30 +3,18 @@ from typing import List
 
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.container.mixins import HasTypeMixin
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
-class Lines(Entities, HasTypeMixin):
+class Lines(Connector, HasTypeMixin):
     data: DataFrame
 
     @staticmethod
     def get_enum() -> RawGridElementsEnum:
         return RawGridElementsEnum.LINE
-
-    @property
-    def node_a(self) -> Series:
-        return self.data["node_a"]
-
-    @property
-    def node_b(self) -> Series:
-        return self.data["node_b"]
-
-    @property
-    def parallel_devices(self) -> Series:
-        return self.data["parallel_devices"]
 
     @property
     def length(self) -> Series:
@@ -82,6 +70,6 @@ class Lines(Entities, HasTypeMixin):
         return self.data["length"] / len(self.data)
 
     def find_lines_by_nodes(self, node_uuids):
-        return self.data[
-            (self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))
-        ]
+        return Lines(
+            self.data[(self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))]
+        )

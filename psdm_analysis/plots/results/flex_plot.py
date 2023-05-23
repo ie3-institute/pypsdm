@@ -9,9 +9,8 @@ from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult
-from psdm_analysis.plots.results.line_plot import ax_plot_time_series
-from psdm_analysis.plots.results.power_plot import ax_plot_active_power
-from psdm_analysis.plots.utils import (
+from psdm_analysis.plots.common.line_plot import ax_plot_time_series
+from psdm_analysis.plots.common.utils import (
     FIGSIZE,
     FLEX_MAX,
     FLEX_MIN,
@@ -20,6 +19,7 @@ from psdm_analysis.plots.utils import (
     set_style,
     set_title,
 )
+from psdm_analysis.plots.results.power_plot import ax_plot_active_power
 
 set_style()
 

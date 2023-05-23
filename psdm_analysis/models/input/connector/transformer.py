@@ -2,26 +2,14 @@ from dataclasses import dataclass
 
 from pandas import DataFrame
 
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.container.mixins import HasTypeMixin
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
-class Transformers2W(Entities, HasTypeMixin):
+class Transformers2W(Connector, HasTypeMixin):
     data: DataFrame
-
-    @property
-    def node_a(self):
-        return self.data["node_a"]
-
-    @property
-    def node_b(self):
-        return self.data["node_b"]
-
-    @property
-    def parallel_devices(self):
-        return self.data["parallel_devices"]
 
     @property
     def type_id(self):
