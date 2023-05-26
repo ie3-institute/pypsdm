@@ -59,7 +59,9 @@ class NodesResult(ResultDict):
     entities: dict[str, NodeResult]
 
     @property
-    def v_mag(self) -> DataFrame:
+    def v_mag(self) -> Optional[DataFrame]:
+        if not self.entities:
+            return None
         return pd.concat(
             [
                 node_res.v_mag.rename(node_res.input_model)
@@ -69,7 +71,9 @@ class NodesResult(ResultDict):
         )
 
     @property
-    def v_ang(self) -> DataFrame:
+    def v_ang(self) -> Optional[DataFrame]:
+        if not self.entities:
+            return None
         return pd.concat(
             [
                 node_res.v_ang.rename(node_res.input_model)

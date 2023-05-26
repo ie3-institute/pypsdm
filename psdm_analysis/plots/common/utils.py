@@ -101,6 +101,7 @@ TITLE_FONT_SIZE = 14
 # === SPACING ===
 
 TITLE_PAD = 15
+LABEL_PAD = 10
 
 # === SHADING ===
 
@@ -147,6 +148,21 @@ def _date_format_and_x_label(resolution: str):
 
 def set_title(ax: Axes, title: str):
     ax.set_title(title, pad=TITLE_PAD, fontsize=TITLE_FONT_SIZE)
+
+
+def set_subplot_title(ax: Axes, title: str):
+    ax.set_title(title, pad=TITLE_PAD)
+
+
+def set_ylabel(ax: Axes, ylabel: str):
+    ax.set_ylabel(ylabel, labelpad=LABEL_PAD)
+
+
+def set_xlabels_rotated(
+    ax: Axes, labels: list[str], rotation: int = 45, ha: str = "center"
+):
+    ax.set_xticks(range(1, len(labels) + 1))
+    ax.set_xticklabels(labels, rotation=rotation, ha=ha)
 
 
 def legend_with_distinct_labels(ax: Axes):

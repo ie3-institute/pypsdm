@@ -1,7 +1,7 @@
 import os.path
 import uuid
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -52,7 +52,7 @@ class ParticipantsResult(ResultDict):
         )
 
     @property
-    def p(self):
+    def p(self) -> Optional[DataFrame]:
         if not self.entities.values():
             return None
         return (
@@ -70,7 +70,9 @@ class ParticipantsResult(ResultDict):
         return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
 
     @property
-    def q(self):
+    def q(self) -> Optional[DataFrame]:
+        if not self.entities.values():
+            return None
         return (
             pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
             .fillna(method="ffill")

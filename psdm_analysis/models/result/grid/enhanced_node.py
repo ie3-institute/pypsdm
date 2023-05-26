@@ -5,6 +5,7 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
+from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
@@ -20,15 +21,13 @@ class EnhancedNodeResult(NodeResult):
 
     @classmethod
     def from_node_result(
-        cls, node_res: NodeResult, p: Series, q: Series = None
+        cls, node_res: NodeResult, pq: PQResult
     ) -> "EnhancedNodeResult":
         return cls(
             RawGridElementsEnum.NODE,
-            node_res.name,
             node_res.input_model,
-            pd.concat(
-                [node_res.data, p.rename("p"), q.rename("q")], axis=1
-            ).sort_index(),
+            node_res.name,
+            pd.concat([node_res.data, pq.data], axis=1).sort_index(),
         )
 
     @property
@@ -46,12 +45,12 @@ class EnhancedNodesResult(NodesResult):
 
     @classmethod
     def from_nodes_result(
-        cls, nodes_result: NodesResult, ps: dict[str, Series], qs: dict[str, Series]
+        cls, nodes_result: NodesResult, nodal_pq: dict[str, PQResult]
     ):
         return cls(
             RawGridElementsEnum.NODE,
             {
-                uuid: EnhancedNodeResult.from_node_result(result, ps[uuid], qs[uuid])
+                uuid: EnhancedNodeResult.from_node_result(result, nodal_pq[uuid])
                 for uuid, result in nodes_result.entities.items()
             },
         )

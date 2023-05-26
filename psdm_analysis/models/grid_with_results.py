@@ -1,4 +1,6 @@
+import concurrent
 import logging
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple, Union
@@ -143,11 +145,25 @@ class GridWithResults:
         ]
 
     def build_enhanced_nodes_result(self):
-        ps, qs = {}, {}
-        for uuid, nodal_result in self.nodal_results().items():
-            ps[uuid] = nodal_result.participants.p_sum()
-            qs[uuid] = nodal_result.participants.q_sum()
-        return EnhancedNodesResult.from_nodes_result(self.results.nodes, ps, qs)
+        nodal_results = self.nodal_results()
+
+        with ProcessPoolExecutor() as executor:
+            futures = {
+                executor.submit(self.calc_pq, uuid, nodal_result)
+                for uuid, nodal_result in nodal_results.items()
+            }
+
+            nodal_pq = {}
+            for future in concurrent.futures.as_completed(futures):
+                uuid, pq = future.result()
+                nodal_pq[uuid] = pq
+
+        return EnhancedNodesResult.from_nodes_result(self.results.nodes, nodal_pq)
+
+    @staticmethod
+    def calc_pq(uuid, nodal_result: ResultContainer):
+        pq = nodal_result.participants.sum()
+        return uuid, pq
 
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
