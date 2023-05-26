@@ -19,6 +19,7 @@ pyarrow = "^11.0.0"
 openpyxl = "^3.1.2"
 python-dotenv = "^1.0.0" # Can probably be removed in the future
 shapely = "^2.0.1"
+networkx = "^3.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
