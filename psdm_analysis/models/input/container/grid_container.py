@@ -103,10 +103,8 @@ class RawGridContainer(ContainerMixin):
         )
 
         graph.add_nodes_from(self.nodes.uuids)
-        graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b))
-        graph.add_edges_from(
-            zip(closed_switches.node_a, closed_switches.node_b, line_data_dicts)
-        )
+        graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
+        graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
         return graph
 
 
