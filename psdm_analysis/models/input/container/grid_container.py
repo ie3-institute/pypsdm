@@ -46,6 +46,8 @@ class RawGridContainer(ContainerMixin):
         Returns all branches, branching off from the slack node of the grid.
         The branches are returned as a list of lists, where each list contains the node uuids of the branch,
         starting at the slack node.
+
+        Currently only works for single slack node and single voltage level grids.
         """
 
         slack_node = self.nodes.get_slack_nodes()
