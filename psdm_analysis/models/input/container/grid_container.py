@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Union
 
+from networkx import Graph
+
 from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.switches import Switches
@@ -38,6 +40,74 @@ class RawGridContainer(ContainerMixin):
             transformers_2_w=transformers_2_w,
             switches=switches,
         )
+
+    def get_branches(self) -> list[list[str]]:
+        """
+        Returns all branches, branching off from the slack node of the grid.
+        The branches are returned as a list of lists, where each list contains the node uuids of the branch,
+        starting at the slack node.
+
+        Currently only works for single slack node and single voltage level grids.
+        """
+
+        slack_node = self.nodes.get_slack_nodes()
+        if len(slack_node.data) != 1:
+            raise ValueError("Currently only implemented for singular slack nodes.")
+        transformers = self.transformers_2_w
+        slack_transformers = Transformers2W(
+            transformers.data[
+                (transformers.node_a.isin(slack_node.uuids.to_list()))
+                | (transformers.node_b.isin(slack_node.uuids.to_list()))
+            ]
+        )
+        slack_connected_node = (
+            set(slack_transformers.node_a)
+            .union(slack_transformers.node_b)
+            .difference(slack_node.uuids)
+        )
+        if len(slack_connected_node) > 1:
+            raise ValueError(
+                "There are multiple nodes connected to the slack node via a transformer."
+            )
+        elif len(slack_connected_node) == 0:
+            raise ValueError("Did not find a slack node!")
+        return self._find_branches(
+            self.build_networkx_graph(), slack_connected_node.pop()
+        )
+
+    @staticmethod
+    def _find_branches(G: Graph, start_node):
+        visited = set()
+        visited.add(start_node)
+        branches = []
+
+        def dfs(node, path):
+            visited.add(node)
+            path.append(node)
+
+            for neighbor in G.neighbors(node):
+                if neighbor not in visited:
+                    dfs(neighbor, path)
+
+        for neighbor in G.neighbors(start_node):
+            if neighbor not in visited:
+                path = []
+                dfs(neighbor, path)
+                branches.append(path)
+
+        return branches
+
+    def build_networkx_graph(self) -> Graph:
+        graph = Graph()
+        closed_switches = self.switches.get_closed()
+        line_data_dicts = self.lines.data.apply(
+            lambda row: {"length": row["length"]}, axis=1
+        )
+
+        graph.add_nodes_from(self.nodes.uuids)
+        graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
+        graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
+        return graph
 
 
 @dataclass(frozen=True)

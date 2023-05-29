@@ -195,3 +195,6 @@ class ResultDict(ABC):
                 for uuid, result in self.entities.items()
             },
         )
+
+    def uuid_to_id_map(self) -> dict[str, Optional[str]]:
+        return {uuid: result.name for uuid, result in self.entities.items()}

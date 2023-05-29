@@ -36,10 +36,8 @@ def test_build_enhanced_nodes_result(gwr, node_uuid):
     enhanced_node_results = gwr.build_enhanced_nodes_result()
     assert len(enhanced_node_results) == 299
     node_res = gwr.nodal_result(node_uuid)
-    p = node_res.participants.sum().p
-    q = node_res.participants.sum().q
     expected = EnhancedNodeResult.from_node_result(
-        node_res.nodes.entities[node_uuid], p, q
+        node_res.nodes.entities[node_uuid], node_res.participants.sum()
     )
     actual = enhanced_node_results.entities[node_uuid]
     assert actual.data.equals(expected.data)
