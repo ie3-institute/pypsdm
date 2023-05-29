@@ -41,7 +41,7 @@ class RawGridContainer(ContainerMixin):
             switches=switches,
         )
 
-    def get_branches(self) -> list[str]:
+    def get_branches(self) -> list[list[str]]:
         """
         Returns all branches, branching off from the slack node of the grid.
         The branches are returned as a list of lists, where each list contains the node uuids of the branch,

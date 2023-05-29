@@ -1,5 +1,5 @@
-import datetime
 import math
+from datetime import datetime
 from typing import Optional, Union
 
 import matplotlib.pyplot as plt
