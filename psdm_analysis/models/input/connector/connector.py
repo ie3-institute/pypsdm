@@ -9,6 +9,10 @@ from psdm_analysis.models.input.node import Nodes
 
 @dataclass(frozen=True)
 class Connector(Entities, ABC):
+    @staticmethod
+    def attributes() -> list[str]:
+        return Entities.attributes() + ["node_a", "node_b", "parallel_devices"]
+
     @property
     def node_a(self):
         return self.data["node_a"]

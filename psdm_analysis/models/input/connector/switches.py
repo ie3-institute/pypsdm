@@ -11,6 +11,10 @@ class Switches(Connector):
     data: DataFrame
 
     @staticmethod
+    def attributes() -> list[str]:
+        return Connector.attributes() + ["closed"]
+
+    @staticmethod
     def get_enum() -> EntitiesEnum:
         return RawGridElementsEnum.SWITCH
 
