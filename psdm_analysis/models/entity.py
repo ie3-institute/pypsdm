@@ -40,7 +40,7 @@ class Entities(ABC):
     def __contains__(self, uuid: str):
         return uuid in self.data.index
 
-    def __add__(self, other: Entities):
+    def __add__(self: EntityType, other: EntityType) -> EntityType:
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
         if columns_diff:
             raise ValueError(
