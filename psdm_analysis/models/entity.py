@@ -34,20 +34,61 @@ class Entities(ABC):
     def __len__(self):
         return len(self.data)
 
+    def __repr__(self):
+        return self.data
+
     def __contains__(self, uuid: str):
         return uuid in self.data.index
+
+    @property
+    def uuids(self):
+        return self.data.index
+
+    @property
+    def ids(self):
+        return self.data["id"]
+
+    @property
+    def operates_from(self):
+        return self.data["operates_from"]
+
+    @property
+    def operates_until(self):
+        return self.data["operates_until"]
+
+    @property
+    def operator(self):
+        return self.data["operator"]
+
+    @abstractmethod
+    def nodes(self):
+        pass
+
+    def get(self, uuid: str) -> Series:
+        return self.data.loc[uuid]
+
+    def subset(self, uuids: Union[list[str], str]):
+        if isinstance(uuids, str):
+            uuids = [uuids]
+        return type(self)(self.data.loc[uuids])
+
+    def subset_split(self, uuids: list[str]):
+        rmd = set(self.uuids) - set(uuids)
+        return self.subset(uuids), self.subset(list(rmd))
+
+    def filter_for_node(self, uuid: str):
+        data = self.data[self.nodes() == str(uuid)]
+        return type(self)(data)
+
+    def find_nodes(self, nodes: Nodes) -> Nodes:
+        return nodes.subset(self.nodes())
+
+    def to_csv(self, path: str, delimiter: str = ","):
+        df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
 
     @classmethod
     def from_csv(cls, path: str, delimiter: str):
         return cls._from_csv(path, delimiter, cls.get_enum())
-
-    @staticmethod
-    @abstractmethod
-    def get_enum() -> EntitiesEnum:
-        pass
-
-    def to_csv(self, path: str, delimiter: str = ","):
-        df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
 
     @classmethod
     def _from_csv(cls, path: str, delimiter: str, entity: EntitiesEnum):
@@ -105,31 +146,15 @@ class Entities(ABC):
                 "Column 'uuid' not found. This might be due to wrong csv delimiter!", e
             )
 
-    @property
-    def uuids(self):
-        return self.data.index
+    @classmethod
+    def create_empty(cls):
+        data = pd.DataFrame(columns=cls.attributes())
+        return cls(data)
 
-    @property
-    def ids(self):
-        return self.data["id"]
-
-    @property
-    def operates_from(self):
-        return self.data["operates_from"]
-
-    @property
-    def operates_until(self):
-        return self.data["operates_until"]
-
-    @property
-    def operator(self):
-        return self.data["operator"]
-
-    def __repr__(self):
-        return self.data
-
-    def get(self, uuid: str) -> Series:
-        return self.data.loc[uuid]
+    @staticmethod
+    @abstractmethod
+    def get_enum() -> EntitiesEnum:
+        pass
 
     @staticmethod
     def attributes() -> List[str]:
@@ -139,31 +164,6 @@ class Entities(ABC):
         :return:
         """
         return ["uuid", "id", "operates_from", "operates_until", "operator"]
-
-    @classmethod
-    def create_empty(cls):
-        data = pd.DataFrame(columns=cls.attributes())
-        return cls(data)
-
-    def subset(self, uuids: Union[list[str], str]):
-        if isinstance(uuids, str):
-            uuids = [uuids]
-        return type(self)(self.data.loc[uuids])
-
-    def subset_split(self, uuids: list[str]):
-        rmd = set(self.uuids) - set(uuids)
-        return self.subset(uuids), self.subset(list(rmd))
-
-    @abstractmethod
-    def nodes(self):
-        pass
-
-    def filter_for_node(self, uuid: str):
-        data = self.data[self.nodes() == str(uuid)]
-        return type(self)(data)
-
-    def find_nodes(self, nodes: Nodes) -> Nodes:
-        return nodes.subset(self.nodes())
 
 
 ResultType = TypeVar("ResultType", bound="ResultEntities")
