@@ -40,6 +40,30 @@ class Entities(ABC):
     def __contains__(self, uuid: str):
         return uuid in self.data.index
 
+    def __add__(self, other: Entities):
+        columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
+        if columns_diff:
+            raise ValueError(
+                f"Columns of the dataframes are not the same: {columns_diff}"
+            )
+        else:
+            return type(self)(pd.concat([self.data, other.data]))
+
+    def __sub__(self, other: Union[Entities, List[str]]):
+        if isinstance(other, Entities):
+            indices_to_remove = other.data.index
+        elif isinstance(other, list) and all(isinstance(index, str) for index in other):
+            indices_to_remove = other
+        else:
+            raise TypeError("other must be an Entities instance or a list of strings")
+
+        if not set(indices_to_remove).issubset(self.data.index):
+            raise ValueError(
+                f"All indices to remove must exist in the current Entities instance: {set(indices_to_remove) - set(self.data.index)}"
+            )
+
+        return type(self)(self.data.drop(indices_to_remove))
+
     @property
     def uuids(self):
         return self.data.index
