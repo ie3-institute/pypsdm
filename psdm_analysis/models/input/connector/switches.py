@@ -1,15 +1,11 @@
 from dataclasses import dataclass
 
-from pandas import DataFrame
-
 from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.enums import EntitiesEnum, RawGridElementsEnum
 
 
 @dataclass(frozen=True)
 class Switches(Connector):
-    data: DataFrame
-
     @staticmethod
     def attributes() -> list[str]:
         return Connector.attributes() + ["closed"]
