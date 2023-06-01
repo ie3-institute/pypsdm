@@ -41,6 +41,15 @@ class Entities(ABC):
         return uuid in self.data.index
 
     def __add__(self: EntityType, other: EntityType) -> EntityType:
+        """
+        Concatenates two Entities instances.
+
+        Args:
+            other: The other Entities instance to concatenate with.
+
+        Returns:
+            The concatenated Entities instance.
+        """
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
         if columns_diff:
             raise ValueError(
@@ -49,7 +58,16 @@ class Entities(ABC):
         else:
             return type(self)(pd.concat([self.data, other.data]))
 
-    def __sub__(self, other: Union[Entities, List[str]]):
+    def __sub__(self: EntityType, other: Union[EntityType, List[str]]) -> EntityType:
+        """
+        Subtacts the entities with the given uuids from the Entities instance.
+
+        Args:
+            other: The other Entities instance or a list of uuids to subtract.
+
+        Returns:
+            A new Entities instance with the uuids removed.
+        """
         if isinstance(other, Entities):
             indices_to_remove = other.data.index
         elif isinstance(other, list) and all(isinstance(index, str) for index in other):
