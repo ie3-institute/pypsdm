@@ -22,6 +22,8 @@ class Nodes(Entities):
             "v_target",
             "slack",
             "geo_position",
+            "longitude",
+            "latitude",
             "volt_lvl",
             "subnet",
         ]

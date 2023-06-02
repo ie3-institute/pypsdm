@@ -64,19 +64,28 @@ class Lines(Connector, HasTypeMixin):
         """
         return self.data["length"] / len(self.data)
 
-    def find_lines_by_nodes(self, node_uuids: list[str]) -> "Lines":
+    def find_lines_by_nodes(
+        self, node_uuids: list[str], both_in_nodes=False
+    ) -> "Lines":
         """
         Returns all lines that are connected to any of the given nodes.
 
         Args:
             node_uuids: List of node uuids to find lines for.
+            both_in_nodes: If True, both nodes of the line must be in the given list of nodes.
 
         Returns:
             Lines: Lines that are connected to any of the given nodes.
         """
-        return Lines(
-            self.data[(self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))]
-        )
+        if both_in_nodes:
+            data = self.data[
+                (self.node_a.isin(node_uuids)) & (self.node_b.isin(node_uuids))
+            ]
+        else:
+            data = self.data[
+                (self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))
+            ]
+        return Lines(data)
 
     def find_line_by_node_pair(self, node_a_uuid: str, node_b_uuid: str) -> "Lines":
         """
