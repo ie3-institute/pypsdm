@@ -24,8 +24,10 @@ def grid_plot(
 
     Args:
         grid (GridContainer): Grid to plot.
-        node_highlights (Optional): Highlights nodes. Defaults to None. List of uuids or dict[(r, g, b), str] with colors.
-        line_highlights (Optional): Highlights lines. Defaults to None. List of uuids or dict[(r, g, b), str] with colors.
+        node_highlights (Optional): Highlights nodes. Defaults to None.
+                                    List of uuids or dict[(r, g, b), str] with colors.
+        line_highlights (Optional): Highlights lines. Defaults to None.
+                                    List of uuids or dict[(r, g, b), str] with colors.
     Returns:
         Figure: Plotly figure.
     """
