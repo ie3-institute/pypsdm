@@ -50,10 +50,14 @@ class Entities(ABC):
         Returns:
             The concatenated Entities instance.
         """
+
+        if not isinstance(other, type(self)):
+            raise TypeError("The two Entities instances must be of the same type")
+
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
-        if columns_diff:
-            raise ValueError(
-                f"Columns of the dataframes are not the same: {columns_diff}"
+        if not columns_diff.issubset(self.attributes()):
+            logging.warning(
+                "The two Entities instances have different columns: %s", columns_diff
             )
         else:
             return type(self)(pd.concat([self.data, other.data]))
@@ -68,6 +72,10 @@ class Entities(ABC):
         Returns:
             A new Entities instance with the uuids removed.
         """
+
+        if not isinstance(other, type(self)):
+            raise TypeError("The two Entities instances must be of the same type")
+
         if isinstance(other, Entities):
             indices_to_remove = other.data.index
         elif isinstance(other, list) and all(isinstance(index, str) for index in other):
