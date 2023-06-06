@@ -4,7 +4,6 @@ from typing import Dict, Union
 
 from networkx import Graph
 
-from psdm_analysis.models.entity import Entities
 from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.switches import Switches
 from psdm_analysis.models.input.connector.transformer import Transformers2W
@@ -12,6 +11,7 @@ from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.container.participants_container import (
     SystemParticipantsContainer,
 )
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.primary_data import PrimaryData
 from psdm_analysis.models.result.power import PQResult
@@ -27,19 +27,6 @@ class RawGridContainer(ContainerMixin):
     def to_list(self, include_empty: bool = False) -> list[Entities]:
         grid_elements = [self.nodes, self.lines, self.transformers_2_w, self.switches]
         return grid_elements if include_empty else [e for e in grid_elements if e]
-
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "RawGridContainer":
-        nodes = Nodes.from_csv(path, delimiter)
-        lines = Lines.from_csv(path, delimiter)
-        transformers_2_w = Transformers2W.from_csv(path, delimiter)
-        switches = Switches.from_csv(path, delimiter)
-        return cls(
-            nodes=nodes,
-            lines=lines,
-            transformers_2_w=transformers_2_w,
-            switches=switches,
-        )
 
     def get_branches(self) -> list[list[str]]:
         """
@@ -76,6 +63,18 @@ class RawGridContainer(ContainerMixin):
         )
         return [[slack_node.uuid[0]] + branch for branch in branches]
 
+    def build_networkx_graph(self) -> Graph:
+        graph = Graph()
+        closed_switches = self.switches.get_closed()
+        line_data_dicts = self.lines.data.apply(
+            lambda row: {"length": row["length"]}, axis=1
+        )
+
+        graph.add_nodes_from(self.nodes.uuid)
+        graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
+        graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
+        return graph
+
     @staticmethod
     def _find_branches(G: Graph, start_node):
         visited = set()
@@ -98,17 +97,18 @@ class RawGridContainer(ContainerMixin):
 
         return branches
 
-    def build_networkx_graph(self) -> Graph:
-        graph = Graph()
-        closed_switches = self.switches.get_closed()
-        line_data_dicts = self.lines.data.apply(
-            lambda row: {"length": row["length"]}, axis=1
+    @classmethod
+    def from_csv(cls, path: str, delimiter: str) -> "RawGridContainer":
+        nodes = Nodes.from_csv(path, delimiter)
+        lines = Lines.from_csv(path, delimiter)
+        transformers_2_w = Transformers2W.from_csv(path, delimiter)
+        switches = Switches.from_csv(path, delimiter)
+        return cls(
+            nodes=nodes,
+            lines=lines,
+            transformers_2_w=transformers_2_w,
+            switches=switches,
         )
-
-        graph.add_nodes_from(self.nodes.uuid)
-        graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
-        graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
-        return graph
 
 
 @dataclass(frozen=True)
@@ -118,18 +118,6 @@ class GridContainer(ContainerMixin):
     participants: SystemParticipantsContainer
     primary_data: PrimaryData
     node_participants_map: Dict[str, SystemParticipantsContainer]
-
-    @classmethod
-    def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
-        if not primary_data_delimiter:
-            primary_data_delimiter = delimiter
-        raw_grid = RawGridContainer.from_csv(path, delimiter)
-        participants = SystemParticipantsContainer.from_csv(path, delimiter)
-        node_participants_map = {
-            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuid
-        }
-        primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
-        return cls(raw_grid, participants, primary_data, node_participants_map)
 
     def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
         grid = [self.raw_grid, self.participants]
@@ -171,3 +159,15 @@ class GridContainer(ContainerMixin):
             primary_data=self.primary_data.filter_by_date_time(time),
             node_participants_map=self.node_participants_map,
         )
+
+    @classmethod
+    def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
+        if not primary_data_delimiter:
+            primary_data_delimiter = delimiter
+        raw_grid = RawGridContainer.from_csv(path, delimiter)
+        participants = SystemParticipantsContainer.from_csv(path, delimiter)
+        node_participants_map = {
+            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuid
+        }
+        primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
+        return cls(raw_grid, participants, primary_data, node_participants_map)

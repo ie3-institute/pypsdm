@@ -8,17 +8,13 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.entity import ResultEntities
+from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.models.result.grid.node import NodeResult
 from psdm_analysis.models.result.participant.dict import ResultDict
 
 
 @dataclass(frozen=True)
 class ConnectorResult(ResultEntities):
-    @staticmethod
-    def attributes() -> List[str]:
-        return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag"]
-
     @property
     def i_a_ang(self) -> Series:
         return self.data["i_a_ang"]
@@ -59,6 +55,10 @@ class ConnectorResult(ResultEntities):
         else:
             raise ValueError("Node must be either hv or lv")
         return np.absolute(res) if absolute else res
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag"]
 
 
 @dataclass(frozen=True)

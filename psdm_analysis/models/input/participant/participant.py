@@ -1,16 +1,12 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.node import Nodes
 
 
 @dataclass(frozen=True)
 class SystemParticipants(Entities, ABC):
-    @staticmethod
-    def attributes():
-        return Entities.attributes() + ["node", "q_characteristics"]
-
     @property
     def node(self):
         return self.data["node"]
@@ -26,9 +22,16 @@ class SystemParticipants(Entities, ABC):
             self.data.insert(self.data.columns.get_loc("node") + 1, "node_id", None)
         self.data["node_id"] = self.node.map(index_to_id)
 
+    @staticmethod
+    def attributes():
+        return Entities.attributes() + ["node", "q_characteristics"]
+
 
 @dataclass(frozen=True)
 class SystemParticipantsWithCapacity(SystemParticipants):
+    def capacity(self):
+        return self.data[self.capacity_attribute()]
+
     @staticmethod
     @abstractmethod
     def capacity_attribute() -> str:
@@ -37,6 +40,3 @@ class SystemParticipantsWithCapacity(SystemParticipants):
     @staticmethod
     def attributes():
         return Entities.attributes() + ["node", "capacity"]
-
-    def capacity(self):
-        return self.data[self.capacity_attribute()]

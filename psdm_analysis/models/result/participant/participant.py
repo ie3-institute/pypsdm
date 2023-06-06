@@ -19,6 +19,58 @@ from psdm_analysis.processing.dataframe import join_dataframes
 class ParticipantsResult(ResultDict):
     entities: Dict[str, PQResult]
 
+    @property
+    def p(self) -> Optional[DataFrame]:
+        if not self.entities.values():
+            return None
+        return (
+            pd.DataFrame({p_uuid: res.p for p_uuid, res in self.entities.items()})
+            .fillna(method="ffill")
+            .sort_index()
+        )
+
+    @property
+    def q(self) -> Optional[DataFrame]:
+        if not self.entities.values():
+            return None
+        return (
+            pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
+            .fillna(method="ffill")
+            .sort_index()
+        )
+
+    def p_sum(self) -> Series:
+        if not self.entities:
+            return Series(dtype=float)
+        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
+
+    def q_sum(self):
+        if not self.entities:
+            return Series(dtype=float)
+        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
+
+    def sum(self) -> PQResult:
+        return PQResult.sum(list(self.entities.values()))
+
+    def energy(self):
+        # todo make concurrent
+        sum = 0
+        for participant in self.entities.values():
+            sum += participant.energy()
+        return sum
+
+    def get(self, key: str) -> PQResult:
+        return self.entities[key]
+
+    def subset(self, uuids):
+        return type(self)(
+            self.entity_type,
+            {uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids},
+        )
+
+    def load_and_generation(self):
+        return self.sum().load_and_generation()
+
     def to_csv(self, path: str, resample_rate: str = None):
         file_name = self.entity_type.get_csv_result_file_name()
 
@@ -38,61 +90,6 @@ class ParticipantsResult(ResultDict):
         ]
         df = join_dataframes(resampled)
         df.to_csv(os.path.join(path, file_name))
-
-    def nodal_results(self, node_uuid: str) -> "ParticipantsResult":
-        pass
-
-    def get(self, key: str) -> PQResult:
-        return self.entities[key]
-
-    def subset(self, uuids):
-        return type(self)(
-            self.entity_type,
-            {uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids},
-        )
-
-    @property
-    def p(self) -> Optional[DataFrame]:
-        if not self.entities.values():
-            return None
-        return (
-            pd.DataFrame({p_uuid: res.p for p_uuid, res in self.entities.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
-
-    def sum(self) -> PQResult:
-        return PQResult.sum(list(self.entities.values()))
-
-    def p_sum(self) -> Series:
-        if not self.entities:
-            return Series(dtype=float)
-        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
-
-    @property
-    def q(self) -> Optional[DataFrame]:
-        if not self.entities.values():
-            return None
-        return (
-            pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
-
-    def q_sum(self):
-        if not self.entities:
-            return Series(dtype=float)
-        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
-
-    def energy(self):
-        # todo make concurrent
-        sum = 0
-        for participant in self.entities.values():
-            sum += participant.energy()
-        return sum
-
-    def load_and_generation(self):
-        return self.sum().load_and_generation()
 
 
 @dataclass(frozen=True)

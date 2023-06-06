@@ -10,10 +10,6 @@ from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 @dataclass(frozen=True)
 class Lines(Connector, HasTypeMixin):
-    @staticmethod
-    def get_enum() -> RawGridElementsEnum:
-        return RawGridElementsEnum.LINE
-
     @property
     def length(self) -> Series:
         return self.data["length"]
@@ -63,6 +59,10 @@ class Lines(Connector, HasTypeMixin):
             float: Relative length of all lines.
         """
         return self.data["length"] / len(self.data)
+
+    @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.LINE
 
     @staticmethod
     def entity_attributes() -> List[str]:

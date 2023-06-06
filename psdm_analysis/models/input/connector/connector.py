@@ -4,7 +4,7 @@ from typing import TypeVar
 
 import pandas as pd
 
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.node import Nodes
 
 ConnectorType = TypeVar("ConnectorType", bound="Connector")
@@ -12,10 +12,6 @@ ConnectorType = TypeVar("ConnectorType", bound="Connector")
 
 @dataclass(frozen=True)
 class Connector(Entities, ABC):
-    @staticmethod
-    def attributes() -> list[str]:
-        return Entities.attributes() + ["node_a", "node_b", "parallel_devices"]
-
     @property
     def node_a(self):
         return self.data["node_a"]
@@ -79,3 +75,7 @@ class Connector(Entities, ABC):
         if "node_b_id" not in self.data.columns:
             self.data.insert(self.data.columns.get_loc("node_b") + 1, "node_b_id", None)
         self.data["node_b_id"] = self.node_b.map(index_to_id)
+
+    @staticmethod
+    def attributes() -> list[str]:
+        return Entities.attributes() + ["node_a", "node_b", "parallel_devices"]

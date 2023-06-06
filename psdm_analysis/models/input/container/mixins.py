@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from psdm_analysis.io.utils import df_to_csv
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum
 from psdm_analysis.models.input.participant.participant import SystemParticipants
 
@@ -21,11 +21,6 @@ class HasTypeMixin(ABC):
     Mixin for entities that have a separate type within the psdm data model.
     This should only be extended as an addition to the Entities class.
     """
-
-    @staticmethod
-    @abstractmethod
-    def get_enum() -> EntitiesEnum:
-        pass
 
     @property
     def type_id(self):
@@ -88,6 +83,11 @@ class HasTypeMixin(ABC):
     @staticmethod
     def type_attributes() -> list[str]:
         return ["type_uuid", "type_id"]
+
+    @staticmethod
+    @abstractmethod
+    def get_enum() -> EntitiesEnum:
+        pass
 
 
 class SpTypeMixin(HasTypeMixin):

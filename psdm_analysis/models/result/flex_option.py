@@ -3,8 +3,8 @@ from typing import List
 
 from pandas import Series
 
-from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import add_series, hourly_mean_resample
 

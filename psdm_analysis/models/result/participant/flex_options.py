@@ -15,6 +15,39 @@ from psdm_analysis.models.result.participant.dict import ResultDict
 class FlexOptionsResult(ResultDict):
     entities: Dict[str, FlexOptionResult]
 
+    def to_csv(self, output_path: str):
+        self.to_df().to_csv(
+            os.path.join(output_path, "flex_df.csv"), index_label="time"
+        )
+
+    def to_df(self) -> DataFrame:
+        return pd.concat(
+            [f.data for f in self.entities.values()],
+            keys=self.entities.keys(),
+            axis=1,
+        ).ffill()
+
+    def to_multi_index_df(
+        self, participants_res  # type hinting leads to circular import
+    ) -> DataFrame:
+        flex_midfs = {}
+        for res in participants_res.to_list():
+            uuids = res.participants.keys()
+            flex_res = self.subset(uuids)
+            if flex_res:
+                flex_dfs = []
+                participant_uuids = []
+                [
+                    (participant_uuids.append(uuid), flex_dfs.append(flex.data))
+                    for uuid, flex in flex_res.entities.items()
+                ]
+                flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
+                flex_midfs[res.entity_type.value] = flex_midf
+        return pd.concat(flex_midfs.values(), keys=(flex_midfs.keys()), axis=1).ffill()
+
+    def sum(self) -> FlexOptionResult:
+        return FlexOptionResult.sum(list(self.entities.values()))
+
     @classmethod
     def from_csv(
         cls,
@@ -59,36 +92,3 @@ class FlexOptionsResult(ResultDict):
             )
         )
         return cls(sp_type, participants)
-
-    def to_csv(self, output_path: str):
-        self.to_df().to_csv(
-            os.path.join(output_path, "flex_df.csv"), index_label="time"
-        )
-
-    def to_df(self) -> DataFrame:
-        return pd.concat(
-            [f.data for f in self.entities.values()],
-            keys=self.entities.keys(),
-            axis=1,
-        ).ffill()
-
-    def to_multi_index_df(
-        self, participants_res  # type hinting leads to circular import
-    ) -> DataFrame:
-        flex_midfs = {}
-        for res in participants_res.to_list():
-            uuids = res.participants.keys()
-            flex_res = self.subset(uuids)
-            if flex_res:
-                flex_dfs = []
-                participant_uuids = []
-                [
-                    (participant_uuids.append(uuid), flex_dfs.append(flex.data))
-                    for uuid, flex in flex_res.entities.items()
-                ]
-                flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
-                flex_midfs[res.entity_type.value] = flex_midf
-        return pd.concat(flex_midfs.values(), keys=(flex_midfs.keys()), axis=1).ffill()
-
-    def sum(self) -> FlexOptionResult:
-        return FlexOptionResult.sum(list(self.entities.values()))

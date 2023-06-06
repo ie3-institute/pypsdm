@@ -31,12 +31,16 @@ def read_csv(path: str, file_name: str, delimiter: str) -> DataFrame:
     return pd.read_csv(full_path, delimiter=delimiter, quotechar='"')
 
 
-def to_date_time(zoned_date_time: str):
+def to_date_time(zoned_date_time: str) -> datetime:
     """
     Converts zoned date time string with format: "yyyy-MM-dd'T'HH:mm:ss[.S[S][S]]'Z'"
     e.g. '2022-02-01T00:15Z[UTC]' to python datetime
-    :param zoned_date_time:
-    :return:
+
+    Args:
+        zoned_date_time: The zoned date time string to convert.
+
+    Returns:
+        The converted datetime object.
     """
     if not zoned_date_time or not isinstance(zoned_date_time, str):
         raise ValueError(f"Unexpected date time string: {zoned_date_time}")
@@ -54,10 +58,13 @@ def csv_to_grpd_df(
     """
     Reads in a PSDM csv results file cleans it up and groups it by input_archive model.
 
-    :param file_name: name of the file to read
-    :param simulation_data_path: base directory of the result data
-    :param delimiter: the csv delimiter
-    :return: DataFrameGroupBy object of the file
+    Args:
+        file_name: name of the file to read
+        simulation_data_path: base directory of the result data
+        delimiter: the csv delimiter
+
+    Returns:
+        DataFrameGroupBy object of the file
     """
     data = read_csv(simulation_data_path, file_name, delimiter)
 

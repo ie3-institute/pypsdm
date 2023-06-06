@@ -30,31 +30,6 @@ class SystemParticipantsContainer(ContainerMixin):
     evcs: EvChargingStations
     hps: HeatPumps
 
-    @staticmethod
-    def from_csv(path: str, delimiter: str) -> "SystemParticipantsContainer":
-        loads = Loads.from_csv(path, delimiter)
-        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
-        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
-        biomass_plants = BiomassPlants.from_csv(path, delimiter)
-        wecs = WindEnergyConverters.from_csv(path, delimiter)
-        storages = Storages.from_csv(path, delimiter)
-        ems = EnergyManagementSystems.from_csv(path, delimiter)
-        evs = ElectricVehicles.from_csv(path, delimiter)
-        evcs = EvChargingStations.from_csv(path, delimiter)
-        hps = HeatPumps.from_csv(path, delimiter)
-        return SystemParticipantsContainer(
-            ems,
-            loads,
-            fixed_feed_ins,
-            pvs,
-            biomass_plants,
-            wecs,
-            storages,
-            evs,
-            evcs,
-            hps,
-        )
-
     def to_list(self, include_empty=False):
         participants = [
             self.ems,
@@ -169,4 +144,29 @@ class SystemParticipantsContainer(ContainerMixin):
             self.evs.subset(uuids),
             self.evcs.subset(uuids),
             self.hps.subset(uuids),
+        )
+
+    @staticmethod
+    def from_csv(path: str, delimiter: str) -> "SystemParticipantsContainer":
+        loads = Loads.from_csv(path, delimiter)
+        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
+        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
+        biomass_plants = BiomassPlants.from_csv(path, delimiter)
+        wecs = WindEnergyConverters.from_csv(path, delimiter)
+        storages = Storages.from_csv(path, delimiter)
+        ems = EnergyManagementSystems.from_csv(path, delimiter)
+        evs = ElectricVehicles.from_csv(path, delimiter)
+        evcs = EvChargingStations.from_csv(path, delimiter)
+        hps = HeatPumps.from_csv(path, delimiter)
+        return SystemParticipantsContainer(
+            ems,
+            loads,
+            fixed_feed_ins,
+            pvs,
+            biomass_plants,
+            wecs,
+            storages,
+            evs,
+            evcs,
+            hps,
         )

@@ -23,11 +23,16 @@ def grid_structure_summary(grid: RawGridContainer):
 def branching_index(grid: RawGridContainer):
     """
     Calculates the average amount of branches connected to the nodes of the grid.
-    :return: average amount of branches connected to the nodes
+
+    Args:
+        grid: The grid to calculate the branching index for.
+
+    Returns:
+        The branching index of the grid.
     """
     # all connections to nodes
     connections = pd.concat((grid.lines.node_a, grid.lines.node_b))
-    # todo: add switch evaluation
+    # TODO: add switch evaluation
     # group connections by node uuid and calculate their amount
     nodal_connections = connections.groupby(connections).apply(
         lambda node_grp: len(node_grp)

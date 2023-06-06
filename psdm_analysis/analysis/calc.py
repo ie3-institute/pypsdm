@@ -5,9 +5,13 @@ from pandas import Series
 def rmse_by_iloc(predictions: Series, targets: Series):
     """
     Calculates the RMSE between two series. Resets the index to calculate by their index (iloc)
-    :param predictions: the predictions
-    :param targets: the targets to aim for
-    :return: the root mean squared error
+
+    Args:
+        predictions: The predictions series.
+        targets: The targets series.
+
+    Returns:
+        The RMSE between the two series.
     """
     if len(predictions) != len(targets):
         raise ValueError("Predictions and targets should have the same length!")

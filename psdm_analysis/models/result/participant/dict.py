@@ -13,8 +13,9 @@ from psdm_analysis.io.utils import (
     get_file_path,
     to_date_time,
 )
-from psdm_analysis.models.entity import Entities, ResultEntities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum, EntityEnumType
+from psdm_analysis.models.result.entity import ResultEntities
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 
@@ -49,6 +50,54 @@ class ResultDict(ABC):
                 raise ValueError(
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
+
+    def uuids(self):
+        return list(self.entities.keys())
+
+    def results(self):
+        return list(self.entities.values())
+
+    # noinspection PyArgumentList
+    def subset(self, uuids):
+        matched_participants = {
+            uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
+        }
+
+        return type(self)(self.entity_type, matched_participants)
+
+    def subset_split(self, uuids: list[str]):
+        """
+        Returns a results result containing the given uuids and a results result containing the remaining uuids.
+        :param uuids: the uuids with which to split the result
+        :return:
+        """
+
+        rmd_uuids = self.entities.keys() - uuids
+        return self.subset(uuids), self.subset(rmd_uuids)
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        """
+        Filters the result by the given datetime or list of datetimes.
+        :param time: the time or list of times to filter by
+        :return: a new result containing only the given time or times
+        """
+        return type(self)(
+            self.entity_type,
+            {uuid: result[time] for uuid, result in self.entities.items()},
+        )
+
+    # noinspection PyArgumentList
+    def filter_for_time_interval(self, start: datetime, end: datetime):
+        return type(self)(
+            self.entity_type,
+            {
+                uuid: result.filter_for_time_interval(start, end)
+                for uuid, result in self.entities.items()
+            },
+        )
+
+    def uuid_to_id_map(self) -> dict[str, Optional[str]]:
+        return {uuid: result.name for uuid, result in self.entities.items()}
 
     @classmethod
     def from_csv(
@@ -92,6 +141,10 @@ class ResultDict(ABC):
             if not filter_start
             else res.filter_for_time_interval(filter_start, filter_end)
         )
+
+    @classmethod
+    def create_empty(cls, sp_type):
+        return cls(sp_type, dict())
 
     @staticmethod
     def build_for_entity(
@@ -146,55 +199,3 @@ class ResultDict(ABC):
                 )
             )
             return None
-
-    @classmethod
-    def create_empty(cls, sp_type):
-        return cls(sp_type, dict())
-
-    def uuids(self):
-        return list(self.entities.keys())
-
-    def results(self):
-        return list(self.entities.values())
-
-    # noinspection PyArgumentList
-    def subset(self, uuids):
-        matched_participants = {
-            uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
-        }
-
-        return type(self)(self.entity_type, matched_participants)
-
-    def subset_split(self, uuids: list[str]):
-        """
-        Returns a results result containing the given uuids and a results result containing the remaining uuids.
-        :param uuids: the uuids with which to split the result
-        :return:
-        """
-
-        rmd_uuids = self.entities.keys() - uuids
-        return self.subset(uuids), self.subset(rmd_uuids)
-
-    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        """
-        Filters the result by the given datetime or list of datetimes.
-        :param time: the time or list of times to filter by
-        :return: a new result containing only the given time or times
-        """
-        return type(self)(
-            self.entity_type,
-            {uuid: result[time] for uuid, result in self.entities.items()},
-        )
-
-    # noinspection PyArgumentList
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        return type(self)(
-            self.entity_type,
-            {
-                uuid: result.filter_for_time_interval(start, end)
-                for uuid, result in self.entities.items()
-            },
-        )
-
-    def uuid_to_id_map(self) -> dict[str, Optional[str]]:
-        return {uuid: result.name for uuid, result in self.entities.items()}

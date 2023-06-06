@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 from psdm_analysis.models.input.node import Nodes
+from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.models.result.participant.dict import ResultDict
 
 
@@ -21,21 +21,6 @@ class NodeResult(ResultEntities):
             & (self.name == other.name)
             & (self.data.equals(other.data))
         )
-
-    @staticmethod
-    def attributes() -> List[str]:
-        return ["v_ang", "v_mag"]
-
-    # todo: fix me
-    @staticmethod
-    def build_from_nominal_data(
-        uuid: str,
-        name: Optional[str],
-        data: DataFrame,
-        rated_voltage: float,
-    ) -> "NodeResult":
-        data["v_mag"] = data["v_mag"].divide(rated_voltage)
-        return NodeResult(RawGridElementsEnum.NODE, uuid, name, data)
 
     @property
     def v_mag(self) -> Series:  # in Ampere
@@ -52,6 +37,21 @@ class NodeResult(ResultEntities):
             else v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
         )
         return (self.v_mag * v_rated_kv) * np.exp(1j * np.radians(self.v_ang))
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return ["v_ang", "v_mag"]
+
+    # todo: fix me
+    @staticmethod
+    def build_from_nominal_data(
+        uuid: str,
+        name: Optional[str],
+        data: DataFrame,
+        rated_voltage: float,
+    ) -> "NodeResult":
+        data["v_mag"] = data["v_mag"].divide(rated_voltage)
+        return NodeResult(RawGridElementsEnum.NODE, uuid, name, data)
 
 
 @dataclass(frozen=True)

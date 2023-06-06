@@ -9,8 +9,8 @@ import pandas as pd
 from pandas import Series
 
 from psdm_analysis.io.utils import get_absolute_path
-from psdm_analysis.models.entity import ResultEntities
 from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.processing.dataframe import divide_positive_negative
 from psdm_analysis.processing.series import (
     add_series,
@@ -55,26 +55,6 @@ class PQResult(ResultEntities):
             return False
         return (self.data == other.data).all()
 
-    @classmethod
-    def from_csv(cls, file_path: str, sp_type: EntitiesEnum, name: str = None):
-        file_path = get_absolute_path(file_path)
-        data = pd.read_csv(file_path)
-        data["time"] = pd.to_datetime(data["time"])
-        data = data.set_index("time", drop=True)
-        file_name = os.path.basename(file_path)
-        is_default_file_name = re.match(
-            f"{sp_type.get_csv_result_file_name()}_.*", file_name
-        )
-        input_model = file_name.split("_")[-1] if is_default_file_name else file_name
-        return cls(sp_type, name if name else input_model, input_model, data)
-
-    def to_csv(self, path: str, file_name: str = None, delimiter: str = ","):
-        file_name = file_name if file_name else self.get_default_output_name()
-        self.data.to_csv(os.path.join(path, file_name), sep=delimiter)
-
-    def get_default_output_name(self):
-        return self.input_model + "_" + self.entity_type.get_csv_result_file_name()
-
     @property
     def p(self):
         return self.data["p"]
@@ -83,20 +63,8 @@ class PQResult(ResultEntities):
     def q(self):
         return self.data["q"]
 
-    @staticmethod
-    def attributes() -> List[str]:
-        return ["p", "q"]
-
-    @classmethod
-    # todo: find a way for parallel calculation
-    def sum(cls, results: List["PQResult"]) -> "PQResult":
-        if len(results) == 0:
-            return PQResult.create_empty(
-                SystemParticipantsEnum.PARTICIPANTS_SUM, "", ""
-            )
-        if len(results) == 1:
-            return results[0]
-        return reduce(lambda a, b: a + b, results)
+    def complex_power(self):
+        return self.p + 1j * self.q
 
     def energy(self) -> float:
         return duration_weighted_sum(self.p)
@@ -129,8 +97,40 @@ class PQResult(ResultEntities):
         updated_data = self.data.apply(lambda col: hourly_mean_resample(col), axis=0)
         return PQResult(self.entity_type, self.input_model, self.name, updated_data)
 
-    def complex_power(self):
-        return self.p + 1j * self.q
+    def to_csv(self, path: str, file_name: str = None, delimiter: str = ","):
+        file_name = file_name if file_name else self.get_default_output_name()
+        self.data.to_csv(os.path.join(path, file_name), sep=delimiter)
+
+    def get_default_output_name(self):
+        return self.input_model + "_" + self.entity_type.get_csv_result_file_name()
+
+    @classmethod
+    def from_csv(cls, file_path: str, sp_type: EntitiesEnum, name: str = None):
+        file_path = get_absolute_path(file_path)
+        data = pd.read_csv(file_path)
+        data["time"] = pd.to_datetime(data["time"])
+        data = data.set_index("time", drop=True)
+        file_name = os.path.basename(file_path)
+        is_default_file_name = re.match(
+            f"{sp_type.get_csv_result_file_name()}_.*", file_name
+        )
+        input_model = file_name.split("_")[-1] if is_default_file_name else file_name
+        return cls(sp_type, name if name else input_model, input_model, data)
+
+    @classmethod
+    # todo: find a way for parallel calculation
+    def sum(cls, results: List["PQResult"]) -> "PQResult":
+        if len(results) == 0:
+            return PQResult.create_empty(
+                SystemParticipantsEnum.PARTICIPANTS_SUM, "", ""
+            )
+        if len(results) == 1:
+            return results[0]
+        return reduce(lambda a, b: a + b, results)
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return ["p", "q"]
 
 
 @dataclass(frozen=True)
