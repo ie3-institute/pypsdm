@@ -92,7 +92,7 @@ def _add_line_trace(
         for line_color, lines in highlights.items():
             if line_data.name in lines:
                 color = line_color
-    elif isinstance(highlights, list):
+    elif highlights is not None:
         color = RED if line_data.name in highlights else GREEN
 
     if is_disconnected:

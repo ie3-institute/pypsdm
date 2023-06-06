@@ -75,16 +75,16 @@ class SystemParticipantsContainer(ContainerMixin):
         )
 
     def filter_by_node(self, node_uuid: str):
-        loads = self.loads.filter_for_node(node_uuid)
-        fixed_feed_ins = self.fixed_feed_ins.filter_for_node(node_uuid)
-        pvs = self.pvs.filter_for_node(node_uuid)
-        biomass_plants = self.biomass_plants.filter_for_node(node_uuid)
-        wecs = self.wecs.filter_for_node(node_uuid)
-        storages = self.storages.filter_for_node(node_uuid)
-        ems = self.ems.filter_for_node(node_uuid)
-        evs = self.evs.filter_for_node(node_uuid)
-        evcs = self.evcs.filter_for_node(node_uuid)
-        hps = self.hps.filter_for_node(node_uuid)
+        loads = self.loads.filter_by_nodes(node_uuid)
+        fixed_feed_ins = self.fixed_feed_ins.filter_by_nodes(node_uuid)
+        pvs = self.pvs.filter_by_nodes(node_uuid)
+        biomass_plants = self.biomass_plants.filter_by_nodes(node_uuid)
+        wecs = self.wecs.filter_by_nodes(node_uuid)
+        storages = self.storages.filter_by_nodes(node_uuid)
+        ems = self.ems.filter_by_nodes(node_uuid)
+        evs = self.evs.filter_by_nodes(node_uuid)
+        evcs = self.evcs.filter_by_nodes(node_uuid)
+        hps = self.hps.filter_by_nodes(node_uuid)
         return SystemParticipantsContainer(
             ems,
             loads,

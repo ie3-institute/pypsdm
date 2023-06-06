@@ -55,7 +55,7 @@ class Entities(ABC):
             raise TypeError("The two Entities instances must be of the same type")
 
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
-        if not columns_diff.issubset(self.attributes()):
+        if len(columns_diff) > 0 and columns_diff.issubset(self.attributes()):
             logging.warning(
                 "The two Entities instances have different columns: %s", columns_diff
             )
@@ -72,9 +72,6 @@ class Entities(ABC):
         Returns:
             A new Entities instance with the uuids removed.
         """
-
-        if not isinstance(other, type(self)):
-            raise TypeError("The two Entities instances must be of the same type")
 
         if isinstance(other, Entities):
             indices_to_remove = other.data.index
@@ -117,17 +114,37 @@ class Entities(ABC):
     def get(self, uuid: str) -> Series:
         return self.data.loc[uuid]
 
-    def subset(self, uuids: Union[list[str], str]):
+    def subset(self, uuids: Union[list[str], set[str], str]):
         if isinstance(uuids, str):
             uuids = [uuids]
+        elif isinstance(uuids, set):
+            uuids = list(uuids)
         return type(self)(self.data.loc[uuids])
+
+    def subset_id(self, ids: Union[list[str], set[str], str]):
+        if isinstance(ids, str):
+            ids = [ids]
+        elif isinstance(ids, set):
+            ids = list(ids)
+        return type(self)(self.data[self.data["id"].isin(ids)])
 
     def subset_split(self, uuids: list[str]):
         rmd = set(self.uuids) - set(uuids)
         return self.subset(uuids), self.subset(list(rmd))
 
-    def filter_for_node(self, uuid: str):
-        data = self.data[self.nodes() == str(uuid)]
+    def filter_by_nodes(self, nodes: Union[str, list[str], set[str]]) -> EntityType:
+        """
+        Filters for all entities which are connected to one of th given nodes.
+
+        Args:
+            nodes: The nodes to filter by, represented by their uuids.
+
+        Returns:
+            A new Entities instance with the filtered entities.
+        """
+        if isinstance(nodes, str):
+            nodes = [nodes]
+        data = self.data[self.nodes().isin(nodes)]
         return type(self)(data)
 
     def find_nodes(self, nodes: Nodes) -> Nodes:

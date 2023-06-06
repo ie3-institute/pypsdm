@@ -17,10 +17,6 @@ class SystemParticipants(Entities, ABC):
     def q_characteristics(self):
         return self.data["q_characteristic"]
 
-    def subset(self, uuids: list[str]):
-        data = self.data.loc[self.data.index.intersection(uuids)]
-        return type(self)(data)
-
     def insert_node_id_columns(self, nodes: Nodes) -> None:
         index_to_id = nodes.ids.to_dict()
 

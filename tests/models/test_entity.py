@@ -1,87 +1,161 @@
 import pandas as pd
 import pytest
 
-from psdm_analysis.models.input.connector.switches import Switches
+from psdm_analysis.models.input.participant.pv import PhotovoltaicPowerPlants
 
 
 @pytest.fixture
-def sample_switches():
+def sample_pvs():
     data = pd.DataFrame(
         {
-            "id": ["1", "2"],
-            "operates_from": ["2023-01-01", "2023-02-01"],
-            "operates_until": ["2023-12-31", "2023-12-31"],
-            "operator": ["operator1", "operator2"],
-            "node_a": ["a", "b"],
-            "node_b": ["c", "d"],
-            "parallel_devices": [0, 0],
-            "closed": [False, False],
+            "id": ["1", "2", "3"],
+            "operates_from": ["2023-01-01", "2023-02-01", "2023-03-01"],
+            "operates_until": ["2023-12-31", "2023-12-31", "2023-12-31"],
+            "operator": ["operator1", "operator2", "operator3"],
+            "node": ["a", "b", "c"],
+            "q_characteristic": ["q1", "q2", "q3"],
+            "albedo": [0.2, 0.3, 0.4],
+            "azimuth": [180, 200, 220],
+            "elevation_angle": [30, 45, 60],
+            "k_g": [0.5, 0.6, 0.7],
+            "k_t": [0.8, 0.9, 1.0],
+            "market_reaction": [True, False, True],
+            "cos_phi_rated": [0.95, 0.98, 0.99],
         },
-        index=["uuid1", "uuid2"],
+        index=["uuid1", "uuid2", "uuid3"],
     )
 
-    return Switches(data)
+    return PhotovoltaicPowerPlants(data)
 
 
-def test_add_entities(sample_switches):
+def test_add_entities(sample_pvs, caplog):
     # Create another Entities instance for the test
     other_data = pd.DataFrame(
         {
-            "id": ["3", "4"],
+            "id": ["4", "5"],
             "operates_from": ["2023-03-01", "2023-04-01"],
             "operates_until": ["2023-12-31", "2023-12-31"],
             "operator": ["operator3", "operator4"],
-            "node_a": ["a", "b"],
-            "node_b": ["c", "d"],
-            "parallel_devices": [0, 0],
-            "closed": [False, False],
+            "node": ["c", "d"],
+            "q_characteristic": ["q4", "q5"],
+            "albedo": [0.4, 0.5],
+            "azimuth": [220, 240],
+            "elevation_angle": [50, 60],
+            "k_g": [0.7, 0.8],
+            "k_t": [0.95, 1.0],
+            "market_reaction": [False, True],
+            "cos_phi_rated": [0.99, 1.0],
         },
-        index=["uuid3", "uuid4"],
+        index=["uuid4", "uuid5"],
     )
 
-    other_switches = Switches(other_data)
+    other_pvs = PhotovoltaicPowerPlants(other_data)
 
-    result = sample_switches + other_switches
+    result = sample_pvs + other_pvs
 
     # Check the resulting Entities instance
-    assert len(result) == 4
-    assert set(result.uuids) == {"uuid1", "uuid2", "uuid3", "uuid4"}
-    assert set(result.ids) == {"1", "2", "3", "4"}
+    assert len(result) == 5
+    assert set(result.data.index) == {"uuid1", "uuid2", "uuid3", "uuid4", "uuid5"}
 
     # Create another Entities instance with an extra column
-    other_data_corupt = other_data.copy()
-    other_data_corupt["extra"] = ["extra1", "extra2"]
-    other_switches = Switches(other_data_corupt)
+    other_data_corrupt = other_data.drop(columns=["cos_phi_rated"])
+    other_pvs = PhotovoltaicPowerPlants(other_data_corrupt)
 
-    with pytest.raises(ValueError, match="Columns of the dataframes are not the same"):
-        _ = sample_switches + other_switches
-
-
-def test_subtract_entities(sample_switches):
-    # Create a subset of sample_switches to be subtracted
-    data_to_subtract = sample_switches.data.iloc[[1]]
-    switches_to_subtract = Switches(data_to_subtract)
-
-    result = sample_switches - switches_to_subtract
-
-    assert len(result) == len(sample_switches) - 1
-    assert switches_to_subtract.uuids[0] not in result.uuids
+    assert "The two Entities instances have different columns: %s", {
+        "cos_phi_rated"
+    } in caplog.text
 
 
-def test_subtract_with_list_of_indices(sample_switches):
-    indices_to_subtract = ["uuid2"]
+def test_subtract_entities(sample_pvs):
+    # Create a subset of sample_pvs to be subtracted
+    data_to_subtract = sample_pvs.data.iloc[[2]]
+    pvs_to_subtract = PhotovoltaicPowerPlants(data_to_subtract)
 
-    result = sample_switches - indices_to_subtract
+    result = sample_pvs - pvs_to_subtract
 
-    assert len(result) == len(sample_switches) - 1
-    assert indices_to_subtract[0] not in result.uuids
+    assert len(result) == len(sample_pvs) - 1
+    assert pvs_to_subtract.data.index[0] not in result.data.index
 
 
-def test_subtract_with_invalid_indices(sample_switches):
-    invalid_indices = ["uuid3", "uuid4"]  # Indices that don't exist in sample_switches
+def test_subtract_with_list_of_indices(sample_pvs):
+    indices_to_subtract = ["uuid3"]
+
+    result = sample_pvs - indices_to_subtract
+
+    assert len(result) == len(sample_pvs) - 1
+    assert indices_to_subtract[0] not in result.data.index
+
+
+def test_subtract_with_invalid_indices(sample_pvs):
+    invalid_indices = ["uuid3", "uuid4"]  # Indices that don't exist in sample_pvs
 
     with pytest.raises(
         ValueError,
         match="All indices to remove must exist in the current Entities instance",
     ):
-        _ = sample_switches - invalid_indices
+        _ = sample_pvs - invalid_indices
+
+
+def test_filter_by_nodes(sample_pvs):
+    result = sample_pvs.filter_by_nodes(["a", "b"])
+
+    assert len(result) == 2
+    assert result.uuids[0] == "uuid1"
+    assert result.uuids[1] == "uuid2"
+
+    result = sample_pvs.filter_by_nodes("a")
+
+    assert len(result) == 1
+    assert result.uuids[0] == "uuid1"
+
+    assert isinstance(result, PhotovoltaicPowerPlants)
+
+
+def test_subset(sample_pvs):
+    # Test with a single string
+    result = sample_pvs.subset("uuid1")
+    assert len(result) == 1
+    assert result.data.index[0] == "uuid1"
+
+    # Test with a list of strings
+    result = sample_pvs.subset(["uuid1", "uuid2"])
+    assert len(result) == 2
+    assert set(result.data.index) == {"uuid1", "uuid2"}
+
+    # Test with a set of strings
+    result = sample_pvs.subset({"uuid1", "uuid2", "uuid3"})
+    assert len(result) == 3
+    assert set(result.data.index) == {"uuid1", "uuid2", "uuid3"}
+
+    assert isinstance(result, PhotovoltaicPowerPlants)
+
+
+def test_subset_id(sample_pvs):
+    # Test with a single string
+    result = sample_pvs.subset_id("1")
+    assert len(result) == 1
+    assert result.data["id"][0] == "1"
+
+    # Test with a list of strings
+    result = sample_pvs.subset_id(["1", "2"])
+    assert len(result) == 2
+    assert set(result.data["id"]) == {"1", "2"}
+
+    # Test with a set of strings
+    result = sample_pvs.subset_id({"1", "2", "3"})
+    assert len(result) == 3
+    assert set(result.data["id"]) == {"1", "2", "3"}
+
+    assert isinstance(result, PhotovoltaicPowerPlants)
+
+
+def test_subset_split(sample_pvs):
+    subset1, subset2 = sample_pvs.subset_split(["uuid1", "uuid2"])
+
+    # Test the first subset
+    assert len(subset1) == 2
+    assert set(subset1.data.index) == {"uuid1", "uuid2"}
+
+    # Test the second subset
+    assert len(subset2) == 1
+    assert subset2.data.index[0] == "uuid3"

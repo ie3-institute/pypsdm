@@ -20,7 +20,7 @@ def test_sp_enum():
 
 
 def test_filter_for_node(wecs):
-    filtered = wecs.filter_for_node("401f37f8-6f2c-4564-bc78-6736cb9cbf8d")
+    filtered = wecs.filter_by_nodes("401f37f8-6f2c-4564-bc78-6736cb9cbf8d")
     assert len(filtered) == 1
 
 

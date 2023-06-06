@@ -71,9 +71,10 @@ class RawGridContainer(ContainerMixin):
             )
         elif len(slack_connected_node) == 0:
             raise ValueError("Did not find a slack node!")
-        return self._find_branches(
+        branches = self._find_branches(
             self.build_networkx_graph(), slack_connected_node.pop()
         )
+        return [[slack_node.uuids[0]] + branch for branch in branches]
 
     @staticmethod
     def _find_branches(G: Graph, start_node):
