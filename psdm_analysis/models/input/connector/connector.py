@@ -28,7 +28,7 @@ class Connector(Entities, ABC):
     def parallel_devices(self):
         return self.data["parallel_devices"]
 
-    def nodes(self):
+    def node(self):
         return pd.concat([self.node_a, self.node_b])
 
     def filter_by_nodes(
@@ -70,7 +70,7 @@ class Connector(Entities, ABC):
         return self.filter_by_nodes([node_a_uuid, node_b_uuid], both_in_nodes=True)
 
     def insert_node_id_columns(self, nodes: Nodes) -> None:
-        index_to_id = nodes.ids.to_dict()
+        index_to_id = nodes.id.to_dict()
 
         if "node_a_id" not in self.data.columns:
             self.data.insert(self.data.columns.get_loc("node_a") + 1, "node_a_id", None)

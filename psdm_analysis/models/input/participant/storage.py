@@ -45,13 +45,13 @@ class Storages(SystemParticipantsWithCapacity, SpTypeMixin):
         return self.data["life_cycle"]
 
     @staticmethod
-    def entity_attributes() -> [str]:
+    def entity_attributes() -> list[str]:
         return [
             "behaviour",
         ]
 
     @staticmethod
-    def type_attributes() -> [str]:
+    def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + [
             "p_max",
             "active_power_gradient",

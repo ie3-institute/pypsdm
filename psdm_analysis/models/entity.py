@@ -98,14 +98,14 @@ class Entities(ABC):
         return type(self)(self.data.drop(indices_to_remove))
 
     @property
-    def uuids(self):
+    def uuid(self):
         """
         Returns: The uuids of the entities.
         """
         return self.data.index
 
     @property
-    def ids(self):
+    def id(self):
         """
         Returns: The ids of the entities.
         """
@@ -133,7 +133,7 @@ class Entities(ABC):
         return self.data["operator"]
 
     @abstractmethod
-    def nodes(self):
+    def node(self):
         """
         Returns: The nodes of the entities.
         """
@@ -201,7 +201,7 @@ class Entities(ABC):
         Returns:
             A tuple of the subset and the remaining entities.
         """
-        rmd = set(self.uuids) - set(uuids)
+        rmd = set(self.uuid) - set(uuids)
         return self.subset(uuids), self.subset(list(rmd))
 
     def filter_by_nodes(self, nodes: Union[str, list[str], set[str]]) -> EntityType:
@@ -216,11 +216,11 @@ class Entities(ABC):
         """
         if isinstance(nodes, str):
             nodes = [nodes]
-        data = self.data[self.nodes().isin(nodes)]
+        data = self.data[self.node.isin(nodes)]
         return type(self)(data)
 
     def find_nodes(self, nodes: Nodes) -> Nodes:
-        return nodes.subset(self.nodes())
+        return nodes.subset(self.node)
 
     def to_csv(self, path: str, delimiter: str = ","):
         df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)

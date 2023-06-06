@@ -56,14 +56,14 @@ class RawGridContainer(ContainerMixin):
         transformers = self.transformers_2_w
         slack_transformers = Transformers2W(
             transformers.data[
-                (transformers.node_a.isin(slack_node.uuids.to_list()))
-                | (transformers.node_b.isin(slack_node.uuids.to_list()))
+                (transformers.node_a.isin(slack_node.uuid.to_list()))
+                | (transformers.node_b.isin(slack_node.uuid.to_list()))
             ]
         )
         slack_connected_node = (
             set(slack_transformers.node_a)
             .union(slack_transformers.node_b)
-            .difference(slack_node.uuids)
+            .difference(slack_node.uuid)
         )
         if len(slack_connected_node) > 1:
             raise ValueError(
@@ -74,7 +74,7 @@ class RawGridContainer(ContainerMixin):
         branches = self._find_branches(
             self.build_networkx_graph(), slack_connected_node.pop()
         )
-        return [[slack_node.uuids[0]] + branch for branch in branches]
+        return [[slack_node.uuid[0]] + branch for branch in branches]
 
     @staticmethod
     def _find_branches(G: Graph, start_node):
@@ -105,7 +105,7 @@ class RawGridContainer(ContainerMixin):
             lambda row: {"length": row["length"]}, axis=1
         )
 
-        graph.add_nodes_from(self.nodes.uuids)
+        graph.add_nodes_from(self.nodes.uuid)
         graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
         graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
         return graph
@@ -126,7 +126,7 @@ class GridContainer(ContainerMixin):
         raw_grid = RawGridContainer.from_csv(path, delimiter)
         participants = SystemParticipantsContainer.from_csv(path, delimiter)
         node_participants_map = {
-            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuids
+            uuid: participants.filter_by_node(uuid) for uuid in raw_grid.nodes.uuid
         }
         primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
         return cls(raw_grid, participants, primary_data, node_participants_map)

@@ -96,17 +96,17 @@ def test_subtract_with_invalid_indices(sample_pvs):
         _ = sample_pvs - invalid_indices
 
 
-def test_filter_by_nodes(sample_pvs):
+def test_filter_by_nodes(sample_pvs: PhotovoltaicPowerPlants):
     result = sample_pvs.filter_by_nodes(["a", "b"])
 
     assert len(result) == 2
-    assert result.uuids[0] == "uuid1"
-    assert result.uuids[1] == "uuid2"
+    assert result.uuid[0] == "uuid1"
+    assert result.uuid[1] == "uuid2"
 
     result = sample_pvs.filter_by_nodes("a")
 
     assert len(result) == 1
-    assert result.uuids[0] == "uuid1"
+    assert result.uuid[0] == "uuid1"
 
     assert isinstance(result, PhotovoltaicPowerPlants)
 

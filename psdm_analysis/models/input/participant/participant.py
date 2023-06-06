@@ -11,18 +11,20 @@ class SystemParticipants(Entities, ABC):
     def attributes():
         return Entities.attributes() + ["node", "q_characteristics"]
 
-    def nodes(self):
+    @property
+    def node(self):
         return self.data["node"]
 
-    def q_characteristics(self):
+    @property
+    def q_characteristic(self):
         return self.data["q_characteristic"]
 
     def insert_node_id_columns(self, nodes: Nodes) -> None:
-        index_to_id = nodes.ids.to_dict()
+        index_to_id = nodes.id.to_dict()
 
         if "node_id" not in self.data.columns:
             self.data.insert(self.data.columns.get_loc("node") + 1, "node_id", None)
-        self.data["node_id"] = self.nodes().map(index_to_id)
+        self.data["node_id"] = self.node.map(index_to_id)
 
 
 @dataclass(frozen=True)

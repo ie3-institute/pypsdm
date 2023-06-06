@@ -103,12 +103,12 @@ class ResultDict(ABC):
     ) -> ResultDictType:
         name = None
         if input_entities is not None:
-            if input_model not in input_entities.ids.index:
+            if input_model not in input_entities.id.index:
                 logging.debug(
                     f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
                 )
             else:
-                name = input_entities.ids.loc[input_model]
+                name = input_entities.id.loc[input_model]
 
         return entity_type.get_result_type().build(
             entity_type, input_model, data, simulation_end, name=name

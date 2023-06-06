@@ -63,5 +63,5 @@ class Nodes(Entities):
     def get_slack_nodes(self):
         return Nodes(self.data[self.slack])
 
-    def nodes(self):
+    def node(self):
         return self.data.index

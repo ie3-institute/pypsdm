@@ -152,7 +152,7 @@ class SystemParticipantsContainer(ContainerMixin):
     def uuids(self):
         return pd.concat(
             [
-                participants.uuids.to_series()
+                participants.uuid.to_series()
                 for participants in self.to_list(include_empty=True)
             ]
         )
