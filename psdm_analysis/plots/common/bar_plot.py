@@ -21,7 +21,7 @@ sns.set_style("whitegrid")
 def daily_usage(res: PQResult, device_power_mw):
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     usage_hours = res.daily_usage(device_power_mw)
-    label, color = get_label_and_color(res.type)
+    label, color = get_label_and_color(res.entity_type)
     ax.bar(usage_hours.index, usage_hours, color=color)
     ax.set_ylabel("Daily usage in hours")
     ax.set_xlabel("Day of year")

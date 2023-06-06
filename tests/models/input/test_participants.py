@@ -24,11 +24,6 @@ def test_filter_for_node(wecs):
     assert len(filtered) == 1
 
 
-def test_subset(wecs):
-    subset = wecs.subset(["d6ad8c73-716a-4244-9ae2-4a3735e492ab", "not_in_df"])
-    assert len(subset) == 1
-
-
 def test_to_csv(wecs, delimiter, tmp_path):
     path = os.path.join(tmp_path, "wecs")
     os.makedirs(path, exist_ok=True)

@@ -130,6 +130,14 @@ def test_subset(sample_pvs):
     assert isinstance(result, PhotovoltaicPowerPlants)
 
 
+def test_subset_incorrect(sample_pvs: PhotovoltaicPowerPlants):
+    with pytest.raises(
+        KeyError,
+        match="uuids must be a subset of the current Entities instance. The following uuids couldn't be found: {'not_in_index'}",
+    ):
+        _ = sample_pvs.subset(["not_in_index"])
+
+
 def test_subset_id(sample_pvs):
     # Test with a single string
     result = sample_pvs.subset_id("1")

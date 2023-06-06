@@ -27,8 +27,8 @@ class PQResult(ResultEntities):
         q_sum = add_series(self.q, other.q, "q")
         summed_data = p_sum.to_frame().join(q_sum)
         return PQResult(
-            self.type
-            if self.type == other.type
+            self.entity_type
+            if self.entity_type == other.entity_type
             else SystemParticipantsEnum.PARTICIPANTS_SUM,
             "PQResult - Sum",
             "PQResult - Sum",
@@ -41,7 +41,7 @@ class PQResult(ResultEntities):
     def __mul__(self, other: Union[float, int]):
         if isinstance(other, float) or isinstance(other, int):
             updated_data = self.data * other
-            return PQResult(self.type, self.input_model, self.name, updated_data)
+            return PQResult(self.entity_type, self.input_model, self.name, updated_data)
         else:
             raise ValueError(
                 f"Multiplication with type {type(other)} not or not yet supported"
@@ -73,7 +73,7 @@ class PQResult(ResultEntities):
         self.data.to_csv(os.path.join(path, file_name), sep=delimiter)
 
     def get_default_output_name(self):
-        return self.input_model + "_" + self.type.get_csv_result_file_name()
+        return self.input_model + "_" + self.entity_type.get_csv_result_file_name()
 
     @property
     def p(self):
@@ -127,7 +127,7 @@ class PQResult(ResultEntities):
 
     def hourly_resample(self):
         updated_data = self.data.apply(lambda col: hourly_mean_resample(col), axis=0)
-        return PQResult(self.type, self.input_model, self.name, updated_data)
+        return PQResult(self.entity_type, self.input_model, self.name, updated_data)
 
     def complex_power(self):
         return self.p + 1j * self.q
@@ -148,7 +148,7 @@ class PQWithSocResult(PQResult):
         )
         summed_data = p_sum.to_frame().join([q_sum, soc])
         return PQWithSocResult(
-            self.type,
+            self.entity_type,
             "PQResult - Sum",
             "PQResult - Sum",
             summed_data,

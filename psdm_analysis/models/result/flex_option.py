@@ -17,7 +17,7 @@ class FlexOptionResult(ResultEntities):
         p_max_sum = add_series(self.p_max(), other.p_max(), "p_max")
         summed_data = p_ref_sum.to_frame().join([p_min_sum, p_max_sum])
         return FlexOptionResult(
-            self.type,
+            self.entity_type,
             "FlexResult - Sum",
             "FlexResult - Sum",
             summed_data,
@@ -54,10 +54,14 @@ class FlexOptionResult(ResultEntities):
 
     def hourly_resample(self):
         updated_data = self.data.apply(lambda x: hourly_mean_resample(x))
-        return FlexOptionResult(self.type, self.name, self.input_model, updated_data)
+        return FlexOptionResult(
+            self.entity_type, self.name, self.input_model, updated_data
+        )
 
     def add_series(self, series: Series) -> "FlexOptionResult":
         updated_data = self.data.apply(
             lambda p_flex: add_series(p_flex, series, p_flex.name), axis=0
         )
-        return FlexOptionResult(self.type, self.name, self.input_model, updated_data)
+        return FlexOptionResult(
+            self.entity_type, self.name, self.input_model, updated_data
+        )
