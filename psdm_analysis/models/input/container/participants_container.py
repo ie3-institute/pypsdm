@@ -1,10 +1,12 @@
 import logging
 from dataclasses import dataclass
+from typing import Union
 
 import pandas as pd
 
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems
 from psdm_analysis.models.input.participant.evcs import EvChargingStations
@@ -48,6 +50,12 @@ class SystemParticipantsContainer(ContainerMixin):
             if include_empty
             else [p for p in participants if not p.data.empty]
         )
+
+    def build_node_participants_map(
+        self, nodes: Union[Nodes, list[str]]
+    ) -> dict[str, "SystemParticipantsContainer"]:
+        uuids = nodes.uuid if isinstance(nodes, Nodes) else nodes
+        return {uuid: self.filter_by_node(uuid) for uuid in uuids}
 
     def filter_by_node(self, node_uuid: str):
         loads = self.loads.filter_by_nodes(node_uuid)

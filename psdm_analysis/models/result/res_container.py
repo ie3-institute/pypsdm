@@ -1,7 +1,7 @@
 import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Set, Union
+from typing import Optional, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -36,10 +36,6 @@ class ResultContainer:
 
     def uuids(self) -> set[str]:
         return set(self.nodes.entities.keys())
-
-    # todo: implement
-    def filter_by_nodes(self, nodes: Set[str]):
-        pass
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return ResultContainer(
