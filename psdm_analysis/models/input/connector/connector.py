@@ -24,6 +24,7 @@ class Connector(Entities, ABC):
     def parallel_devices(self):
         return self.data["parallel_devices"]
 
+    @property
     def node(self):
         return pd.concat([self.node_a, self.node_b])
 

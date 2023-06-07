@@ -84,7 +84,7 @@ class ResultEntities(ABC):
     @classmethod
     def create_empty(
         cls, entity_type: EntitiesEnum, input_model: str, name: Optional[str] = None
-    ) -> "ResultEntities":
+    ) -> ResultType:
         """
         Creates an empty ResultEntities object with the given entity type and optionally name.
         Args:
@@ -130,7 +130,7 @@ class ResultEntities(ABC):
             name: The name or id of the corresponding input object. Can be none.
         """
         if data.empty:
-            return cls.create_empty(entity_type, name, input_model)
+            return cls.create_empty(entity_type, input_model, name)
 
         if "time" in data.columns:
             data["time"] = data["time"].apply(

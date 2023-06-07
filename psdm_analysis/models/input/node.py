@@ -43,11 +43,12 @@ class Nodes(Entities):
     def volt_lvl(self):
         return self.data["volt_lvl"]
 
-    def get_slack_nodes(self):
-        return Nodes(self.data[self.slack])
-
+    @property
     def node(self):
         return self.data.index
+
+    def get_slack_nodes(self):
+        return Nodes(self.data[self.slack])
 
     @staticmethod
     def get_enum() -> RawGridElementsEnum:

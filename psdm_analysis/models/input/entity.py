@@ -67,8 +67,7 @@ class Entities(ABC):
             logging.warning(
                 "The two Entities instances have different columns: %s", columns_diff
             )
-        else:
-            return type(self)(pd.concat([self.data, other.data]))
+        return type(self)(pd.concat([self.data, other.data]))
 
     def __sub__(self: EntityType, other: Union[EntityType, List[str]]) -> EntityType:
         """
@@ -130,10 +129,11 @@ class Entities(ABC):
         """
         return self.data["operator"]
 
+    @property
     @abstractmethod
     def node(self) -> Series:
         """
-        Returns: The nodes of the entities.
+        Returns: The nodes to which the entities are connected.
         """
         pass
 
@@ -149,7 +149,7 @@ class Entities(ABC):
         """
         return self.data.loc[uuid]
 
-    def subset(self, uuids: Union[list[str], set[str], str]) -> EntityType:
+    def subset(self: EntityType, uuids: Union[list[str], set[str], str]) -> EntityType:
         """
         Creates a subset of the Entities instance with the given uuids.
 
@@ -171,7 +171,7 @@ class Entities(ABC):
                 f"uuids must be a subset of the current Entities instance. The following uuids couldn't be found: {not_found}"
             ) from e
 
-    def subset_id(self, ids: Union[list[str], set[str], str]) -> EntityType:
+    def subset_id(self: EntityType, ids: Union[list[str], set[str], str]) -> EntityType:
         """
         Creates a subset of the Entities instance with the given ids.
 
@@ -188,7 +188,7 @@ class Entities(ABC):
         return type(self)(self.data[self.data["id"].isin(ids)])
 
     def subset_split(
-        self, uuids: Union[list[str], set[str], str]
+        self: EntityType, uuids: Union[list[str], set[str], str]
     ) -> Tuple[EntityType, EntityType]:
         """
         Returns the subset of entities as well as the remaining instances.
@@ -202,7 +202,9 @@ class Entities(ABC):
         rmd = set(self.uuid) - set(uuids)
         return self.subset(uuids), self.subset(list(rmd))
 
-    def filter_by_nodes(self, nodes: Union[str, list[str], set[str]]) -> EntityType:
+    def filter_by_nodes(
+        self: EntityType, nodes: Union[str, list[str], set[str]]
+    ) -> EntityType:
         """
         Filters for all entities which are connected to one of th given nodes.
 
