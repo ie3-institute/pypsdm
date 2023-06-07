@@ -96,42 +96,42 @@ class Entities(ABC):
         return type(self)(self.data.drop(indices_to_remove))
 
     @property
-    def uuid(self):
+    def uuid(self) -> Series:
         """
         Returns: The uuids of the entities.
         """
         return self.data.index
 
     @property
-    def id(self):
+    def id(self) -> Series:
         """
         Returns: The ids of the entities.
         """
         return self.data["id"]
 
     @property
-    def operates_from(self):
+    def operates_from(self) -> Series:
         """
         Returns: The operaton start time of the entities.
         """
         return self.data["operates_from"]
 
     @property
-    def operates_until(self):
+    def operates_until(self) -> Series:
         """
         Returns: The operaton end time of the entities.
         """
         return self.data["operates_until"]
 
     @property
-    def operator(self):
+    def operator(self) -> Series:
         """
         Returns: The operator of the entities.
         """
         return self.data["operator"]
 
     @abstractmethod
-    def node(self):
+    def node(self) -> Series:
         """
         Returns: The nodes of the entities.
         """
