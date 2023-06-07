@@ -1,10 +1,12 @@
 import logging
 from dataclasses import dataclass
+from typing import Union
 
 import pandas as pd
 
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems
 from psdm_analysis.models.input.participant.evcs import EvChargingStations
@@ -30,31 +32,6 @@ class SystemParticipantsContainer(ContainerMixin):
     evcs: EvChargingStations
     hps: HeatPumps
 
-    @staticmethod
-    def from_csv(path: str, delimiter: str) -> "SystemParticipantsContainer":
-        loads = Loads.from_csv(path, delimiter)
-        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
-        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
-        biomass_plants = BiomassPlants.from_csv(path, delimiter)
-        wecs = WindEnergyConverters.from_csv(path, delimiter)
-        storages = Storages.from_csv(path, delimiter)
-        ems = EnergyManagementSystems.from_csv(path, delimiter)
-        evs = ElectricVehicles.from_csv(path, delimiter)
-        evcs = EvChargingStations.from_csv(path, delimiter)
-        hps = HeatPumps.from_csv(path, delimiter)
-        return SystemParticipantsContainer(
-            ems,
-            loads,
-            fixed_feed_ins,
-            pvs,
-            biomass_plants,
-            wecs,
-            storages,
-            evs,
-            evcs,
-            hps,
-        )
-
     def to_list(self, include_empty=False):
         participants = [
             self.ems,
@@ -74,17 +51,23 @@ class SystemParticipantsContainer(ContainerMixin):
             else [p for p in participants if not p.data.empty]
         )
 
+    def build_node_participants_map(
+        self, nodes: Union[Nodes, list[str]]
+    ) -> dict[str, "SystemParticipantsContainer"]:
+        uuids = nodes.uuid if isinstance(nodes, Nodes) else nodes
+        return {uuid: self.filter_by_node(uuid) for uuid in uuids}
+
     def filter_by_node(self, node_uuid: str):
-        loads = self.loads.filter_for_node(node_uuid)
-        fixed_feed_ins = self.fixed_feed_ins.filter_for_node(node_uuid)
-        pvs = self.pvs.filter_for_node(node_uuid)
-        biomass_plants = self.biomass_plants.filter_for_node(node_uuid)
-        wecs = self.wecs.filter_for_node(node_uuid)
-        storages = self.storages.filter_for_node(node_uuid)
-        ems = self.ems.filter_for_node(node_uuid)
-        evs = self.evs.filter_for_node(node_uuid)
-        evcs = self.evcs.filter_for_node(node_uuid)
-        hps = self.hps.filter_for_node(node_uuid)
+        loads = self.loads.filter_by_nodes(node_uuid)
+        fixed_feed_ins = self.fixed_feed_ins.filter_by_nodes(node_uuid)
+        pvs = self.pvs.filter_by_nodes(node_uuid)
+        biomass_plants = self.biomass_plants.filter_by_nodes(node_uuid)
+        wecs = self.wecs.filter_by_nodes(node_uuid)
+        storages = self.storages.filter_by_nodes(node_uuid)
+        ems = self.ems.filter_by_nodes(node_uuid)
+        evs = self.evs.filter_by_nodes(node_uuid)
+        evcs = self.evcs.filter_by_nodes(node_uuid)
+        hps = self.hps.filter_by_nodes(node_uuid)
         return SystemParticipantsContainer(
             ems,
             loads,
@@ -152,7 +135,7 @@ class SystemParticipantsContainer(ContainerMixin):
     def uuids(self):
         return pd.concat(
             [
-                participants.uuids.to_series()
+                participants.uuid.to_series()
                 for participants in self.to_list(include_empty=True)
             ]
         )
@@ -169,4 +152,29 @@ class SystemParticipantsContainer(ContainerMixin):
             self.evs.subset(uuids),
             self.evcs.subset(uuids),
             self.hps.subset(uuids),
+        )
+
+    @staticmethod
+    def from_csv(path: str, delimiter: str) -> "SystemParticipantsContainer":
+        loads = Loads.from_csv(path, delimiter)
+        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
+        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
+        biomass_plants = BiomassPlants.from_csv(path, delimiter)
+        wecs = WindEnergyConverters.from_csv(path, delimiter)
+        storages = Storages.from_csv(path, delimiter)
+        ems = EnergyManagementSystems.from_csv(path, delimiter)
+        evs = ElectricVehicles.from_csv(path, delimiter)
+        evcs = EvChargingStations.from_csv(path, delimiter)
+        hps = HeatPumps.from_csv(path, delimiter)
+        return SystemParticipantsContainer(
+            ems,
+            loads,
+            fixed_feed_ins,
+            pvs,
+            biomass_plants,
+            wecs,
+            storages,
+            evs,
+            evcs,
+            hps,
         )

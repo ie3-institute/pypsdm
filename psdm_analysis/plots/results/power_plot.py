@@ -245,7 +245,7 @@ def ax_plot_stacked_pq(
 
         if load.p.sum() > 0:
             load_sum = PQResult(
-                res.type, "", "", PQResult.sum([load, residual_load]).data
+                res.entity_type, "", "", PQResult.sum([load, residual_load]).data
             )
             plot_partial(
                 res=load_sum,
@@ -256,7 +256,10 @@ def ax_plot_stacked_pq(
 
         if generation.p.sum() < 0:
             generation_sum = PQResult(
-                res.type, "", "", PQResult.sum([generation, residual_generation]).data
+                res.entity_type,
+                "",
+                "",
+                PQResult.sum([generation, residual_generation]).data,
             )
             plot_partial(
                 res=generation_sum,
@@ -369,7 +372,7 @@ def ax_plot_active_power(
     ax = ax_plot_time_series(
         ax,
         res.p,
-        res.type,
+        res.entity_type,
         resolution,
         hourly_mean=hourly_mean,
         fill_from_index=fill_from_index,
@@ -388,7 +391,7 @@ def ax_plot_soc(
     fill_from_index=False,
     **kwargs,
 ):
-    label, color = get_label_and_color(res.type)
+    label, color = get_label_and_color(res.entity_type)
     set_date_format_and_label(ax, resolution)
     ax.set_ylabel("SOC in percent")
     soc = plot_resample(res.soc(), hourly_mean)
@@ -401,7 +404,7 @@ def ax_plot_soc(
 def plot_sorted_annual_load_duration(
     res: PQResult, s_rated_mw: float = None, fill_from_index=False, **kwargs
 ):
-    args = get_label_and_color_dict(res.type)
+    args = get_label_and_color_dict(res.entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
     fig, ax = plt.subplots(figsize=FIGSIZE)
     annual_duartion_series = res.annual_duration_series()

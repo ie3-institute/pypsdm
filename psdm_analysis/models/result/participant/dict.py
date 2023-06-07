@@ -13,8 +13,9 @@ from psdm_analysis.io.utils import (
     get_file_path,
     to_date_time,
 )
-from psdm_analysis.models.entity import Entities, ResultEntities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum, EntityEnumType
+from psdm_analysis.models.result.entity import ResultEntities
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 
@@ -49,107 +50,6 @@ class ResultDict(ABC):
                 raise ValueError(
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
-
-    @classmethod
-    def from_csv(
-        cls: Type[ResultDictType],
-        entity_type: EntityEnumType,
-        simulation_data_path: str,
-        delimiter: str,
-        simulation_end: Optional[datetime] = None,
-        input_entities: Optional[Entities] = None,
-        filter_start: Optional[datetime] = None,
-        filter_end: Optional[datetime] = None,
-    ) -> ResultDictType:
-        check_filter(filter_start, filter_end)
-        grpd_df = ResultDict.get_grpd_df(
-            entity_type,
-            simulation_data_path,
-            delimiter,
-        )
-        if not grpd_df:
-            logging.debug("There are no " + str(cls))
-            return cls.create_empty(entity_type)
-        if simulation_end is None:
-            simulation_end = to_date_time(grpd_df["time"].max().max())
-        entities = dict(
-            grpd_df.apply(
-                lambda grp: ResultDict.build_for_entity(
-                    entity_type,
-                    grp.name,
-                    grp.drop(columns=["input_model"]),
-                    simulation_end,
-                    input_entities=input_entities,
-                )
-            )
-        )
-        res = cls(
-            entity_type,
-            entities,
-        )
-        return (
-            res
-            if not filter_start
-            else res.filter_for_time_interval(filter_start, filter_end)
-        )
-
-    @staticmethod
-    def build_for_entity(
-        entity_type: EntityEnumType,
-        input_model: str,
-        data: DataFrame,
-        simulation_end: datetime,
-        input_entities=Optional[Entities],
-    ) -> ResultDictType:
-        name = None
-        if input_entities is not None:
-            if input_model not in input_entities.ids.index:
-                logging.debug(
-                    f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
-                )
-            else:
-                name = input_entities.ids.loc[input_model]
-
-        return entity_type.get_result_type().build(
-            entity_type, input_model, data, simulation_end, name=name
-        )
-
-    @staticmethod
-    def get_grpd_df(
-        entity_type: EntityEnumType,
-        simulation_data_path: str,
-        delimiter: str,
-    ) -> Optional[DataFrameGroupBy]:
-        file_name = entity_type.get_csv_result_file_name()
-        path = get_file_path(simulation_data_path, file_name)
-
-        if not path.exists():
-            logging.info(
-                "No results built for {} since {} does not exist".format(
-                    file_name, str(path)
-                )
-            )
-            return None
-
-        return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
-
-    @staticmethod
-    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[str]:
-        file_name = entity_type.get_csv_result_file_name()
-        path = get_file_path(data_path, file_name)
-        if path.exists():
-            return path
-        else:
-            logging.info(
-                "No results built for {} since {} does not exist".format(
-                    file_name, str(path)
-                )
-            )
-            return None
-
-    @classmethod
-    def create_empty(cls, sp_type):
-        return cls(sp_type, dict())
 
     def uuids(self):
         return list(self.entities.keys())
@@ -198,3 +98,104 @@ class ResultDict(ABC):
 
     def uuid_to_id_map(self) -> dict[str, Optional[str]]:
         return {uuid: result.name for uuid, result in self.entities.items()}
+
+    @classmethod
+    def from_csv(
+        cls: Type[ResultDictType],
+        entity_type: EntityEnumType,
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+    ) -> ResultDictType:
+        check_filter(filter_start, filter_end)
+        grpd_df = ResultDict.get_grpd_df(
+            entity_type,
+            simulation_data_path,
+            delimiter,
+        )
+        if not grpd_df:
+            logging.debug("There are no " + str(cls))
+            return cls.create_empty(entity_type)
+        if simulation_end is None:
+            simulation_end = to_date_time(grpd_df["time"].max().max())
+        entities = dict(
+            grpd_df.apply(
+                lambda grp: ResultDict.build_for_entity(
+                    entity_type,
+                    grp.name,
+                    grp.drop(columns=["input_model"]),
+                    simulation_end,
+                    input_entities=input_entities,
+                )
+            )
+        )
+        res = cls(
+            entity_type,
+            entities,
+        )
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)
+        )
+
+    @classmethod
+    def create_empty(cls, sp_type):
+        return cls(sp_type, dict())
+
+    @staticmethod
+    def build_for_entity(
+        entity_type: EntityEnumType,
+        input_model: str,
+        data: DataFrame,
+        simulation_end: datetime,
+        input_entities=Optional[Entities],
+    ) -> ResultDictType:
+        name = None
+        if input_entities is not None:
+            if input_model not in input_entities.id.index:
+                logging.debug(
+                    f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
+                )
+            else:
+                name = input_entities.id.loc[input_model]
+
+        return entity_type.get_result_type().build(
+            entity_type, input_model, data, simulation_end, name=name
+        )
+
+    @staticmethod
+    def get_grpd_df(
+        entity_type: EntityEnumType,
+        simulation_data_path: str,
+        delimiter: str,
+    ) -> Optional[DataFrameGroupBy]:
+        file_name = entity_type.get_csv_result_file_name()
+        path = get_file_path(simulation_data_path, file_name)
+
+        if not path.exists():
+            logging.info(
+                "No results built for {} since {} does not exist".format(
+                    file_name, str(path)
+                )
+            )
+            return None
+
+        return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
+
+    @staticmethod
+    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[str]:
+        file_name = entity_type.get_csv_result_file_name()
+        path = get_file_path(data_path, file_name)
+        if path.exists():
+            return path
+        else:
+            logging.info(
+                "No results built for {} since {} does not exist".format(
+                    file_name, str(path)
+                )
+            )
+            return None

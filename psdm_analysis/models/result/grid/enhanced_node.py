@@ -19,6 +19,14 @@ class EnhancedNodeResult(NodeResult):
             & (self.data.equals(other.data))
         )
 
+    @property
+    def p(self) -> Series:
+        return self.data["p"]
+
+    @property
+    def q(self) -> Series:
+        return self.data["q"]
+
     @classmethod
     def from_node_result(
         cls, node_res: NodeResult, pq: PQResult
@@ -30,30 +38,10 @@ class EnhancedNodeResult(NodeResult):
             pd.concat([node_res.data, pq.data], axis=1).sort_index(),
         )
 
-    @property
-    def p(self) -> Series:
-        return self.data["p"]
-
-    @property
-    def q(self) -> Series:
-        return self.data["q"]
-
 
 @dataclass(frozen=True)
 class EnhancedNodesResult(NodesResult):
     entities: dict[str, EnhancedNodeResult]
-
-    @classmethod
-    def from_nodes_result(
-        cls, nodes_result: NodesResult, nodal_pq: dict[str, PQResult]
-    ):
-        return cls(
-            RawGridElementsEnum.NODE,
-            {
-                uuid: EnhancedNodeResult.from_node_result(result, nodal_pq[uuid])
-                for uuid, result in nodes_result.entities.items()
-            },
-        )
 
     @property
     def p(self) -> DataFrame:
@@ -83,4 +71,16 @@ class EnhancedNodesResult(NodesResult):
             .sort_index()
             .ffill()
             .fillna(0)
+        )
+
+    @classmethod
+    def from_nodes_result(
+        cls, nodes_result: NodesResult, nodal_pq: dict[str, PQResult]
+    ):
+        return cls(
+            RawGridElementsEnum.NODE,
+            {
+                uuid: EnhancedNodeResult.from_node_result(result, nodal_pq[uuid])
+                for uuid, result in nodes_result.entities.items()
+            },
         )

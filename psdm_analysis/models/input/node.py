@@ -3,28 +3,13 @@ from typing import List
 
 from pandas import DataFrame
 
-from psdm_analysis.models.entity import Entities
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
 class Nodes(Entities):
     data: DataFrame
-
-    @staticmethod
-    def get_enum() -> RawGridElementsEnum:
-        return RawGridElementsEnum.NODE
-
-    @staticmethod
-    def attributes() -> List[str]:
-        return Entities.attributes() + [
-            "v_rated",
-            "v_target",
-            "slack",
-            "geo_position",
-            "volt_lvl",
-            "subnet",
-        ]
 
     @property
     def geo_position(self):
@@ -58,8 +43,26 @@ class Nodes(Entities):
     def volt_lvl(self):
         return self.data["volt_lvl"]
 
+    @property
+    def node(self):
+        return self.data.index
+
     def get_slack_nodes(self):
         return Nodes(self.data[self.slack])
 
-    def nodes(self):
-        return self.data.index
+    @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.NODE
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return Entities.attributes() + [
+            "v_rated",
+            "v_target",
+            "slack",
+            "geo_position",
+            "longitude",
+            "latitude",
+            "volt_lvl",
+            "subnet",
+        ]

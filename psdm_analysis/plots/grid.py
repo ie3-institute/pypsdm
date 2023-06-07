@@ -1,19 +1,19 @@
 import json
+from typing import Optional, Union
 
 import plotly.graph_objs as go
 from pandas import Series
 from shapely.geometry import LineString
 
 from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.plots.common.utils import BLUE, GREY, RED, rgb_to_hex
+from psdm_analysis.plots.common.utils import BLUE, GREEN, GREY, RED, rgb_to_hex
 
 
-def get_lons_lats(geojson: str):
-    coordinates = json.loads(geojson)["coordinates"]
-    return list(zip(*coordinates))  # returns lons, lats
-
-
-def grid_plot(grid: GridContainer):
+def grid_plot(
+    grid: GridContainer,
+    node_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    line_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+) -> go.Figure:
     """
     Plots the grid on an OpenStreetMap. Lines that are disconnected due to open switches will be grey.
 
@@ -21,21 +21,32 @@ def grid_plot(grid: GridContainer):
     We currently consider the node_b of the switches to be the auxiliary switch node.
     This is not enforced within the PSDM so might not work as expected.
     If that is the case the wrong lines might be grey.
+
+    Args:
+        grid (GridContainer): Grid to plot.
+        node_highlights (Optional): Highlights nodes. Defaults to None.
+                                    List of uuids or dict[(r, g, b), str] with colors.
+        line_highlights (Optional): Highlights lines. Defaults to None.
+                                    List of uuids or dict[(r, g, b), str] with colors.
+    Returns:
+        Figure: Plotly figure.
     """
     fig = go.Figure()
 
     # Get disconnected lines via opened switches
     opened_switches = grid.raw_grid.switches.get_opened()
 
-    disconnected_lines = grid.raw_grid.lines.find_lines_by_nodes(opened_switches.node_b)
-    _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuids)
+    disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
+    _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
-    connected_lines.data.apply(lambda line: add_line_trace(fig, line), axis=1)
+    connected_lines.data.apply(
+        lambda line: _add_line_trace(fig, line, highlights=line_highlights), axis=1
+    )
     disconnected_lines.data.apply(
-        lambda line: add_line_trace(fig, line, is_disconnected=True), axis=1
+        lambda line: _add_line_trace(fig, line, is_disconnected=True), axis=1
     )
 
-    add_node_trace(fig, grid)
+    _add_node_trace(fig, grid, node_highlights)
 
     center_lat = grid.raw_grid.nodes.data["latitude"].mean()
     center_lon = grid.raw_grid.nodes.data["longitude"].mean()
@@ -67,11 +78,25 @@ def grid_plot(grid: GridContainer):
     return fig
 
 
-def add_line_trace(fig: go.Figure, line_data: Series, is_disconnected: bool = False):
-    lons, lats = get_lons_lats(line_data.geo_position)
+def _add_line_trace(
+    fig: go.Figure,
+    line_data: Series,
+    is_disconnected: bool = False,
+    highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+):
+    lons, lats = _get_lons_lats(line_data.geo_position)
     hover_text = line_data["id"]
 
-    color = GREY if is_disconnected else RED
+    color = GREEN
+    if isinstance(highlights, dict):
+        for line_color, lines in highlights.items():
+            if line_data.name in lines:
+                color = line_color
+    elif highlights is not None:
+        color = RED if line_data.name in highlights else GREEN
+
+    if is_disconnected:
+        color = GREY
 
     # Add the lines
     fig.add_trace(
@@ -98,12 +123,16 @@ def add_line_trace(fig: go.Figure, line_data: Series, is_disconnected: bool = Fa
             lat=[midpoint.y],
             hoverinfo="text",
             hovertext=hover_text,
-            marker=dict(size=0, opacity=0, color=rgb_to_hex(RED)),
+            marker=dict(size=0, opacity=0, color=rgb_to_hex(color)),
         )
     )
 
 
-def add_node_trace(fig: go.Figure, grid: GridContainer):
+def _add_node_trace(
+    fig: go.Figure,
+    grid: GridContainer,
+    highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+):
     node_hover_data = grid.get_nodal_sp_count_and_power()
     nodes_data = grid.raw_grid.nodes.data
 
@@ -123,14 +152,37 @@ def add_node_trace(fig: go.Figure, grid: GridContainer):
         lambda node_data: to_hover_text(node_data), axis=1
     ).to_list()
 
-    fig.add_trace(
-        go.Scattermapbox(
-            mode="markers",
-            lon=nodes_data["longitude"],
-            lat=nodes_data["latitude"],
-            hovertext=text,
-            hoverinfo="text",
-            marker=dict(size=6, color=rgb_to_hex(BLUE)),
-            text=text,
+    def _add_node_trace(data, color):
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="markers",
+                lon=data["longitude"],
+                lat=data["latitude"],
+                hovertext=text,
+                hoverinfo="text",
+                marker=dict(size=6, color=rgb_to_hex(color)),
+                text=text,
+            )
         )
-    )
+
+    if highlights is not None:
+        if isinstance(highlights, dict):
+            for color, nodes in highlights.items():
+                highlighted_nodes = nodes_data.loc[nodes]
+                _add_node_trace(highlighted_nodes, color)
+        elif isinstance(highlights, list):
+            highlighted_nodes = nodes_data.loc[highlights]
+            _add_node_trace(highlighted_nodes, RED)
+            rmd = nodes_data.drop(highlights)
+            _add_node_trace(rmd, BLUE)
+        else:
+            raise ValueError(
+                "Invalid type for highlights. We expect a list of ids or a dict of colors and ids."
+            )
+    else:
+        _add_node_trace(nodes_data, BLUE)
+
+
+def _get_lons_lats(geojson: str):
+    coordinates = json.loads(geojson)["coordinates"]
+    return list(zip(*coordinates))  # returns lons, lats

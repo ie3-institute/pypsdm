@@ -13,10 +13,6 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class Transformer2WResult(ConnectorResult):
-    @staticmethod
-    def attributes() -> List[str]:
-        return ConnectorResult.attributes() + ["tap_pos"]
-
     @property
     def tap_pos(self) -> Series:
         return self.data["tap_pos"]
@@ -42,6 +38,10 @@ class Transformer2WResult(ConnectorResult):
         # todo: adjust to real prefix
         s_rated = transformer.s_rated.to_list()[0]
         return self.calc_rated_power_gwr(gwr, side, absolute) / s_rated
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return ConnectorResult.attributes() + ["tap_pos"]
 
 
 @dataclass(frozen=True)

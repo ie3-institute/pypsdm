@@ -15,7 +15,7 @@ class EvChargingStations(SystemParticipants):
         return self.data["charging_points"]
 
     @property
-    def location_types(self):
+    def location_type(self):
         return self.data["location_type"]
 
     @property
@@ -27,7 +27,7 @@ class EvChargingStations(SystemParticipants):
         return self.data["electric_current_type"]
 
     def get_public_evcs(self):
-        return self.data[self.location_types.isin(["CUSTOMER_PARKING", "WORK"])]
+        return self.data[self.location_type.isin(["CUSTOMER_PARKING", "WORK"])]
 
     def get_home_evcs(self):
-        return self.data[self.location_types.isin(["HOME"])]
+        return self.data[self.location_type.isin(["HOME"])]

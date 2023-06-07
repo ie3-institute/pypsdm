@@ -10,10 +10,6 @@ from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 @dataclass(frozen=True)
 class Lines(Connector, HasTypeMixin):
-    @staticmethod
-    def get_enum() -> RawGridElementsEnum:
-        return RawGridElementsEnum.LINE
-
     @property
     def length(self) -> Series:
         return self.data["length"]
@@ -64,38 +60,9 @@ class Lines(Connector, HasTypeMixin):
         """
         return self.data["length"] / len(self.data)
 
-    def find_lines_by_nodes(self, node_uuids: list[str]) -> "Lines":
-        """
-        Returns all lines that are connected to any of the given nodes.
-
-        Args:
-            node_uuids: List of node uuids to find lines for.
-
-        Returns:
-            Lines: Lines that are connected to any of the given nodes.
-        """
-        return Lines(
-            self.data[(self.node_a.isin(node_uuids)) | (self.node_b.isin(node_uuids))]
-        )
-
-    def find_line_by_node_pair(self, node_a_uuid: str, node_b_uuid: str) -> "Lines":
-        """
-        Returns the line that connects the given nodes.
-
-        Args:
-            node_a_uuid (str): UUID of the first node.
-            node_b_uuid (str): UUID of the second node.
-
-        Returns:
-            Lines: Line that connects the given nodes. Will be empty if no line is found.
-        """
-
-        return Lines(
-            self.data[
-                ((self.node_a == node_a_uuid) & (self.node_b == node_b_uuid))
-                | ((self.node_a == node_b_uuid) & (self.node_b == node_a_uuid))
-            ]
-        )
+    @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.LINE
 
     @staticmethod
     def entity_attributes() -> List[str]:

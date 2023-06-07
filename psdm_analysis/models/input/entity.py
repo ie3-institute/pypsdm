@@ -5,21 +5,19 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, List, Tuple, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
-from psdm_analysis.io.utils import df_to_csv, read_csv, to_date_time
+from psdm_analysis.io.utils import df_to_csv, read_csv
 from psdm_analysis.models.input.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
     SystemParticipantsEnum,
 )
 from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
-from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 if TYPE_CHECKING:
     from psdm_analysis.models.input.node import Nodes
@@ -29,6 +27,16 @@ EntityType = TypeVar("EntityType", bound="Entities")
 
 @dataclass(frozen=True)
 class Entities(ABC):
+    """
+    Entities is the abstract base class for all input entity models.
+    At it's core all data can be retrieved by accessing the data attribute which returns a pandas DataFrame.
+    Every row corresponds to one entity, indexed with their uuid.
+    Attribute columns can be accessed by their respectively named property methods.
+
+    Args:
+        data: The data of the entities.
+    """
+
     data: DataFrame
 
     def __len__(self):
@@ -50,13 +58,16 @@ class Entities(ABC):
         Returns:
             The concatenated Entities instance.
         """
+
+        if not isinstance(other, type(self)):
+            raise TypeError("The two Entities instances must be of the same type")
+
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
-        if columns_diff:
-            raise ValueError(
-                f"Columns of the dataframes are not the same: {columns_diff}"
+        if len(columns_diff) > 0 and columns_diff.issubset(self.attributes()):
+            logging.warning(
+                "The two Entities instances have different columns: %s", columns_diff
             )
-        else:
-            return type(self)(pd.concat([self.data, other.data]))
+        return type(self)(pd.concat([self.data, other.data]))
 
     def __sub__(self: EntityType, other: Union[EntityType, List[str]]) -> EntityType:
         """
@@ -68,6 +79,7 @@ class Entities(ABC):
         Returns:
             A new Entities instance with the uuids removed.
         """
+
         if isinstance(other, Entities):
             indices_to_remove = other.data.index
         elif isinstance(other, list) and all(isinstance(index, str) for index in other):
@@ -83,53 +95,148 @@ class Entities(ABC):
         return type(self)(self.data.drop(indices_to_remove))
 
     @property
-    def uuids(self):
+    def uuid(self) -> Series:
+        """
+        Returns: The uuids of the entities.
+        """
         return self.data.index
 
     @property
-    def ids(self):
+    def id(self) -> Series:
+        """
+        Returns: The ids of the entities.
+        """
         return self.data["id"]
 
     @property
-    def operates_from(self):
+    def operates_from(self) -> Series:
+        """
+        Returns: The operaton start time of the entities.
+        """
         return self.data["operates_from"]
 
     @property
-    def operates_until(self):
+    def operates_until(self) -> Series:
+        """
+        Returns: The operaton end time of the entities.
+        """
         return self.data["operates_until"]
 
     @property
-    def operator(self):
+    def operator(self) -> Series:
+        """
+        Returns: The operator of the entities.
+        """
         return self.data["operator"]
 
+    @property
     @abstractmethod
-    def nodes(self):
+    def node(self) -> Series:
+        """
+        Returns: The nodes to which the entities are connected.
+        """
         pass
 
     def get(self, uuid: str) -> Series:
+        """
+        Returns the entity information of the entitiy with the given uuid.
+
+        Args:
+            uuid: The uuid of the entity.
+
+        Returns:
+            Row (Series) of the corresponding entity information.
+        """
         return self.data.loc[uuid]
 
-    def subset(self, uuids: Union[list[str], str]):
+    def subset(self: EntityType, uuids: Union[list[str], set[str], str]) -> EntityType:
+        """
+        Creates a subset of the Entities instance with the given uuids.
+
+        Args:
+            uuids: The uuids to subset.
+
+        Returns:
+            A new instance with the subset of entities.
+        """
         if isinstance(uuids, str):
             uuids = [uuids]
-        return type(self)(self.data.loc[uuids])
+        elif isinstance(uuids, set):
+            uuids = list(uuids)
+        try:
+            return type(self)(self.data.loc[uuids])
+        except KeyError as e:
+            not_found = set(uuids) - set(self.data.index)
+            raise KeyError(
+                f"uuids must be a subset of the current Entities instance. The following uuids couldn't be found: {not_found}"
+            ) from e
 
-    def subset_split(self, uuids: list[str]):
-        rmd = set(self.uuids) - set(uuids)
+    def subset_id(self: EntityType, ids: Union[list[str], set[str], str]) -> EntityType:
+        """
+        Creates a subset of the Entities instance with the given ids.
+
+        Args:
+            ids: The ids to subset.
+
+        Returns:
+            A new instance with the subset of entities.
+        """
+        if isinstance(ids, str):
+            ids = [ids]
+        elif isinstance(ids, set):
+            ids = list(ids)
+        return type(self)(self.data[self.data["id"].isin(ids)])
+
+    def subset_split(
+        self: EntityType, uuids: Union[list[str], set[str], str]
+    ) -> Tuple[EntityType, EntityType]:
+        """
+        Returns the subset of entities as well as the remaining instances.
+
+        Args:
+            uuids: The uuids to subset.
+
+        Returns:
+            A tuple of the subset and the remaining entities.
+        """
+        rmd = set(self.uuid) - set(uuids)
         return self.subset(uuids), self.subset(list(rmd))
 
-    def filter_for_node(self, uuid: str):
-        data = self.data[self.nodes() == str(uuid)]
+    def filter_by_nodes(
+        self: EntityType, nodes: Union[str, list[str], set[str]]
+    ) -> EntityType:
+        """
+        Filters for all entities which are connected to one of th given nodes.
+
+        Args:
+            nodes: The nodes to filter by, represented by their uuids.
+
+        Returns:
+            A new Entities instance with the filtered entities.
+        """
+        if isinstance(nodes, str):
+            nodes = [nodes]
+        data = self.data[self.node.isin(nodes)]
         return type(self)(data)
 
     def find_nodes(self, nodes: Nodes) -> Nodes:
-        return nodes.subset(self.nodes())
+        return nodes.subset(self.node)
 
     def to_csv(self, path: str, delimiter: str = ","):
         df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str):
+    def from_csv(cls: EntityType, path: str, delimiter: str) -> EntityType:
+        """
+        Reads the entity data from a csv file.
+
+        Args:
+            path: The path to the csv file.
+            delimiter: The delimiter of the csv file.
+
+        Returns:
+           The corresponding entities object.
+        """
         return cls._from_csv(path, delimiter, cls.get_enum())
 
     @classmethod
@@ -189,13 +296,19 @@ class Entities(ABC):
             )
 
     @classmethod
-    def create_empty(cls):
+    def create_empty(cls: EntityType) -> EntityType:
+        """
+        Creates an empty instance of the corresponding entity class.
+        """
         data = pd.DataFrame(columns=cls.attributes())
         return cls(data)
 
     @staticmethod
     @abstractmethod
     def get_enum() -> EntitiesEnum:
+        """
+        Returns the corresponding entity enum value.
+        """
         pass
 
     @staticmethod
@@ -206,121 +319,3 @@ class Entities(ABC):
         :return:
         """
         return ["uuid", "id", "operates_from", "operates_until", "operator"]
-
-
-ResultType = TypeVar("ResultType", bound="ResultEntities")
-
-
-@dataclass(frozen=True)
-class ResultEntities(ABC):
-    # todo: type is a reserved keyword -> rename
-    type: EntitiesEnum
-    input_model: str
-    name: Optional[str]
-    data: DataFrame
-
-    def __repr__(self):
-        return self.data
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, where: Union[slice, datetime, list[datetime]]):
-        if isinstance(where, slice):
-            start, stop, step = where.start, where.stop, where.step
-            if step is not None:
-                logging.warning("Step is not supported for slicing. Ignoring it.")
-            if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-                raise ValueError("Only datetime slicing is supported")
-            return self.filter_for_time_interval(start, stop)
-        elif isinstance(where, datetime):
-            filtered, dt = self._get_data_by_datetime(where)
-            data = pd.DataFrame(filtered).T
-            return self.build(self.type, self.input_model, data, dt, self.name)
-        elif isinstance(where, list):
-            filtered = [self._get_data_by_datetime(time)[0] for time in where]
-            data = pd.DataFrame(pd.concat(filtered, axis=1)).T
-            max_dt = sorted(data.index)[-1]
-            return self.build(self.type, self.input_model, data, max_dt, name=self.name)
-
-    def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
-        if dt > self.data.index[-1]:
-            logging.warning(
-                "Trying to access data after last time step. Returning last time step."
-            )
-            return self.data.iloc[-1], self.data.index[-1]
-        if dt < self.data.index[0]:
-            logging.warning(
-                "Trying to access data before first time step. Returning first time step."
-            )
-            return self.data.iloc[0], self.data.index[0]
-        else:
-            return self.data.asof(dt), dt
-
-    @staticmethod
-    @abstractmethod
-    def attributes() -> List[str]:
-        pass
-
-    @classmethod
-    def empty_data(cls, index=None):
-        return (
-            pd.DataFrame(columns=cls.attributes(), index=index)
-            if index
-            else pd.DataFrame(columns=cls.attributes())
-        )
-
-    @classmethod
-    def create_empty(
-        cls, entity_type: EntitiesEnum, name: Optional[str], input_model: str
-    ):
-        data = cls.empty_data()
-        return cls(entity_type, input_model, name, data)
-
-    @classmethod
-    def build(
-        cls,
-        entity_type: EntitiesEnum,
-        input_model: str,
-        data: DataFrame,
-        end: datetime,
-        name: Optional[str] = None,
-    ) -> "ResultEntities":
-        if data.empty:
-            return cls.create_empty(entity_type, name, input_model)
-
-        if "time" in data.columns:
-            data["time"] = data["time"].apply(
-                lambda date_string: to_date_time(date_string)
-            )
-            data = data.set_index("time", drop=True)
-
-        last_state = data.iloc[len(data) - 1]
-        if last_state.name != end:
-            last_state.name = end
-            data = pd.concat([data, DataFrame(last_state).transpose()])
-        # todo: deal with duplicate indexes -> take later one
-        data = data[~data.index.duplicated(keep="last")]
-        data.sort_index(inplace=True)
-        return cls(entity_type, input_model, name, data)
-
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        filtered_data = filter_data_for_time_interval(self.data, start, end)
-        return self.build(self.type, self.input_model, filtered_data, end, self.name)
-
-    @classmethod
-    # todo: find a way for parallel calculation
-    def sum(cls, results: list[ResultType]) -> ResultType:
-        if len(results) == 0:
-            return cls.create_empty(SystemParticipantsEnum.PARTICIPANTS_SUM, "", "")
-        if len(results) == 1:
-            return results[0]
-        agg = results[0]
-        for result in results[1::]:
-            agg += result
-        return agg
-
-    def find_input_entity(self, input_model: EntityType):
-        if self.type != input_model.get_enum():
-            logging.warning("Input model type does not match result type!")
-        return input_model.subset([self.input_model])

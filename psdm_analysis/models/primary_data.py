@@ -33,14 +33,6 @@ class PrimaryData:
             .sort_index()
         )
 
-    def sum(self) -> PQResult:
-        return PQResult.sum(list(self.time_series.values()))
-
-    def p_sum(self) -> Series:
-        if not self.time_series:
-            return Series(dtype=float)
-        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
-
     @property
     def q(self):
         return (
@@ -49,10 +41,18 @@ class PrimaryData:
             .sort_index()
         )
 
+    def p_sum(self) -> Series:
+        if not self.time_series:
+            return Series(dtype=float)
+        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
+
     def q_sum(self):
         if not self.time_series:
             return Series(dtype=float)
         return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
+
+    def sum(self) -> PQResult:
+        return PQResult.sum(list(self.time_series.values()))
 
     def get_for_participant(self, participant: str):
         time_series_id = self.participant_mapping[participant]
@@ -101,7 +101,9 @@ class PrimaryData:
                 .to_dict()["time_series"]
             )
 
-            pa_read_time_series = partial(PrimaryData.read_time_series, path, delimiter)
+            pa_read_time_series = partial(
+                PrimaryData._read_pd_time_series, path, delimiter
+            )
 
             with concurrent.futures.ProcessPoolExecutor() as executor:
                 time_series = executor.map(pa_read_time_series, ts_files)
@@ -115,11 +117,11 @@ class PrimaryData:
             return PrimaryData("Primary Data", dict(), dict())
 
     @staticmethod
-    def read_time_series(dir_path: str, delimiter: str, ts_file: str):
-        name = ts_file[-40:][:36]
+    def _read_pd_time_series(dir_path: str, delimiter: str, ts_file: str):
+        ts_uuid = ts_file[-40:][:36]
         data = utils.read_csv(str(dir_path), ts_file, delimiter)
         data["time"] = data["time"].apply(lambda date_string: to_date_time(date_string))
         data = data.set_index("time")
         if "q" not in data.columns:
             data["q"] = 0
-        return PQResult(SystemParticipantsEnum.PRIMARY_DATA, name, name, data)
+        return PQResult(SystemParticipantsEnum.PRIMARY_DATA, ts_uuid, ts_uuid, data)

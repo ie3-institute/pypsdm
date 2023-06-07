@@ -47,10 +47,10 @@ def test_relative_line_length(lines_fixture):
 
 
 def test_find_lines_by_nodes(lines_fixture):
-    found_lines = lines_fixture.find_lines_by_nodes(["uuid1", "uuid3"])
+    found_lines = lines_fixture.filter_by_nodes(["uuid1", "uuid3"])
     assert (found_lines.data == lines_fixture.data.loc[[0, 2], :]).all().all()
 
 
 def test_find_line_by_node_pair(lines_fixture):
-    found_line = lines_fixture.find_line_by_node_pair("uuid2", "uuid5")
+    found_line = lines_fixture.filter_by_node_pair("uuid2", "uuid5")
     assert (found_line.data == lines_fixture.data.loc[[1], :]).all().all()

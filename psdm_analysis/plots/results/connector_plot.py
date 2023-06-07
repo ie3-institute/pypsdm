@@ -70,7 +70,7 @@ def ax_plot_transformer_s_rated(
     ax_plot_time_series(
         ax,
         rated_power,
-        res.type,
+        res.entity_type,
         resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
@@ -133,7 +133,7 @@ def ax_plot_line_current(
     ax = ax_plot_time_series(
         ax,
         current,
-        res.type,
+        res.entity_type,
         resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
@@ -167,7 +167,7 @@ def plot_connector_current(
     set_x_label=True,
     **kwargs,
 ):
-    connector_type = res.type.get_plot_name()
+    connector_type = res.entity_type.get_plot_name()
     connector_name = res.name if res.name else res.input_model
     if title is None:
         title = f"Current Magnitude {connector_type}: {connector_name}"
@@ -197,7 +197,7 @@ def ax_plot_connector_current(
     set_x_label=True,
     **kwargs,
 ):
-    connector_type = res.type.get_plot_name()
+    connector_type = res.entity_type.get_plot_name()
     if len(res.i_a_mag) == 0:
         raise ValueError(
             f"{connector_type} current time series is empty. No data to plot"
@@ -208,7 +208,7 @@ def ax_plot_connector_current(
     ax = ax_plot_time_series(
         ax,
         current,
-        res.type,
+        res.entity_type,
         resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,

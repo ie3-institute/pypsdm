@@ -1,7 +1,7 @@
 import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Set, Union
+from typing import Optional, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
@@ -33,6 +33,27 @@ class ResultContainer:
     # todo: implement slicing
     def __getitem__(self, slice_val):
         raise NotImplementedError
+
+    def uuids(self) -> set[str]:
+        return set(self.nodes.entities.keys())
+
+    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
+        return ResultContainer(
+            self.name,
+            self.nodes.filter_by_date_time(time),
+            self.lines.filter_by_date_time(time),
+            self.transformers_2w.filter_by_date_time(time),
+            self.participants.filter_by_date_time(time),
+        )
+
+    def filter_for_time_interval(self, start: datetime, end: datetime):
+        return ResultContainer(
+            self.name,
+            self.nodes.filter_for_time_interval(start, end),
+            self.lines.filter_for_time_interval(start, end),
+            self.transformers_2w.filter_for_time_interval(start, end),
+            self.participants.filter_for_time_interval(start, end),
+        )
 
     @classmethod
     def from_csv(
@@ -101,28 +122,3 @@ class ResultContainer:
         )
 
         return cls(name, nodes, lines, transformers_2_w, participants)
-
-    def uuids(self) -> set[str]:
-        return set(self.nodes.entities.keys())
-
-    # todo: implement
-    def filter_by_nodes(self, nodes: Set[str]):
-        pass
-
-    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        return ResultContainer(
-            self.name,
-            self.nodes.filter_by_date_time(time),
-            self.lines.filter_by_date_time(time),
-            self.transformers_2w.filter_by_date_time(time),
-            self.participants.filter_by_date_time(time),
-        )
-
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        return ResultContainer(
-            self.name,
-            self.nodes.filter_for_time_interval(start, end),
-            self.lines.filter_for_time_interval(start, end),
-            self.transformers_2w.filter_for_time_interval(start, end),
-            self.participants.filter_for_time_interval(start, end),
-        )

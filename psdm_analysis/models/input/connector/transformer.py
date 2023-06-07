@@ -72,6 +72,10 @@ class Transformers2W(Connector, HasTypeMixin):
         return self.data["tap_max"]
 
     @staticmethod
+    def get_enum() -> RawGridElementsEnum:
+        return RawGridElementsEnum.TRANSFORMER_2_W
+
+    @staticmethod
     def entity_attributes() -> list[str]:
         return [
             "node_a",
@@ -99,7 +103,3 @@ class Transformers2W(Connector, HasTypeMixin):
             "tap_min",
             "tap_max",
         ]
-
-    @staticmethod
-    def get_enum() -> RawGridElementsEnum:
-        return RawGridElementsEnum.TRANSFORMER_2_W

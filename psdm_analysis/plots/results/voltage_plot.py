@@ -247,7 +247,7 @@ def ax_plot_node_v_mag(
     ax = ax_plot_time_series(
         ax,
         res.v_mag,
-        res.type,
+        res.entity_type,
         resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
@@ -272,7 +272,7 @@ def ax_plot_node_v_ang(
     ax = ax_plot_time_series(
         ax,
         res.v_ang,
-        res.type,
+        res.entity_type,
         resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,

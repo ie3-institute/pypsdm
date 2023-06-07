@@ -167,7 +167,7 @@ def test_from_csv(wec_a):
     os.makedirs(output_dir, exist_ok=True)
     wec_a.to_csv(output_dir)
     file_name = wec_a.get_default_output_name()
-    res = PQResult.from_csv(os.path.join(output_dir, file_name), wec_a.type)
+    res = PQResult.from_csv(os.path.join(output_dir, file_name), wec_a.entity_type)
     assert (res.p == wec_a.p).all()
     assert (res.q == wec_a.q).all()
 
