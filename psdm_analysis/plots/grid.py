@@ -36,8 +36,8 @@ def grid_plot(
     # Get disconnected lines via opened switches
     opened_switches = grid.raw_grid.switches.get_opened()
 
-    disconnected_lines = grid.raw_grid.lines.find_lines_by_nodes(opened_switches.node_b)
-    _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuids)
+    disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
+    _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
     connected_lines.data.apply(
         lambda line: _add_line_trace(fig, line, highlights=line_highlights), axis=1

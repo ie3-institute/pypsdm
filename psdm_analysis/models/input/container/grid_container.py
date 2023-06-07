@@ -28,13 +28,19 @@ class RawGridContainer(ContainerMixin):
         grid_elements = [self.nodes, self.lines, self.transformers_2_w, self.switches]
         return grid_elements if include_empty else [e for e in grid_elements if e]
 
-    def get_branches(self) -> list[list[str]]:
+    def get_branches(self, as_graphs=False) -> Union[list[list[str]], list[Graph]]:
         """
         Returns all branches, branching off from the slack node of the grid.
-        The branches are returned as a list of lists, where each list contains the node uuids of the branch,
-        starting at the slack node.
+        The branches are either returned as a list of lists, where each list contains the node uuids of the branch,
+        starting at the slack node, or rather as subgraphs containing all nodes and edges of the branch.
 
         Currently only works for single slack node and single voltage level grids.
+
+        Args:
+            as_graphs: If True, returns the branches as subgraphs, otherwise as lists of node uuids.
+
+        Returns:
+            A list of lists or a list of subgraphs, containing the branches of the grid.
         """
 
         slack_node = self.nodes.get_slack_nodes()
@@ -58,10 +64,13 @@ class RawGridContainer(ContainerMixin):
             )
         elif len(slack_connected_node) == 0:
             raise ValueError("Did not find a slack node!")
-        branches = self._find_branches(
-            self.build_networkx_graph(), slack_connected_node.pop()
-        )
-        return [[slack_node.uuid[0]] + branch for branch in branches]
+        slack_connected_node = slack_connected_node.pop()
+        graph = self.build_networkx_graph()
+        branches = self._find_branches(graph, slack_connected_node)
+        branches = [[slack_connected_node] + branch for branch in branches]
+        if as_graphs:
+            return [graph.subgraph(branch).copy() for branch in branches]
+        return branches
 
     def build_networkx_graph(self) -> Graph:
         graph = Graph()
