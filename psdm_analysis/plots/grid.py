@@ -13,6 +13,7 @@ def grid_plot(
     grid: GridContainer,
     node_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
     line_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    highlight_disconnected: Optional[bool] = False,
 ) -> go.Figure:
     """
     Plots the grid on an OpenStreetMap. Lines that are disconnected due to open switches will be grey.
@@ -43,7 +44,14 @@ def grid_plot(
         lambda line: _add_line_trace(fig, line, highlights=line_highlights), axis=1
     )
     disconnected_lines.data.apply(
-        lambda line: _add_line_trace(fig, line, is_disconnected=True), axis=1
+        lambda line: _add_line_trace(
+            fig,
+            line,
+            highlights=line_highlights,
+            is_disconnected=True,
+            highlight_disconnected=highlight_disconnected,
+        ),
+        axis=1,
     )
 
     _add_node_trace(fig, grid, node_highlights)
@@ -83,6 +91,7 @@ def _add_line_trace(
     line_data: Series,
     is_disconnected: bool = False,
     highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    highlight_disconnected: Optional[bool] = False,
 ):
     lons, lats = _get_lons_lats(line_data.geo_position)
     hover_text = line_data["id"]
@@ -95,7 +104,7 @@ def _add_line_trace(
     elif highlights is not None:
         color = RED if line_data.name in highlights else GREEN
 
-    if is_disconnected:
+    if (highlight_disconnected is False) and is_disconnected:
         color = GREY
 
     # Add the lines
@@ -152,7 +161,7 @@ def _add_node_trace(
         lambda node_data: to_hover_text(node_data), axis=1
     ).to_list()
 
-    def _add_node_trace(data, color):
+    def _node_trace(data, color):
         fig.add_trace(
             go.Scattermapbox(
                 mode="markers",
@@ -169,18 +178,18 @@ def _add_node_trace(
         if isinstance(highlights, dict):
             for color, nodes in highlights.items():
                 highlighted_nodes = nodes_data.loc[nodes]
-                _add_node_trace(highlighted_nodes, color)
+                _node_trace(highlighted_nodes, color)
         elif isinstance(highlights, list):
             highlighted_nodes = nodes_data.loc[highlights]
-            _add_node_trace(highlighted_nodes, RED)
+            _node_trace(highlighted_nodes, RED)
             rmd = nodes_data.drop(highlights)
-            _add_node_trace(rmd, BLUE)
+            _node_trace(rmd, BLUE)
         else:
             raise ValueError(
                 "Invalid type for highlights. We expect a list of ids or a dict of colors and ids."
             )
     else:
-        _add_node_trace(nodes_data, BLUE)
+        _node_trace(nodes_data, BLUE)
 
 
 def _get_lons_lats(geojson: str):
