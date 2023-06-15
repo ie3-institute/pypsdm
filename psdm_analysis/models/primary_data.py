@@ -17,11 +17,43 @@ from psdm_analysis.models.result.power import PQResult
 
 @dataclass
 class PrimaryData:
-    name: str
     # ts_uuid -> ts
     time_series: dict[str, PQResult]
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
+
+    def __len__(self):
+        return len(self.entities)
+
+    def __contains__(self, uuid):
+        return uuid in self.entities
+
+    def __getitem__(self, get):
+        match get:
+            case str():
+                if get in self.participant_mapping:
+                    return self.time_series[self.participant_mapping[get]]
+                elif get in self.time_series:
+                    return self.time_series[get]
+                else:
+                    raise KeyError(
+                        f"{get} neither a valid time series nor a participant uuid."
+                    )
+            case slice():
+                start, stop, step = get.start, get.stop, get.step
+                if step is not None:
+                    logging.warning("Step is not supported for slicing. Ignoring it.")
+                if not (isinstance(start, datetime) and isinstance(stop, datetime)):
+                    raise ValueError("Only datetime slicing is supported")
+                entities = {
+                    key: e.filter_for_time_interval(start, stop)
+                    for key, e in self.entities.items()
+                }
+                return type(self)(self.entity_type, entities)
+            case _:
+                raise ValueError(
+                    "Only get by uuid or datetime slice for filtering is supported."
+                )
 
     @property
     def p(self):
@@ -72,7 +104,6 @@ class PrimaryData:
         :return: a new result containing only the given time or times
         """
         return PrimaryData(
-            self.name,
             {uuid: result[time] for uuid, result in self.time_series.items()},
             self.participant_mapping,
         )
@@ -82,7 +113,7 @@ class PrimaryData:
             uuid: time_series.filter_for_time_interval(start, end)
             for uuid, time_series in self.time_series.items()
         }
-        return PrimaryData(self.name, filtered_time_series, self.participant_mapping)
+        return PrimaryData(filtered_time_series, self.participant_mapping)
 
     @classmethod
     def from_csv(cls, path: str, delimiter: str):
@@ -110,11 +141,11 @@ class PrimaryData:
                 for ts in time_series:
                     time_series_dict[ts.name] = ts
 
-            return PrimaryData("Primary Data", time_series_dict, participant_mapping)
+            return PrimaryData(time_series_dict, participant_mapping)
 
         else:
             logging.debug(f"No primary data in path {path}")
-            return PrimaryData("Primary Data", dict(), dict())
+            return PrimaryData(dict(), dict())
 
     @staticmethod
     def _read_pd_time_series(dir_path: str, delimiter: str, ts_file: str):
