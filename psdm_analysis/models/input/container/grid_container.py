@@ -169,6 +169,18 @@ class GridContainer(ContainerMixin):
             node_participants_map=self.node_participants_map,
         )
 
+    def to_csv(
+        self,
+        path: str,
+        inclued_primary_data: bool,
+        mkdirs: bool = True,
+        delimiter: str = ",",
+    ):
+        [
+            e.to_csv(path, mkdirs=mkdirs, delimiter=delimiter)
+            for e in self.to_list(include_primary_data=inclued_primary_data)
+        ]
+
     @classmethod
     def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
         if not primary_data_delimiter:

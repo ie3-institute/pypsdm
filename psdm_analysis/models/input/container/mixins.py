@@ -12,8 +12,8 @@ class ContainerMixin(ABC):
     def to_list(self, include_empty: bool = False) -> list:
         pass
 
-    def to_csv(self, path: str, delimiter: str):
-        [e.to_csv(path, delimiter) for e in self.to_list()]
+    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+        [e.to_csv(path, delimiter=delimiter, mkdirs=mkdirs) for e in self.to_list()]
 
 
 class HasTypeMixin(ABC):

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import os
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, List, Tuple, TypeVar, Union
 
 import pandas as pd
@@ -60,7 +61,9 @@ class Entities(ABC):
         """
 
         if not isinstance(other, type(self)):
-            raise TypeError("The two Entities instances must be of the same type")
+            raise TypeError(
+                f"The two Entities instances must be of the same type. Received {type(self)} and {type(other)}"
+            )
 
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
         if len(columns_diff) > 0 and columns_diff.issubset(self.attributes()):
@@ -222,8 +225,30 @@ class Entities(ABC):
     def find_nodes(self, nodes: Nodes) -> Nodes:
         return nodes.subset(self.node)
 
-    def to_csv(self, path: str, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+        if mkdirs:
+            os.makedirs(os.path.normpath(path), exist_ok=True)
         df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
+
+    def copy(
+        self: EntityType,
+        deep=True,
+        **changes,
+    ) -> EntityType:
+        """
+        Creates a copy of the current Entities instance.
+        By default does a deep copy of all data and replaces the given changes.
+        When deep is false, only the references to the data of the non-changed attribtues are copied.
+
+        Args:
+            deep: Whether to do a deep copy of the data.
+            **changes: The changes to apply to the copy.
+
+        Returns:
+            The copy of the current Entities instance.
+        """
+        to_copy = copy.deepcopy(self) if deep else self
+        return replace(to_copy, **changes)
 
     @classmethod
     def from_csv(cls: EntityType, path: str, delimiter: str) -> EntityType:
