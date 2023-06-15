@@ -226,9 +226,13 @@ class Entities(ABC):
         return nodes.subset(self.node)
 
     def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
-        if mkdirs:
-            os.makedirs(os.path.normpath(path), exist_ok=True)
-        df_to_csv(self.data, path, self.get_enum().get_csv_input_file_name(), delimiter)
+        df_to_csv(
+            self.data,
+            path,
+            self.get_enum().get_csv_input_file_name(),
+            mkdirs=mkdirs,
+            delimiter=delimiter,
+        )
 
     def copy(
         self: EntityType,

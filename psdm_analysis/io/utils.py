@@ -82,9 +82,14 @@ def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime
         raise ValueError("Filter start must be before end.")
 
 
-def df_to_csv(df: DataFrame, path: str, file_name: str, delimiter: str):
-    full_path = get_file_path(path, file_name)
+def df_to_csv(
+    df: DataFrame, path: str, file_name: str, mkdirs=True, delimiter: str = ","
+):
+    file_path = get_file_path(path, file_name)
+    if mkdirs:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
     df = df.replace(True, "true")
     df = df.replace(False, "false")
     df = df.sort_index()
-    df.to_csv(full_path, index=True, index_label="uuid", sep=delimiter)
+    df.to_csv(file_path, index=True, index_label="uuid", sep=delimiter)

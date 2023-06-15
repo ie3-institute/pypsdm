@@ -30,7 +30,7 @@ class HasTypeMixin(ABC):
     def type_uuid(self):
         return self.data["type_uuid"]
 
-    def to_csv(self, path: str, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
         # persist entity_input.csv
         all_entity_attributes = self.attributes(include_type_attrs=False)
         all_entity_attributes.append("type_uuid"), all_entity_attributes.remove(
@@ -40,7 +40,11 @@ class HasTypeMixin(ABC):
             columns={"type_uuid": "type"}
         )
         df_to_csv(
-            entity_data, path, self.get_enum().get_csv_input_file_name(), delimiter
+            entity_data,
+            path,
+            self.get_enum().get_csv_input_file_name(),
+            mkdirs=mkdirs,
+            delimiter=delimiter,
         )
 
         # persist entity_type_input.csv
@@ -53,7 +57,8 @@ class HasTypeMixin(ABC):
             type_data.drop_duplicates(),
             path,
             self.get_enum().get_type_file_name(),
-            delimiter,
+            mkdirs=mkdirs,
+            delimiter=delimiter,
         )
 
     @classmethod

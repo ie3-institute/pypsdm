@@ -169,16 +169,16 @@ class GridContainer(ContainerMixin):
             node_participants_map=self.node_participants_map,
         )
 
+    # TODO: Implement PrimaryData export
     def to_csv(
         self,
         path: str,
-        inclued_primary_data: bool,
         mkdirs: bool = True,
         delimiter: str = ",",
     ):
         [
             e.to_csv(path, mkdirs=mkdirs, delimiter=delimiter)
-            for e in self.to_list(include_primary_data=inclued_primary_data)
+            for e in self.to_list(include_primary_data=False)
         ]
 
     @classmethod
