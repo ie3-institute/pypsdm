@@ -167,3 +167,51 @@ def test_subset_split(sample_pvs):
     # Test the second subset
     assert len(subset2) == 1
     assert subset2.data.index[0] == "uuid3"
+
+
+def test_copy_method(sample_pvs):
+    # Define the changes you want to apply
+    changes = {
+        "data": pd.DataFrame(
+            {
+                "id": ["4"],
+                "operates_from": ["2024-01-01"],
+                "operates_until": ["2024-12-31"],
+                "operator": ["operator4"],
+                "node": ["d"],
+                "q_characteristic": ["q4"],
+                "albedo": [0.5],
+                "azimuth": [240],
+                "elevation_angle": [75],
+                "k_g": [0.8],
+                "k_t": [1.1],
+                "market_reaction": [False],
+                "cos_phi_rated": [0.97],
+            },
+            index=["uuid4"],
+        )
+    }
+
+    # Create a copy with changes
+    copied = sample_pvs.copy(**changes)
+
+    # Assert that changes were applied correctly
+    pd.testing.assert_frame_equal(copied.data, changes["data"])
+
+    # Assert that original was not affected
+    assert "4" not in sample_pvs.data["id"].values
+
+    # Test deep copy by modifying original after copying
+    sample_pvs.data["id"]["uuid1"] = "10"
+
+    # Assert that the copied data is not affected
+    assert copied.data["id"]["uuid1"] == "1"
+
+    # Test shallow copy
+    shallow_copied = sample_pvs.copy(deep=False)
+
+    # Modify original after copying
+    sample_pvs.data["id"]["uuid1"] = "20"
+
+    # Assert that the shallow copied data is affected
+    assert shallow_copied.data["id"]["uuid1"] == "20"
