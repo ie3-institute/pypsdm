@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Union
+from typing import Optional, Union
 
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -72,7 +72,7 @@ def plot_em(
     resolution: str,
     hourly_mean: bool = False,
 ):
-    em_uuid = list(em_participant_results.ems.participants.keys())[0]
+    em_uuid = list(em_participant_results.ems.entities.keys())[0]
 
     title = f"Household: {em_uuid}"
 
@@ -341,9 +341,9 @@ def plot_active_power_with_soc(
 
 def plot_active_power(
     res: PQResult,
-    title: str,
     resolution: str,
-    hourly_mean: bool,
+    title: Optional[str] = None,
+    hourly_mean: bool = False,
     fill_from_index=True,
     **kwargs,
 ):
@@ -352,6 +352,8 @@ def plot_active_power(
     ax_plot_active_power(
         ax, res, resolution, hourly_mean, fill_from_index=fill_from_index, **kwargs
     )
+    if not title:
+        title = "Active power of {}".format(res.entity_type.get_plot_name())
     set_title(ax, title)
     return fig, ax
 
