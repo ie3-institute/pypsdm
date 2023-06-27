@@ -9,7 +9,7 @@ from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
-class Lines(Connector, HasTypeMixin):
+class Lines(HasTypeMixin, Connector):
     @property
     def length(self) -> Series:
         return self.data["length"]
@@ -67,14 +67,11 @@ class Lines(Connector, HasTypeMixin):
     @staticmethod
     def entity_attributes() -> List[str]:
         return [
-            "node_a",
-            "node_b",
             "length",
             "geo_position",
             "olm_characteristic",
-            "parallel_devices",
         ]
 
     @staticmethod
     def type_attributes() -> List[str]:
-        return HasTypeMixin.attributes() + ["r", "x", "b", "i_max", "v_rated"]
+        return HasTypeMixin.type_attributes() + ["r", "x", "b", "g", "i_max", "v_rated"]

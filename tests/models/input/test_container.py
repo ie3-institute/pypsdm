@@ -17,4 +17,4 @@ def test_container_to_csv(gwr, delimiter):
     grid_container = gwr.grid
     path = os.path.join(ROOT_DIR, "tests", "temp", "grid")
     os.makedirs(path, exist_ok=True)
-    grid_container.to_csv(path, delimiter)
+    grid_container.to_csv(path, include_primary_data=False)

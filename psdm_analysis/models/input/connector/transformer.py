@@ -6,7 +6,7 @@ from psdm_analysis.models.input.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)
-class Transformers2W(Connector, HasTypeMixin):
+class Transformers2W(HasTypeMixin, Connector):
     @property
     def type_id(self):
         return self.data["type_id"]
@@ -78,17 +78,13 @@ class Transformers2W(Connector, HasTypeMixin):
     @staticmethod
     def entity_attributes() -> list[str]:
         return [
-            "node_a",
-            "node_b",
-            "parallel_devices",
-            "type_id",
             "tap_pos",
             "auto_tap",
         ]
 
     @staticmethod
     def type_attributes() -> list[str]:
-        return [
+        return HasTypeMixin.type_attributes() + [
             "r_sc",
             "x_sc",
             "g_m",

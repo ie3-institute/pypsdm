@@ -85,11 +85,27 @@ def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime
 def df_to_csv(
     df: DataFrame, path: str, file_name: str, mkdirs=True, delimiter: str = ","
 ):
+    df = df.copy(deep=True)
     file_path = get_file_path(path, file_name)
     if mkdirs:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    df = df.replace(True, "true")
-    df = df.replace(False, "false")
+    bool_cols = []
+    for col in df.columns:
+        is_bool_col = df[col].dropna().map(type).eq(bool).all()
+        if is_bool_col:
+            bool_cols.append(col)
+
+    # replace True with 'true' only in boolean columns
+    df[bool_cols] = df[bool_cols].replace({True: "true", False: "false"})
     df = df.sort_index()
     df.to_csv(file_path, index=True, index_label="uuid", sep=delimiter)
+
+
+def bool_converter(maybe_bool):
+    if isinstance(maybe_bool, bool):
+        return maybe_bool
+    elif isinstance(maybe_bool, str) and maybe_bool.lower() in ["true", "false"]:
+        return maybe_bool.lower() == "true"
+    else:
+        raise ValueError("Cannot convert to bool: " + str(maybe_bool))

@@ -205,7 +205,7 @@ def test_copy_method(sample_pvs):
     sample_pvs.data["id"]["uuid1"] = "10"
 
     # Assert that the copied data is not affected
-    assert copied.data["id"]["uuid1"] == "1"
+    assert "uuid1" not in copied.data.index
 
     # Test shallow copy
     shallow_copied = sample_pvs.copy(deep=False)

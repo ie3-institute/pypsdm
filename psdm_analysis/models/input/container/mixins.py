@@ -1,7 +1,9 @@
 import logging
+import os
 from abc import ABC, abstractmethod
 
 from psdm_analysis.io.utils import df_to_csv
+from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.enums import EntitiesEnum
 from psdm_analysis.models.input.participant.participant import SystemParticipants
@@ -13,7 +15,11 @@ class ContainerMixin(ABC):
         pass
 
     def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
-        [e.to_csv(path, delimiter=delimiter, mkdirs=mkdirs) for e in self.to_list()]
+        for entities in self.to_list():
+            try:
+                entities.to_csv(path, delimiter=delimiter, mkdirs=mkdirs)
+            except Exception as e:
+                logging.error(f"Could not write {entities} to {path}. Error: {e}")
 
 
 class HasTypeMixin(ABC):
@@ -31,11 +37,11 @@ class HasTypeMixin(ABC):
         return self.data["type_uuid"]
 
     def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+        if mkdirs:
+            os.makedirs(path, exist_ok=True)
         # persist entity_input.csv
         all_entity_attributes = self.attributes(include_type_attrs=False)
-        all_entity_attributes.append("type_uuid"), all_entity_attributes.remove(
-            "uuid"
-        )  # uuid is set as index
+        all_entity_attributes.append("type_uuid")
         entity_data = self.data[all_entity_attributes].rename(
             columns={"type_uuid": "type"}
         )
@@ -67,6 +73,8 @@ class HasTypeMixin(ABC):
         # check if cls is a subclass of SystemParticipants
         if issubclass(cls, SystemParticipants):
             base_attributes += SystemParticipants.attributes()
+        elif issubclass(cls, Connector):
+            base_attributes += Connector.attributes()
         elif issubclass(cls, Entities):
             base_attributes += Entities.attributes()
         else:

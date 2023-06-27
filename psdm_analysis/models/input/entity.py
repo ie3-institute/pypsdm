@@ -12,7 +12,7 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io import utils
-from psdm_analysis.io.utils import df_to_csv, read_csv
+from psdm_analysis.io.utils import bool_converter, df_to_csv, read_csv
 from psdm_analysis.models.input.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
@@ -226,13 +226,18 @@ class Entities(ABC):
         return nodes.subset(self.node)
 
     def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
-        df_to_csv(
-            self.data,
-            path,
-            self.get_enum().get_csv_input_file_name(),
-            mkdirs=mkdirs,
-            delimiter=delimiter,
-        )
+        # local import to avoid circular imports
+        from psdm_analysis.models.input.container.mixins import HasTypeMixin
+
+        if isinstance(self, HasTypeMixin):
+            HasTypeMixin.to_csv(self, path, mkdirs, delimiter)
+        # TODO: check if mkdirs in df_to_csv or here
+        else:
+            if mkdirs:
+                os.makedirs(os.path.normpath(path), exist_ok=True)
+            df_to_csv(
+                self.data, path, self.get_enum().get_csv_input_file_name(), delimiter
+            )
 
     def copy(
         self: EntityType,
@@ -272,7 +277,7 @@ class Entities(ABC):
     def _from_csv(cls, path: str, delimiter: str, entity: EntitiesEnum):
         file_path = utils.get_file_path(path, entity.get_csv_input_file_name())
         if os.path.exists(file_path):
-            return cls(Entities._data_from_csv(entity, path, delimiter))
+            return cls(cls._data_from_csv(entity, path, delimiter))
         else:
             logging.debug(
                 "There is no file named: "
@@ -288,11 +293,28 @@ class Entities(ABC):
         cls, entity: EntitiesEnum, path: str, delimiter: str
     ) -> DataFrame:
         data = read_csv(path, entity.get_csv_input_file_name(), delimiter)
+
+        bool_cols = cls.bool_attributes()
+        for col in bool_cols:
+            try:
+                data[col] = data[col].apply(lambda x: bool_converter(x))
+                data[col] = data[col].astype(bool)
+            except ValueError as e:
+                logging.error(
+                    f"Could not convert column {col} to bool. "
+                    f"Please check the values in the csv file. "
+                    f"Error: {e}"
+                )
+
         if entity.has_type():
             type_data = read_csv(path, entity.get_type_file_name(), delimiter)
-            data = data.merge(
-                type_data, left_on="type", right_on="uuid", suffixes=("", "_type")
-            ).rename(columns={"id_type": "type_id", "uuid_type": "type_uuid"})
+            data = (
+                data.merge(
+                    type_data, left_on="type", right_on="uuid", suffixes=("", "_type")
+                )
+                .rename(columns={"id_type": "type_id", "uuid_type": "type_uuid"})
+                .drop(columns=["type"])
+            )
         # special data transformations
         match entity:
             # for raw grid elements
@@ -347,4 +369,13 @@ class Entities(ABC):
         of the corresponding PSDM entity
         :return:
         """
-        return ["uuid", "id", "operates_from", "operates_until", "operator"]
+        return ["id", "operates_from", "operates_until", "operator"]
+
+    @staticmethod
+    def bool_attributes() -> List[str]:
+        """
+        Method that should hold all boolean attributes field (transformed to snake_case and case-sensitive)
+        of the corresponding PSDM entity. It is mainly used for type casting of the data frame column.
+        :return:
+        """
+        return []

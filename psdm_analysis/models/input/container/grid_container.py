@@ -72,7 +72,7 @@ class RawGridContainer(ContainerMixin):
             return [graph.subgraph(branch).copy() for branch in branches]
         return branches
 
-    def build_networkx_graph(self) -> Graph:
+    def build_networkx_graph(self, include_transformer: bool = False) -> Graph:
         graph = Graph()
         closed_switches = self.switches.get_closed()
         line_data_dicts = self.lines.data.apply(
@@ -82,6 +82,10 @@ class RawGridContainer(ContainerMixin):
         graph.add_nodes_from(self.nodes.uuid)
         graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
         graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
+        if include_transformer:
+            graph.add_edges_from(
+                zip(self.transformers_2_w.node_a, self.transformers_2_w.node_b)
+            )
         return graph
 
     @staticmethod
@@ -169,17 +173,18 @@ class GridContainer(ContainerMixin):
             node_participants_map=self.node_participants_map,
         )
 
-    # TODO: Implement PrimaryData export
     def to_csv(
         self,
         path: str,
+        include_primary_data: bool,
         mkdirs: bool = True,
         delimiter: str = ",",
     ):
-        [
-            e.to_csv(path, mkdirs=mkdirs, delimiter=delimiter)
-            for e in self.to_list(include_primary_data=False)
-        ]
+        for container in self.to_list(include_primary_data=include_primary_data):
+            try:
+                container.to_csv(path, mkdirs=mkdirs, delimiter=delimiter)
+            except Exception as e:
+                raise IOError(f"Could not write {container} to {path}.", e)
 
     @classmethod
     def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
