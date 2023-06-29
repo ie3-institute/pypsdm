@@ -11,7 +11,7 @@ from pandas import Series
 
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import to_date_time
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.power import PQResult
 
 

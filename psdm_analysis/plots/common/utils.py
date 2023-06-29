@@ -7,7 +7,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pandas import Series
 
-from psdm_analysis.models.input.enums import (
+from psdm_analysis.models.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
     SystemParticipantsEnum,

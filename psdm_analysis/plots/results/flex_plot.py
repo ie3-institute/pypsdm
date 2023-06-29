@@ -3,7 +3,7 @@ from functools import partial
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.flex_option import FlexOptionResult
 from psdm_analysis.models.result.participant.participants_res_container import (
     ParticipantsResultContainer,

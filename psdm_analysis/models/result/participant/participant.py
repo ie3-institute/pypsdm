@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
     SystemParticipantsWithCapacity,
 )

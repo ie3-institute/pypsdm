@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.container.mixins import HasTypeMixin
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)

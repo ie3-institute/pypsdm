@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 from psdm_analysis.models.input.connector.connector import Connector
-from psdm_analysis.models.input.enums import EntitiesEnum, RawGridElementsEnum
+from psdm_analysis.models.enums import EntitiesEnum, RawGridElementsEnum
 
 
 @dataclass(frozen=True)

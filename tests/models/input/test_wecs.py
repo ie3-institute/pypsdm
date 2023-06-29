@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.wec import WindEnergyConverters
 from tests.utils import compare_dfs
 
@@ -10,13 +9,6 @@ from tests.utils import compare_dfs
 @pytest.fixture(scope="module")
 def wecs(gwr) -> WindEnergyConverters:
     return gwr.grid.participants.wecs
-
-
-def test_sp_enum():
-    bm = SystemParticipantsEnum.BIOMASS_PLANT
-    pv = SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
-    assert bm.has_type() is True
-    assert pv.has_type() is False
 
 
 def test_filter_for_node(wecs):

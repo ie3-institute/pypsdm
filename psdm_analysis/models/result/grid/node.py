@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.models.result.participant.dict import ResultDict

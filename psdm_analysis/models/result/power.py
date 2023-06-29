@@ -9,7 +9,7 @@ import pandas as pd
 from pandas import Series
 
 from psdm_analysis.io.utils import get_absolute_path
-from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.processing.dataframe import divide_positive_negative
 from psdm_analysis.processing.series import (

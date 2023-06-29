@@ -9,7 +9,7 @@ from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid import GridContainer
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
     ParticipantsResult,

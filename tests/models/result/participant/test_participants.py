@@ -3,7 +3,7 @@ import math
 
 import pytest
 
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.processing.series import duration_weighted_sum
 
 

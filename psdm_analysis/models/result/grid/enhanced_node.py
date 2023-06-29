@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
 from psdm_analysis.models.result.power import PQResult
 

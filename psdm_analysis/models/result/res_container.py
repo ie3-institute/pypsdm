@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid import GridContainer
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
