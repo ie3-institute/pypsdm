@@ -3,7 +3,7 @@ import os
 import pytest
 
 from psdm_analysis.models.input.participant.wec import WindEnergyConverters
-from tests.utils import compare_dfs
+from psdm_analysis.processing.dataframe import compare_dfs
 
 
 @pytest.fixture(scope="module")
