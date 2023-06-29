@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.models.input.container.participants_container import (
+from psdm_analysis.models.input.container.participants import (
     SystemParticipantsContainer,
 )
 from psdm_analysis.models.input.enums import RawGridElementsEnum

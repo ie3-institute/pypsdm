@@ -8,7 +8,7 @@ from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.switches import Switches
 from psdm_analysis.models.input.connector.transformer import Transformers2W
 from psdm_analysis.models.input.container.mixins import ContainerMixin
-from psdm_analysis.models.input.container.participants_container import (
+from psdm_analysis.models.input.container.participants import (
     SystemParticipantsContainer,
 )
 from psdm_analysis.models.input.entity import Entities
