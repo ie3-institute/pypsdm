@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from definitions import ROOT_DIR
-from psdm_analysis.models.grid_with_results import GridWithResults
+from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.input.container.grid import GridContainer
 
 # Note: the fixture scope defines how long the fixture is valid and prevents reevaluation
