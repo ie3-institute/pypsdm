@@ -5,8 +5,8 @@ from typing import List
 from pandas import DataFrame
 
 from psdm_analysis.io.utils import df_to_csv
-from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.enums import RawGridElementsEnum
+from psdm_analysis.models.input.entity import Entities
 
 
 @dataclass(frozen=True)

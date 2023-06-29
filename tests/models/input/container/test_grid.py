@@ -1,5 +1,7 @@
-from definitions import ROOT_DIR
 import os
+
+from definitions import ROOT_DIR
+
 
 def test_grid_container(gwr):
     grid_container = gwr.grid

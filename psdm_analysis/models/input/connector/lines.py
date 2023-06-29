@@ -3,9 +3,9 @@ from typing import List
 
 from pandas import Series
 
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.container.mixins import HasTypeMixin
-from psdm_analysis.models.enums import RawGridElementsEnum
 
 
 @dataclass(frozen=True)

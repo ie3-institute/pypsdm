@@ -4,10 +4,10 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.flex_option import FlexOptionResult
 from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
+from psdm_analysis.models.result.flex_option import FlexOptionResult
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
 from psdm_analysis.plots.common.utils import (

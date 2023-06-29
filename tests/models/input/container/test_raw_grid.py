@@ -1,9 +1,11 @@
 from psdm_analysis.models.grid_with_results import GridWithResults
 
+
 def test_raw_grid_container(gwr):
     raw_grid_container = gwr.grid.raw_grid
     assert len(raw_grid_container.lines) == 291
     assert len(raw_grid_container.nodes) == 299
+
 
 def test_build_networkx_graph(gwr: GridWithResults):
     G = gwr.grid.raw_grid.build_networkx_graph()

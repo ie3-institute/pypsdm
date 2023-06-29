@@ -8,8 +8,8 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import to_date_time
-from psdm_analysis.models.input.entity import EntityType
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.input.entity import EntityType
 from psdm_analysis.processing.dataframe import filter_data_for_time_interval
 
 ResultType = TypeVar("ResultType", bound="ResultEntities")

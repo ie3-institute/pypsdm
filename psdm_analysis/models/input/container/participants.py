@@ -4,8 +4,8 @@ from typing import Union
 
 import pandas as pd
 
-from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems

@@ -13,8 +13,8 @@ from psdm_analysis.io.utils import (
     get_file_path,
     to_date_time,
 )
-from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.enums import EntitiesEnum, EntityEnumType
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.result.entity import ResultEntities
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")

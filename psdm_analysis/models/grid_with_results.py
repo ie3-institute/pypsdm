@@ -5,19 +5,19 @@ from datetime import datetime
 from typing import List, Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.models.input.container.participants import (
     SystemParticipantsContainer,
 )
-from psdm_analysis.models.enums import RawGridElementsEnum
+from psdm_analysis.models.result.container.grid import GridResultContainer
+from psdm_analysis.models.result.container.participants import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
-from psdm_analysis.models.result.container.participants import (
-    ParticipantsResultContainer,
-)
-from psdm_analysis.models.result.container.grid import GridResultContainer
 
 
 @dataclass(frozen=True)
