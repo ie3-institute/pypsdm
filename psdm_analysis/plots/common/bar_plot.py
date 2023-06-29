@@ -2,7 +2,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from psdm_analysis.models.result.participant.participants_res_container import (
+from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult

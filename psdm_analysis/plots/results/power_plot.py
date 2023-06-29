@@ -12,7 +12,7 @@ from psdm_analysis.models.result.participant.participant import (
     ParticipantsResult,
     ParticipantsWithSocResult,
 )
-from psdm_analysis.models.result.participant.participants_res_container import (
+from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult

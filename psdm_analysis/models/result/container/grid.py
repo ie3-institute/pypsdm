@@ -9,13 +9,13 @@ from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
-from psdm_analysis.models.result.participant.participants_res_container import (
+from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 
 
 @dataclass(frozen=True)
-class ResultContainer:
+class GridResultContainer:
     name: str
     nodes: NodesResult
     lines: ConnectorsResult
@@ -38,7 +38,7 @@ class ResultContainer:
         return set(self.nodes.entities.keys())
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        return ResultContainer(
+        return GridResultContainer(
             self.name,
             self.nodes.filter_by_date_time(time),
             self.lines.filter_by_date_time(time),
@@ -47,7 +47,7 @@ class ResultContainer:
         )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
-        return ResultContainer(
+        return GridResultContainer(
             self.name,
             self.nodes.filter_for_time_interval(start, end),
             self.lines.filter_for_time_interval(start, end),

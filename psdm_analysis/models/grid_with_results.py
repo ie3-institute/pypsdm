@@ -14,16 +14,16 @@ from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
-from psdm_analysis.models.result.participant.participants_res_container import (
+from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
-from psdm_analysis.models.result.res_container import ResultContainer
+from psdm_analysis.models.result.container.grid import GridResultContainer
 
 
 @dataclass(frozen=True)
 class GridWithResults:
     grid: GridContainer
-    results: ResultContainer
+    results: GridResultContainer
 
     def nodal_energies(self) -> dict[str, float]:
         return {uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuid}
@@ -31,17 +31,17 @@ class GridWithResults:
     def nodal_energy(self, uuid: str) -> float:
         return self.nodal_result(uuid).participants.sum().energy()
 
-    def nodal_results(self) -> dict[str, ResultContainer]:
+    def nodal_results(self) -> dict[str, GridResultContainer]:
         return {
             node_uuid: self.nodal_result(node_uuid)
             for node_uuid in self.grid.node_participants_map.keys()
         }
 
-    def nodal_result(self, node_uuid: str) -> "ResultContainer":
+    def nodal_result(self, node_uuid: str) -> "GridResultContainer":
         node_participants = self.grid.node_participants_map[node_uuid]
         participants_uuids = node_participants.uuids()
         participants = self.results.participants.subset(participants_uuids)
-        return ResultContainer(
+        return GridResultContainer(
             name=node_uuid,
             nodes=NodesResult(
                 RawGridElementsEnum.NODE,
@@ -122,7 +122,7 @@ class GridWithResults:
         if not grid:
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
 
-        results = ResultContainer.from_csv(
+        results = GridResultContainer.from_csv(
             name,
             result_path,
             result_delimiter,
@@ -142,6 +142,6 @@ class GridWithResults:
         )
 
     @staticmethod
-    def calc_pq(uuid, nodal_result: ResultContainer):
+    def calc_pq(uuid, nodal_result: GridResultContainer):
         pq = nodal_result.participants.sum()
         return uuid, pq
