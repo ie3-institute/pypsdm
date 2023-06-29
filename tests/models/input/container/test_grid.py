@@ -1,6 +1,11 @@
-import os.path
-
 from definitions import ROOT_DIR
+
+
+def test_grid_container(gwr):
+    grid_container = gwr.grid
+    assert len(grid_container.raw_grid.lines) == 291
+    assert len(grid_container.raw_grid.nodes) == 299
+    assert len(grid_container.participants.loads) == 496
 
 
 def test_node_participants_map(gwr):
