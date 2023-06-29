@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
-from psdm_analysis.models.input.container.grid_container import GridContainer
+from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.models.input.container.participants import (
     SystemParticipantsContainer,
 )

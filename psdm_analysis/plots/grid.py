@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from pandas import Series
 from shapely.geometry import LineString
 
-from psdm_analysis.models.input.container.grid_container import GridContainer
+from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.plots.common.utils import BLUE, GREEN, GREY, RED, rgb_to_hex
 
 
