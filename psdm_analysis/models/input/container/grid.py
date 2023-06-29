@@ -14,7 +14,7 @@ from psdm_analysis.models.result.power import PQResult
 @dataclass(frozen=True)
 class GridContainer(ContainerMixin):
     raw_grid: RawGridContainer
-    # todo: we keep the participant containers effectively twice with the mapping
+    # TODO: we keep the participant containers effectively twice with the mapping
     participants: SystemParticipantsContainer
     primary_data: PrimaryData
     node_participants_map: Dict[str, SystemParticipantsContainer]
