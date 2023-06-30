@@ -1,6 +1,9 @@
+import copy
 import os
+import os.path
 
 from definitions import ROOT_DIR
+from psdm_analysis.models.input.container.grid import GridContainer
 
 
 def test_grid_container(gwr):
@@ -20,8 +23,20 @@ def test_node_participants_map(gwr):
     assert len(node_participants.biomass_plants) == 0
 
 
+def test_create_empty():
+    empty_container = GridContainer.create_empty()
+    if empty_container:
+        raise AssertionError("Empty container should be falsy")
+
+
 def test_container_to_csv(gwr, delimiter):
     grid_container = gwr.grid
     path = os.path.join(ROOT_DIR, "tests", "temp", "grid")
     os.makedirs(path, exist_ok=True)
     grid_container.to_csv(path, include_primary_data=False)
+
+
+def test_compare(gwr):
+    grid_a = gwr.grid
+    grid_b = copy.deepcopy(grid_a)
+    assert grid_a.compare(grid_b) is None

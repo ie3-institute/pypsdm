@@ -37,3 +37,14 @@ def filter_data_for_time_interval(
     end_row = data.index[data.index <= end][-1]
     filtered_data = data[start_row:end_row]
     return filtered_data.rename(index={filtered_data.loc[start_row].name: start})
+
+
+def compare_dfs(a: DataFrame, b: DataFrame, check_like=True, **kwargs):
+    pd.testing.assert_frame_equal(
+        a,
+        b,
+        check_like=check_like,
+        check_column_type=False,
+        check_index_type=False,
+        **kwargs,
+    )

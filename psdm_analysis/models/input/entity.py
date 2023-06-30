@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, List, Tuple, TypeVar, Union
 import pandas as pd
 from pandas import DataFrame, Series
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import bool_converter, df_to_csv, read_csv
 from psdm_analysis.models.enums import (
@@ -19,6 +20,7 @@ from psdm_analysis.models.enums import (
     SystemParticipantsEnum,
 )
 from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
+from psdm_analysis.processing.dataframe import compare_dfs
 
 if TYPE_CHECKING:
     from psdm_analysis.models.input.node import Nodes
@@ -231,12 +233,36 @@ class Entities(ABC):
 
         if isinstance(self, HasTypeMixin):
             HasTypeMixin.to_csv(self, path, mkdirs, delimiter)
-        # TODO: check if mkdirs in df_to_csv or here
         else:
-            if mkdirs:
-                os.makedirs(os.path.normpath(path), exist_ok=True)
             df_to_csv(
-                self.data, path, self.get_enum().get_csv_input_file_name(), delimiter
+                self.data,
+                path,
+                self.get_enum().get_csv_input_file_name(),
+                mkdirs=mkdirs,
+                delimiter=delimiter,
+            )
+
+    def compare(self, other) -> None:
+        """
+        Compares the current Entities instance with another Entities instance.
+
+        Args:
+            other: The other Entities instance to compare with.
+
+        Returns:
+            None
+        """
+        if not isinstance(other, type(self)):
+            raise ComparisonError(
+                f"Type of self {type(self)} != type of other {type(other)}"
+            )
+
+        try:
+            compare_dfs(self.data, other.data)
+        except AssertionError as e:
+            raise ComparisonError(
+                f"{self.get_enum().get_plot_name()} entities are not equal.",
+                errors=[(type(self), str(e))],
             )
 
     def copy(

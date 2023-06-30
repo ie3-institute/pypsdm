@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Union
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.container.participants import (
     SystemParticipantsContainer,
 )
@@ -21,12 +22,16 @@ from psdm_analysis.models.result.grid.transformer import Transformers2WResult
 
 
 @dataclass(frozen=True)
-class GridWithResults:
+class GridWithResults(ContainerMixin):
     grid: GridContainer
     results: GridResultContainer
 
     def nodal_energies(self) -> dict[str, float]:
         return {uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuid}
+
+    def to_list(self, include_empty: bool = False) -> list:
+        elems = [self.grid, self.results]
+        return elems if include_empty else [r for r in elems if r]
 
     def nodal_energy(self, uuid: str) -> float:
         return self.nodal_result(uuid).participants.sum().energy()
@@ -139,6 +144,12 @@ class GridWithResults:
             GridWithResults(grid, results)
             if not filter_start
             else GridWithResults(grid, results)
+        )
+
+    @classmethod
+    def create_empty(cls):
+        return GridWithResults(
+            GridContainer.create_empty(), GridResultContainer.create_empty()
         )
 
     @staticmethod

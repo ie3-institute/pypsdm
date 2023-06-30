@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from pandas import DataFrame
@@ -83,9 +83,15 @@ def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime
 
 
 def df_to_csv(
-    df: DataFrame, path: str, file_name: str, mkdirs=True, delimiter: str = ","
+    df: DataFrame,
+    path: Union[str, Path],
+    file_name: str,
+    mkdirs=True,
+    delimiter: str = ",",
 ):
     df = df.copy(deep=True)
+    if isinstance(path, Path):
+        path = str(path)
     file_path = get_file_path(path, file_name)
     if mkdirs:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

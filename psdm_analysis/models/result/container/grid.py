@@ -6,6 +6,7 @@ from typing import Optional, Union
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
@@ -15,7 +16,7 @@ from psdm_analysis.models.result.grid.transformer import Transformers2WResult
 
 
 @dataclass(frozen=True)
-class GridResultContainer:
+class GridResultContainer(ContainerMixin):
     name: str
     nodes: NodesResult
     lines: ConnectorsResult
@@ -33,6 +34,10 @@ class GridResultContainer:
     # todo: implement slicing
     def __getitem__(self, slice_val):
         raise NotImplementedError
+
+    def to_list(self, include_empty: bool = False) -> list:
+        res = [self.nodes, self.lines, self.transformers_2w, self.participants]
+        return res if include_empty else [r for r in res if r]
 
     def uuids(self) -> set[str]:
         return set(self.nodes.entities.keys())
@@ -122,3 +127,15 @@ class GridResultContainer:
         )
 
         return cls(name, nodes, lines, transformers_2_w, participants)
+
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            name="Empty Container",
+            nodes=NodesResult.create_empty(),
+            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
+            transformers_2w=ConnectorsResult.create_empty(
+                RawGridElementsEnum.TRANSFORMER_2_W
+            ),
+            participants=ParticipantsResultContainer.create_empty(),
+        )

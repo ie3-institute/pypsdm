@@ -7,10 +7,14 @@ from typing import Optional, Tuple, TypeVar, Union
 import pandas as pd
 from pandas import DataFrame, Series
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import to_date_time
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.input.entity import EntityType
-from psdm_analysis.processing.dataframe import filter_data_for_time_interval
+from psdm_analysis.processing.dataframe import (
+    compare_dfs,
+    filter_data_for_time_interval,
+)
 
 ResultType = TypeVar("ResultType", bound="ResultEntities")
 
@@ -27,11 +31,24 @@ class ResultEntities(ABC):
         data: Resulting time series data of the entity.
     """
 
-    # todo: type is a reserved keyword -> rename
     entity_type: EntitiesEnum
     input_model: str
     name: Optional[str]
     data: DataFrame
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        if self.entity_type != other.entity_type:
+            return False
+        if self.input_model != other.input_model:
+            return False
+        if self.name != other.name:
+            return False
+        try:
+            compare_dfs(self.data, other.data)
+        except ComparisonError:
+            return False
 
     def __repr__(self):
         return self.data
@@ -72,6 +89,42 @@ class ResultEntities(ABC):
             return self.data.iloc[0], self.data.index[0]
         else:
             return self.data.asof(dt), dt
+
+    def compare(self, other) -> None:
+        """
+        Compares the current Entities instance with another Entities instance.
+
+        Args:
+            other: The other Entities instance to compare with.
+
+        Returns:
+            None
+        """
+        if not isinstance(other, type(self)):
+            raise ComparisonError(
+                f"Type of self: {type(self)} != type of other: {type(other)}", errors=[]
+            )
+
+        differences = []
+
+        if self.entity_type != other.entity_type:
+            differences.append(
+                f"Entity type left: {self.entity_type} != right {other.entity_type}"
+            )
+        if self.input_model != other.input_model:
+            differences.append(
+                f"Input model left: {self.input_model} != right {other.input_model}"
+            )
+        if self.name != other.name:
+            differences.append(f"Name left: {self.name} != right {other.name}")
+
+        try:
+            compare_dfs(self.data, other.data)
+        except AssertionError as e:
+            raise ComparisonError(
+                f"{self.entity_type.get_plot_name()} entities are not equal.",
+                errors=[(type(self), str(e))],
+            )
 
     @staticmethod
     @abstractmethod

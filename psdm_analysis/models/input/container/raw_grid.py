@@ -113,3 +113,12 @@ class RawGridContainer(ContainerMixin):
             transformers_2_w=transformers_2_w,
             switches=switches,
         )
+
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            nodes=Nodes.create_empty(),
+            lines=Lines.create_empty(),
+            transformers_2_w=Transformers2W.create_empty(),
+            switches=Switches.create_empty(),
+        )

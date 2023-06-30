@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.models.input.participant.pv import PhotovoltaicPowerPlants
 
 
@@ -8,7 +9,8 @@ from psdm_analysis.models.input.participant.pv import PhotovoltaicPowerPlants
 def sample_pvs():
     data = pd.DataFrame(
         {
-            "id": ["1", "2", "3"],
+            "uuid": ["uuid1", "uuid2", "uuid3"],
+            "id": ["id1", "id2", "id3"],
             "operates_from": ["2023-01-01", "2023-02-01", "2023-03-01"],
             "operates_until": ["2023-12-31", "2023-12-31", "2023-12-31"],
             "operator": ["operator1", "operator2", "operator3"],
@@ -22,8 +24,8 @@ def sample_pvs():
             "market_reaction": [True, False, True],
             "cos_phi_rated": [0.95, 0.98, 0.99],
         },
-        index=["uuid1", "uuid2", "uuid3"],
     )
+    data.set_index("uuid", inplace=True, drop=True)
 
     return PhotovoltaicPowerPlants(data)
 
@@ -32,7 +34,7 @@ def test_add_entities(sample_pvs, caplog):
     # Create another Entities instance for the test
     other_data = pd.DataFrame(
         {
-            "id": ["4", "5"],
+            "id": ["id4", "id5"],
             "operates_from": ["2023-03-01", "2023-04-01"],
             "operates_until": ["2023-12-31", "2023-12-31"],
             "operator": ["operator3", "operator4"],
@@ -140,19 +142,19 @@ def test_subset_incorrect(sample_pvs: PhotovoltaicPowerPlants):
 
 def test_subset_id(sample_pvs):
     # Test with a single string
-    result = sample_pvs.subset_id("1")
+    result = sample_pvs.subset_id("id1")
     assert len(result) == 1
-    assert result.data["id"][0] == "1"
+    assert result.data["id"][0] == "id1"
 
     # Test with a list of strings
-    result = sample_pvs.subset_id(["1", "2"])
+    result = sample_pvs.subset_id(["id1", "id2"])
     assert len(result) == 2
-    assert set(result.data["id"]) == {"1", "2"}
+    assert set(result.data["id"]) == {"id1", "id2"}
 
     # Test with a set of strings
-    result = sample_pvs.subset_id({"1", "2", "3"})
+    result = sample_pvs.subset_id({"id1", "id2", "id3"})
     assert len(result) == 3
-    assert set(result.data["id"]) == {"1", "2", "3"}
+    assert set(result.data["id"]) == {"id1", "id2", "id3"}
 
     assert isinstance(result, PhotovoltaicPowerPlants)
 
@@ -202,7 +204,7 @@ def test_copy_method(sample_pvs):
     assert "4" not in sample_pvs.data["id"].values
 
     # Test deep copy by modifying original after copying
-    sample_pvs.data["id"]["uuid1"] = "10"
+    sample_pvs.data.loc["uuid1", "id"] = "10"
 
     # Assert that the copied data is not affected
     assert "uuid1" not in copied.data.index
@@ -211,7 +213,32 @@ def test_copy_method(sample_pvs):
     shallow_copied = sample_pvs.copy(deep=False)
 
     # Modify original after copying
-    sample_pvs.data["id"]["uuid1"] = "20"
+    sample_pvs.data.loc["uuid1", "id"] = "modified"
 
     # Assert that the shallow copied data is affected
-    assert shallow_copied.data["id"]["uuid1"] == "20"
+    assert shallow_copied.data.loc["uuid1", "id"] == "modified"
+
+
+def test_compare(sample_pvs):
+    # Create a copy of sample_pvs
+    copied = sample_pvs.copy()
+
+    # Assert that they are equal
+    assert sample_pvs.compare(copied) is None
+
+    # Modify the copy
+    copied.data.loc["uuid1", "id"] = "I was changed"
+
+    # Expect error
+    with pytest.raises(ComparisonError):
+        sample_pvs.compare(copied)
+
+
+def test_to_csv(sample_pvs: PhotovoltaicPowerPlants, tmpdir):
+    str_path = str(tmpdir)
+    # Export to csv
+    sample_pvs.to_csv(str_path)
+    # Import from csv
+    imported = PhotovoltaicPowerPlants.from_csv(str_path, ",")
+
+    assert sample_pvs.compare(imported) is None

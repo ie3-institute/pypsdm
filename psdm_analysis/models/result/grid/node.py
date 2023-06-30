@@ -91,3 +91,7 @@ class NodesResult(ResultDict):
     @staticmethod
     def _describe(data: DataFrame):
         return data.describe().transpose()
+
+    @classmethod
+    def create_empty(cls) -> "NodesResult":
+        return super().create_empty(RawGridElementsEnum.NODE)

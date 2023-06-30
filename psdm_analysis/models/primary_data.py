@@ -23,10 +23,10 @@ class PrimaryData:
     participant_mapping: dict[str, str]
 
     def __len__(self):
-        return len(self.entities)
+        return len(self.time_series)
 
     def __contains__(self, uuid):
-        return uuid in self.entities
+        return uuid in self.time_series
 
     def __getitem__(self, get):
         match get:
@@ -45,11 +45,11 @@ class PrimaryData:
                     logging.warning("Step is not supported for slicing. Ignoring it.")
                 if not (isinstance(start, datetime) and isinstance(stop, datetime)):
                     raise ValueError("Only datetime slicing is supported")
-                entities = {
+                time_series = {
                     key: e.filter_for_time_interval(start, stop)
-                    for key, e in self.entities.items()
+                    for key, e in self.time_series.items()
                 }
-                return type(self)(self.entity_type, entities)
+                return PrimaryData(time_series, self.participant_mapping)
             case _:
                 raise ValueError(
                     "Only get by uuid or datetime slice for filtering is supported."
@@ -156,3 +156,7 @@ class PrimaryData:
         if "q" not in data.columns:
             data["q"] = 0
         return PQResult(SystemParticipantsEnum.PRIMARY_DATA, ts_uuid, ts_uuid, data)
+
+    @classmethod
+    def create_empty(cls):
+        return cls(dict(), dict())

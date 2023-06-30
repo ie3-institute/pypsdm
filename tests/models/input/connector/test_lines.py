@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from psdm_analysis.models.input.connector.lines import Lines
-from tests.utils import compare_dfs
+from psdm_analysis.processing.dataframe import compare_dfs
 
 
 @pytest.fixture

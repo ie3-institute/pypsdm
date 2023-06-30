@@ -19,9 +19,16 @@ class GridContainer(ContainerMixin):
     primary_data: PrimaryData
     node_participants_map: Dict[str, SystemParticipantsContainer]
 
+    def __bool__(self):
+        return len(self.to_list(include_primary_data=True)) > 0
+
     def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
-        grid = [self.raw_grid, self.participants]
-        return grid if not include_primary_data else grid + [self.primary_data]
+        grid = (
+            [self.raw_grid, self.participants, self.primary_data]
+            if include_primary_data
+            else [self.raw_grid, self.participants]
+        )
+        return grid if include_empty else [g for g in grid if g]
 
     def get_nodal_primary_data(self):
         time_series = []
@@ -82,3 +89,12 @@ class GridContainer(ContainerMixin):
         node_participants_map = participants.build_node_participants_map(raw_grid.nodes)
         primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
         return cls(raw_grid, participants, primary_data, node_participants_map)
+
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            raw_grid=RawGridContainer.create_empty(),
+            participants=SystemParticipantsContainer.create_empty(),
+            primary_data=PrimaryData.create_empty(),
+            node_participants_map=dict(),
+        )
