@@ -9,7 +9,7 @@ import pandas as pd
 from pandas import Series
 
 from psdm_analysis.io.utils import get_absolute_path
-from psdm_analysis.models.input.enums import EntitiesEnum, SystemParticipantsEnum
+from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.processing.dataframe import divide_positive_negative
 from psdm_analysis.processing.series import (
@@ -98,8 +98,12 @@ class PQResult(ResultEntities):
         return PQResult(self.entity_type, self.input_model, self.name, updated_data)
 
     def to_csv(self, path: str, file_name: str = None, delimiter: str = ","):
+        if not isinstance(path, str):
+            path = str(path)
         file_name = file_name if file_name else self.get_default_output_name()
-        self.data.to_csv(os.path.join(path, file_name), sep=delimiter)
+        self.data.to_csv(
+            os.path.join(path, file_name), sep=delimiter, index_label="time"
+        )
 
     def get_default_output_name(self):
         return self.input_model + "_" + self.entity_type.get_csv_result_file_name()

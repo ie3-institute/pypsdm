@@ -1,8 +1,9 @@
+import copy
 from datetime import datetime
 
 import pytest
 
-from psdm_analysis.models.grid_with_results import GridWithResults
+from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodeResult
 
 
@@ -49,3 +50,14 @@ def test_filter_by_date_time(gwr):
     assert isinstance(filtered, GridWithResults)
     assert len(list(filtered.grid.primary_data.time_series.values())[0]) == 1
     assert len(filtered.results.participants.pvs.results()[0]) == 1
+
+
+def test_compare(gwr: GridWithResults):
+    gwr_2 = copy.deepcopy(gwr)
+    gwr.compare(gwr_2)
+
+
+def test_create_empty():
+    empty = GridWithResults.create_empty()
+    if empty:
+        raise AssertionError("Empty GridWithResults should be falsy")

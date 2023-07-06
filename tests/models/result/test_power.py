@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from psdm_analysis.io.utils import get_absolute_path
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.participant import ParticipantsResult
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import duration_weighted_series
@@ -21,7 +21,9 @@ def create_sample_data(
         "p": pd.Series(range(periods), index=date_range),
         "q": pd.Series(range(periods, periods * 2), index=date_range),
     }
-    return pd.DataFrame(data)
+    data = pd.DataFrame(data)
+    data.index.name = "time"
+    return data
 
 
 def create_custom_pq_res():
@@ -156,12 +158,6 @@ def test_subset(wec_results):
     assert len(wec_subset) == 1
 
 
-def test_to_csv(wec_a):
-    output_dir = os.path.join(get_absolute_path("tests"), "temp")
-    os.makedirs(output_dir, exist_ok=True)
-    wec_a.to_csv(output_dir)
-
-
 def test_from_csv(wec_a):
     output_dir = os.path.join(get_absolute_path("tests"), "temp")
     os.makedirs(output_dir, exist_ok=True)
@@ -240,3 +236,12 @@ def test_get_list_of_datetimes_out_of_bounds_both():
     assert len(result_ts.data) == 2
     assert result_ts.data.index[0] == ts.data.index[0]
     assert result_ts.data.index[1] == ts.data.index[-1]
+
+
+def test_to_csv(tmpdir):
+    ts_a = create_custom_pq_res()
+    file_name = "pq_res.csv"
+    ts_a.to_csv(tmpdir, file_name)
+    file_path = os.path.join(tmpdir, file_name)
+    ts_b = PQResult.from_csv(file_path, ts_a.entity_type, ts_a.name)
+    ts_a.compare(ts_b)

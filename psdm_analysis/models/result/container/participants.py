@@ -8,8 +8,9 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
-from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
+from psdm_analysis.models.input.container.grid import GridContainer
+from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
 from psdm_analysis.models.result.participant.participant import (
     ParticipantsResult,
@@ -19,7 +20,7 @@ from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
-class ParticipantsResultContainer:
+class ParticipantsResultContainer(ContainerMixin):
     ems: ParticipantsResult
     loads: ParticipantsResult
     fixed_feed_ins: ParticipantsResult
@@ -272,3 +273,30 @@ class ParticipantsResultContainer:
                 simulation_end,
                 input_entities=input_entities,
             )
+
+    @classmethod
+    def create_empty(cls):
+        return ParticipantsResultContainer(
+            loads=ParticipantsResult.create_empty(SystemParticipantsEnum.LOAD),
+            fixed_feed_ins=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.FIXED_FEED_IN
+            ),
+            pvs=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
+            ),
+            wecs=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.WIND_ENERGY_CONVERTER
+            ),
+            storages=ParticipantsResult.create_empty(SystemParticipantsEnum.STORAGE),
+            ems=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.ENERGY_MANAGEMENT
+            ),
+            evcs=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.ELECTRIC_VEHICLE
+            ),
+            evs=ParticipantsResult.create_empty(
+                SystemParticipantsEnum.ELECTRIC_VEHICLE
+            ),
+            hps=ParticipantsResult.create_empty(SystemParticipantsEnum.HEAT_PUMP),
+            flex=ParticipantsResult.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
+        )

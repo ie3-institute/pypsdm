@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import List
 
+from psdm_analysis.models.enums import EntitiesEnum, RawGridElementsEnum
 from psdm_analysis.models.input.connector.connector import Connector
-from psdm_analysis.models.input.enums import EntitiesEnum, RawGridElementsEnum
 
 
 @dataclass(frozen=True)
@@ -18,8 +19,18 @@ class Switches(Connector):
 
     @staticmethod
     def attributes() -> list[str]:
-        return Connector.attributes() + ["closed"]
+        # ignore parallel devices since this is always 1
+        # also we cannot read the attribute in the PSDM at the moment
+        return [
+            attr
+            for attr in Connector.attributes() + ["closed"]
+            if attr != "parallel_devices"
+        ]
 
     @staticmethod
     def get_enum() -> EntitiesEnum:
         return RawGridElementsEnum.SWITCH
+
+    @staticmethod
+    def bool_attributes() -> List[str]:
+        return Connector.bool_attributes() + ["closed"]

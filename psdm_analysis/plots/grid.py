@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from pandas import Series
 from shapely.geometry import LineString
 
-from psdm_analysis.models.input.container.grid_container import GridContainer
+from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.plots.common.utils import BLUE, GREEN, GREY, RED, rgb_to_hex
 
 
@@ -146,6 +146,11 @@ def _add_node_trace(
     nodes_data = grid.raw_grid.nodes.data
 
     def to_hover_text(node_data: Series):
+        if node_data.name not in node_hover_data:
+            raise ValueError(
+                f"Node with uuid: {node_data.name} not found in node_hover_data"
+            )
+
         return (
             node_data["id"]
             + "<br>"
@@ -157,11 +162,9 @@ def _add_node_trace(
             )
         )
 
-    text = nodes_data.apply(
-        lambda node_data: to_hover_text(node_data), axis=1
-    ).to_list()
-
     def _node_trace(data, color):
+        text = data.apply(lambda node_data: to_hover_text(node_data), axis=1).to_list()
+
         fig.add_trace(
             go.Scattermapbox(
                 mode="markers",

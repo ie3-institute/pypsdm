@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib.axes import Axes
 
-from psdm_analysis.models.grid_with_results import GridWithResults
+from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series

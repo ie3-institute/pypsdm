@@ -7,14 +7,15 @@ from typing import Dict, Optional, Type, TypeVar, Union
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import (
     check_filter,
     csv_to_grpd_df,
     get_file_path,
     to_date_time,
 )
+from psdm_analysis.models.enums import EntitiesEnum, EntityEnumType
 from psdm_analysis.models.input.entity import Entities
-from psdm_analysis.models.input.enums import EntitiesEnum, EntityEnumType
 from psdm_analysis.models.result.entity import ResultEntities
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
@@ -24,6 +25,18 @@ ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 class ResultDict(ABC):
     entity_type: EntitiesEnum
     entities: Dict[str, ResultEntities]
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        if self.entity_type != other.entity_type:
+            return False
+        for key, res in self.entities.items():
+            if key not in other.entities:
+                return False
+            if res != other.entities[key]:
+                return False
+        return True
 
     def __len__(self):
         return len(self.entities)
@@ -99,6 +112,27 @@ class ResultDict(ABC):
     def uuid_to_id_map(self) -> dict[str, Optional[str]]:
         return {uuid: result.name for uuid, result in self.entities.items()}
 
+    def compare(self, other):
+        if not isinstance(other, type(self)):
+            raise ComparisonError(
+                f"Type of self {type(self)} != type of other {type(other)}", errors=[]
+            )
+        differences = []
+        if self.entity_type != other.entity_type:
+            differences.append(f"Entity type {self.entity_type} != {other.entity_type}")
+        for key, entity in self.entities.items():
+            if key not in other.entities:
+                differences.append(f"Entity {key} not in other")
+            else:
+                try:
+                    entity.compare(other.entities[key])
+                except ComparisonError as e:
+                    differences.extend(e.differences)
+        if differences:
+            raise ComparisonError(
+                f"Comparison of {type(self)} failed", errors=differences
+            )
+
     @classmethod
     def from_csv(
         cls: Type[ResultDictType],
@@ -143,8 +177,10 @@ class ResultDict(ABC):
         )
 
     @classmethod
-    def create_empty(cls, sp_type):
-        return cls(sp_type, dict())
+    def create_empty(
+        cls: ResultDictType, entity_type: EntityEnumType
+    ) -> ResultDictType:
+        return cls(entity_type, dict())
 
     @staticmethod
     def build_for_entity(

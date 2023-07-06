@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.models.result.participant.dict import ResultDict
@@ -91,3 +91,7 @@ class NodesResult(ResultDict):
     @staticmethod
     def _describe(data: DataFrame):
         return data.describe().transpose()
+
+    @classmethod
+    def create_empty(cls) -> "NodesResult":
+        return super().create_empty(RawGridElementsEnum.NODE)

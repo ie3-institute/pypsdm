@@ -4,7 +4,7 @@ from typing import Optional, Union
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from psdm_analysis.models.grid_with_results import GridWithResults
+from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.result.grid.connector import ConnectorResult
 from psdm_analysis.models.result.grid.transformer import Transformer2WResult

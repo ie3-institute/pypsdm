@@ -4,18 +4,19 @@ from datetime import datetime
 from typing import Optional, Union
 
 from psdm_analysis.io.utils import check_filter
-from psdm_analysis.models.input.container.grid_container import GridContainer
-from psdm_analysis.models.input.enums import RawGridElementsEnum
+from psdm_analysis.models.enums import RawGridElementsEnum
+from psdm_analysis.models.input.container.grid import GridContainer
+from psdm_analysis.models.input.container.mixins import ContainerMixin
+from psdm_analysis.models.result.container.participants import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.models.result.grid.connector import ConnectorsResult
 from psdm_analysis.models.result.grid.node import NodesResult
 from psdm_analysis.models.result.grid.transformer import Transformers2WResult
-from psdm_analysis.models.result.participant.participants_res_container import (
-    ParticipantsResultContainer,
-)
 
 
 @dataclass(frozen=True)
-class ResultContainer:
+class GridResultContainer(ContainerMixin):
     name: str
     nodes: NodesResult
     lines: ConnectorsResult
@@ -34,11 +35,15 @@ class ResultContainer:
     def __getitem__(self, slice_val):
         raise NotImplementedError
 
+    def to_list(self, include_empty: bool = False) -> list:
+        res = [self.nodes, self.lines, self.transformers_2w, self.participants]
+        return res if include_empty else [r for r in res if r]
+
     def uuids(self) -> set[str]:
         return set(self.nodes.entities.keys())
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        return ResultContainer(
+        return GridResultContainer(
             self.name,
             self.nodes.filter_by_date_time(time),
             self.lines.filter_by_date_time(time),
@@ -47,7 +52,7 @@ class ResultContainer:
         )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
-        return ResultContainer(
+        return GridResultContainer(
             self.name,
             self.nodes.filter_for_time_interval(start, end),
             self.lines.filter_for_time_interval(start, end),
@@ -122,3 +127,15 @@ class ResultContainer:
         )
 
         return cls(name, nodes, lines, transformers_2_w, participants)
+
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            name="Empty Container",
+            nodes=NodesResult.create_empty(),
+            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
+            transformers_2w=ConnectorsResult.create_empty(
+                RawGridElementsEnum.TRANSFORMER_2_W
+            ),
+            participants=ParticipantsResultContainer.create_empty(),
+        )

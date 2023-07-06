@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Dict, Union
+from typing import Union
 
 from networkx import Graph
 
@@ -8,13 +7,8 @@ from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.input.connector.switches import Switches
 from psdm_analysis.models.input.connector.transformer import Transformers2W
 from psdm_analysis.models.input.container.mixins import ContainerMixin
-from psdm_analysis.models.input.container.participants_container import (
-    SystemParticipantsContainer,
-)
 from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.node import Nodes
-from psdm_analysis.models.primary_data import PrimaryData
-from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
@@ -33,12 +27,9 @@ class RawGridContainer(ContainerMixin):
         Returns all branches, branching off from the slack node of the grid.
         The branches are either returned as a list of lists, where each list contains the node uuids of the branch,
         starting at the slack node, or rather as subgraphs containing all nodes and edges of the branch.
-
         Currently only works for single slack node and single voltage level grids.
-
         Args:
             as_graphs: If True, returns the branches as subgraphs, otherwise as lists of node uuids.
-
         Returns:
             A list of lists or a list of subgraphs, containing the branches of the grid.
         """
@@ -72,7 +63,7 @@ class RawGridContainer(ContainerMixin):
             return [graph.subgraph(branch).copy() for branch in branches]
         return branches
 
-    def build_networkx_graph(self) -> Graph:
+    def build_networkx_graph(self, include_transformer: bool = False) -> Graph:
         graph = Graph()
         closed_switches = self.switches.get_closed()
         line_data_dicts = self.lines.data.apply(
@@ -82,6 +73,10 @@ class RawGridContainer(ContainerMixin):
         graph.add_nodes_from(self.nodes.uuid)
         graph.add_edges_from(zip(self.lines.node_a, self.lines.node_b, line_data_dicts))
         graph.add_edges_from(zip(closed_switches.node_a, closed_switches.node_b))
+        if include_transformer:
+            graph.add_edges_from(
+                zip(self.transformers_2_w.node_a, self.transformers_2_w.node_b)
+            )
         return graph
 
     @staticmethod
@@ -119,74 +114,11 @@ class RawGridContainer(ContainerMixin):
             switches=switches,
         )
 
-
-@dataclass(frozen=True)
-class GridContainer(ContainerMixin):
-    raw_grid: RawGridContainer
-    # todo: we keep the participant containers effectively twice with the mapping
-    participants: SystemParticipantsContainer
-    primary_data: PrimaryData
-    node_participants_map: Dict[str, SystemParticipantsContainer]
-
-    def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
-        grid = [self.raw_grid, self.participants]
-        return grid if not include_primary_data else grid + [self.primary_data]
-
-    def get_nodal_primary_data(self):
-        time_series = []
-        nodal_primary_data = dict()
-        for node, participants_container in self.node_participants_map.items():
-            participants_uuids = participants_container.uuids().tolist()
-            node_primary_data = self.primary_data.get_for_participants(
-                participants_uuids
-            )
-            time_series.extend(node_primary_data)
-            node_primary_data_agg = PQResult.sum(node_primary_data)
-            nodal_primary_data[node] = node_primary_data_agg
-        return nodal_primary_data
-
-    def get_nodal_sp_count_and_power(self):
-        data = {}
-        for node_uuid, sps in self.node_participants_map.items():
-            nodal_data = {}
-            for sp in sps.to_list(include_empty=False):
-                sp_id = sp.get_enum().value
-                count = len(sp.data)
-                data_str = f"Count: {count}"
-                # check if sp has a property named s_rated
-                if hasattr(sp, "s_rated"):
-                    s_rated = round(sp.s_rated.sum(), 2)
-                    data_str += f", Rated Power: {s_rated} kw"
-                nodal_data[sp_id] = data_str
-            data[node_uuid] = nodal_data
-        return data
-
-    def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        return GridContainer(
-            raw_grid=self.raw_grid,
-            participants=self.participants,
-            primary_data=self.primary_data.filter_by_date_time(time),
-            node_participants_map=self.node_participants_map,
-        )
-
-    def to_csv(
-        self,
-        path: str,
-        inclued_primary_data: bool,
-        mkdirs: bool = True,
-        delimiter: str = ",",
-    ):
-        [
-            e.to_csv(path, mkdirs=mkdirs, delimiter=delimiter)
-            for e in self.to_list(include_primary_data=inclued_primary_data)
-        ]
-
     @classmethod
-    def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
-        if not primary_data_delimiter:
-            primary_data_delimiter = delimiter
-        raw_grid = RawGridContainer.from_csv(path, delimiter)
-        participants = SystemParticipantsContainer.from_csv(path, delimiter)
-        node_participants_map = participants.build_node_participants_map(raw_grid.nodes)
-        primary_data = PrimaryData.from_csv(path, primary_data_delimiter)
-        return cls(raw_grid, participants, primary_data, node_participants_map)
+    def create_empty(cls):
+        return cls(
+            nodes=Nodes.create_empty(),
+            lines=Lines.create_empty(),
+            transformers_2_w=Transformers2W.create_empty(),
+            switches=Switches.create_empty(),
+        )

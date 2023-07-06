@@ -96,3 +96,24 @@ class RawGridElementsEnum(EntitiesEnum):
     TRANSFROMER_3_W = "transformer_3_w"
     SWITCH = "switch"
     MEASUREMENT_UNIT = "measurement_unit"
+
+
+class TimeSeriesEnum(EntitiesEnum):
+    P_TIME_SERIES = "its_p"
+    PQ_TIME_SERIES = "its_pq"
+    PQH_TIME_SERIES = "its_pqh"  # pq time series with heat demand
+
+    def get_csv_input_file_name(self, uuid: str):
+        return f"{self.value}_{uuid}.csv"
+
+    def get_csv_result_file_name(self):
+        raise NotImplementedError("Time series are by definition input data!")
+
+    def get_type_file_name(self):
+        raise NotImplementedError("Types for time series do not exist!")
+
+    def get_plot_name(self):
+        return self.value
+
+    def get_result_type(self):
+        raise NotImplementedError("Result type defined for time series!")

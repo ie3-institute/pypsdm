@@ -3,7 +3,10 @@ import math
 
 import pytest
 
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum
+from psdm_analysis.models.result.container.participants import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.processing.series import duration_weighted_sum
 
 
@@ -55,3 +58,10 @@ def test_participants_q(participants_results):
     assert SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value in participants_q
     pvs_q = participants_q[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value]
     compare_duration_weighted_sum(pvs_q, participants_results.pvs.q_sum())
+
+
+def test_create_empty():
+    empty = ParticipantsResultContainer.create_empty()
+    # len(empty)
+    if empty:
+        raise AssertionError("Empty ParticipantsResult should be falsy")

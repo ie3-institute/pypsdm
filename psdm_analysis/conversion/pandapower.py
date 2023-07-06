@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from psdm_analysis.models.input.enums import (
+from psdm_analysis.models.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
     SystemParticipantsEnum,

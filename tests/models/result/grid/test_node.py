@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from psdm_analysis.models.result.grid.node import NodesResult
+
 
 def test_filter_for_time_interval(gwr):
     nodes_res = gwr.results.nodes
@@ -25,3 +27,9 @@ def test_vangs(gwr):
     v_angs = nodes_res.v_ang
     assert len(v_angs) == 3
     assert len(v_angs.columns) == 299
+
+
+def test_create_empty():
+    empty = NodesResult.create_empty()
+    if empty:
+        raise AssertionError("Empty NodesResult should be falsy")

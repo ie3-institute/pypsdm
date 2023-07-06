@@ -8,7 +8,7 @@ from pandas import Series
 from psdm_analysis.models.result.grid.connector import ConnectorResult, ConnectorsResult
 
 if TYPE_CHECKING:
-    from psdm_analysis.models.grid_with_results import GridWithResults
+    from psdm_analysis.models.gwr import GridWithResults
 
 
 @dataclass(frozen=True)

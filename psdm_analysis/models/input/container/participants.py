@@ -4,8 +4,8 @@ from typing import Union
 
 import pandas as pd
 
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.container.mixins import ContainerMixin
-from psdm_analysis.models.input.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.input.participant.bm import BiomassPlants
 from psdm_analysis.models.input.participant.em import EnergyManagementSystems
@@ -146,8 +146,8 @@ class SystemParticipantsContainer(ContainerMixin):
             self.loads.subset(uuids),
             self.fixed_feed_ins.subset(uuids),
             self.pvs.subset(uuids),
-            self.wecs.subset(uuids),
             self.biomass_plants.subset(uuids),
+            self.wecs.subset(uuids),
             self.storages.subset(uuids),
             self.evs.subset(uuids),
             self.evcs.subset(uuids),
@@ -177,4 +177,19 @@ class SystemParticipantsContainer(ContainerMixin):
             evs,
             evcs,
             hps,
+        )
+
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            EnergyManagementSystems.create_empty(),
+            Loads.create_empty(),
+            FixedFeedIns.create_empty(),
+            PhotovoltaicPowerPlants.create_empty(),
+            BiomassPlants.create_empty(),
+            WindEnergyConverters.create_empty(),
+            Storages.create_empty(),
+            ElectricVehicles.create_empty(),
+            EvChargingStations.create_empty(),
+            HeatPumps.create_empty(),
         )

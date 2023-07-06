@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, Union
 
 import pandas as pd
 
@@ -29,7 +29,7 @@ class Connector(Entities, ABC):
         return pd.concat([self.node_a, self.node_b])
 
     def filter_by_nodes(
-        self: ConnectorType, node_uuids: list[str], both_in_nodes=False
+        self: ConnectorType, node_uuids: Union[str, list[str]], both_in_nodes=False
     ) -> ConnectorType:
         """
         Returns all connectors that are connected to the given nodes.
@@ -41,6 +41,8 @@ class Connector(Entities, ABC):
         Returns:
             ConnectorType: Connectors that are connected to the given nodes.
         """
+        if isinstance(node_uuids, str):
+            node_uuids = [node_uuids]
         if both_in_nodes:
             data = self.data[
                 (self.node_a.isin(node_uuids)) & (self.node_b.isin(node_uuids))
