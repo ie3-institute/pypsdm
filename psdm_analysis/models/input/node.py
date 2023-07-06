@@ -64,7 +64,7 @@ class Nodes(Entities):
         return RawGridElementsEnum.NODE
 
     @classmethod
-    def attributes(cls, include_additional: bool = True) -> List[str]:
+    def attributes(cls) -> List[str]:
         return Entities.attributes() + [
             "v_rated",
             "v_target",

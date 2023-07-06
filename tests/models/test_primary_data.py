@@ -1,7 +1,6 @@
 import pytest
-from psdm_analysis.errors import ComparisonError
-from psdm_analysis.models.enums import TimeSeriesEnum
 
+from psdm_analysis.models.enums import TimeSeriesEnum
 from psdm_analysis.models.primary_data import PrimaryData
 
 

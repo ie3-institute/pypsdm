@@ -2,20 +2,20 @@ import concurrent.futures
 import copy
 import logging
 import os
+import re
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-import re
 from typing import Union
-import uuid
 
 import pandas as pd
 from pandas import Series
-from psdm_analysis.errors import ComparisonError
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import df_to_csv, to_date_time
-from psdm_analysis.models.enums import SystemParticipantsEnum, TimeSeriesEnum
+from psdm_analysis.models.enums import TimeSeriesEnum
 from psdm_analysis.models.result.power import PQResult
 
 
@@ -30,7 +30,7 @@ class PrimaryData:
         try:
             self.compare(other)
             return True
-        except:
+        except ComparisonError:
             return False
 
     def __len__(self):
@@ -130,12 +130,23 @@ class PrimaryData:
         # write time series
         for ts_uuid, ts in self.time_series.items():
             data = copy.deepcopy(ts.data)
+            if not isinstance(ts.entity_type, TimeSeriesEnum):
+                raise ValueError(
+                    f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
+                )
             ts_name = ts.entity_type.get_csv_input_file_name(ts_uuid)
             data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
             data["time"] = data.index
             data["time"] = data["time"].apply(lambda t: str(t))
             data.set_index("uuid", inplace=True)
-            df_to_csv(data, path, ts_name, mkdirs=mkdirs, index_label="uuid")
+            df_to_csv(
+                data,
+                path,
+                ts_name,
+                mkdirs=mkdirs,
+                delimiter=delimiter,
+                index_label="uuid",
+            )
 
         # write mapping data
         index = [str(uuid.uuid4()) for _ in range(len(self.participant_mapping))]
@@ -147,7 +158,13 @@ class PrimaryData:
             index=index,
         )
         mapping_data.index.name = "uuid"
-        df_to_csv(mapping_data, path, "time_series_mapping.csv", index_label="uuid")
+        df_to_csv(
+            mapping_data,
+            path,
+            "time_series_mapping.csv",
+            delimiter=delimiter,
+            index_label="uuida",
+        )
 
     def compare(self, other):
         if not isinstance(other, type(self)):

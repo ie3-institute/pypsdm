@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.input.container.participants import (
@@ -81,7 +81,9 @@ class GridContainer(ContainerMixin):
                 raise IOError(f"Could not write {container} to {path}.", e)
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str, primary_data_delimiter: str = None):
+    def from_csv(
+        cls, path: str, delimiter: str, primary_data_delimiter: Optional[str] = None
+    ):
         if not primary_data_delimiter:
             primary_data_delimiter = delimiter
         raw_grid = RawGridContainer.from_csv(path, delimiter)

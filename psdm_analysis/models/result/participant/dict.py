@@ -177,7 +177,9 @@ class ResultDict(ABC):
         )
 
     @classmethod
-    def create_empty(cls, entity_type: EntityEnumType) -> ResultDictType:
+    def create_empty(
+        cls: ResultDictType, entity_type: EntityEnumType
+    ) -> ResultDictType:
         return cls(entity_type, dict())
 
     @staticmethod

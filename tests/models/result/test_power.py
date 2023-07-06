@@ -158,12 +158,6 @@ def test_subset(wec_results):
     assert len(wec_subset) == 1
 
 
-def test_to_csv(wec_a):
-    output_dir = os.path.join(get_absolute_path("tests"), "temp")
-    os.makedirs(output_dir, exist_ok=True)
-    wec_a.to_csv(output_dir)
-
-
 def test_from_csv(wec_a):
     output_dir = os.path.join(get_absolute_path("tests"), "temp")
     os.makedirs(output_dir, exist_ok=True)
