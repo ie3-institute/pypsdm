@@ -11,6 +11,8 @@ ROOT_DIR = os.path.abspath(__file__ + "/../../../")
 
 
 def get_absolute_path(path: str):
+    if not isinstance(path, str):
+        path = str(path)
     if path.startswith(ROOT_DIR):
         return path
     else:
@@ -24,11 +26,18 @@ def get_file_path(path: str, file_name: str):
         return Path(ROOT_DIR).joinpath(path).joinpath(file_name)
 
 
-def read_csv(path: str, file_name: str, delimiter: str) -> DataFrame:
+def read_csv(
+    path: str, file_name: str, delimiter: str, index_col: Optional[str] = None
+) -> DataFrame:
     full_path = get_file_path(path, file_name)
     if not full_path.exists():
         raise IOError("File with path: " + str(full_path) + " does not exist")
-    return pd.read_csv(full_path, delimiter=delimiter, quotechar='"')
+    if index_col:
+        return pd.read_csv(
+            full_path, delimiter=delimiter, quotechar='"', index_col=index_col
+        )
+    else:
+        return pd.read_csv(full_path, delimiter=delimiter, quotechar='"')
 
 
 def to_date_time(zoned_date_time: str) -> datetime:
@@ -44,11 +53,14 @@ def to_date_time(zoned_date_time: str) -> datetime:
     """
     if not zoned_date_time or not isinstance(zoned_date_time, str):
         raise ValueError(f"Unexpected date time string: {zoned_date_time}")
-    year = int(zoned_date_time[0:4])
-    month = int(zoned_date_time[5:7])
-    day = int(zoned_date_time[8:10])
-    hour = int(zoned_date_time[11:13])
-    minute = int(zoned_date_time[14:16])
+    try:
+        year = int(zoned_date_time[0:4])
+        month = int(zoned_date_time[5:7])
+        day = int(zoned_date_time[8:10])
+        hour = int(zoned_date_time[11:13])
+        minute = int(zoned_date_time[14:16])
+    except:
+        raise IOError(f"Could not parse time stamp: {zoned_date_time}")
     return datetime(year=year, month=month, day=day, hour=hour, minute=minute)
 
 
@@ -88,6 +100,7 @@ def df_to_csv(
     file_name: str,
     mkdirs=True,
     delimiter: str = ",",
+    index_label="uuid",
 ):
     df = df.copy(deep=True)
     if isinstance(path, Path):
@@ -105,7 +118,7 @@ def df_to_csv(
     # replace True with 'true' only in boolean columns
     df[bool_cols] = df[bool_cols].replace({True: "true", False: "false"})
     df = df.sort_index()
-    df.to_csv(file_path, index=True, index_label="uuid", sep=delimiter)
+    df.to_csv(file_path, index=True, index_label=index_label, sep=delimiter)
 
 
 def bool_converter(maybe_bool):
