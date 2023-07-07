@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import Optional, Union
 
@@ -8,6 +9,12 @@ from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 ROOT_DIR = os.path.abspath(__file__ + "/../../../")
+
+
+class DateTimePattern(Enum):
+    UTC_TIME_PATTERN_EXTENDED = "%Y-%m-%dT%H:%M:%SZ"
+    UTC_TIME_PATTERN = "%Y-%m-%dT%H:%MZ"
+    PLAIN = "%Y-%m-%d %H:%M:%S"
 
 
 def get_absolute_path(path: str):
@@ -101,6 +108,7 @@ def df_to_csv(
     mkdirs=True,
     delimiter: str = ",",
     index_label="uuid",
+    datetime_pattern=DateTimePattern.UTC_TIME_PATTERN,
 ):
     df = df.copy(deep=True)
     if isinstance(path, Path):
@@ -118,6 +126,18 @@ def df_to_csv(
     # replace True with 'true' only in boolean columns
     df[bool_cols] = df[bool_cols].replace({True: "true", False: "false"})
     df = df.sort_index()
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        df.index = df.index.strftime(datetime_pattern.value)
+
+    datetime_cols = df.select_dtypes(
+        include=["datetime64[ns, UTC]", "datetime64"]
+    ).columns
+    for col in datetime_cols:
+        df[col] = df[col].apply(
+            lambda x: x.strftime(datetime_pattern.value) if not pd.isnull(x) else x
+        )
+
     df.to_csv(file_path, index=True, index_label=index_label, sep=delimiter)
 
 
