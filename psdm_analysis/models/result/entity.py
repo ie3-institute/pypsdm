@@ -128,10 +128,10 @@ class ResultEntities(ABC):
             )
 
     def copy(
-        self: EntityType,
+        self: ResultType,
         deep=True,
         **changes,
-    ) -> EntityType:
+    ) -> ResultType:
         """
         Creates a copy of the current ResultEntities instance.
         By default does a deep copy of all data and replaces the given changes.
