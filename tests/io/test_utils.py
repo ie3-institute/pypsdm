@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from psdm_analysis.io.utils import check_filter
+from psdm_analysis.io.utils import DateTimePattern, check_filter
 
 
 def test_check_filter_both_dates_provided_valid():
@@ -38,3 +38,14 @@ def test_check_filter_start_date_after_end_date():
     filter_end = datetime(2022, 1, 1)
     with pytest.raises(ValueError, match="Filter start must be before end."):
         check_filter(filter_start, filter_end)
+
+
+def test_date_time_pattern():
+    datetime_str = "2011-01-01T00:00:00Z"
+    datetime_obj = datetime.strptime(
+        datetime_str, DateTimePattern.UTC_TIME_PATTERN_EXTENDED.value
+    )
+    datetime_str_b = datetime_obj.strftime(
+        DateTimePattern.UTC_TIME_PATTERN_EXTENDED.value
+    )
+    assert datetime_str == datetime_str_b

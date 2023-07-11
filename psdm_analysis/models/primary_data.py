@@ -127,26 +127,9 @@ class PrimaryData:
         return PrimaryData(filtered_time_series, self.participant_mapping)
 
     def to_csv(self, path: str, mkdirs=True, delimiter=","):
-        # write time series
-        for ts_uuid, ts in self.time_series.items():
-            data = copy.deepcopy(ts.data)
-            if not isinstance(ts.entity_type, TimeSeriesEnum):
-                raise ValueError(
-                    f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
-                )
-            ts_name = ts.entity_type.get_csv_input_file_name(ts_uuid)
-            data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
-            data["time"] = data.index
-            data["time"] = data["time"].apply(lambda t: str(t))
-            data.set_index("uuid", inplace=True)
-            df_to_csv(
-                data,
-                path,
-                ts_name,
-                mkdirs=mkdirs,
-                delimiter=delimiter,
-                index_label="uuid",
-            )
+        write_ts = partial(PrimaryData._write_ts_df, path, mkdirs, delimiter)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            executor.map(write_ts, list(self.time_series.values()))
 
         # write mapping data
         index = [str(uuid.uuid4()) for _ in range(len(self.participant_mapping))]
@@ -163,7 +146,27 @@ class PrimaryData:
             path,
             "time_series_mapping.csv",
             delimiter=delimiter,
-            index_label="uuida",
+            index_label="uuid",
+        )
+
+    @staticmethod
+    def _write_ts_df(path: str, mkdirs: bool, delimiter: str, ts: PQResult):
+        data = copy.deepcopy(ts.data)
+        if not isinstance(ts.entity_type, TimeSeriesEnum):
+            raise ValueError(
+                f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
+            )
+        ts_name = ts.entity_type.get_csv_input_file_name(ts.input_model)
+        data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
+        data["time"] = data.index
+        data.set_index("uuid", inplace=True)
+        df_to_csv(
+            data,
+            path,
+            ts_name,
+            mkdirs=mkdirs,
+            delimiter=delimiter,
+            index_label="uuid",
         )
 
     def compare(self, other):
