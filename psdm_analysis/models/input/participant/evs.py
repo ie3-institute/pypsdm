@@ -2,8 +2,9 @@ from dataclasses import dataclass
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.container.mixins import SpTypeMixin
-from psdm_analysis.models.input.participant.participant import \
-    SystemParticipantsWithCapacity
+from psdm_analysis.models.input.participant.participant import (
+    SystemParticipantsWithCapacity,
+)
 
 
 @dataclass(frozen=True)

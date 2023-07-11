@@ -9,8 +9,7 @@ from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.result.grid.connector import ConnectorResult
 from psdm_analysis.models.result.grid.transformer import Transformer2WResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
-from psdm_analysis.plots.common.utils import (FIGSIZE, ax_plot_secondary_axis,
-                                              set_title)
+from psdm_analysis.plots.common.utils import FIGSIZE, ax_plot_secondary_axis, set_title
 
 
 def plot_transformer_s_rated(

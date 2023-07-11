@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 
 import pytest
-from definitions import ROOT_DIR
 
+from definitions import ROOT_DIR
 from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.input.container.grid import GridContainer
 

@@ -12,8 +12,10 @@ from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import to_date_time
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.input.entity import EntityType
-from psdm_analysis.processing.dataframe import (compare_dfs,
-                                                filter_data_for_time_interval)
+from psdm_analysis.processing.dataframe import (
+    compare_dfs,
+    filter_data_for_time_interval,
+)
 
 ResultType = TypeVar("ResultType", bound="ResultEntities")
 

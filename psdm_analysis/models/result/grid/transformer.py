@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, List
 
 from pandas import Series
 
-from psdm_analysis.models.result.grid.connector import (ConnectorResult,
-                                                        ConnectorsResult)
+from psdm_analysis.models.result.grid.connector import ConnectorResult, ConnectorsResult
 
 if TYPE_CHECKING:
     from psdm_analysis.models.gwr import GridWithResults

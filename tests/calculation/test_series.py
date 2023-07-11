@@ -2,8 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from psdm_analysis.processing.series import (add_series,
-                                             divide_positive_negative)
+from psdm_analysis.processing.series import add_series, divide_positive_negative
 
 index = pd.date_range("2012-01-01 10:00:00", "2012-01-01 13:00:00", freq="h")
 series = pd.Series(index=index, data=[1, 2, -2, 3])

@@ -8,8 +8,12 @@ from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 from psdm_analysis.errors import ComparisonError
-from psdm_analysis.io.utils import (check_filter, csv_to_grpd_df,
-                                    get_file_path, to_date_time)
+from psdm_analysis.io.utils import (
+    check_filter,
+    csv_to_grpd_df,
+    get_file_path,
+    to_date_time,
+)
 from psdm_analysis.models.enums import EntitiesEnum, EntityEnumType
 from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.result.entity import ResultEntities

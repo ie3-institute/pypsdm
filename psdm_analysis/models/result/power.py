@@ -12,9 +12,12 @@ from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.processing.dataframe import divide_positive_negative
-from psdm_analysis.processing.series import (add_series, duration_weighted_sum,
-                                             hourly_mean_resample,
-                                             load_and_generation)
+from psdm_analysis.processing.series import (
+    add_series,
+    duration_weighted_sum,
+    hourly_mean_resample,
+    load_and_generation,
+)
 
 
 @dataclass(frozen=True)

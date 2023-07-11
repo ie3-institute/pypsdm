@@ -7,8 +7,7 @@ from psdm_analysis.io.utils import df_to_csv
 from psdm_analysis.models.enums import EntitiesEnum
 from psdm_analysis.models.input.connector.connector import Connector
 from psdm_analysis.models.input.entity import Entities
-from psdm_analysis.models.input.participant.participant import \
-    SystemParticipants
+from psdm_analysis.models.input.participant.participant import SystemParticipants
 
 
 class ContainerMixin(ABC):

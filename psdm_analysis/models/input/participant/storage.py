@@ -2,8 +2,9 @@ from pandas import Series
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.container.mixins import SpTypeMixin
-from psdm_analysis.models.input.participant.participant import \
-    SystemParticipantsWithCapacity
+from psdm_analysis.models.input.participant.participant import (
+    SystemParticipantsWithCapacity,
+)
 
 
 class Storages(SystemParticipantsWithCapacity, SpTypeMixin):

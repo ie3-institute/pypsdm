@@ -4,8 +4,9 @@ import math
 import pytest
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.container.participants import \
-    ParticipantsResultContainer
+from psdm_analysis.models.result.container.participants import (
+    ParticipantsResultContainer,
+)
 from psdm_analysis.processing.series import duration_weighted_sum
 
 
