@@ -69,7 +69,7 @@ class ResultDict(ABC):
             raise TypeError(f"Cannot add {type(self)} and {type(other)}")
         if self.entity_type != other.entity_type:
             raise TypeError(
-                f"Cannot add {type(self)} and {type(other)} of different entity types"
+                f"Cannot add {type(self)} and {type(other)}. Entities are of different entity types"
             )
         return type(self)(self.entity_type, {**self.entities, **other.entities})
 
@@ -78,7 +78,7 @@ class ResultDict(ABC):
             raise TypeError(f"Cannot subtract {type(self)} and {type(other)}")
         if self.entity_type != other.entity_type:
             raise TypeError(
-                f"Cannot subtract {type(self)} and {type(other)} of different entity types"
+                f"Cannot subtract {type(self)} and {type(other)}. Entities are of different entity types"
             )
         keys = self.entities.keys() - other.entities.keys()
         return type(self)(self.entity_type, {key: self.entities[key] for key in keys})
