@@ -4,7 +4,8 @@ import pandas as pd
 from pytest import fixture
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.participant import \
+    ParticipantsResult
 from psdm_analysis.models.result.power import PQResult
 
 

@@ -11,15 +11,9 @@ from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
-from psdm_analysis.plots.common.utils import (
-    FIGSIZE,
-    LABEL_PAD,
-    set_style,
-    set_subplot_title,
-    set_title,
-    set_xlabels_rotated,
-    set_ylabel,
-)
+from psdm_analysis.plots.common.utils import (FIGSIZE, LABEL_PAD, set_style,
+                                              set_subplot_title, set_title,
+                                              set_xlabels_rotated, set_ylabel)
 
 set_style()
 

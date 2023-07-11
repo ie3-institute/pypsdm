@@ -14,12 +14,10 @@ from pandas import DataFrame, Series
 from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import bool_converter, df_to_csv, read_csv
-from psdm_analysis.models.enums import (
-    EntitiesEnum,
-    RawGridElementsEnum,
-    SystemParticipantsEnum,
-)
-from psdm_analysis.models.input.participant.charging import parse_evcs_type_info
+from psdm_analysis.models.enums import (EntitiesEnum, RawGridElementsEnum,
+                                        SystemParticipantsEnum)
+from psdm_analysis.models.input.participant.charging import \
+    parse_evcs_type_info
 from psdm_analysis.processing.dataframe import compare_dfs
 
 if TYPE_CHECKING:

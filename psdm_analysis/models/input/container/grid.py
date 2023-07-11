@@ -3,9 +3,8 @@ from datetime import datetime
 from typing import Dict, Optional, Union
 
 from psdm_analysis.models.input.container.mixins import ContainerMixin
-from psdm_analysis.models.input.container.participants import (
-    SystemParticipantsContainer,
-)
+from psdm_analysis.models.input.container.participants import \
+    SystemParticipantsContainer
 from psdm_analysis.models.input.container.raw_grid import RawGridContainer
 from psdm_analysis.models.primary_data import PrimaryData
 from psdm_analysis.models.result.power import PQResult

@@ -1,8 +1,9 @@
-import pandas as pd 
 from datetime import datetime
-import pytest
-from psdm_analysis.models.enums import SystemParticipantsEnum
 
+import pandas as pd
+import pytest
+
+from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.power import PQResult
 
 
@@ -22,7 +23,7 @@ def create_sample_data(
 def create_custom_pq_res():
     data = create_sample_data(datetime(2023, 1, 1), 5)
     return PQResult(SystemParticipantsEnum.LOAD, "test-res", "test-res", data)
-    
+
 
 def test_get_slice():
     ts = create_custom_pq_res()

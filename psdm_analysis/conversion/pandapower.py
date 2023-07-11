@@ -2,13 +2,11 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from psdm_analysis.models.enums import (
-    EntitiesEnum,
-    RawGridElementsEnum,
-    SystemParticipantsEnum,
-)
+from psdm_analysis.models.enums import (EntitiesEnum, RawGridElementsEnum,
+                                        SystemParticipantsEnum)
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.participant import \
+    ParticipantsResult
 from psdm_analysis.models.result.power import PQResult
 
 # These are just some early quite specific conversions. Additional ones will be added as needed.

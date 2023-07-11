@@ -2,18 +2,12 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from psdm_analysis.models.result.container.participants import (
-    ParticipantsResultContainer,
-)
+from psdm_analysis.models.result.container.participants import \
+    ParticipantsResultContainer
 from psdm_analysis.models.result.power import PQResult
-from psdm_analysis.plots.utils import (
-    FIGSIZE,
-    FIGSIZE_WIDE,
-    LOAD_COLOR,
-    PV_COLOR,
-    TITLE_FONT_SIZE,
-    get_label_and_color,
-)
+from psdm_analysis.plots.utils import (FIGSIZE, FIGSIZE_WIDE, LOAD_COLOR,
+                                       PV_COLOR, TITLE_FONT_SIZE,
+                                       get_label_and_color)
 
 sns.set_style("whitegrid")
 

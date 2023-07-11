@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import List
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.input.participant.participant import SystemParticipants
+from psdm_analysis.models.input.participant.participant import \
+    SystemParticipants
 
 
 @dataclass(frozen=True)

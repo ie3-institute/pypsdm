@@ -35,7 +35,8 @@ class EntitiesEnum(Enum):
         # locally to avoid circular imports
         from psdm_analysis.models.result.grid.connector import ConnectorResult
         from psdm_analysis.models.result.grid.node import NodeResult
-        from psdm_analysis.models.result.grid.transformer import Transformer2WResult
+        from psdm_analysis.models.result.grid.transformer import \
+            Transformer2WResult
         from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 
         if isinstance(self, SystemParticipantsEnum):
