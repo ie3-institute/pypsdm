@@ -64,6 +64,31 @@ class ResultDict(ABC):
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
 
+    def __add__(self, other: ResultDictType):
+        if not isinstance(other, type(self)):
+            raise TypeError(f"Cannot add {type(self)} and {type(other)}")
+        if self.entity_type != other.entity_type:
+            raise TypeError(
+                f"Cannot add {type(self)} and {type(other)} of different entity types"
+            )
+        return type(self)(self.entity_type, {**self.entities, **other.entities})
+
+    def __sub__(self, other: ResultDictType):
+        if not isinstance(other, type(self)):
+            raise TypeError(f"Cannot subtract {type(self)} and {type(other)}")
+        if self.entity_type != other.entity_type:
+            raise TypeError(
+                f"Cannot subtract {type(self)} and {type(other)} of different entity types"
+            )
+        keys = self.entities.keys() - other.entities.keys()
+        return type(self)(self.entity_type, {key: self.entities[key] for key in keys})
+
+    def __iter__(self):
+        return self.entities.__iter__()
+
+    def items(self):
+        return self.entities.items()
+
     def uuids(self):
         return list(self.entities.keys())
 

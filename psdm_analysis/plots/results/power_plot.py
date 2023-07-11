@@ -385,6 +385,33 @@ def ax_plot_active_power(
     ax.set_ylabel("Power in MW")
 
 
+def ax_plot_reactive_power(
+    ax: Axes,
+    res: PQResult,
+    resolution: str,
+    hourly_mean: bool = False,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    if len(res.p) == 0:
+        raise ValueError("Reactive power time series is empty. No data to plot")
+
+    ax = ax_plot_time_series(
+        ax,
+        res.q,
+        res.entity_type,
+        resolution,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
+    ax.set_ylabel(" in MW")
+
+
 def ax_plot_soc(
     ax: Axes,
     res: PQWithSocResult,
