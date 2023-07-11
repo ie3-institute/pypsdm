@@ -149,6 +149,7 @@ class PrimaryData:
             index_label="uuid",
         )
 
+    @staticmethod
     def _write_ts_df(path: str, mkdirs: bool, delimiter: str, ts: PQResult):
         data = copy.deepcopy(ts.data)
         if not isinstance(ts.entity_type, TimeSeriesEnum):

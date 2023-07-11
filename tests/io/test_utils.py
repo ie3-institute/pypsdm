@@ -43,7 +43,9 @@ def test_check_filter_start_date_after_end_date():
 def test_date_time_pattern():
     datetime_str = "2011-01-01T00:00:00Z"
     datetime_obj = datetime.strptime(
-        datetime_str, DateTimePattern.UTC_TIME_PATTERN.value
+        datetime_str, DateTimePattern.UTC_TIME_PATTERN_EXTENDED.value
     )
-    datetime_str_b = datetime_obj.strftime(DateTimePattern.UTC_TIME_PATTERN.value)
+    datetime_str_b = datetime_obj.strftime(
+        DateTimePattern.UTC_TIME_PATTERN_EXTENDED.value
+    )
     assert datetime_str == datetime_str_b
