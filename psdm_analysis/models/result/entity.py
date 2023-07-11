@@ -1,6 +1,7 @@
+import copy
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import Optional, Tuple, TypeVar, Union
 
@@ -125,6 +126,26 @@ class ResultEntities(ABC):
                 f"{self.entity_type.get_plot_name()} entities are not equal.",
                 errors=[(type(self), str(e))],
             )
+
+    def copy(
+        self: EntityType,
+        deep=True,
+        **changes,
+    ) -> EntityType:
+        """
+        Creates a copy of the current ResultEntities instance.
+        By default does a deep copy of all data and replaces the given changes.
+        When deep is false, only the references to the data of the non-changed attribtues are copied.
+
+        Args:
+            deep: Whether to do a deep copy of the data.
+            **changes: The changes to apply to the copy.
+
+        Returns:
+            The copy of the current Entities instance.
+        """
+        to_copy = copy.deepcopy(self) if deep else self
+        return replace(to_copy, **changes)
 
     @staticmethod
     @abstractmethod
