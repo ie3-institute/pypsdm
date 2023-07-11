@@ -65,6 +65,18 @@ class ResultDict(ABC):
                 )
 
     def __add__(self: ResultDictType, other: ResultDictType):
+        """
+        Add two ResultDicts together. The entity types must be the same.
+
+        BEWARE: The underlying data will NOT be copied. That means changing items in the returned ResultDict will also
+        change the items in the original ResultDicts and vice versa.
+
+        Args:
+            other: The ResultDict to add to this ResultDict
+
+        Returns:
+            A new ResultDict containing the entities of both ResultDicts.
+        """
         if not isinstance(other, type(self)):
             raise TypeError(f"Cannot add {type(self)} and {type(other)}")
         if self.entity_type != other.entity_type:
@@ -74,6 +86,15 @@ class ResultDict(ABC):
         return type(self)(self.entity_type, {**self.entities, **other.entities})
 
     def __sub__(self: ResultDictType, other: ResultDictType):
+        """
+        Creates a new dict with the elements of self minus all keys of other. The entity types must be the same.
+
+        BEWARE: Returns a shallow copy of the data, the underlying data will NOT be copied.
+
+        Args:
+            other: The ResultDict to subtract from this ResultDict
+
+        """
         if not isinstance(other, type(self)):
             raise TypeError(f"Cannot subtract {type(self)} and {type(other)}")
         if self.entity_type != other.entity_type:

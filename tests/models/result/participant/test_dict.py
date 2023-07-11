@@ -38,15 +38,16 @@ def test_add(res_dict):
     data = create_sample_data(start, periods)
     c = PQResult(SystemParticipantsEnum.LOAD, "test-res-c", "test-res-c", data)
     res_dict_b = ParticipantsResult(SystemParticipantsEnum.LOAD, {"c": c})
-    added = res_dict + res_dict_b
-    assert len(added) == 3
-    assert list(added.entities.keys()) == ["a", "b", "c"]
+    res_dict_add = res_dict + res_dict_b
+    assert len(res_dict_add) == 3
+    assert list(res_dict_add.entities.keys()) == ["a", "b", "c"]
+    assert id(res_dict_add.entities["a"]) == id(res_dict.entities["a"])
 
     # test with key already in dict
     res_dict_c = res_dict.subset(["b"])
-    added = res_dict + res_dict_c
-    assert len(added) == 2
-    assert list(added.entities.keys()) == ["a", "b"]
+    res_dict_add = res_dict + res_dict_c
+    assert len(res_dict_add) == 2
+    assert list(res_dict_add.entities.keys()) == ["a", "b"]
 
 
 def test_sub(res_dict):
