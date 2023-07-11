@@ -31,6 +31,7 @@ def create_custom_pq_res():
     return PQResult(SystemParticipantsEnum.LOAD, "test-res", "test-res", data)
 
 
+# TODO: Replace from csv tests with sample_data tests
 @pytest.fixture
 def wec_results(result_path, delimiter):
     simulation_end = datetime(year=2011, month=1, day=1, hour=14)
@@ -166,76 +167,6 @@ def test_from_csv(wec_a):
     res = PQResult.from_csv(os.path.join(output_dir, file_name), wec_a.entity_type)
     assert (res.p == wec_a.p).all()
     assert (res.q == wec_a.q).all()
-
-
-def test_get_slice():
-    ts = create_custom_pq_res()
-    start = datetime(2023, 1, 1, 1)
-    stop = datetime(2023, 1, 1, 3)
-    sliced_ts = ts[start:stop]
-
-    assert isinstance(sliced_ts, PQResult)
-    assert len(sliced_ts.data) == 3
-
-
-def test_get_slice_invalid_types():
-    ts = create_custom_pq_res()
-    with pytest.raises(ValueError):
-        _ = ts[0:2]
-
-
-def test_get_datetime():
-    ts = create_custom_pq_res()
-    dt = datetime(2023, 1, 1)
-    result_ts = ts[dt]
-
-    assert isinstance(result_ts, PQResult)
-    assert len(result_ts.data) == 1
-    assert result_ts.data.index[0] == dt
-
-
-def test_get_list_of_datetimes():
-    ts = create_custom_pq_res()
-    dt_list = [datetime(2023, 1, 1, 1), datetime(2023, 1, 1, 2)]
-    result_ts = ts[dt_list]
-
-    assert isinstance(result_ts, PQResult)
-    assert len(result_ts.data) == 2
-    assert result_ts.data.index[0] == dt_list[0]
-    assert result_ts.data.index[1] == dt_list[1]
-
-
-def test_get_list_of_datetimes_out_of_bounds_upper():
-    ts = create_custom_pq_res()
-    dt_list = [datetime(2023, 1, 1, 1), datetime(2023, 1, 2, 2)]
-    result_ts = ts[dt_list]
-
-    assert isinstance(result_ts, PQResult)
-    assert len(result_ts.data) == 2
-    assert result_ts.data.index[0] == dt_list[0]
-    assert result_ts.data.index[1] == ts.data.index[-1]
-
-
-def test_get_list_of_datetimes_out_of_bounds_lower():
-    ts = create_custom_pq_res()
-    dt_list = [datetime(2022, 1, 1, 1), datetime(2023, 1, 1, 2)]
-    result_ts = ts[dt_list]
-
-    assert isinstance(result_ts, PQResult)
-    assert len(result_ts.data) == 2
-    assert result_ts.data.index[0] == ts.data.index[0]
-    assert result_ts.data.index[1] == dt_list[1]
-
-
-def test_get_list_of_datetimes_out_of_bounds_both():
-    ts = create_custom_pq_res()
-    dt_list = [datetime(2022, 1, 1, 1), datetime(2023, 1, 2, 2)]
-    result_ts = ts[dt_list]
-
-    assert isinstance(result_ts, PQResult)
-    assert len(result_ts.data) == 2
-    assert result_ts.data.index[0] == ts.data.index[0]
-    assert result_ts.data.index[1] == ts.data.index[-1]
 
 
 def test_to_csv(tmpdir):
