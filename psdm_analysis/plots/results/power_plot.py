@@ -12,8 +12,8 @@ from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult,
     ParticipantsWithSocResult,
+    PQResultDict,
 )
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
@@ -273,14 +273,14 @@ def ax_plot_stacked_pq(
 
 
 def plot_participants_sum(
-    res: ParticipantsResult,
+    res: PQResultDict,
     title: str,
     resolution: str,
     hourly_mean: bool = False,
     fill_from_index: bool = True,
     **kwargs,
 ):
-    if not isinstance(res, ParticipantsResult):
+    if not isinstance(res, PQResultDict):
         raise TypeError(
             "Data must be of type ParticipantsResult but is {}".format(type(res))
         )

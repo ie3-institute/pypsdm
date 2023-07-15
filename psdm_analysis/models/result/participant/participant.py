@@ -16,7 +16,7 @@ from psdm_analysis.processing.dataframe import join_dataframes
 
 
 @dataclass(frozen=True)
-class ParticipantsResult(ResultDict):
+class PQResultDict(ResultDict):
     entities: Dict[str, PQResult]
 
     @property
@@ -93,7 +93,7 @@ class ParticipantsResult(ResultDict):
 
 
 @dataclass(frozen=True)
-class ParticipantsWithSocResult(ParticipantsResult):
+class ParticipantsWithSocResult(PQResultDict):
     entity_type: SystemParticipantsEnum
     entities: Dict[str, PQWithSocResult]
 

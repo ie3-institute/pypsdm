@@ -4,7 +4,7 @@ import pandas as pd
 from pytest import fixture
 
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.participant import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 
 
@@ -29,7 +29,7 @@ def res_dict():
     data = create_sample_data(start, periods)
     a = PQResult(SystemParticipantsEnum.LOAD, "test-res-a", "test-res-a", data)
     b = PQResult(SystemParticipantsEnum.LOAD, "test-res-a", "test-res-a", data * 2)
-    return ParticipantsResult(SystemParticipantsEnum.LOAD, {"a": a, "b": b})
+    return PQResultDict(SystemParticipantsEnum.LOAD, {"a": a, "b": b})
 
 
 def test_add(res_dict):
@@ -37,7 +37,7 @@ def test_add(res_dict):
     periods = 5
     data = create_sample_data(start, periods)
     c = PQResult(SystemParticipantsEnum.LOAD, "test-res-c", "test-res-c", data)
-    res_dict_b = ParticipantsResult(SystemParticipantsEnum.LOAD, {"c": c})
+    res_dict_b = PQResultDict(SystemParticipantsEnum.LOAD, {"c": c})
     res_dict_add = res_dict + res_dict_b
     assert len(res_dict_add) == 3
     assert list(res_dict_add.entities.keys()) == ["a", "b", "c"]

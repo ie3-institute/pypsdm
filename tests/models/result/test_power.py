@@ -7,7 +7,7 @@ import pytest
 
 from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.participant import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import duration_weighted_series
 from tests.utils import is_close
@@ -34,7 +34,7 @@ def create_custom_pq_res():
 @pytest.fixture
 def wec_results(result_path, delimiter):
     simulation_end = datetime(year=2011, month=1, day=1, hour=14)
-    wecs = ParticipantsResult.from_csv(
+    wecs = PQResultDict.from_csv(
         SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
         result_path,
         delimiter,
