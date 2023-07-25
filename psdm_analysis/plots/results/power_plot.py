@@ -40,10 +40,22 @@ def plot_comparison(
     label_a: str,
     label_b: str,
     title: str,
-    resolution: str,
+    resolution="auto",
     hourly_mean=False,
     flex_signal: PQResult = None,
 ):
+    """
+    Creates a line plot which compares time series a and time series b.
+    :param res_a: First time series
+    :param res_b: Second time series
+    :param label_a: Label of the first time series
+    :param label_b: Label of the second time series
+    :param title
+    :param resolution: Resolution of the ticks on the time axes
+    :param hourly_mean
+    :param flex_signal
+    :return: axs, fig
+    """
     subplot_count = 2 if flex_signal is None else 3
     fig, axs = plt.subplots(
         subplot_count, 1, figsize=FIGSIZE, sharex=True, sharey=False
@@ -69,9 +81,16 @@ def plot_comparison(
 
 def plot_em(
     em_participant_results: ParticipantsResultContainer,
-    resolution: str,
+    resolution="auto",
     hourly_mean: bool = False,
 ):
+    """
+    Creates a line plot with all participants connected to an em agent.
+    :param em_participant_results
+    :param resolution: Resolution of the ticks on the time axis
+    :param hourly_mean
+    :return: fig
+    """
     em_uuid = list(em_participant_results.ems.entities.keys())[0]
 
     title = f"Household: {em_uuid}"
@@ -95,10 +114,19 @@ def plot_em(
 def plot_aggregated_load_and_generation(
     participants: Union[ParticipantsResultContainer, list[PQResult]],
     title: str,
-    resolution: str,
     hourly_mean: bool,
+    resolution="auto",
     with_residual=True,
 ):
+    """
+    Creates a line plot for aggregated load and generation.
+    :param participants: Container with the results of the participants
+    :param title
+    :param hourly_mean
+    :param resolution: Resolution of the ticks on the time axis
+    :param with_residual
+    :return: fig, axs
+    """
     if with_residual:
         fig, axs = plt.subplots(2, 1, figsize=(10, 5), sharex=True, sharey=True)
         pq_results = _get_pq_results_from_union(participants)
@@ -143,12 +171,23 @@ def plot_aggregated_load_and_generation(
 def plot_all_participants(
     participants: Union[ParticipantsResultContainer, list[PQResult]],
     title: str,
-    resolution: str,
     hourly_mean: bool,
+    resolution="auto",
     stack=False,
     with_residual=False,
     **kwargs,
 ):
+    """
+    Creates a line plot with the results of a participants
+    :param participants: Container with the results of the participants
+    :param title
+    :param hourly_mean
+    :param resolution: Resolution of the ticks on the time axis
+    :param stack: Boolean if the lines should be plotted in one or in several plots
+    :param with_residual
+    :param kwargs
+    :return: fig, axs
+    """
     if with_residual:
         fig, axs = plt.subplots(2, 1, figsize=(10, 5), sharex=True, sharey=True)
         ax_plot_participants(
@@ -275,11 +314,21 @@ def ax_plot_stacked_pq(
 def plot_participants_sum(
     res: ParticipantsResult,
     title: str,
-    resolution: str,
+    resolution="auto",
     hourly_mean: bool = False,
     fill_from_index: bool = True,
     **kwargs,
 ):
+    """
+    Creates a line plot for the sum of the participants results.
+    :param res: Results
+    :param title
+    :param resolution: Resolution of the ticks on the time axis
+    :param hourly_mean
+    :param fill_from_index
+    :param kwargs
+    :return fig
+    """
     if not isinstance(res, ParticipantsResult):
         raise TypeError(
             "Data must be of type ParticipantsResult but is {}".format(type(res))
@@ -296,11 +345,22 @@ def plot_participants_with_soc_sum(
     res: ParticipantsWithSocResult,
     input: SystemParticipantsWithCapacity,
     title: str,
-    resolution: str,
+    resolution="auto",
     hourly_mean: bool = False,
     fill_from_index: bool = True,
     **kwargs,
 ):
+    """
+    Creates a subplot with active power and soc.
+    :param res: Results
+    :param input: SystemParticipantsWithCapacity
+    :param title
+    :param resolution: Resolution of the ticks on the time axis
+    :param hourly_mean
+    :param fill_from_index
+    :param kwargs
+    :return: fig
+    """
     fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
     axs[0].set_title(title)
     sum = ParticipantsWithSocResult.sum_with_soc(res, input)
@@ -319,11 +379,21 @@ def plot_participants_with_soc_sum(
 def plot_active_power_with_soc(
     res: PQWithSocResult,
     title: str,
-    resolution: str,
+    resolution="auto",
     hourly_mean=False,
     fill_from_index=False,
     **kwargs,
 ):
+    """
+    Creates a subplot with active power and soc.
+    :param res: Results of P and Q and SOC
+    :param title
+    :param resolution: Resolution of the ticks on the time axis
+    :param hourly_mean
+    :param fill_from_index
+    :param kwargs
+    :return: fig
+    """
     fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
     axs[0].set_title(title)
     ax_plot_active_power(
@@ -341,12 +411,22 @@ def plot_active_power_with_soc(
 
 def plot_active_power(
     res: PQResult,
-    resolution: str,
+    resolution="auto",
     title: Optional[str] = None,
     hourly_mean: bool = False,
     fill_from_index=True,
     **kwargs,
 ):
+    """
+    Creates a line plot of a active power curve.
+    :param res: Results
+    :param resolution: Resolution of the ticks on the time axis
+    :param title
+    :param hourly_mean
+    :param fill_from_index
+    :param kwargs
+    :return: fig, ax
+    """
     fig, ax = plt.subplots(figsize=FIGSIZE)
     ax.set_ylabel("Power in MW")
     ax_plot_active_power(
@@ -404,7 +484,10 @@ def ax_plot_soc(
 
 
 def plot_sorted_annual_load_duration(
-    res: PQResult, s_rated_mw: float = None, fill_from_index=False, **kwargs
+    res: PQResult,
+    s_rated_mw: float = None,
+    fill_from_index=False,
+    **kwargs
 ):
     args = get_label_and_color_dict(res.entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)

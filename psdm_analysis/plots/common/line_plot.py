@@ -1,3 +1,5 @@
+import datetime
+
 from matplotlib.axes import Axes
 from pandas import Series
 
@@ -24,10 +26,24 @@ def ax_plot_time_series(
 ):
     args = get_label_and_color_dict(type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
-    if set_x_label:
-        set_date_format_and_label(ax, resolution)
+
     ts = plot_resample(res, hourly_mean)
+    if resolution == "auto":
+        if ts.index.max()-ts.index.min() <= datetime.timedelta(days=4):
+            used_resolution = "d"
+        elif ts.index.max()-ts.index.min() <= datetime.timedelta(days=30):
+            used_resolution = "w"
+        elif ts.index.max()-ts.index.min() <= datetime.timedelta(days=60):
+            used_resolution = "m"
+        else:
+            used_resolution = "y"
+    else:
+        used_resolution = resolution
+    if set_x_label:
+        set_date_format_and_label(ax, used_resolution)
+
     ax.plot(ts, **kwargs)
+
     if fill_from_index:
         ax.fill_between(ts.index, ts, alpha=FILL_ALPHA, color=kwargs["color"])
     elif fill_between is not None:
@@ -38,4 +54,5 @@ def ax_plot_time_series(
             alpha=FILL_ALPHA,
             color=kwargs["color"],
         )
+
     return ax

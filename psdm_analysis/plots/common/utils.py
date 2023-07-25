@@ -123,6 +123,7 @@ def plot_resample(res: Series, hourly_mean: bool):
 
 def set_date_format_and_label(ax: Axes, resolution: str):
     date_format, x_label = _date_format_and_x_label(resolution)
+
     ax.set_xlabel(x_label)
     if resolution == "y":
         # set x labels for every month
