@@ -1,14 +1,16 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from datetime import datetime
+from typing import List, Optional, Type, Union
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.models.enums import RawGridElementsEnum
+from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.input.node import Nodes
 from psdm_analysis.models.result.entity import ResultEntities
-from psdm_analysis.models.result.participant.dict import ResultDict
+from psdm_analysis.models.result.participant.dict import ResultDict, ResultDictType
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,26 @@ class NodeResult(ResultEntities):
 class NodesResult(ResultDict):
     entities: dict[str, NodeResult]
 
+    @classmethod
+    def from_csv(
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+    ) -> ResultDictType:
+        return super().from_csv(
+            RawGridElementsEnum.NODE,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+        )
+
     @property
     def v_mag(self) -> Optional[DataFrame]:
         if not self.entities:
@@ -93,5 +115,5 @@ class NodesResult(ResultDict):
         return data.describe().transpose()
 
     @classmethod
-    def create_empty(cls) -> "NodesResult":
-        return super().create_empty(RawGridElementsEnum.NODE)
+    def create_empty(cls, entity_type=RawGridElementsEnum.NODE) -> "NodesResult":
+        return super().create_empty(entity_type)

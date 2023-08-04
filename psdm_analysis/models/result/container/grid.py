@@ -76,7 +76,6 @@ class GridResultContainer(ContainerMixin):
         with concurrent.futures.ProcessPoolExecutor() as executor:
             nodes_future = executor.submit(
                 NodesResult.from_csv,
-                RawGridElementsEnum.NODE,
                 simulation_data_path,
                 delimiter,
                 simulation_end,
@@ -112,7 +111,7 @@ class GridResultContainer(ContainerMixin):
         if simulation_end is None:
             if len(nodes.entities) == 0:
                 raise ValueError(
-                    "Can't determine simulation end time. No node results to base it on."
+                    "Can't determine simulation end time automatically. No node results to base it on. Please configure 'simulation_end' manually."
                 )
             some_node_res = next(iter(nodes.entities.values()))
             simulation_end = some_node_res.data.index.max()

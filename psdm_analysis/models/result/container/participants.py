@@ -8,28 +8,28 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
-from psdm_analysis.models.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
-from psdm_analysis.models.result.participant.participant import (
-    ParticipantsResult,
-    ParticipantsWithSocResult,
+from psdm_analysis.models.result.participant.pq_dict import (
+    PQResultDict,
+    PQWithSocResultDict,
 )
 from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
 class ParticipantsResultContainer(ContainerMixin):
-    ems: ParticipantsResult
-    loads: ParticipantsResult
-    fixed_feed_ins: ParticipantsResult
-    pvs: ParticipantsResult
-    wecs: ParticipantsResult
-    storages: ParticipantsWithSocResult
-    evcs: ParticipantsResult
-    evs: ParticipantsWithSocResult
-    hps: ParticipantsResult
+    ems: PQResultDict
+    loads: PQResultDict
+    fixed_feed_ins: PQResultDict
+    pvs: PQResultDict
+    wecs: PQResultDict
+    storages: PQWithSocResultDict
+    evcs: PQResultDict
+    evs: PQWithSocResultDict
+    hps: PQResultDict
     flex: FlexOptionsResult
 
     def __len__(self):
@@ -106,11 +106,9 @@ class ParticipantsResultContainer(ContainerMixin):
         for participants_res in self.to_list(include_flex=False):
             if uuid in participants_res:
                 return participants_res.get(uuid)
-        return ParticipantsResult.create_empty("None")
+        return ValueError(f"No participant result with uuid: {uuid}")
 
-    def to_dict(
-        self, include_empty: bool = True
-    ) -> dict[SystemParticipantsEnum, ParticipantsResult]:
+    def to_dict(self, include_empty: bool = True) -> dict[EntitiesEnum, PQResultDict]:
         if include_empty:
             return {res.entity_type: res for res in self.to_list()}
         else:
@@ -137,7 +135,7 @@ class ParticipantsResultContainer(ContainerMixin):
 
     def to_list(
         self, include_em: bool = True, include_flex=True, include_empty=True
-    ) -> list[ParticipantsResult]:
+    ) -> list[PQResultDict]:
         optional = []
         if include_em:
             optional.append(self.ems)
@@ -258,7 +256,7 @@ class ParticipantsResultContainer(ContainerMixin):
         else:
             input_entities = None
         if participant.has_soc():
-            return ParticipantsWithSocResult.from_csv(
+            return PQWithSocResultDict.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,
@@ -266,7 +264,7 @@ class ParticipantsResultContainer(ContainerMixin):
                 input_entities,
             )
         else:
-            return ParticipantsResult.from_csv(
+            return PQResultDict.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,
@@ -277,26 +275,20 @@ class ParticipantsResultContainer(ContainerMixin):
     @classmethod
     def create_empty(cls):
         return ParticipantsResultContainer(
-            loads=ParticipantsResult.create_empty(SystemParticipantsEnum.LOAD),
-            fixed_feed_ins=ParticipantsResult.create_empty(
+            loads=PQResultDict.create_empty(SystemParticipantsEnum.LOAD),
+            fixed_feed_ins=PQResultDict.create_empty(
                 SystemParticipantsEnum.FIXED_FEED_IN
             ),
-            pvs=ParticipantsResult.create_empty(
+            pvs=PQResultDict.create_empty(
                 SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
             ),
-            wecs=ParticipantsResult.create_empty(
+            wecs=PQResultDict.create_empty(
                 SystemParticipantsEnum.WIND_ENERGY_CONVERTER
             ),
-            storages=ParticipantsResult.create_empty(SystemParticipantsEnum.STORAGE),
-            ems=ParticipantsResult.create_empty(
-                SystemParticipantsEnum.ENERGY_MANAGEMENT
-            ),
-            evcs=ParticipantsResult.create_empty(
-                SystemParticipantsEnum.ELECTRIC_VEHICLE
-            ),
-            evs=ParticipantsResult.create_empty(
-                SystemParticipantsEnum.ELECTRIC_VEHICLE
-            ),
-            hps=ParticipantsResult.create_empty(SystemParticipantsEnum.HEAT_PUMP),
-            flex=ParticipantsResult.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
+            storages=PQResultDict.create_empty(SystemParticipantsEnum.STORAGE),
+            ems=PQResultDict.create_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT),
+            evcs=PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE),
+            evs=PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE),
+            hps=PQResultDict.create_empty(SystemParticipantsEnum.HEAT_PUMP),
+            flex=PQResultDict.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
         )

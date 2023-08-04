@@ -15,14 +15,15 @@ from pandas import Series
 from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io import utils
 from psdm_analysis.io.utils import df_to_csv, to_date_time
-from psdm_analysis.models.enums import TimeSeriesEnum
+from psdm_analysis.models.enums import SystemParticipantsEnum, TimeSeriesEnum
+from psdm_analysis.models.result.participant.pq_dict import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 
 
 @dataclass
 class PrimaryData:
     # ts_uuid -> ts
-    time_series: dict[str, PQResult]
+    time_series: PQResultDict
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
 
@@ -37,7 +38,7 @@ class PrimaryData:
         return len(self.time_series)
 
     def __contains__(self, uuid):
-        return uuid in self.time_series
+        return uuid in self.time_series or uuid in self.participant_mapping
 
     def __getitem__(self, get):
         match get:
@@ -56,11 +57,7 @@ class PrimaryData:
                     logging.warning("Step is not supported for slicing. Ignoring it.")
                 if not (isinstance(start, datetime) and isinstance(stop, datetime)):
                     raise ValueError("Only datetime slicing is supported")
-                time_series = {
-                    key: e.filter_for_time_interval(start, stop)
-                    for key, e in self.time_series.items()
-                }
-                return PrimaryData(time_series, self.participant_mapping)
+                return self.filter_for_time_interval(start, stop)
             case _:
                 raise ValueError(
                     "Only get by uuid or datetime slice for filtering is supported."
@@ -68,38 +65,20 @@ class PrimaryData:
 
     @property
     def p(self):
-        if not self.time_series.values():
-            return None
-        return (
-            pd.DataFrame({p_uuid: res.p for p_uuid, res in self.time_series.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
+        return self.time_series.p
 
     @property
     def q(self):
-        return (
-            pd.DataFrame({p_uuid: res.q for p_uuid, res in self.time_series.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
+        return self.time_series.q
 
     def p_sum(self) -> Series:
-        if not self.time_series:
-            return Series(dtype=float)
-        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
+        return self.time_series.p_sum()
 
     def q_sum(self):
-        if not self.time_series:
-            return Series(dtype=float)
-        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
+        return self.time_series.q_sum()
 
     def sum(self) -> PQResult:
-        return PQResult.sum(list(self.time_series.values()))
-
-    def get_for_participant(self, participant: str):
-        time_series_id = self.participant_mapping[participant]
-        return self.time_series[time_series_id]
+        return self.time_series.sum()
 
     def get_for_participants(self, participants):
         time_series = []
@@ -114,22 +93,17 @@ class PrimaryData:
         :param time: the time or list of times to filter by
         :return: a new result containing only the given time or times
         """
-        return PrimaryData(
-            {uuid: result[time] for uuid, result in self.time_series.items()},
-            self.participant_mapping,
-        )
+        ts = self.time_series.filter_by_date_time(time)
+        return PrimaryData(ts, self.participant_mapping)
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
-        filtered_time_series = {
-            uuid: time_series.filter_for_time_interval(start, end)
-            for uuid, time_series in self.time_series.items()
-        }
-        return PrimaryData(filtered_time_series, self.participant_mapping)
+        ts = self.time_series.filter_for_time_interval(start, end)
+        return PrimaryData(ts, self.participant_mapping)
 
     def to_csv(self, path: str, mkdirs=True, delimiter=","):
         write_ts = partial(PrimaryData._write_ts_df, path, mkdirs, delimiter)
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            executor.map(write_ts, list(self.time_series.values()))
+            executor.map(write_ts, list(self.time_series.entities.values()))
 
         # write mapping data
         index = [str(uuid.uuid4()) for _ in range(len(self.participant_mapping))]
@@ -185,6 +159,7 @@ class PrimaryData:
         mapping_differences = participant_ts_self.symmetric_difference(
             participant_ts_other
         )
+
         if mapping_differences:
             errors.append(
                 ComparisonError(
@@ -193,22 +168,10 @@ class PrimaryData:
             )
 
         # Compare time series
-        ts_self_keys = set(self.time_series.keys())
-        ts_other_keys = set(self.time_series.keys())
-        ts_differences = ts_self_keys.symmetric_difference(ts_other_keys)
-        if ts_differences:
-            errors.append(
-                ComparisonError(
-                    f"Differences in time series keys. Following keys not in both dicts: {ts_differences}"
-                )
-            )
-
-        for key, ts in self.time_series.items():
-            if key in other:
-                try:
-                    ts.compare(other[key])
-                except ComparisonError as e:
-                    errors.append(e)
+        try:
+            self.time_series.compare(other.time_series)
+        except ComparisonError as e:
+            errors.extend(e.errors)
 
         if errors:
             raise ComparisonError(
@@ -242,18 +205,24 @@ class PrimaryData:
                 for ts in time_series:
                     time_series_dict[ts.name] = ts
 
-            return PrimaryData(time_series_dict, participant_mapping)
+            time_series = PQResultDict(
+                SystemParticipantsEnum.PRIMARY_DATA, time_series_dict
+            )
+
+            return PrimaryData(time_series, participant_mapping)
 
         else:
             logging.debug(f"No primary data in path {path}")
-            return PrimaryData(dict(), dict())
+            return PrimaryData(
+                PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
+            )
 
     @staticmethod
     def _read_pd_time_series(dir_path: str, delimiter: str, ts_file: str):
         ts_types = "|".join([e.value for e in TimeSeriesEnum])
         pattern = (
             f"({ts_types})_"
-            + r"([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}).csv"
+            + r"([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}).csv"  # uuid4 regex
         )
         match = re.match(pattern, ts_file)
         if match:
@@ -269,9 +238,11 @@ class PrimaryData:
 
         else:
             raise IOError(
-                f"Could not read time series with name {ts_file}. Expected format: its_p_5022a70e-a58f-4bac-b8ec-1c62376c216b.csv"
+                f"Could not read time series with name {ts_file}. Expected format: e.g. its_p_5022a70e-a58f-4bac-b8ec-1c62376c216b.csv"
             )
 
     @classmethod
     def create_empty(cls):
-        return cls(dict(), dict())
+        return cls(
+            PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
+        )

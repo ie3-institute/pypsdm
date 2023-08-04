@@ -125,7 +125,6 @@ def df_to_csv(
 
     # replace True with 'true' only in boolean columns
     df[bool_cols] = df[bool_cols].replace({True: "true", False: "false"})
-    df = df.sort_index()
 
     if isinstance(df.index, pd.DatetimeIndex):
         df.index = df.index.strftime(datetime_pattern.value)

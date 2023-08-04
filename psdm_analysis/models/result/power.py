@@ -146,8 +146,8 @@ class PQWithSocResult(PQResult):
         q_sum = add_series(self.q, other.q, "q")
         total_capacity = this_capacity + other_capacity
         soc = add_series(
-            self.soc() * this_capacity / total_capacity,
-            other.soc() * other_capacity / total_capacity,
+            self.soc * this_capacity / total_capacity,
+            other.soc * other_capacity / total_capacity,
             "soc",
         )
         summed_data = p_sum.to_frame().join([q_sum, soc])
@@ -174,6 +174,7 @@ class PQWithSocResult(PQResult):
             agg = agg.add_with_soc(this_capacity, result, other_capacity)
         return agg
 
+    @property
     def soc(self) -> Series:
         return self.data["soc"]
 

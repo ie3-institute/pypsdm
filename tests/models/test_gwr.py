@@ -48,7 +48,7 @@ def test_filter_by_date_time(gwr):
     dt = datetime(year=2011, month=1, day=1, hour=13, minute=30)
     filtered = gwr.filter_by_date_time(dt)
     assert isinstance(filtered, GridWithResults)
-    assert len(list(filtered.grid.primary_data.time_series.values())[0]) == 1
+    assert len(list(filtered.grid.primary_data.time_series.entities.values())[0]) == 1
     assert len(filtered.results.participants.pvs.results()[0]) == 1
 
 

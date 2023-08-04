@@ -8,7 +8,7 @@ from psdm_analysis.models.enums import (
     SystemParticipantsEnum,
 )
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
-from psdm_analysis.models.result.participant.participant import ParticipantsResult
+from psdm_analysis.models.result.participant.pq_dict import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 
 # These are just some early quite specific conversions. Additional ones will be added as needed.
@@ -21,7 +21,7 @@ def pp_load_to_participants_result(
     psdm_load_file: str,  # psdm load csv input
     start: datetime,  # start of the time series simulation
     resolution: timedelta,  # resolution of the time series simulation
-) -> ParticipantsResult:
+) -> PQResultDict:
     return _pp_to_psdm_result(
         entity_type=SystemParticipantsEnum.LOAD,
         pp_net_file=pp_net_file,
@@ -34,7 +34,7 @@ def pp_load_to_participants_result(
         start=start,
         resolution=resolution,
         res_entity_class=PQResult,
-        res_dict_class=ParticipantsResult,
+        res_dict_class=PQResultDict,
     )
 
 
@@ -45,7 +45,7 @@ def pp_node_to_nodes_result(
     psdm_node_file: str,  # psdm node csv input
     start: datetime,  # start of the time series simulation
     resolution: timedelta,  # resolution of the time series simulation
-) -> ParticipantsResult:
+) -> PQResultDict:
     return _pp_to_psdm_result(
         entity_type=RawGridElementsEnum.NODE,
         pp_net_file=pp_net_file,
