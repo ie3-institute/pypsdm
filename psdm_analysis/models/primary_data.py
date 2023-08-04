@@ -213,7 +213,9 @@ class PrimaryData:
 
         else:
             logging.debug(f"No primary data in path {path}")
-            return PrimaryData(PQResultDict.create_empty(), dict())
+            return PrimaryData(
+                PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
+            )
 
     @staticmethod
     def _read_pd_time_series(dir_path: str, delimiter: str, ts_file: str):

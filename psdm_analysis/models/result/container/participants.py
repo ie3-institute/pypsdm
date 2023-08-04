@@ -8,7 +8,7 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from psdm_analysis.io.utils import check_filter
-from psdm_analysis.models.enums import SystemParticipantsEnum
+from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
@@ -106,11 +106,9 @@ class ParticipantsResultContainer(ContainerMixin):
         for participants_res in self.to_list(include_flex=False):
             if uuid in participants_res:
                 return participants_res.get(uuid)
-        return PQResultDict.create_empty("None")
+        return ValueError(f"No participant result with uuid: {uuid}")
 
-    def to_dict(
-        self, include_empty: bool = True
-    ) -> dict[SystemParticipantsEnum, PQResultDict]:
+    def to_dict(self, include_empty: bool = True) -> dict[EntitiesEnum, PQResultDict]:
         if include_empty:
             return {res.entity_type: res for res in self.to_list()}
         else:

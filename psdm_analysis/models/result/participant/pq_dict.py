@@ -98,7 +98,7 @@ class PQResultDict(ResultDict):
                 f"Found Differences in {type(self)} comparison: ", errors=errors
             )
 
-    def to_csv(self, path: str, resample_rate: str = None):
+    def to_csv(self, path: str, resample_rate: Optional[str] = None):
         file_name = self.entity_type.get_csv_result_file_name()
 
         def resample(data: DataFrame, input_model: str):
