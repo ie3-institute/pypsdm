@@ -12,9 +12,9 @@ from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.container.grid import GridContainer
 from psdm_analysis.models.input.container.mixins import ContainerMixin
 from psdm_analysis.models.result.participant.flex_options import FlexOptionsResult
-from psdm_analysis.models.result.participant.participant import (
-    ParticipantsWithSocResult,
+from psdm_analysis.models.result.participant.pq_dict import (
     PQResultDict,
+    PQWithSocResultDict,
 )
 from psdm_analysis.models.result.power import PQResult
 
@@ -26,9 +26,9 @@ class ParticipantsResultContainer(ContainerMixin):
     fixed_feed_ins: PQResultDict
     pvs: PQResultDict
     wecs: PQResultDict
-    storages: ParticipantsWithSocResult
+    storages: PQWithSocResultDict
     evcs: PQResultDict
-    evs: ParticipantsWithSocResult
+    evs: PQWithSocResultDict
     hps: PQResultDict
     flex: FlexOptionsResult
 
@@ -258,7 +258,7 @@ class ParticipantsResultContainer(ContainerMixin):
         else:
             input_entities = None
         if participant.has_soc():
-            return ParticipantsWithSocResult.from_csv(
+            return PQWithSocResultDict.from_csv(
                 participant,
                 simulation_data_path,
                 delimiter,

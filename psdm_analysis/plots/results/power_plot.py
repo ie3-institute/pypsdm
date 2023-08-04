@@ -11,9 +11,9 @@ from psdm_analysis.models.input.participant.participant import (
 from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
-from psdm_analysis.models.result.participant.participant import (
-    ParticipantsWithSocResult,
+from psdm_analysis.models.result.participant.pq_dict import (
     PQResultDict,
+    PQWithSocResultDict,
 )
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
@@ -293,7 +293,7 @@ def plot_participants_sum(
 
 
 def plot_participants_with_soc_sum(
-    res: ParticipantsWithSocResult,
+    res: PQWithSocResultDict,
     input: SystemParticipantsWithCapacity,
     title: str,
     resolution: str,
@@ -303,7 +303,7 @@ def plot_participants_with_soc_sum(
 ):
     fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True, sharey=False)
     axs[0].set_title(title)
-    sum = ParticipantsWithSocResult.sum_with_soc(res, input)
+    sum = PQWithSocResultDict.sum_with_soc(res, input)
     ax_plot_active_power(
         axs[0],
         sum,
@@ -396,7 +396,7 @@ def ax_plot_soc(
     label, color = get_label_and_color(res.entity_type)
     set_date_format_and_label(ax, resolution)
     ax.set_ylabel("SOC in percent")
-    soc = plot_resample(res.soc(), hourly_mean)
+    soc = plot_resample(res.soc, hourly_mean)
     ax.plot(soc, color=color, label=label, **kwargs)
     ax.set_ylim(bottom=0, top=100)
     if fill_from_index:

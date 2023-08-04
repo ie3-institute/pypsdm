@@ -7,7 +7,7 @@ import pytest
 
 from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.participant import PQResultDict
+from psdm_analysis.models.result.participant.pq_dict import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 from psdm_analysis.processing.series import duration_weighted_series
 from tests.utils import is_close

@@ -8,7 +8,7 @@ from psdm_analysis.models.enums import (
     SystemParticipantsEnum,
 )
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
-from psdm_analysis.models.result.participant.participant import PQResultDict
+from psdm_analysis.models.result.participant.pq_dict import PQResultDict
 from psdm_analysis.models.result.power import PQResult
 
 # These are just some early quite specific conversions. Additional ones will be added as needed.

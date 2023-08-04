@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import pandas as pd
 from pandas import DataFrame, Series
 
+from psdm_analysis.errors import ComparisonError
 from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.input.participant.participant import (
     SystemParticipantsWithCapacity,
@@ -71,6 +72,32 @@ class PQResultDict(ResultDict):
     def load_and_generation(self):
         return self.sum().load_and_generation()
 
+    def compare(self, other):
+        errors = []
+
+        # Compare time series
+        self_keys = set(self.entities.keys())
+        other_keys = set(other.entities.keys())
+        entity_differences = self_keys.symmetric_difference(other_keys)
+        if entity_differences:
+            errors.append(
+                ComparisonError(
+                    f"Differences in entity keys. Following keys not in both dicts: {entity_differences}"
+                )
+            )
+
+        key_intersection = self_keys & other_keys
+        for key in key_intersection:
+            try:
+                self.entities[key].compare(other.entities[key])
+            except ComparisonError as e:
+                errors.append(e)
+
+        if errors:
+            raise ComparisonError(
+                f"Found Differences in {type(self)} comparison: ", errors=errors
+            )
+
     def to_csv(self, path: str, resample_rate: str = None):
         file_name = self.entity_type.get_csv_result_file_name()
 
@@ -93,7 +120,7 @@ class PQResultDict(ResultDict):
 
 
 @dataclass(frozen=True)
-class ParticipantsWithSocResult(PQResultDict):
+class PQWithSocResultDict(PQResultDict):
     entity_type: SystemParticipantsEnum
     entities: Dict[str, PQWithSocResult]
 
