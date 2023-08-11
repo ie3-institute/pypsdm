@@ -39,9 +39,8 @@ class ConnectorResult(ResultEntities):
     def i_b_complex(self) -> Series:
         return self.i_b_mag * np.exp(1j * np.radians(self.i_b_ang))
 
-    # todo: Check if calculation is correct
-    def calc_rated_power(
-        self, node_res: NodeResult, voltage_level_kv: float, node="a", absolute=True
+    def calc_apparent_power(
+        self, node_res: NodeResult, voltage_level_kv: float, node="a"
     ):  # in kVA
         s_rated_fn = (
             lambda i_complex: math.sqrt(3)
@@ -54,7 +53,7 @@ class ConnectorResult(ResultEntities):
             res = s_rated_fn(self.i_b_complex)
         else:
             raise ValueError("Node must be either hv or lv")
-        return np.absolute(res) if absolute else res
+        return res
 
     @staticmethod
     def attributes() -> List[str]:
