@@ -12,6 +12,7 @@ from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
 from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
 from psdm_analysis.plots.common.utils import (
+    COLOR_PALETTE,
     FIGSIZE,
     LABEL_PAD,
     set_style,
@@ -42,7 +43,7 @@ def plot_all_v_mag_branch_violin(
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
-        ax_plot_v_mag_branch_violin(axes[i], nodes_res, branch)
+        ax_plot_v_mags_violin(axes[i], nodes_res, branch)
         set_subplot_title(axes[i], f"Voltages along Branch {i+1}")
     plt.tight_layout()
 
@@ -51,10 +52,10 @@ def plot_all_v_mag_branch_violin(
 
 def plot_v_mags_violin(
     nodes_res: Union[NodesResult, EnhancedNodesResult],
-    nodes: Optional[list[str]],
+    nodes: Optional[list[str]] = None,
 ):
     """
-    Plots violin plots for all nodes across the given branches.
+    Plots violin plots for all given nodes .
 
     Args:
         nodes_res: NodesResult or EnhancedNodesResult object
@@ -64,12 +65,12 @@ def plot_v_mags_violin(
         fig, ax
     """
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_v_mag_branch_violin(ax, nodes_res, nodes)
+    ax_plot_v_mags_violin(ax, nodes_res, nodes)
     set_title(ax, "Voltage Magnitudes along Branch")
     return fig, ax
 
 
-def ax_plot_v_mag_branch_violin(
+def ax_plot_v_mags_violin(
     ax: Axes,
     nodes_res: Union[NodesResult, EnhancedNodesResult],
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
@@ -89,13 +90,13 @@ def ax_plot_v_mag_branch_violin(
     else:
         v_mag = nodes_res.v_mag
 
-    ax.violinplot(v_mag, showmedians=True)
+    sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
     x_labels = v_mag.columns.map(lambda uuid: uuid_to_id[uuid])
     set_xlabels_rotated(ax, x_labels, ha="right")
-    set_ylabel(ax, "Voltage Magnitude in pu")
+    set_ylabel(ax, "Voltage magnitude in pu")
     _ = ax.set_xticklabels(x_labels, rotation=45, ha="right")
 
 
