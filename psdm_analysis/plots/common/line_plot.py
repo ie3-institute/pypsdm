@@ -1,3 +1,5 @@
+import logging
+
 from matplotlib.axes import Axes
 from pandas import Series
 
@@ -26,15 +28,20 @@ def ax_plot_time_series(
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
     if set_x_label:
         set_date_format_and_label(ax, resolution)
-    ts = plot_resample(res, hourly_mean)
-    ax.plot(ts, **kwargs)
+    try:
+        res = plot_resample(res, hourly_mean)
+    except TypeError as e:
+        logging.warn(
+            f"Could not resample time series. Plotting without resampling. Error: {e}"
+        )
+    ax.plot(res, **kwargs)
     if fill_from_index:
-        ax.fill_between(ts.index, ts, alpha=FILL_ALPHA, color=kwargs["color"])
+        ax.fill_between(res.index, res, alpha=FILL_ALPHA, color=kwargs["color"])
     elif fill_between is not None:
         ax.fill_between(
-            ts.index,
+            res.index,
             plot_resample(fill_between, hourly_mean),
-            ts,
+            res,
             alpha=FILL_ALPHA,
             color=kwargs["color"],
         )
