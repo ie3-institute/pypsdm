@@ -2,6 +2,8 @@ import logging
 from typing import Optional, Union
 
 import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 from matplotlib.axes import Axes
 
 from psdm_analysis.models.gwr import GridWithResults
@@ -11,8 +13,10 @@ from psdm_analysis.models.result.grid.transformer import Transformer2WResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
 from psdm_analysis.plots.common.utils import FIGSIZE, ax_plot_secondary_axis, set_title
 
+sns.set_style("whitegrid")
 
-def plot_transformer_s_rated(
+
+def plot_transformer_s(
     res: Transformer2WResult,
     side: str,
     gwr: GridWithResults,
@@ -28,31 +32,50 @@ def plot_transformer_s_rated(
     transformer_name = res.name if res.name else res.input_model
     if title is None:
         title = f"Rated Power Transformer: {transformer_name}"
-    fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_transformer_s_rated(
-        ax,
-        res,
-        side,
-        gwr,
-        resolution,
-        fill_from_index=fill_from_index,
-        fill_between=fill_between,
-        set_x_label=set_x_label,
-        **kwargs,
-    )
     if include_utilisation:
-        ax_plot_secondary_axis(
-            ax,
-            res.calc_transformer_utilisation(gwr),
-            "Transformer Utilisation",
-            show_secondary_grid_lines=show_util_grid_lines,
+        fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True)
+        ax_plot_transformer_s(
+            axs[0],
+            res,
+            side,
+            gwr,
+            resolution,
+            fill_from_index=fill_from_index,
+            fill_between=fill_between,
+            set_x_label=set_x_label,
+            **kwargs,
         )
-    ax.set_ylabel("Rated Power in kVA")
-    set_title(ax, title)
-    return fig, ax
+        ax_plot_transformer_utilization(
+            axs[1],
+            res,
+            side,
+            gwr,
+            resolution,
+            fill_from_index=fill_from_index,
+            fill_between=fill_between,
+            set_x_label=False,
+            **kwargs,
+        )
+        set_title(axs[0], title)
+        return fig, axs
+    else:
+        fig, ax = plt.subplots(figsize=FIGSIZE)
+        ax_plot_transformer_s(
+            ax,
+            res,
+            side,
+            gwr,
+            resolution,
+            fill_from_index=fill_from_index,
+            fill_between=fill_between,
+            set_x_label=set_x_label,
+            **kwargs,
+        )
+        set_title(ax, title)
+        return fig, ax
 
 
-def ax_plot_transformer_s_rated(
+def ax_plot_transformer_s(
     ax: Axes,
     res: Transformer2WResult,
     side: str,
@@ -66,7 +89,7 @@ def ax_plot_transformer_s_rated(
     if len(res.i_a_mag) == 0:
         raise ValueError("Transformer current time series is empty. No data to plot")
 
-    rated_power = res.calc_rated_power_gwr(gwr, side)
+    rated_power = res.calc_apparent_power_gwr(gwr, side).apply(lambda x: np.real(x))
     ax_plot_time_series(
         ax,
         rated_power,
@@ -78,6 +101,30 @@ def ax_plot_transformer_s_rated(
         **kwargs,
     )
     ax.set_ylabel("Rated Power in kVA")
+
+
+def ax_plot_transformer_utilization(
+    ax: Axes,
+    res: Transformer2WResult,
+    side: str,
+    gwr: GridWithResults,
+    resolution: str,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    ax_plot_time_series(
+        ax,
+        res.calc_transformer_utilisation(gwr, side),
+        res.entity_type,
+        resolution,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
+    ax.set_ylabel("Transformer Utilization")
 
 
 def plot_line_current(
@@ -223,5 +270,14 @@ def get_connector_current(side: str, res: ConnectorResult):
         return res.i_a_mag
     elif side == "b":
         return res.i_b_mag
+    else:
+        raise ValueError('Side should be either "a" for node a or "b" for node b')
+
+
+def get_connector_angle(side: str, res: ConnectorResult):
+    if side == "a":
+        return res.i_a_ang
+    elif side == "b":
+        return res.i_b_ang
     else:
         raise ValueError('Side should be either "a" for node a or "b" for node b')

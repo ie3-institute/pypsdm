@@ -1,42 +1,35 @@
-from dataclasses import dataclass
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
 
-import plotly.express as px
-
-from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
-from psdm_analysis.models.result.grid.node import NodesResult
-
-
-@dataclass(frozen=True)
-class NodesResultPlotter:
-    results: NodesResult
-
-    def boxplot_v_mag(self, uuid: str):
-        node_res = self.results.entities.get(uuid)
-        return px.box(node_res.v_mag)
-
-    def boxplots_v_mag(self):
-        return px.box(self.results.v_mag)
-
-    def boxplot_v_ang(self, uuid: str):
-        node_res = self.results.entities.get(uuid)
-        return px.box(node_res.v_ang)
-
-    def boxplots_v_ang(self):
-        return px.box(self.results.v_ang)
-
-    def lineplots_v_mag(self):
-        return px.line(self.results.v_mag)
-
-    def lineplots_v_ang(self):
-        return px.line(self.results.v_ang)
+from psdm_analysis.models.gwr import GridWithResults
+from psdm_analysis.plots.common.utils import FIGSIZE
+from psdm_analysis.plots.results.power_plot import ax_plot_nodal_ps_violin
+from psdm_analysis.plots.results.voltage_plot import ax_plot_v_mags_violin
 
 
-@dataclass(frozen=True)
-class EnhancedNodesResultPlotter(NodesResultPlotter):
-    results: EnhancedNodesResult
+def voltage_power_along_branches_violin(gwr: GridWithResults):
+    branches = gwr.grid.raw_grid.get_branches()
+    nodes_res = gwr.build_enhanced_nodes_result()
+    width, height = FIGSIZE
+    height = height * len(branches) * 2
+    fig = plt.figure(figsize=(width, height))
+    outer_grid = gridspec.GridSpec(len(branches), 1, wspace=0.2, hspace=0.3)
+    inner_grids = []
+    for i, branch in enumerate(branches):
+        inner_grid = gridspec.GridSpecFromSubplotSpec(
+            2, 1, subplot_spec=outer_grid[i], wspace=0.1, hspace=0.6
+        )
+        inner_grids.append(inner_grid)
+        ax_v = plt.Subplot(fig, inner_grid[0])
+        ax_plot_v_mags_violin(ax_v, nodes_res, branch)
+        ax_v.set_title(f"Voltage and Active Power for Branch {i}")
+        fig.add_subplot(ax_v)
 
-    def lineplots_p(self):
-        return px.line(self.results.p)
+        ax_p = plt.Subplot(fig, inner_grid[1])
+        ax_plot_nodal_ps_violin(ax_p, nodes_res, branch)
+        fig.add_subplot(ax_p)
 
-    def boxplots_p(self):
-        return px.box(self.results.p)
+    plt.tight_layout()
+    plt.show()
+
+    return fig, outer_grid, inner_grids

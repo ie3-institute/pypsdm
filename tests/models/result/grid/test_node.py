@@ -1,6 +1,43 @@
 from datetime import datetime
 
-from psdm_analysis.models.result.grid.node import NodesResult
+import numpy as np
+import pandas as pd
+import pytest
+
+from psdm_analysis.models.enums import RawGridElementsEnum
+from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
+
+
+def get_node_result(v_mags, v_angs):
+    data = pd.DataFrame(
+        {
+            "v_mag": v_mags,
+            "v_ang": v_angs,
+        }
+    )
+    return NodeResult(RawGridElementsEnum.NODE, "test_node", None, data)
+
+
+def test_v_complex_pos_angle():
+    v_mags = [1.01, 1.02, 1.03]
+    v_angs = [1, 2, 3]
+    node = get_node_result(v_mags=v_mags, v_angs=v_angs)
+    v_rated = 10
+    v_complex = node.v_complex(v_rated)
+    assert len(v_complex) == 3
+    assert list(np.abs(v_complex) / 10) == pytest.approx(v_mags)
+    assert list(np.degrees(np.angle(v_complex))) == pytest.approx(v_angs)
+
+
+def test_v_complex_neg_angle():
+    v_mags = [1.01, 1.02, 1.03]
+    v_angs = [-1, -2, -3]
+    node = get_node_result(v_mags=v_mags, v_angs=v_angs)
+    v_rated = 10
+    v_complex = node.v_complex(v_rated)
+    assert len(v_complex) == 3
+    assert list(np.abs(v_complex) / 10) == pytest.approx(v_mags)
+    assert list(np.degrees(np.angle(v_complex))) == pytest.approx(v_angs)
 
 
 def test_filter_for_time_interval(gwr):

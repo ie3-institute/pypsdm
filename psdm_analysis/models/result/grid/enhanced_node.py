@@ -35,7 +35,9 @@ class EnhancedNodeResult(NodeResult):
             RawGridElementsEnum.NODE,
             node_res.input_model,
             node_res.name,
-            pd.concat([node_res.data, pq.data], axis=1).sort_index(),
+            # First time step of nodal voltages will most likely be nan because SIMONA pf calculation
+            # starts at t+1. In this case we drop the time step.
+            pd.concat([node_res.data, pq.data], axis=1).sort_index().ffill().dropna(),
         )
 
 

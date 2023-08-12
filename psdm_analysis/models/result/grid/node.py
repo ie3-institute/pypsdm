@@ -1,6 +1,7 @@
+import numbers
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Type, Union
+from typing import List, Optional, Type
 
 import numpy as np
 import pandas as pd
@@ -32,10 +33,10 @@ class NodeResult(ResultEntities):
     def v_ang(self) -> Series:
         return self.data["v_ang"]
 
-    def v_complex(self, v_rated_kv_src: Union[float, Nodes]) -> Series:
+    def v_complex(self, v_rated_kv_src: numbers.Real | Nodes) -> Series:
         v_rated_kv = (
             v_rated_kv_src
-            if isinstance(v_rated_kv_src, float)
+            if isinstance(v_rated_kv_src, numbers.Real)
             else v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
         )
         return (self.v_mag * v_rated_kv) * np.exp(1j * np.radians(self.v_ang))
