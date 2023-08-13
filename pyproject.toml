@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "psdm-analysis"
-version = "0.1.6"
+name = "psdm_analysis"
+version = "0.1.8"
 description = ""
 authors = ["Thomas Oberliessen <thomas.oberliessen@googlemail.com>"]
 readme = "README.md"
