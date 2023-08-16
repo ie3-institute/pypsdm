@@ -90,8 +90,8 @@ def get_label_and_color_dict(sp_type: EntitiesEnum):
 
 # === FIGURE DEFAULTS ===
 
-FIGSIZE = (12, 5)
-FIGSIZE_WIDE = (15, 5)
+FIGSIZE = (12, 4)
+FIGSIZE_WIDE = (15, 4)
 SUBPLOTS_PADDING = 10
 
 # === FONT DEFAULTS ===
@@ -144,6 +144,10 @@ def _date_format_and_x_label(resolution: str):
         return "%x", "Day of Month"
     elif resolution == "y":
         return "%b", "Month"
+
+
+def set_suptitle(fig: Figure, title: str):
+    fig.suptitle(title, fontsize=TITLE_FONT_SIZE)
 
 
 def set_title(ax: Axes, title: str):
