@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional, Union
 
+import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -20,11 +21,15 @@ from psdm_analysis.models.result.participant.pq_dict import (
 from psdm_analysis.models.result.power import PQResult, PQWithSocResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
 from psdm_analysis.plots.common.utils import (
+    BLUE,
     COLOR_PALETTE,
     FIGSIZE,
     FILL_ALPHA,
+    GREEN,
     LOAD_COLOR,
+    ORANGE,
     PV_COLOR,
+    RED,
     add_to_kwargs_if_not_exist,
     get_label_and_color,
     get_label_and_color_dict,
@@ -38,6 +43,40 @@ from psdm_analysis.plots.common.utils import (
 )
 
 sns.set_style("whitegrid")
+
+
+def plot_apparent_power_components(
+    pq: PQResult, resolution: str, title: str | None = None
+):
+    """
+    Plots apparent power components (magnitude, active, reactive, angle) for a given
+    pq result.
+
+    Args
+        pq: PQResult
+        resolution: Resolution of the plot
+        title: Optional title of the plot
+    """
+    fig, axs = plt.subplots(4, 1, figsize=(15, 16))
+
+    fig.subplots_adjust(hspace=0.4)
+
+    ax_plot_power_mag(axs[0], pq, resolution=resolution, color=RED)
+    axs[0].set_title("Apparent Power")
+    ax_plot_active_power(axs[1], pq, resolution=resolution, color=GREEN)
+    axs[1].set_title("Active Power")
+    ax_plot_reactive_power(axs[2], pq, resolution=resolution, color=BLUE)
+    axs[2].set_title("Reactive Power")
+    ax_plot_power_angle(axs[3], pq, resolution=resolution, color=ORANGE)
+    axs[3].set_title("Power Angle")
+
+    if title is None:
+        name = pq.name if pq.name else pq.input_model
+        title = "Apparent Power Composition: " + name
+
+    fig.suptitle(title, fontsize=16, y=0.93)
+
+    return fig, axs
 
 
 def plot_all_nodal_ps_branch_violin(
@@ -464,6 +503,89 @@ def ax_plot_active_power(
         **kwargs,
     )
     ax.set_ylabel("Power in MW")
+
+
+def ax_plot_reactive_power(
+    ax: Axes,
+    res: PQResult,
+    resolution: str,
+    hourly_mean: bool = False,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    if len(res.q) == 0:
+        raise ValueError("Reactive power time series is empty. No data to plot")
+
+    ax = ax_plot_time_series(
+        ax,
+        res.q,
+        res.entity_type,
+        resolution,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
+    ax.set_ylabel("Reactive Power in MVar")
+
+
+def ax_plot_power_angle(
+    ax: Axes,
+    res: PQResult,
+    resolution: str,
+    hourly_mean: bool = False,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    angle = res.angle()
+    if len(angle) == 0:
+        raise ValueError("Angle time series is empty. No data to plot")
+
+    ax = ax_plot_time_series(
+        ax,
+        angle,
+        res.entity_type,
+        resolution,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
+    ax.set_ylabel("Angle in degree")
+
+
+def ax_plot_power_mag(
+    ax: Axes,
+    res: PQResult,
+    resolution: str,
+    hourly_mean: bool = False,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    complex_mag = res.complex_power().apply(lambda x: np.abs(x))
+    if len(complex_mag) == 0:
+        raise ValueError("Angle time series is empty. No data to plot")
+
+    ax = ax_plot_time_series(
+        ax,
+        complex_mag,
+        res.entity_type,
+        resolution,
+        hourly_mean=hourly_mean,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
+    ax.set_ylabel("Apparent Power Magnitude in MVA")
 
 
 def ax_plot_soc(
