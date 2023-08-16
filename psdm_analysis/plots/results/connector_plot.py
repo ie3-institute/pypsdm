@@ -11,7 +11,14 @@ from psdm_analysis.models.input.connector.lines import Lines
 from psdm_analysis.models.result.grid.connector import ConnectorResult
 from psdm_analysis.models.result.grid.transformer import Transformer2WResult
 from psdm_analysis.plots.common.line_plot import ax_plot_time_series
-from psdm_analysis.plots.common.utils import FIGSIZE, ax_plot_secondary_axis, set_title
+from psdm_analysis.plots.common.utils import (
+    BLUE,
+    FIGSIZE,
+    ax_plot_secondary_axis,
+    set_subplot_title,
+    set_suptitle,
+    set_title,
+)
 
 sns.set_style("whitegrid")
 
@@ -33,7 +40,8 @@ def plot_transformer_s(
     if title is None:
         title = f"Rated Power Transformer: {transformer_name}"
     if include_utilisation:
-        fig, axs = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True)
+        width, height = FIGSIZE
+        fig, axs = plt.subplots(2, 1, figsize=(width, height * 2), sharex=False)
         ax_plot_transformer_s(
             axs[0],
             res,
@@ -45,6 +53,7 @@ def plot_transformer_s(
             set_x_label=set_x_label,
             **kwargs,
         )
+        set_subplot_title(axs[0], "Rated Power Magnitude")
         ax_plot_transformer_utilization(
             axs[1],
             res,
@@ -54,9 +63,12 @@ def plot_transformer_s(
             fill_from_index=fill_from_index,
             fill_between=fill_between,
             set_x_label=False,
+            color=BLUE,
             **kwargs,
         )
-        set_title(axs[0], title)
+        set_subplot_title(axs[1], "Transformer Utilization")
+        fig.suptitle(title, fontsize=16)
+        fig.subplots_adjust(hspace=0.4)
         return fig, axs
     else:
         fig, ax = plt.subplots(figsize=FIGSIZE)
@@ -71,7 +83,7 @@ def plot_transformer_s(
             set_x_label=set_x_label,
             **kwargs,
         )
-        set_title(ax, title)
+        set_suptitle(fig, title)
         return fig, ax
 
 
@@ -263,6 +275,36 @@ def ax_plot_connector_current(
         **kwargs,
     )
     ax.set_ylabel("Current Magnitude in Ampere")
+
+
+def ax_plot_connector_angle(
+    ax: Axes,
+    res: ConnectorResult,
+    side: str,
+    resolution: str,
+    fill_from_index: bool = False,
+    fill_between=None,
+    set_x_label=True,
+    **kwargs,
+):
+    connector_type = res.entity_type.get_plot_name()
+    if len(res.i_a_mag) == 0:
+        raise ValueError(
+            f"{connector_type} angle time series is empty. No data to plot"
+        )
+
+    angle = get_connector_angle(side, res)
+
+    ax = ax_plot_time_series(
+        ax,
+        angle,
+        res.entity_type,
+        resolution,
+        fill_from_index=fill_from_index,
+        fill_between=fill_between,
+        set_x_label=set_x_label,
+        **kwargs,
+    )
 
 
 def get_connector_current(side: str, res: ConnectorResult):

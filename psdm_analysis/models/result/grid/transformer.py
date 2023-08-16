@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
 import numpy as np
+import pandas as pd
 from pandas import Series
 
 from psdm_analysis.models.result.grid.connector import ConnectorResult, ConnectorsResult
+from psdm_analysis.models.result.power import PQResult
 
 if TYPE_CHECKING:
     from psdm_analysis.models.gwr import GridWithResults
@@ -31,11 +33,11 @@ class Transformer2WResult(ConnectorResult):
 
     def calc_active_power_gwr(self, gwr: GridWithResults, side="hv"):
         s = self.calc_apparent_power_gwr(gwr, side)
-        return s.apply(lambda x: np.real(x))
+        return s.apply(lambda x: np.real(x)).rename("p")
 
     def calc_reactive_power_gwr(self, gwr: GridWithResults, side="hv"):
         s = self.calc_apparent_power_gwr(gwr, side)
-        return s.apply(lambda x: np.imag(x))
+        return s.apply(lambda x: np.imag(x)).rename("q")
 
     def calc_transformer_utilisation(self, gwr: GridWithResults, side="hv"):
         transformer = gwr.grid.raw_grid.transformers_2_w.subset(self.input_model)
@@ -43,6 +45,12 @@ class Transformer2WResult(ConnectorResult):
         return (
             self.calc_apparent_power_gwr(gwr, side).apply(lambda x: np.abs(x)) / s_rated
         )
+
+    def to_pq_result(self, gwr: GridWithResults, side="hv"):
+        p = self.calc_active_power_gwr(gwr, side)
+        q = self.calc_reactive_power_gwr(gwr, side)
+        data = pd.concat([p, q], axis=1)
+        return PQResult(self.entity_type, self.input_model, self.name, data)
 
     @staticmethod
     def attributes() -> List[str]:
