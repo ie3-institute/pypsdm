@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import List, Tuple, Union
 
+import numpy as np
 import pandas as pd
 from pandas import Series
 
@@ -65,6 +66,9 @@ class PQResult(ResultEntities):
 
     def complex_power(self):
         return self.p + 1j * self.q
+
+    def angle(self):
+        return self.complex_power().apply(lambda x: np.angle(x, deg=True))
 
     def energy(self) -> float:
         return duration_weighted_sum(self.p)
