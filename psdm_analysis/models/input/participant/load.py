@@ -17,21 +17,26 @@ class Loads(SystemParticipants):
 
     @property
     def standard_load_profile(self):
-        return self.data["standard_load_profile"]
+        return self.data["load_profile"]
+
+    @property
+    def dsm(self):
+        return self.data["dsm"]
 
     @property
     def e_cons_annual(self):
         return self.data["e_cons_annual"]
 
     @property
-    def cosphi_rated(self):
-        return self.data["cosphi_rated"]
+    def cos_phi_rated(self):
+        return self.data["cos_phi_rated"]
 
     @staticmethod
     def attributes() -> List[str]:
         return SystemParticipants.attributes() + [
-            "standard_load_profile",
+            "load_profile",
+            "dsm",
             "e_cons_annual",
             "s_rated",
-            "cosphi_rated",
+            "cos_phi_rated",
         ]

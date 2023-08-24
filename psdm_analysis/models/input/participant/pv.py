@@ -28,6 +28,10 @@ class PhotovoltaicPowerPlants(SystemParticipants):
         return self.data["elevation_angle"]
 
     @property
+    def eta_conv(self):
+        return self.data["eta_conv"]
+
+    @property
     def k_g(self):
         return self.data["k_g"]
 
@@ -49,6 +53,7 @@ class PhotovoltaicPowerPlants(SystemParticipants):
             "albedo",
             "azimuth",
             "elevation_angle",
+            "eta_conv",
             "k_g",
             "k_t",
             "market_reaction",

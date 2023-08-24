@@ -7,7 +7,7 @@ from psdm_analysis.models.input.participant.participant import (
 )
 
 
-class Storages(SystemParticipantsWithCapacity, SpTypeMixin):
+class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.STORAGE

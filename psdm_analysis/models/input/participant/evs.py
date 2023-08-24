@@ -8,7 +8,7 @@ from psdm_analysis.models.input.participant.participant import (
 
 
 @dataclass(frozen=True)
-class ElectricVehicles(SystemParticipantsWithCapacity, SpTypeMixin):
+class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.ELECTRIC_VEHICLE
