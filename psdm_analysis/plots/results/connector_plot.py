@@ -3,7 +3,6 @@ from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from matplotlib.axes import Axes
 
 from psdm_analysis.models.gwr import GridWithResults
@@ -19,8 +18,6 @@ from psdm_analysis.plots.common.utils import (
     set_suptitle,
     set_title,
 )
-
-sns.set_style("whitegrid")
 
 
 def plot_transformer_s(

@@ -16,12 +16,9 @@ from psdm_analysis.plots.common.utils import (
     FLEX_MIN,
     FLEX_REF,
     ORANGE,
-    set_style,
     set_title,
 )
 from psdm_analysis.plots.results.power_plot import ax_plot_active_power
-
-set_style()
 
 
 def plot_all_participants_flex_range(

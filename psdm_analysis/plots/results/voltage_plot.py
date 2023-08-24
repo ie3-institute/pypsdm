@@ -15,14 +15,11 @@ from psdm_analysis.plots.common.utils import (
     COLOR_PALETTE,
     FIGSIZE,
     LABEL_PAD,
-    set_style,
     set_subplot_title,
     set_title,
     set_xlabels_rotated,
     set_ylabel,
 )
-
-set_style()
 
 
 def plot_all_v_mag_branch_violin(
