@@ -1,6 +1,0 @@
-uuid,geo_position,id,operates_from,operates_until,operator,slack,subnet,v_rated,v_target,volt_lvl
-df97c0d1-379b-417a-a473-8e7fe37da99d,"{""type"":""Point"",""coordinates"":[7.177091457368853, 51.00489119159423],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MS_01,,,,true,11,20.0,1.0,Mittelspannung
-6a4547a8-630b-46e4-8144-9cd649e67c07,"{""type"":""Point"",""coordinates"":[7.177091457368853, 51.00489119159423],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",NS_01,,,,false,12,0.4,1.0,Niederspannung
-b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"{""type"":""Point"",""coordinates"":[7.178732983051468, 51.00473924277929],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",NS_02,,,,false,12,0.4,1.0,Niederspannung
-1dcddd06-f41a-405b-9686-7f7942852196,"{""type"":""Point"",""coordinates"":[7.18043886801018, 51.00474261837189],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",NS_03,,,,false,12,0.4,1.0,Niederspannung
-e3c3c6a3-c383-4dbb-9b3f-a14125615386,"{""type"":""Point"",""coordinates"":[7.1826490082711505, 51.00442531159225],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",NS_04,,,,false,12,0.4,1.0,Niederspannung
