@@ -21,6 +21,7 @@ def set_gruvbox_minor_dark_hard():
         "axes.titlecolor": tick_color,
         "xtick.color": tick_color,
         "ytick.color": tick_color,
+        "axes.grid": True,
         "grid.color": dark_tick_color,
         "grid.linestyle": "--",
         "grid.linewidth": 0.5,

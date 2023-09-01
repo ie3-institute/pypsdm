@@ -1,0 +1,4 @@
+uuid,id,capex,opex,s_rated,cos_phi_rated,p_max,active_power_gradient,e_storage,eta,dod,life_time,life_cycle
+3049ff52-2b13-44d5-81aa-12f1e2591a1a,Type_BS_NS_02,0,0,3.0,0.9,3.0,100,6.0,100,90,9999999,9999999
+5dbb1208-280f-4d6f-8223-a256f106c364,Type_BS_NS_03,0,0,4.5,0.9,4.5,100,9.0,100,90,9999999,9999999
+f862953a-9b45-4060-a15f-30b9bee89b5c,Type_BS_NS_04,0,0,7.5,0.9,7.5,100,15.0,100,90,9999999,9999999

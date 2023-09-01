@@ -50,6 +50,7 @@ class PhotovoltaicPowerPlants(SystemParticipants):
     @staticmethod
     def attributes() -> List[str]:
         return SystemParticipants.attributes() + [
+            "s_rated",
             "albedo",
             "azimuth",
             "elevation_angle",

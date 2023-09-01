@@ -1,0 +1,4 @@
+uuid,id,capex,opex,s_rated,cos_phi_rated,e_storage,e_cons
+6f255acc-47d1-4d89-bc32-c52bb419f1b7,,0,0,10,1,80,20
+850e9366-8542-41ff-974b-2b898a63da0b,,0,0,10,1,70,16
+2755afa7-f90d-40ba-b5ff-54dc9e9764f1,,0,0,20,1,100,19

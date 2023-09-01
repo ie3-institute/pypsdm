@@ -12,10 +12,6 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.STORAGE
 
-    @property
-    def behaviour(self) -> Series:
-        return self.data["behaviour"]
-
     @staticmethod
     def capacity_attribute() -> str:
         return "e_storage"
@@ -46,9 +42,7 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return [
-            "behaviour",
-        ]
+        return []
 
     @staticmethod
     def type_attributes() -> list[str]:

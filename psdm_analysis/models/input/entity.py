@@ -6,6 +6,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple, TypeVar, Union
 
 import pandas as pd
@@ -316,7 +317,7 @@ class Entities(ABC):
 
     @classmethod
     def _data_from_csv(
-        cls, entity: EntitiesEnum, path: str, delimiter: str
+        cls, entity: EntitiesEnum, path: str | Path, delimiter: str
     ) -> DataFrame:
         data = read_csv(path, entity.get_csv_input_file_name(), delimiter)
 
