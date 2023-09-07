@@ -98,6 +98,12 @@ class RawGridElementsEnum(EntitiesEnum):
     MEASUREMENT_UNIT = "measurement_unit"
 
 
+class ThermalGridElementsEnum(EntitiesEnum):
+    THERMAL_BUS = "thermal_bus"
+    THERMAL_GRID = "thermal_grid"
+    THERMAL_HOUSE = "thermal_house"
+
+
 class TimeSeriesEnum(EntitiesEnum):
     P_TIME_SERIES = "its_p"
     PQ_TIME_SERIES = "its_pq"
@@ -117,3 +123,8 @@ class TimeSeriesEnum(EntitiesEnum):
 
     def get_result_type(self):
         raise NotImplementedError("Result type defined for time series!")
+
+
+class ElectricCurrentType(Enum):
+    AC = "AC"
+    DC = "DC"

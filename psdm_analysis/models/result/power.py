@@ -3,13 +3,13 @@ import os
 import re
 from dataclasses import dataclass
 from functools import reduce
+from pathlib import Path
 from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from pandas import Series
 
-from psdm_analysis.io.utils import get_absolute_path
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
 from psdm_analysis.models.result.entity import ResultEntities
 from psdm_analysis.processing.dataframe import divide_positive_negative
@@ -113,8 +113,8 @@ class PQResult(ResultEntities):
         return self.input_model + "_" + self.entity_type.get_csv_result_file_name()
 
     @classmethod
-    def from_csv(cls, file_path: str, sp_type: EntitiesEnum, name: str = None):
-        file_path = get_absolute_path(file_path)
+    def from_csv(cls, file_path: str | Path, sp_type: EntitiesEnum, name: str = None):
+        file_path = Path(file_path).resolve()
         data = pd.read_csv(file_path)
         data["time"] = pd.to_datetime(data["time"])
         data = data.set_index("time", drop=True)

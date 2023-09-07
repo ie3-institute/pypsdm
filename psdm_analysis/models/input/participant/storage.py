@@ -7,14 +7,10 @@ from psdm_analysis.models.input.participant.participant import (
 )
 
 
-class Storages(SystemParticipantsWithCapacity, SpTypeMixin):
+class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.STORAGE
-
-    @property
-    def behaviour(self) -> Series:
-        return self.data["behaviour"]
 
     @staticmethod
     def capacity_attribute() -> str:
@@ -46,9 +42,7 @@ class Storages(SystemParticipantsWithCapacity, SpTypeMixin):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return [
-            "behaviour",
-        ]
+        return []
 
     @staticmethod
     def type_attributes() -> list[str]:

@@ -48,11 +48,6 @@ FLEX_REF = YELLOW
 RGB = NewType("RGB", Tuple[float, float, float])
 
 
-def set_style(style: str = "whitegrid", context: str = "notebook"):
-    sns.set_style(style)
-    sns.set_context(context)
-
-
 def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
     match sp_type:
         case RawGridElementsEnum.NODE:

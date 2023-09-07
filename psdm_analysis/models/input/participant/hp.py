@@ -6,7 +6,7 @@ from psdm_analysis.models.input.participant.participant import SystemParticipant
 
 
 @dataclass(frozen=True)
-class HeatPumps(SystemParticipants, SpTypeMixin):
+class HeatPumps(SpTypeMixin, SystemParticipants):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.HEAT_PUMP

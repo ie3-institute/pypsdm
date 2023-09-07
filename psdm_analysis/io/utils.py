@@ -17,7 +17,7 @@ class DateTimePattern(Enum):
     PLAIN = "%Y-%m-%d %H:%M:%S"
 
 
-def get_absolute_path(path: str):
+def get_absolute_path_from_project_root(path: str):
     if not isinstance(path, str):
         path = str(path)
     if path.startswith(ROOT_DIR):
@@ -26,15 +26,29 @@ def get_absolute_path(path: str):
         return Path(ROOT_DIR).joinpath(path)
 
 
-def get_file_path(path: str, file_name: str):
-    if path.startswith(ROOT_DIR):
-        return Path(path).joinpath(file_name)
-    else:
-        return Path(ROOT_DIR).joinpath(path).joinpath(file_name)
+def get_absolute_path_from_working_dir(path: str | Path) -> Path:
+    """
+    Given a path (as string or pathlib.Path), returns its absolute path based on
+    the current working directory. If the path is already absolute, it's returned unchanged.
+
+    Args:
+    - path (Union[str, Path]): The input path.
+
+    Returns:
+    - Path: The absolute path as a pathlib.Path object.
+    """
+    path_obj = Path(path)
+    if path_obj.is_absolute():
+        return path_obj
+    return path_obj.resolve()
+
+
+def get_file_path(path: str | Path, file_name: str):
+    return Path(path).resolve().joinpath(file_name)
 
 
 def read_csv(
-    path: str, file_name: str, delimiter: str, index_col: Optional[str] = None
+    path: str | Path, file_name: str, delimiter: str, index_col: Optional[str] = None
 ) -> DataFrame:
     full_path = get_file_path(path, file_name)
     if not full_path.exists():

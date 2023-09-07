@@ -7,6 +7,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
+from pathlib import Path
 from typing import Union
 
 import pandas as pd
@@ -179,9 +180,9 @@ class PrimaryData:
             )
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str):
+    def from_csv(cls, path: str | Path, delimiter: str):
         # get all files that start with "its_"
-        path = utils.get_absolute_path(path)
+        path = Path(path).resolve()
         ts_files = [file for file in os.listdir(path) if file.startswith("its_p")]
 
         time_series_dict = {}

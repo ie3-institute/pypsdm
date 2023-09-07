@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from psdm_analysis.io.utils import get_absolute_path
+from psdm_analysis.io.utils import get_absolute_path_from_project_root
 from psdm_analysis.models.enums import SystemParticipantsEnum
 from psdm_analysis.models.result.participant.pq_dict import PQResultDict
 from psdm_analysis.models.result.power import PQResult
@@ -160,7 +160,7 @@ def test_subset(wec_results):
 
 
 def test_from_csv(wec_a):
-    output_dir = os.path.join(get_absolute_path("tests"), "temp")
+    output_dir = os.path.join(get_absolute_path_from_project_root("tests"), "temp")
     os.makedirs(output_dir, exist_ok=True)
     wec_a.to_csv(output_dir)
     file_name = wec_a.get_default_output_name()
