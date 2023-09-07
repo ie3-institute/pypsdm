@@ -1,4 +1,4 @@
-name: poetry
+name: CI
 
 on:
     push:
