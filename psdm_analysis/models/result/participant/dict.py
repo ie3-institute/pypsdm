@@ -107,6 +107,12 @@ class ResultDict(ABC):
     def __iter__(self):
         return self.entities.__iter__()
 
+    def keys(self):
+        return self.entities.keys()
+
+    def values(self):
+        return self.entities.values()
+
     def items(self):
         return self.entities.items()
 

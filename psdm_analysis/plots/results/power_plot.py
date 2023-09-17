@@ -42,8 +42,6 @@ from psdm_analysis.plots.common.utils import (
     set_ylabel,
 )
 
-sns.set_style("whitegrid")
-
 
 def plot_apparent_power_components(
     pq: PQResult, resolution: str, title: str | None = None
