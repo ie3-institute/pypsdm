@@ -17,11 +17,14 @@ def duration_weighted_series(series: Series):
 
 
 def weighted_series_sum(weighted_series: DataFrame) -> float:
+    if len(weighted_series) == 0:
+        return 0.0
     return (weighted_series["values"] * weighted_series["time"]).sum()
 
 
 def duration_weighted_sum(series: Series) -> float:
     weighted_series = duration_weighted_series(series)
+
     return weighted_series_sum(weighted_series)
 
 

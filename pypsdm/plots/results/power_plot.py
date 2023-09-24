@@ -201,7 +201,7 @@ def plot_em(
         hourly_mean=hourly_mean,
         fill_from_index=True,
     )
-    return fig
+    return fig, axs
 
 
 def plot_aggregated_load_and_generation(
@@ -401,7 +401,7 @@ def plot_participants_sum(
         ax, res.sum(), resolution, hourly_mean, fill_from_index, **kwargs
     )
     set_title(ax, title)
-    return fig
+    return fig, ax
 
 
 def plot_participants_with_soc_sum(
@@ -425,7 +425,7 @@ def plot_participants_with_soc_sum(
         **kwargs,
     )
     ax_plot_soc(axs[1], sum, resolution, hourly_mean, fill_from_index, **kwargs)
-    return fig
+    return fig, axs
 
 
 def plot_active_power_with_soc(
@@ -448,7 +448,7 @@ def plot_active_power_with_soc(
         **kwargs,
     )
     ax_plot_soc(axs[1], res, resolution, hourly_mean, fill_from_index, **kwargs)
-    return fig
+    return fig, axs
 
 
 def plot_active_power(
@@ -485,7 +485,7 @@ def ax_plot_active_power(
 
     ax = ax_plot_time_series(
         ax,
-        res.p,
+        res.p * 1e3,
         res.entity_type,
         resolution,
         hourly_mean=hourly_mean,
@@ -494,7 +494,7 @@ def ax_plot_active_power(
         set_x_label=set_x_label,
         **kwargs,
     )
-    ax.set_ylabel("Power in MW")
+    ax.set_ylabel("Power in kW")
 
 
 def ax_plot_reactive_power(

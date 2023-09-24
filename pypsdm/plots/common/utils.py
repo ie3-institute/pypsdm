@@ -16,7 +16,7 @@ from pypsdm.processing.series import hourly_mean_resample
 
 # === COLORS ===
 
-COLOR_PALETTE = sns.color_palette()
+COLOR_PALETTE = sns.color_palette("bright")
 
 RGB = NewType("RGB", Tuple[float, float, float])
 
@@ -117,6 +117,11 @@ def plot_resample(res: Series, hourly_mean: bool):
 
 
 def set_date_format_and_label(ax: Axes, resolution: str):
+    possible_resolutions = set(["d", "w", "m", "y"])
+    if resolution not in possible_resolutions:
+        raise ValueError(
+            f"Invalid resolution: '{resolution}' (possible: {possible_resolutions}"
+        )
     date_format, x_label = _date_format_and_x_label(resolution)
     ax.set_xlabel(x_label)
     if resolution == "y":
@@ -168,10 +173,10 @@ def set_xlabels_rotated(
     ax.set_xticklabels(labels, rotation=rotation, ha=ha)
 
 
-def legend_with_distinct_labels(ax: Axes):
+def legend_with_distinct_labels(ax: Axes, loc=None):
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    ax.legend(list(by_label.values()), list(by_label.keys()))
+    ax.legend(list(by_label.values()), list(by_label.keys(), loc=loc))
 
 
 def rgb_to_hex(rgb):
