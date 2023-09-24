@@ -142,16 +142,16 @@ class SystemParticipantsContainer(ContainerMixin):
 
     def subset(self, uuids):
         return SystemParticipantsContainer(
-            self.ems.subset(uuids),
-            self.loads.subset(uuids),
-            self.fixed_feed_ins.subset(uuids),
-            self.pvs.subset(uuids),
-            self.biomass_plants.subset(uuids),
-            self.wecs.subset(uuids),
-            self.storages.subset(uuids),
-            self.evs.subset(uuids),
-            self.evcs.subset(uuids),
-            self.hps.subset(uuids),
+            self.ems.subset(uuids, intersection=True),
+            self.loads.subset(uuids, intersection=True),
+            self.fixed_feed_ins.subset(uuids, intersection=True),
+            self.pvs.subset(uuids, intersection=True),
+            self.biomass_plants.subset(uuids, intersection=True),
+            self.wecs.subset(uuids, intersection=True),
+            self.storages.subset(uuids, intersection=True),
+            self.evs.subset(uuids, intersection=True),
+            self.evcs.subset(uuids, intersection=True),
+            self.hps.subset(uuids, intersection=True),
         )
 
     @staticmethod

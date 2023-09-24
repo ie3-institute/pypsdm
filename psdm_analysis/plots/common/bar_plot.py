@@ -6,7 +6,7 @@ from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult
-from psdm_analysis.plots.utils import (
+from psdm_analysis.plots.common.utils import (
     FIGSIZE,
     FIGSIZE_WIDE,
     LOAD_COLOR,
@@ -18,13 +18,28 @@ from psdm_analysis.plots.utils import (
 sns.set_style("whitegrid")
 
 
-def daily_usage(res: PQResult, device_power_mw):
+def plot_full_load_hours(res: PQResult, device_power_kw, period="M", title=None):
+    if not title:
+        name = res.name if res.name else res.input_model
+        title = f"Full load hours: {name}"
+
+    full_load_hours = res.full_load_hours(device_power_kw, period=period)
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
-    usage_hours = res.daily_usage(device_power_mw)
-    label, color = get_label_and_color(res.entity_type)
-    ax.bar(usage_hours.index, usage_hours, color=color)
-    ax.set_ylabel("Daily usage in hours")
-    ax.set_xlabel("Day of year")
+    _, color = get_label_and_color(res.entity_type)
+    ax.bar([x for x in range(len(full_load_hours))], full_load_hours, color=color)
+
+    # Set x-tick labels
+    ax.set_xticks(range(len(full_load_hours)))
+    ax.set_xticklabels(
+        full_load_hours.index.astype(str), rotation=45, ha="right"
+    )  # Rotate labels for better visibility
+
+    ax.set_ylabel("Usage in hours")
+    ax.set_xlabel("Period")
+
+    ax.set_title(title, fontsize=TITLE_FONT_SIZE, pad=15)
+    plt.show()
+    return fig, ax
 
 
 def plot_load_and_generation(participant_res: ParticipantsResultContainer):

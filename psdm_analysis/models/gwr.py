@@ -2,7 +2,7 @@ import concurrent
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from psdm_analysis.io.utils import check_filter
 from psdm_analysis.models.enums import RawGridElementsEnum
@@ -61,7 +61,7 @@ class GridWithResults(ContainerMixin):
 
     def em_results(
         self,
-    ) -> List[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
+    ) -> list[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
         uuid_to_connected_asset = self.grid.participants.ems.uuid_to_connected_assets()
         return [
             (
