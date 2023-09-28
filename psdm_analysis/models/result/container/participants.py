@@ -243,6 +243,71 @@ class ParticipantsResultContainer(ContainerMixin):
             else res.filter_for_time_interval(filter_start, filter_end)
         )
 
+    @classmethod
+    def from_csv_pl(
+        cls,
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: datetime,
+        grid_container: Optional[GridContainer] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+    ):
+        check_filter(filter_start, filter_end)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            # warning: Breakpoints in the underlying method might not work when started from ipynb
+            pa_from_csv_for_participant = partial(
+                ParticipantsResultContainer.from_csv_for_participant_pl,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                grid_container,
+            )
+
+            futures = [
+                executor.submit(pa_from_csv_for_participant, participant)
+                for participant in filter(
+                    lambda x: x != SystemParticipantsEnum.FLEX_OPTIONS,
+                    SystemParticipantsEnum.values(),
+                )
+            ]
+
+            participant_result_map = {}
+
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    participant_result = future.result()
+                    participant_result_map[
+                        participant_result.entity_type
+                    ] = participant_result
+                except Exception as e:
+                    raise IOError(
+                        f"Error during reading participant results: {e}"
+                    ) from e
+
+        res = ParticipantsResultContainer(
+            loads=participant_result_map[SystemParticipantsEnum.LOAD],
+            fixed_feed_ins=participant_result_map[SystemParticipantsEnum.FIXED_FEED_IN],
+            pvs=participant_result_map[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT],
+            wecs=participant_result_map[SystemParticipantsEnum.WIND_ENERGY_CONVERTER],
+            storages=participant_result_map[SystemParticipantsEnum.STORAGE],
+            ems=participant_result_map[SystemParticipantsEnum.ENERGY_MANAGEMENT],
+            evcs=participant_result_map[SystemParticipantsEnum.EV_CHARGING_STATION],
+            evs=participant_result_map[SystemParticipantsEnum.ELECTRIC_VEHICLE],
+            hps=participant_result_map[SystemParticipantsEnum.HEAT_PUMP],
+            flex=FlexOptionsResult.from_csv(
+                SystemParticipantsEnum.FLEX_OPTIONS,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+            ),
+        )
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)
+        )
+
     @staticmethod
     def from_csv_for_participant(
         simulation_data_path: str,
@@ -261,10 +326,39 @@ class ParticipantsResultContainer(ContainerMixin):
                 simulation_data_path,
                 delimiter,
                 simulation_end,
-                input_entities,
+                input_entities=input_entities,
             )
         else:
             return PQResultDict.from_csv(
+                participant,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                input_entities=input_entities,
+            )
+
+    @staticmethod
+    def from_csv_for_participant_pl(
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: datetime,
+        grid_container: Optional[GridContainer],
+        participant: SystemParticipantsEnum,
+    ):
+        if grid_container:
+            input_entities = grid_container.participants.get_participants(participant)
+        else:
+            input_entities = None
+        if participant.has_soc():
+            return PQWithSocResultDict.from_csv_pl(
+                participant,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                input_entities=input_entities,
+            )
+        else:
+            return PQResultDict.from_csv_pl(
                 participant,
                 simulation_data_path,
                 delimiter,

@@ -1,4 +1,5 @@
 import logging
+import os
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
@@ -7,6 +8,7 @@ from typing import Dict, Optional, Type, TypeVar, Union
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
+import polars as pl
 from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import (
     check_filter,
@@ -229,6 +231,67 @@ class ResultDict(ABC):
         )
 
     @classmethod
+    def from_csv_pl(
+        cls: Type[ResultDictType],
+        entity_type: EntityEnumType,
+        simulation_data_path: str,
+        delimiter: str,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+    ) -> ResultDictType:
+        check_filter(filter_start, filter_end)
+
+        file_name = entity_type.get_csv_result_file_name()
+        path = get_file_path(simulation_data_path, file_name)
+
+        if not os.path.exists(path):
+            logging.debug("There are no " + str(cls))
+            return cls.create_empty(entity_type)
+
+        df = (
+            pl.scan_csv(path, separator=delimiter, has_header=True)
+            .with_columns(
+                pl.col("time")
+                .str.replace("\\[UTC\\]", "")
+                .str.strptime(pl.Datetime, format="%Y-%m-%dT%H:%MZ")
+                .alias("time")
+            )
+            .unique(subset=["input_model", "time"], keep="last")
+        )
+
+        if filter_start:
+            df = df.filter(pl.col("time").is_between(filter_start, filter_end))
+
+        df = df.collect()
+        if simulation_end is None:
+            simulation_end = df.select(pl.col("time")).max().item()
+
+        grpd_df = df.group_by("input_model")
+
+        if not grpd_df:
+            logging.debug("There are no " + str(cls))
+            return cls.create_empty(entity_type)
+
+        entities = {}
+
+        for name, grp in grpd_df:
+            res = ResultDict.build_for_entity_pl(
+                entity_type,
+                name,
+                grp,
+                simulation_end,
+                input_entities=input_entities,
+            )
+            entities[name] = res
+
+        return cls(
+            entity_type,
+            entities,
+        )
+
+    @classmethod
     def create_empty(
         cls: ResultDictType, entity_type: EntityEnumType
     ) -> ResultDictType:
@@ -252,6 +315,28 @@ class ResultDict(ABC):
                 name = input_entities.id.loc[input_model]
 
         return entity_type.get_result_type().build(
+            entity_type, input_model, data, simulation_end, name=name
+        )
+
+    @staticmethod
+    def build_for_entity_pl(
+        entity_type: EntityEnumType,
+        input_model: str,
+        data: DataFrame,
+        simulation_end: datetime,
+        input_entities=Optional[Entities],
+    ) -> ResultDictType:
+        name = None
+        if input_entities is not None:
+            if input_model not in input_entities.id.index:
+                logging.debug(
+                    f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
+                )
+            else:
+                name = input_entities.id.loc[input_model]
+
+        res_cls = entity_type.get_result_type()
+        return res_cls.build_pl(
             entity_type, input_model, data, simulation_end, name=name
         )
 

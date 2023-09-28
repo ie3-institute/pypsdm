@@ -9,6 +9,7 @@ from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 ROOT_DIR = os.path.abspath(__file__ + "/../../../")
+TIME_INDEX_COL = "time"
 
 
 class DateTimePattern(Enum):

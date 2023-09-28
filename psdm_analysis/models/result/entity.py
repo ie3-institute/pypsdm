@@ -8,6 +8,7 @@ from typing import Optional, Tuple, TypeVar, Union
 import pandas as pd
 from pandas import DataFrame, Series
 
+import polars as pl
 from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import to_date_time
 from psdm_analysis.models.enums import EntitiesEnum, SystemParticipantsEnum
@@ -216,9 +217,48 @@ class ResultEntities(ABC):
         if last_state.name != end:
             last_state.name = end
             data = pd.concat([data, DataFrame(last_state).transpose()])
+
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
         data.sort_index(inplace=True)
+        return cls(entity_type, input_model, name, data)
+
+    @classmethod
+    def build_pl(
+        cls,
+        entity_type: EntitiesEnum,
+        input_model: str,
+        data: DataFrame,
+        end: datetime,
+        name: Optional[str] = None,
+    ) -> "ResultEntities":
+        """
+        Creates a ResultEntities object from the given data.
+        The end time is used to fill the last time step of the data with the end time.
+        This is because we have a time discrete simulation, which means the last entry in the data
+        is the state of the entity at the end of the simulation.
+        Args:
+            entity_type: The entity type of the ResultEntities object.
+            input_model: The input model for which the result data was calculated.
+            data: The data of the ResultEntities object.
+            end: The end time of the simulation.
+            name: The name or id of the corresponding input object. Can be none.
+        """
+
+        # TODO Check docstring
+        # TODO Drop unneccessary columns
+        # TODO Check datatypes
+        if data.is_empty():
+            return cls.create_empty(entity_type, input_model, name)
+
+        # create empty result if grp is empty
+        # change last time stamp of time series to simulation end
+        data = data.drop(["uuid", "input_model"]).sort("time")
+        last_ts = data[-1, "time"]
+        if last_ts < end:
+            last = data[-1].with_columns(pl.col("time").add(end - pl.col("time")))
+            data = pl.concat([data, last])
+
         return cls(entity_type, input_model, name, data)
 
     # TODO: Check if end time is in or excluded
