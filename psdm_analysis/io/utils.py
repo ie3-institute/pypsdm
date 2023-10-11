@@ -133,7 +133,7 @@ def df_to_csv(
 
     bool_cols = []
     for col in df.columns:
-        is_bool_col = df[col].dropna().apply(lambda x: type(x) == bool).all()
+        is_bool_col = df[col].dropna().apply(lambda x: isinstance(x, bool)).all()
         if is_bool_col:
             bool_cols.append(col)
 
