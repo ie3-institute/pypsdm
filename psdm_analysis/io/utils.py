@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import pandas as pd
 from pandas import DataFrame
-from pandas.core.groupby import DataFrameGroupBy
+from pandas.core.groupby.generic import DataFrameGroupBy
 
 ROOT_DIR = os.path.abspath(__file__ + "/../../../")
 
@@ -133,7 +133,7 @@ def df_to_csv(
 
     bool_cols = []
     for col in df.columns:
-        is_bool_col = df[col].dropna().map(type).eq(bool).all()
+        is_bool_col = df[col].dropna().apply(lambda x: type(x) == bool).all()
         if is_bool_col:
             bool_cols.append(col)
 

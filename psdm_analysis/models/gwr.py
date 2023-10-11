@@ -81,7 +81,7 @@ class GridWithResults(ContainerMixin):
             }
 
             nodal_pq = {}
-            for future in concurrent.futures.as_completed(futures):
+            for future in concurrent.futures.as_completed(futures):  # type: ignore
                 uuid, pq = future.result()
                 nodal_pq[uuid] = pq
 

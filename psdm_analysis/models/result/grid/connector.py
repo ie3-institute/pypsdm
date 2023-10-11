@@ -15,6 +15,9 @@ from psdm_analysis.models.result.participant.dict import ResultDict
 
 @dataclass(frozen=True)
 class ConnectorResult(ResultEntities):
+    def __add__(self, other):
+        raise NotImplementedError("Adding connector results is not defined")
+
     @property
     def i_a_ang(self) -> Series:
         return self.data["i_a_ang"]
@@ -44,7 +47,7 @@ class ConnectorResult(ResultEntities):
     ):  # in kVA
         s_rated_fn = (
             lambda i_complex: math.sqrt(3)
-            * node_res.v_complex(voltage_level_kv)
+            * node_res.v_complex(voltage_level_kv)  # type: ignore
             * np.conj(i_complex)
         )
         if node == "a":

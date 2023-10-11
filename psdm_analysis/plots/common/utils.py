@@ -1,5 +1,6 @@
 import os.path
-from typing import Dict, NewType, Tuple
+from multiprocessing import Value
+from typing import Dict, NewType, Sequence, Tuple
 
 import seaborn as sns
 from matplotlib import dates as mdates
@@ -18,16 +19,18 @@ from psdm_analysis.processing.series import hourly_mean_resample
 
 COLOR_PALETTE = sns.color_palette()
 
-BLUE = COLOR_PALETTE[0]
-ORANGE = COLOR_PALETTE[1]
-GREEN = COLOR_PALETTE[2]
-RED = COLOR_PALETTE[3]
-PURPLE = COLOR_PALETTE[4]
-BROWN = COLOR_PALETTE[5]
-PINK = COLOR_PALETTE[6]
-GREY = COLOR_PALETTE[7]
-YELLOW = COLOR_PALETTE[8]
-LIGHT_BLUE = COLOR_PALETTE[9]
+RGB = NewType("RGB", Tuple[float, float, float])
+
+BLUE: RGB = COLOR_PALETTE[0]  # type: ignore
+ORANGE: RGB = COLOR_PALETTE[1]  # type: ignore
+GREEN: RGB = COLOR_PALETTE[2]  # type: ignore
+RED: RGB = COLOR_PALETTE[3]  # type: ignore
+PURPLE: RGB = COLOR_PALETTE[4]  # type: ignore
+BROWN: RGB = COLOR_PALETTE[5]  # type: ignore
+PINK: RGB = COLOR_PALETTE[6]  # type: ignore
+GREY: RGB = COLOR_PALETTE[7]  # type: ignore
+YELLOW: RGB = COLOR_PALETTE[8]  # type: ignore
+LIGHT_BLUE: RGB = COLOR_PALETTE[9]  # type: ignore
 
 # === COLOR MATCHING ===
 
@@ -44,8 +47,6 @@ UNKNOWN_COLOR = GREY
 FLEX_MAX = BLUE
 FLEX_MIN = GREEN
 FLEX_REF = YELLOW
-
-RGB = NewType("RGB", Tuple[float, float, float])
 
 
 def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
@@ -130,7 +131,7 @@ def set_date_format_and_label(ax: Axes, resolution: str):
     ax.xaxis.set_minor_formatter(mdates.DateFormatter(date_format))
 
 
-def _date_format_and_x_label(resolution: str):
+def _date_format_and_x_label(resolution: str) -> Tuple[str, str]:
     if resolution == "d":
         return "%H:%M", "Time in h"
     elif resolution == "w":
@@ -139,6 +140,10 @@ def _date_format_and_x_label(resolution: str):
         return "%x", "Day of Month"
     elif resolution == "y":
         return "%b", "Month"
+    else:
+        raise ValueError(
+            f"Resolution: {resolution} is not supported. Choose one of 'd', 'w', 'm', 'y'."
+        )
 
 
 def set_suptitle(fig: Figure, title: str):
@@ -158,7 +163,7 @@ def set_ylabel(ax: Axes, ylabel: str):
 
 
 def set_xlabels_rotated(
-    ax: Axes, labels: list[str], rotation: int = 45, ha: str = "center"
+    ax: Axes, labels: Sequence[str], rotation: int = 45, ha: str = "center"
 ):
     ax.set_xticks(range(1, len(labels) + 1))
     ax.set_xticklabels(labels, rotation=rotation, ha=ha)
@@ -167,7 +172,7 @@ def set_xlabels_rotated(
 def legend_with_distinct_labels(ax: Axes):
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    ax.legend(by_label.values(), by_label.keys())
+    ax.legend(list(by_label.values()), list(by_label.keys()))
 
 
 def rgb_to_hex(rgb):

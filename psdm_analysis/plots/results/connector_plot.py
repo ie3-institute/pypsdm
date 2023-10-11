@@ -1,3 +1,4 @@
+import abc
 import logging
 from typing import Optional, Union
 
@@ -202,11 +203,14 @@ def ax_plot_line_current(
         if i_max_src is None:
             logging.warning("No i_max_src provided. Cannot plot utilisation")
             return
-        line_i_max = (
-            i_max_src
-            if isinstance(i_max_src, float)
-            else i_max_src.subset(res.input_model).i_max.iloc[0]
-        )
+        if isinstance(i_max_src, float) or isinstance(i_max_src, int):
+            line_i_max = i_max_src
+        elif isinstance(i_max_src, Lines):
+            line_i_max = i_max_src.subset(res.input_model).i_max.iloc[0]
+        else:
+            raise ValueError(
+                f"i_max_src should be either float or Lines, got {type(i_max_src)}"
+            )
         utilisation = current / line_i_max
         ax_plot_secondary_axis(
             ax, utilisation, "Line Utilisation", show_secondary_grid_lines=True

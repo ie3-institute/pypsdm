@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from psdm_analysis.models.gwr import GridWithResults
 from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodesResult
@@ -40,7 +41,7 @@ def plot_all_v_mag_branch_violin(
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
-        ax_plot_v_mags_violin(axes[i], nodes_res, branch)
+        ax_plot_v_mags_violin(axes[i], nodes_res, branch)  # type: ignore
         set_subplot_title(axes[i], f"Voltages along Branch {i+1}")
     plt.tight_layout()
 
@@ -92,7 +93,7 @@ def ax_plot_v_mags_violin(
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
     x_labels = v_mag.columns.map(lambda uuid: uuid_to_id[uuid])
-    set_xlabels_rotated(ax, x_labels, ha="right")
+    set_xlabels_rotated(ax, list(x_labels), ha="right")
     set_ylabel(ax, "Voltage magnitude in pu")
     _ = ax.set_xticklabels(x_labels, rotation=45, ha="right")
 
@@ -123,10 +124,10 @@ def plot_v_mag_branch(
 
 def ax_plot_v_mag_branch(
     ax: Axes,
-    nodes_res: Union[NodeResult, EnhancedNodesResult],
+    nodes_res: Union[NodesResult, EnhancedNodesResult],
     branch: list[str],
     time: datetime,
-    fig: Optional[plt.Figure] = None,  # used to plot colorbar
+    fig: Optional[Figure] = None,  # used to plot colorbar
     in_kw: bool = False,
 ):
     """
@@ -153,13 +154,13 @@ def ax_plot_v_mag_branch(
         v_mag = res.v_mag.iloc[0]
 
         # happens for auxiliary node at open switch
-        if math.isnan(v_mag):
+        if math.isnan(v_mag):  # type: ignore
             continue
         v_mags.append(v_mag)
 
         if with_power:
-            p_s.append(res.p.iloc[0])
-        x_ticks.append(node_res.name)
+            p_s.append(res.p.iloc[0])  # type: ignore
+        x_ticks.append(node_res.name)  # type: ignore
 
     ax.plot(x_ticks, v_mags)
     ax.set_xticks(np.arange(len(x_ticks)))  # xtick locations
@@ -171,7 +172,7 @@ def ax_plot_v_mag_branch(
         cmap = sns.color_palette("coolwarm", as_cmap=True)
         if in_kw:
             p_s = [p * 1000 for p in p_s]
-        sc = ax.scatter(x_ticks, v_mags, c=p_s, cmap=cmap, edgecolor="none", zorder=10)
+        sc = ax.scatter(x_ticks, v_mags, c=p_s, cmap=cmap, edgecolor="none", zorder=10)  # type: ignore
         if fig:
             cbar = fig.colorbar(sc, ax=ax)
             unit = "kW" if in_kw else "MW"

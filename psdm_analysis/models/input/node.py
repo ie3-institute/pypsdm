@@ -57,7 +57,9 @@ class Nodes(Entities):
         data = self.data.drop(columns=["latitude", "longitude"])
         if mkdirs:
             os.makedirs(os.path.normpath(path), exist_ok=True)
-        df_to_csv(data, path, self.get_enum().get_csv_input_file_name(), delimiter)
+        df_to_csv(
+            data, path, self.get_enum().get_csv_input_file_name(), delimiter=delimiter
+        )
 
     @staticmethod
     def get_enum() -> RawGridElementsEnum:

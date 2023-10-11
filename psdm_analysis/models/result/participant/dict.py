@@ -2,10 +2,11 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, Type, TypeVar, Union
+from pathlib import Path
+from typing import Dict, Generic, Optional, Self, Type, TypeVar, Union
 
 from pandas import DataFrame
-from pandas.core.groupby import DataFrameGroupBy
+from pandas.core.groupby.generic import DataFrameGroupBy
 
 from psdm_analysis.errors import ComparisonError
 from psdm_analysis.io.utils import (
@@ -19,12 +20,13 @@ from psdm_analysis.models.input.entity import Entities
 from psdm_analysis.models.result.entity import ResultEntities
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
+T = TypeVar("T", bound=ResultEntities)
 
 
 @dataclass(frozen=True)
-class ResultDict(ABC):
+class ResultDict(Generic[T], ABC):
     entity_type: EntitiesEnum
-    entities: Dict[str, ResultEntities]
+    entities: Dict[str, T]
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -44,7 +46,7 @@ class ResultDict(ABC):
     def __contains__(self, uuid):
         return uuid in self.entities
 
-    def __getitem__(self, get):
+    def __getitem__(self, get) -> T | Self:
         match get:
             case str():
                 return self.entities[get]
@@ -167,7 +169,8 @@ class ResultDict(ABC):
     def compare(self, other):
         if not isinstance(other, type(self)):
             raise ComparisonError(
-                f"Type of self {type(self)} != type of other {type(other)}", errors=[]
+                f"Type of self {type(self)} != type of other {type(other)}",
+                differences=[],
             )
         differences = []
         if self.entity_type != other.entity_type:
@@ -182,7 +185,7 @@ class ResultDict(ABC):
                     differences.extend(e.differences)
         if differences:
             raise ComparisonError(
-                f"Comparison of {type(self)} failed", errors=differences
+                f"Comparison of {type(self)} failed", differences=differences
             )
 
     @classmethod
@@ -211,7 +214,7 @@ class ResultDict(ABC):
             grpd_df.apply(
                 lambda grp: ResultDict.build_for_entity(
                     entity_type,
-                    grp.name,
+                    grp.name,  # type: ignore
                     grp.drop(columns=["input_model"]),
                     simulation_end,
                     input_entities=input_entities,
@@ -229,9 +232,7 @@ class ResultDict(ABC):
         )
 
     @classmethod
-    def create_empty(
-        cls: ResultDictType, entity_type: EntityEnumType
-    ) -> ResultDictType:
+    def create_empty(cls: Type[Self], entity_type: EntityEnumType) -> Self:
         return cls(entity_type, dict())
 
     @staticmethod
@@ -240,8 +241,8 @@ class ResultDict(ABC):
         input_model: str,
         data: DataFrame,
         simulation_end: datetime,
-        input_entities=Optional[Entities],
-    ) -> ResultDictType:
+        input_entities: Optional[Entities],
+    ) -> ResultEntities:
         name = None
         if input_entities is not None:
             if input_model not in input_entities.id.index:
@@ -275,7 +276,7 @@ class ResultDict(ABC):
         return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
-    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[str]:
+    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[Path]:
         file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(data_path, file_name)
         if path.exists():

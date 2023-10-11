@@ -81,12 +81,20 @@ class PrimaryData:
     def sum(self) -> PQResult:
         return self.time_series.sum()
 
-    def get_for_participants(self, participants):
+    def get_for_participants(self, participants) -> list[PQResult]:
         time_series = []
         for participant in participants:
-            if participant in self.participant_mapping:
-                time_series.append(self.get_for_participant(participant))
+            ts = self.get_for_participant(participant)
+            if ts:
+                time_series.append(ts)
         return time_series
+
+    def get_for_participant(self, participant: str) -> PQResult | None:
+        ts_uuid = self.participant_mapping.get(participant)
+        if ts_uuid:
+            return self.time_series.entities[ts_uuid]
+        else:
+            return None
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         """
@@ -172,11 +180,11 @@ class PrimaryData:
         try:
             self.time_series.compare(other.time_series)
         except ComparisonError as e:
-            errors.extend(e.errors)
+            errors.extend(e.differences)
 
         if errors:
             raise ComparisonError(
-                f"Found Differences in {type(self)} comparison: ", errors=errors
+                f"Found Differences in {type(self)} comparison: ", differences=errors
             )
 
     @classmethod
@@ -219,7 +227,7 @@ class PrimaryData:
             )
 
     @staticmethod
-    def _read_pd_time_series(dir_path: str, delimiter: str, ts_file: str):
+    def _read_pd_time_series(dir_path: Path | str, delimiter: str, ts_file: str):
         ts_types = "|".join([e.value for e in TimeSeriesEnum])
         pattern = (
             f"({ts_types})_"
@@ -228,7 +236,7 @@ class PrimaryData:
         match = re.match(pattern, ts_file)
         if match:
             ts_type, ts_uuid = match.groups()
-            data = utils.read_csv(str(dir_path), ts_file, delimiter, index_col="uuid")
+            data = utils.read_csv(dir_path, ts_file, delimiter, index_col="uuid")
             data["time"] = data["time"].apply(
                 lambda date_string: to_date_time(date_string)
             )

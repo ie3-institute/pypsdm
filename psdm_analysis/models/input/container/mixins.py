@@ -67,7 +67,9 @@ class ContainerMixin(ABC):
                 errors += [e]
 
         if errors:
-            raise ComparisonError(f"Comparison of {type(self)} failed.", errors=errors)
+            raise ComparisonError(
+                f"Comparison of {type(self)} failed.", differences=errors
+            )
 
 
 class HasTypeMixin(ABC):

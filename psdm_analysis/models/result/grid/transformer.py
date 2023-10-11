@@ -28,7 +28,7 @@ class Transformer2WResult(ConnectorResult):
         node_res = gwr.results.nodes[node_uuid]
         node_side = self._get_node_for_side(side)
         return self.calc_apparent_power(
-            node_res, voltage_level_kv=v_rated, node=node_side
+            node_res, voltage_level_kv=v_rated, node=node_side  # type: ignore
         )
 
     def calc_active_power_gwr(self, gwr: GridWithResults, side="hv"):

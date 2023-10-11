@@ -12,10 +12,10 @@ class Switches(Connector):
         return self.data["closed"]
 
     def get_closed(self) -> "Switches":
-        return self.subset(self.data.query("closed == True").index)
+        return self.subset(self.data.query("closed == True").index.tolist())
 
     def get_opened(self) -> "Switches":
-        return self.subset(self.data.query("closed == False").index)
+        return self.subset(self.data.query("closed == False").index.tolist())
 
     @staticmethod
     def attributes() -> list[str]:

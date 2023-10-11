@@ -50,7 +50,7 @@ def gwr(
 
 
 @pytest.fixture(scope="session")
-def grid(input_path, delimiter) -> GridWithResults:
+def grid(input_path, delimiter) -> GridContainer:
     return GridContainer.from_csv(
         input_path,
         delimiter,

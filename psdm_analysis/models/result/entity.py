@@ -3,7 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
 from datetime import datetime
-from typing import Optional, Tuple, TypeVar, Union
+from typing import Optional, Self, Tuple, Type, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -36,6 +36,10 @@ class ResultEntities(ABC):
     input_model: str
     name: Optional[str]
     data: DataFrame
+
+    @abstractmethod
+    def __add__(self, other):
+        raise NotImplementedError
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -103,7 +107,8 @@ class ResultEntities(ABC):
         """
         if not isinstance(other, type(self)):
             raise ComparisonError(
-                f"Type of self: {type(self)} != type of other: {type(other)}", errors=[]
+                f"Type of self: {type(self)} != type of other: {type(other)}",
+                differences=[],
             )
 
         differences = []
@@ -124,7 +129,7 @@ class ResultEntities(ABC):
         except AssertionError as e:
             raise ComparisonError(
                 f"{self.entity_type.get_plot_name()} entities are not equal.",
-                errors=[(type(self), str(e))],
+                differences=[(type(self), str(e))],
             )
 
     def copy(
@@ -157,8 +162,11 @@ class ResultEntities(ABC):
 
     @classmethod
     def create_empty(
-        cls, entity_type: EntitiesEnum, input_model: str, name: Optional[str] = None
-    ) -> ResultType:
+        cls: Type[Self],
+        entity_type: EntitiesEnum,
+        input_model: str,
+        name: Optional[str] = None,
+    ) -> Self:
         """
         Creates an empty ResultEntities object with the given entity type and optionally name.
         Args:
@@ -184,13 +192,13 @@ class ResultEntities(ABC):
 
     @classmethod
     def build(
-        cls,
+        cls: Type[Self],
         entity_type: EntitiesEnum,
         input_model: str,
         data: DataFrame,
         end: datetime,
         name: Optional[str] = None,
-    ) -> "ResultEntities":
+    ) -> Self:
         """
         Creates a ResultEntities object from the given data.
         The end time is used to fill the last time step of the data with the end time.
@@ -241,7 +249,7 @@ class ResultEntities(ABC):
 
     @classmethod
     # todo: find a way for parallel calculation
-    def sum(cls, results: list[ResultType]) -> ResultType:
+    def sum(cls, results: list[ResultType]) -> Self:
         """
         Sums up the time series data for a list of ResultEntities objects.
         Args:
@@ -253,7 +261,7 @@ class ResultEntities(ABC):
             return cls.create_empty(SystemParticipantsEnum.PARTICIPANTS_SUM, "", "")
         if len(results) == 1:
             return results[0]
-        agg = results[0]
+        agg: ResultType = results[0]
         for result in results[1::]:
             agg += result
         return agg

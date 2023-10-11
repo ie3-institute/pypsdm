@@ -95,7 +95,7 @@ def plot_all_nodal_ps_branch_violin(
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
-        ax_plot_nodal_ps_violin(axes[i], nodes_res, branch)
+        ax_plot_nodal_ps_violin(axes[i], nodes_res, branch)  # type: ignore
         set_subplot_title(axes[i], f"Nodal Actice Power Along Branch {i+1}")
     plt.tight_layout()
 
@@ -146,7 +146,7 @@ def ax_plot_nodal_ps_violin(
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
-    x_labels = p.columns.map(lambda uuid: uuid_to_id[uuid])
+    x_labels = list(p.columns.map(lambda uuid: uuid_to_id[uuid]))
     set_xlabels_rotated(ax, x_labels, ha="right")
     set_ylabel(ax, "Nodal active power in MW")
     _ = ax.set_xticklabels(x_labels, rotation=45, ha="right")
@@ -160,7 +160,7 @@ def plot_comparison(
     title: str,
     resolution: str,
     hourly_mean=False,
-    flex_signal: PQResult = None,
+    flex_signal: PQResult | None = None,
 ):
     subplot_count = 2 if flex_signal is None else 3
     fig, axs = plt.subplots(
@@ -338,7 +338,7 @@ def ax_plot_stacked_pq(
     results: list[PQResult],
     resolution: str,
     hourly_mean: bool = False,
-    plot_kwargs: list[dict] = None,
+    plot_kwargs: list[dict] | None = None,
 ):
     residual_load, residual_generation = results[0].divide_load_generation()
 
@@ -387,7 +387,7 @@ def ax_plot_stacked_pq(
             residual_generation = generation_sum
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    ax.legend(by_label.values(), by_label.keys())
+    ax.legend(list(by_label.values()), list(by_label.keys()))
 
 
 def plot_participants_sum(

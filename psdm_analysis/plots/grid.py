@@ -41,7 +41,7 @@ def grid_plot(
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
     connected_lines.data.apply(
-        lambda line: _add_line_trace(fig, line, highlights=line_highlights), axis=1
+        lambda line: _add_line_trace(fig, line, highlights=line_highlights), axis=1  # type: ignore
     )
     disconnected_lines.data.apply(
         lambda line: _add_line_trace(
@@ -50,7 +50,7 @@ def grid_plot(
             highlights=line_highlights,
             is_disconnected=True,
             highlight_disconnected=highlight_disconnected,
-        ),
+        ),  # type: ignore
         axis=1,
     )
 
@@ -99,7 +99,7 @@ def _add_line_trace(
     color = GREEN
     if isinstance(highlights, dict):
         for line_color, lines in highlights.items():
-            if line_data.name in lines:
+            if line_data.name in lines:  # type: ignore
                 color = line_color
     elif highlights is not None:
         color = RED if line_data.name in highlights else GREEN
