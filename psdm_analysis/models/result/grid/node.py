@@ -1,6 +1,6 @@
-import numbers
 from dataclasses import dataclass
 from datetime import datetime
+from numbers import Real
 from typing import List, Optional, Type
 
 import numpy as np
@@ -25,6 +25,9 @@ class NodeResult(ResultEntities):
             & (self.data.equals(other.data))
         )
 
+    def __add__(self, other):
+        return NotImplemented
+
     @property
     def v_mag(self) -> Series:  # in Ampere
         return self.data["v_mag"]
@@ -33,10 +36,10 @@ class NodeResult(ResultEntities):
     def v_ang(self) -> Series:
         return self.data["v_ang"]
 
-    def v_complex(self, v_rated_kv_src: numbers.Real | Nodes) -> Series:
+    def v_complex(self, v_rated_kv_src: Real | Nodes) -> Series:
         v_rated_kv = (
             v_rated_kv_src
-            if isinstance(v_rated_kv_src, numbers.Real)
+            if isinstance(v_rated_kv_src, Real)
             else v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
         )
         return (self.v_mag * v_rated_kv) * np.exp(1j * np.radians(self.v_ang))
@@ -82,9 +85,9 @@ class NodesResult(ResultDict):
         )
 
     @property
-    def v_mag(self) -> Optional[DataFrame]:
+    def v_mag(self) -> DataFrame:
         if not self.entities:
-            return None
+            return pd.DataFrame()
         return pd.concat(
             [
                 node_res.v_mag.rename(node_res.input_model)
@@ -94,9 +97,9 @@ class NodesResult(ResultDict):
         )
 
     @property
-    def v_ang(self) -> Optional[DataFrame]:
+    def v_ang(self) -> DataFrame:
         if not self.entities:
-            return None
+            return pd.DataFrame()
         return pd.concat(
             [
                 node_res.v_ang.rename(node_res.input_model)

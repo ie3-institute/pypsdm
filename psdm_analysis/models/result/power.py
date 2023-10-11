@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from functools import reduce
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -84,9 +84,9 @@ class PQResult(ResultEntities):
 
     def daily_usage(self, device_power_mw):
         return (
-            self.p()
-            .groupby(self.p.index.date)
-            .apply(lambda series: duration_weighted_sum(series.abs()))
+            self.p.groupby(self.p.index.date).apply(  # type: ignore
+                lambda series: duration_weighted_sum(series.abs())
+            )
             / device_power_mw
         )
 
@@ -94,14 +94,14 @@ class PQResult(ResultEntities):
         return (
             hourly_mean_resample(self.p)
             .sort_values(ascending=False)
-            .reset_index(drop=drop_index)
+            .reset_index(drop=drop_index)  # type: ignore
         )
 
     def hourly_resample(self):
         updated_data = self.data.apply(lambda col: hourly_mean_resample(col), axis=0)
         return PQResult(self.entity_type, self.input_model, self.name, updated_data)
 
-    def to_csv(self, path: str, file_name: str = None, delimiter: str = ","):
+    def to_csv(self, path: str, file_name: str | None = None, delimiter: str = ","):
         if not isinstance(path, str):
             path = str(path)
         file_name = file_name if file_name else self.get_default_output_name()
@@ -109,11 +109,13 @@ class PQResult(ResultEntities):
             os.path.join(path, file_name), sep=delimiter, index_label="time"
         )
 
-    def get_default_output_name(self):
+    def get_default_output_name(self) -> str:
         return self.input_model + "_" + self.entity_type.get_csv_result_file_name()
 
     @classmethod
-    def from_csv(cls, file_path: str | Path, sp_type: EntitiesEnum, name: str = None):
+    def from_csv(
+        cls, file_path: str | Path, sp_type: EntitiesEnum, name: str | None = None
+    ):
         file_path = Path(file_path).resolve()
         data = pd.read_csv(file_path)
         data["time"] = pd.to_datetime(data["time"])
@@ -127,7 +129,7 @@ class PQResult(ResultEntities):
 
     @classmethod
     # todo: find a way for parallel calculation
-    def sum(cls, results: List["PQResult"]) -> "PQResult":
+    def sum(cls, results: Sequence["PQResult"]) -> "PQResult":
         if len(results) == 0:
             return PQResult.create_empty(
                 SystemParticipantsEnum.PARTICIPANTS_SUM, "", ""

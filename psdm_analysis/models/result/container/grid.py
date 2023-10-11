@@ -119,7 +119,7 @@ class GridResultContainer(ContainerMixin):
         participants = ParticipantsResultContainer.from_csv(
             simulation_data_path,
             delimiter,
-            simulation_end,
+            simulation_end,  # type: ignore
             grid_container=grid_container,
             filter_start=filter_start,
             filter_end=filter_end,
@@ -131,7 +131,7 @@ class GridResultContainer(ContainerMixin):
     def create_empty(cls):
         return cls(
             name="Empty Container",
-            nodes=NodesResult.create_empty(),
+            nodes=NodesResult.create_empty(RawGridElementsEnum.NODE),
             lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
             transformers_2w=ConnectorsResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W

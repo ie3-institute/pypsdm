@@ -7,7 +7,7 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, List, Self, Tuple, Type, TypeVar, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -105,7 +105,7 @@ class Entities(ABC):
         """
         Returns: The uuids of the entities.
         """
-        return self.data.index
+        return self.data.index.to_series()
 
     @property
     def id(self) -> Series:
@@ -155,7 +155,9 @@ class Entities(ABC):
         """
         return self.data.loc[uuid]
 
-    def subset(self: EntityType, uuids: Union[list[str], set[str], str]) -> EntityType:
+    def subset(
+        self: EntityType, uuids: Union[list[str], Series, set[str], str]
+    ) -> EntityType:
         """
         Creates a subset of the Entities instance with the given uuids.
 
@@ -194,7 +196,7 @@ class Entities(ABC):
         return type(self)(self.data[self.data["id"].isin(ids)])
 
     def subset_split(
-        self: EntityType, uuids: Union[list[str], set[str], str]
+        self: EntityType, uuids: Union[list[str], Series, set[str], str]
     ) -> Tuple[EntityType, EntityType]:
         """
         Returns the subset of entities as well as the remaining instances.
@@ -226,7 +228,7 @@ class Entities(ABC):
         return type(self)(data)
 
     def find_nodes(self, nodes: Nodes) -> Nodes:
-        return nodes.subset(self.node)
+        return nodes.subset(self.node.to_list())
 
     def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
         # local import to avoid circular imports
@@ -263,7 +265,7 @@ class Entities(ABC):
         except AssertionError as e:
             raise ComparisonError(
                 f"{self.get_enum().get_plot_name()} entities are not equal.",
-                errors=[(type(self), str(e))],
+                differences=[(type(self), str(e))],
             )
 
     def copy(
@@ -287,7 +289,7 @@ class Entities(ABC):
         return replace(to_copy, **changes)
 
     @classmethod
-    def from_csv(cls: EntityType, path: str, delimiter: str) -> EntityType:
+    def from_csv(cls: Type[Self], path: str, delimiter: str) -> Self:
         """
         Reads the entity data from a csv file.
 
@@ -301,10 +303,12 @@ class Entities(ABC):
         return cls._from_csv(path, delimiter, cls.get_enum())
 
     @classmethod
-    def _from_csv(cls, path: str, delimiter: str, entity: EntitiesEnum):
+    def _from_csv(
+        cls: Type[Self], path: str, delimiter: str, entity: EntitiesEnum
+    ) -> Self:
         file_path = utils.get_file_path(path, entity.get_csv_input_file_name())
         if os.path.exists(file_path):
-            return cls(cls._data_from_csv(entity, path, delimiter))
+            return cls(Entities._data_from_csv(entity, path, delimiter))
         else:
             logging.debug(
                 "There is no file named: "
@@ -374,7 +378,7 @@ class Entities(ABC):
             )
 
     @classmethod
-    def create_empty(cls: EntityType) -> EntityType:
+    def create_empty(cls: Type[Self]) -> Self:
         """
         Creates an empty instance of the corresponding entity class.
         """
@@ -389,8 +393,8 @@ class Entities(ABC):
         """
         pass
 
-    @staticmethod
-    def attributes() -> List[str]:
+    @classmethod
+    def attributes(cls) -> List[str]:
         """
         Method that should hold all attributes field (transformed to snake_case and case-sensitive)
         of the corresponding PSDM entity

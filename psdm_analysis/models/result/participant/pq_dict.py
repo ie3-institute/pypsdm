@@ -21,9 +21,9 @@ class PQResultDict(ResultDict):
     entities: Dict[str, PQResult]
 
     @property
-    def p(self) -> Optional[DataFrame]:
+    def p(self) -> DataFrame:
         if not self.entities.values():
-            return None
+            return pd.DataFrame()
         return (
             pd.DataFrame({p_uuid: res.p for p_uuid, res in self.entities.items()})
             .fillna(method="ffill")
@@ -31,9 +31,9 @@ class PQResultDict(ResultDict):
         )
 
     @property
-    def q(self) -> Optional[DataFrame]:
+    def q(self) -> DataFrame:
         if not self.entities.values():
-            return None
+            return pd.DataFrame()
         return (
             pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
             .fillna(method="ffill")
@@ -53,7 +53,7 @@ class PQResultDict(ResultDict):
     def sum(self) -> PQResult:
         return PQResult.sum(list(self.entities.values()))
 
-    def energy(self):
+    def energy(self) -> float:
         # todo make concurrent
         sum = 0
         for participant in self.entities.values():
@@ -95,7 +95,7 @@ class PQResultDict(ResultDict):
 
         if errors:
             raise ComparisonError(
-                f"Found Differences in {type(self)} comparison: ", errors=errors
+                f"Found Differences in {type(self)} comparison: ", differences=errors
             )
 
     def to_csv(self, path: str, resample_rate: Optional[str] = None):
@@ -107,7 +107,7 @@ class PQResultDict(ResultDict):
                 if resample_rate
                 else data
             )
-            data["uuid"] = data.apply(lambda _: uuid.uuid4(), axis=1)
+            data["uuid"] = data.apply(lambda _: str(uuid.uuid4()), axis=1)
             data["input_model"] = input_model
             return data
 

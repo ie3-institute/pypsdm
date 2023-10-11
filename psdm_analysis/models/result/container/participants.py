@@ -2,7 +2,7 @@ import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -114,14 +114,14 @@ class ParticipantsResultContainer(ContainerMixin):
         else:
             return {res.entity_type: res for res in self.to_list() if res.entities}
 
-    def energies(self) -> dict[SystemParticipantsEnum, float]:
+    def energies(self) -> dict[EntitiesEnum, float]:
         return {
             sp_type: res.energy()
             for sp_type, res in self.to_dict(include_empty=False).items()
             if sp_type != SystemParticipantsEnum.FLEX_OPTIONS
         }
 
-    def load_and_generation_energies(self) -> dict[SystemParticipantsEnum, float]:
+    def load_and_generation_energies(self) -> dict[EntitiesEnum, Tuple[float, float]]:
         return {
             sp_type: res.load_and_generation()
             for sp_type, res in self.to_dict(include_empty=False).items()
@@ -240,7 +240,7 @@ class ParticipantsResultContainer(ContainerMixin):
         return (
             res
             if not filter_start
-            else res.filter_for_time_interval(filter_start, filter_end)
+            else res.filter_for_time_interval(filter_start, filter_end)  # type: ignore
         )
 
     @staticmethod
@@ -285,10 +285,12 @@ class ParticipantsResultContainer(ContainerMixin):
             wecs=PQResultDict.create_empty(
                 SystemParticipantsEnum.WIND_ENERGY_CONVERTER
             ),
-            storages=PQResultDict.create_empty(SystemParticipantsEnum.STORAGE),
+            storages=PQWithSocResultDict.create_empty(SystemParticipantsEnum.STORAGE),
             ems=PQResultDict.create_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT),
             evcs=PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE),
-            evs=PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE),
+            evs=PQWithSocResultDict.create_empty(
+                SystemParticipantsEnum.ELECTRIC_VEHICLE
+            ),
             hps=PQResultDict.create_empty(SystemParticipantsEnum.HEAT_PUMP),
-            flex=PQResultDict.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
+            flex=FlexOptionsResult.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
         )

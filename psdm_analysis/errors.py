@@ -1,7 +1,7 @@
 class ComparisonError(Exception):
-    def __init__(self, message, errors=None):
+    def __init__(self, message, differences=None):
         super().__init__(message)
-        self.differences = errors if errors else []
+        self.differences = differences if differences else []
         self.message = message
 
     def __str__(self):

@@ -1,12 +1,12 @@
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib.ticker import FuncFormatter
 
 from psdm_analysis.models.result.container.participants import (
     ParticipantsResultContainer,
 )
 from psdm_analysis.models.result.power import PQResult
-from psdm_analysis.plots.utils import (
+from psdm_analysis.plots.common.utils import (
     FIGSIZE,
     FIGSIZE_WIDE,
     LOAD_COLOR,
@@ -59,7 +59,7 @@ def plot_load_and_generation(participant_res: ParticipantsResultContainer):
         labels=[f"{x:,.0f}" for x in bars_generation.datavalues],
     )
     axs[0].get_xaxis().set_major_formatter(
-        mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ","))
+        FuncFormatter(lambda x, p: format(int(x), ","))
     )
 
     bars_load = axs[1].barh(
@@ -71,7 +71,7 @@ def plot_load_and_generation(participant_res: ParticipantsResultContainer):
     axs[1].set_title("Load", fontsize=TITLE_FONT_SIZE, pad=15)
     axs[1].set_xlim(right=x_lim)
     axs[1].get_xaxis().set_major_formatter(
-        mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ","))
+        FuncFormatter(lambda x, p: format(int(x), ","))
     )
     # this should work since mpl 3.4 but does not for some reason
 

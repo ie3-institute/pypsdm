@@ -70,7 +70,7 @@ def plot_flex_range(
     title: str,
     resolution: str,
     hourly_mean: bool,
-    actual_res: PQResult = None,
+    actual_res: PQResult | None = None,
 ):
     figure, ax = plt.subplots(figsize=FIGSIZE)
     # plt.tight_layout()
@@ -86,7 +86,7 @@ def ax_plot_flex_range(
     flex_option: FlexOptionResult,
     resolution: str,
     hourly_mean: bool,
-    actual_res: PQResult = None,
+    actual_res: PQResult | None = None,
 ):
     p_ref = flex_option.p_ref()
     plot_func = partial(

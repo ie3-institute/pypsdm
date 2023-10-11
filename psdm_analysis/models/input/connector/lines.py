@@ -51,14 +51,14 @@ class Lines(HasTypeMixin, Connector):
         """
         return self.data["length"].sum()
 
-    def relative_line_length(self) -> float:
+    def relative_line_length(self) -> Series:
         """
         Returns the relative length of all lines.
 
         Returns:
             float: Relative length of all lines.
         """
-        return self.data["length"] / len(self.data)
+        return self.length / len(self.data)
 
     @staticmethod
     def get_enum() -> RawGridElementsEnum:

@@ -55,7 +55,7 @@ class FlexOptionResult(ResultEntities):
     def hourly_resample(self):
         updated_data = self.data.apply(lambda x: hourly_mean_resample(x))
         return FlexOptionResult(
-            self.entity_type, self.name, self.input_model, updated_data
+            self.entity_type, self.input_model, self.name, updated_data
         )
 
     def add_series(self, series: Series) -> "FlexOptionResult":
@@ -63,5 +63,5 @@ class FlexOptionResult(ResultEntities):
             lambda p_flex: add_series(p_flex, series, p_flex.name), axis=0
         )
         return FlexOptionResult(
-            self.entity_type, self.name, self.input_model, updated_data
+            self.entity_type, self.input_model, self.name, updated_data
         )
