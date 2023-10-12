@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/psdm-analysis.iml" filepath="$PROJECT_DIR$/.idea/psdm-analysis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pypsdm.iml" filepath="$PROJECT_DIR$/.idea/pypsdm.iml" />
     </modules>
   </component>
 </project>
