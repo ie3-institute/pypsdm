@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from psdm_analysis.io.utils import DateTimePattern, check_filter
+from pypsdm.io.utils import DateTimePattern, check_filter
 
 
 def test_check_filter_both_dates_provided_valid():

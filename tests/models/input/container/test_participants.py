@@ -3,9 +3,7 @@ import os
 import pytest
 
 from definitions import ROOT_DIR
-from psdm_analysis.models.input.container.participants import (
-    SystemParticipantsContainer,
-)
+from pypsdm.models.input.container.participants import SystemParticipantsContainer
 
 
 @pytest.fixture(scope="module")

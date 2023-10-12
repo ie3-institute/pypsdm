@@ -3,8 +3,8 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.power import PQResult
+from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.result.power import PQResult
 
 
 def create_sample_data(

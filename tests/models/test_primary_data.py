@@ -1,7 +1,7 @@
 import pytest
 
-from psdm_analysis.models.enums import TimeSeriesEnum
-from psdm_analysis.models.primary_data import PrimaryData
+from pypsdm.models.enums import TimeSeriesEnum
+from pypsdm.models.primary_data import PrimaryData
 
 
 @pytest.fixture

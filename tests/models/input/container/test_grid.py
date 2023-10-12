@@ -3,7 +3,7 @@ import os
 import os.path
 
 from definitions import ROOT_DIR
-from psdm_analysis.models.input.container.grid import GridContainer
+from pypsdm.models.input.container.grid import GridContainer
 
 
 def test_grid_container(gwr):

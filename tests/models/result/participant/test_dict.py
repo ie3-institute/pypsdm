@@ -3,9 +3,9 @@ from datetime import datetime
 import pandas as pd
 from pytest import fixture
 
-from psdm_analysis.models.enums import SystemParticipantsEnum
-from psdm_analysis.models.result.participant.pq_dict import PQResultDict
-from psdm_analysis.models.result.power import PQResult
+from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.result.participant.pq_dict import PQResultDict
+from pypsdm.models.result.power import PQResult
 
 
 def create_sample_data(

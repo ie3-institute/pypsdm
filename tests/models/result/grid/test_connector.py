@@ -3,8 +3,8 @@ import math
 import numpy as np
 import pandas as pd
 
-from psdm_analysis.models.enums import RawGridElementsEnum
-from psdm_analysis.models.result.grid.transformer import Transformer2WResult
+from pypsdm.models.enums import RawGridElementsEnum
+from pypsdm.models.result.grid.transformer import Transformer2WResult
 from tests.models.result.grid.test_node import get_node_result
 
 
