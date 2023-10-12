@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from psdm_analysis.errors import ComparisonError
-from psdm_analysis.models.input.participant.pv import PhotovoltaicPowerPlants
+from pypsdm.errors import ComparisonError
+from pypsdm.models.input.participant.pv import PhotovoltaicPowerPlants
 
 
 @pytest.fixture

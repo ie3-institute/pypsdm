@@ -1,7 +1,7 @@
 import pytest
 
-from psdm_analysis.models.input.connector.switches import Switches
-from psdm_analysis.processing.dataframe import compare_dfs
+from pypsdm.models.input.connector.switches import Switches
+from pypsdm.processing.dataframe import compare_dfs
 
 
 @pytest.fixture

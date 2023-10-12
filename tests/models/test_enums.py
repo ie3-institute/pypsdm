@@ -1,4 +1,4 @@
-from psdm_analysis.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import SystemParticipantsEnum
 
 
 def test_sp_enum():

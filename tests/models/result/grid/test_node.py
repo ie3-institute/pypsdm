@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from psdm_analysis.models.enums import RawGridElementsEnum
-from psdm_analysis.models.result.grid.node import NodeResult, NodesResult
+from pypsdm.models.enums import RawGridElementsEnum
+from pypsdm.models.result.grid.node import NodeResult, NodesResult
 
 
 def get_node_result(v_mags, v_angs):

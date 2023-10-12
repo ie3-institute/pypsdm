@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import pytest
 
-from psdm_analysis.errors import ComparisonError
-from psdm_analysis.models.gwr import GridWithResults
-from psdm_analysis.models.input.container.raw_grid import RawGridContainer
+from pypsdm.errors import ComparisonError
+from pypsdm.models.gwr import GridWithResults
+from pypsdm.models.input.container.raw_grid import RawGridContainer
 
 
 def test_raw_grid_container(gwr):

@@ -371,6 +371,6 @@ tests/temp/
 .idea/
 
 # can be removed later
-psdm_analysis/projects/
+pypsdm/projects/
 transense_analysis/
 dsse_benchmark/

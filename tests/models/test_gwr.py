@@ -3,8 +3,8 @@ from datetime import datetime
 
 import pytest
 
-from psdm_analysis.models.gwr import GridWithResults
-from psdm_analysis.models.result.grid.enhanced_node import EnhancedNodeResult
+from pypsdm.models.gwr import GridWithResults
+from pypsdm.models.result.grid.enhanced_node import EnhancedNodeResult
 
 
 @pytest.fixture
