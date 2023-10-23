@@ -55,19 +55,19 @@ class SystemParticipantsContainer(ContainerMixin):
         self, nodes: Union[Nodes, list[str]]
     ) -> dict[str, "SystemParticipantsContainer"]:
         uuids = nodes.uuid if isinstance(nodes, Nodes) else nodes
-        return {uuid: self.filter_by_node(uuid) for uuid in uuids}
+        return {uuid: self.filter_by_nodes(uuid) for uuid in uuids}
 
-    def filter_by_node(self, node_uuid: str):
-        loads = self.loads.filter_by_nodes(node_uuid)
-        fixed_feed_ins = self.fixed_feed_ins.filter_by_nodes(node_uuid)
-        pvs = self.pvs.filter_by_nodes(node_uuid)
-        biomass_plants = self.biomass_plants.filter_by_nodes(node_uuid)
-        wecs = self.wecs.filter_by_nodes(node_uuid)
-        storages = self.storages.filter_by_nodes(node_uuid)
-        ems = self.ems.filter_by_nodes(node_uuid)
-        evs = self.evs.filter_by_nodes(node_uuid)
-        evcs = self.evcs.filter_by_nodes(node_uuid)
-        hps = self.hps.filter_by_nodes(node_uuid)
+    def filter_by_nodes(self, node_uuids: str | list[str]):
+        loads = self.loads.filter_by_nodes(node_uuids)
+        fixed_feed_ins = self.fixed_feed_ins.filter_by_nodes(node_uuids)
+        pvs = self.pvs.filter_by_nodes(node_uuids)
+        biomass_plants = self.biomass_plants.filter_by_nodes(node_uuids)
+        wecs = self.wecs.filter_by_nodes(node_uuids)
+        storages = self.storages.filter_by_nodes(node_uuids)
+        ems = self.ems.filter_by_nodes(node_uuids)
+        evs = self.evs.filter_by_nodes(node_uuids)
+        evcs = self.evcs.filter_by_nodes(node_uuids)
+        hps = self.hps.filter_by_nodes(node_uuids)
         return SystemParticipantsContainer(
             ems,
             loads,

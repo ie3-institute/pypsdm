@@ -89,6 +89,21 @@ class PrimaryData:
                 time_series.append(ts)
         return time_series
 
+    def filter_by_participants(
+        self, participants: list[str], skip_missing: bool = False
+    ):
+        if skip_missing:
+            participants = [p for p in participants if p in self.participant_mapping]
+        try:
+            pm = {p: self.participant_mapping[p] for p in participants}
+            ts = {ts_uuid: self.time_series[ts_uuid] for ts_uuid in pm.values()}
+            return PrimaryData(ts, pm)
+        except KeyError as e:
+            missing_key = e.args[0]
+            raise KeyError(
+                f"Participant with uuid: {missing_key} has no associated primary data."
+            ) from e
+
     def get_for_participant(self, participant: str) -> PQResult | None:
         ts_uuid = self.participant_mapping.get(participant)
         if ts_uuid:

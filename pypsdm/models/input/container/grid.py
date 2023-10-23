@@ -65,6 +65,21 @@ class GridContainer(ContainerMixin):
             node_participants_map=self.node_participants_map,
         )
 
+    def filter_by_nodes(self, nodes: str | list[str]):
+        raw_grid = self.raw_grid.filter_by_nodes(nodes)
+        participants = self.participants.filter_by_nodes(nodes)
+        primary_data = self.primary_data.filter_by_participants(
+            participants.uuids().tolist(),
+            skip_missing=True,
+        )
+        node_participants_map = participants.build_node_participants_map(raw_grid.nodes)
+        return GridContainer(
+            raw_grid=raw_grid,
+            participants=participants,
+            primary_data=primary_data,
+            node_participants_map=node_participants_map,
+        )
+
     def to_csv(
         self,
         path: str,
