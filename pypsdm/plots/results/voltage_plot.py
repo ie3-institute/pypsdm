@@ -8,9 +8,8 @@ import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from pypsdm.models.gwr import GridWithResults
+from pypsdm.models.result.grid.node import NodeResult, NodesResult 
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
-from pypsdm.models.result.grid.node import NodeResult, NodesResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     COLOR_PALETTE,
@@ -24,10 +23,12 @@ from pypsdm.plots.common.utils import (
 
 
 def plot_all_v_mag_branch_violin(
-    gwr: GridWithResults,
+    nodes_res: Union[NodesResult, EnhancedNodesResult],
+    branches: list[list[str]],
 ):
     """
     Plots violin plots for all nodes across all branches.
+    Branches of the grid can be retrieved by raw_grid.get_branches()
 
     Args:
         gwr: GridWithResults object
@@ -35,14 +36,13 @@ def plot_all_v_mag_branch_violin(
     Returns:
         fig, axes
     """
-    branches = gwr.grid.raw_grid.get_branches()
-    nodes_res = gwr.results.nodes
     width, height = FIGSIZE
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
-        ax_plot_v_mags_violin(axes[i], nodes_res, branch)  # type: ignore
-        set_subplot_title(axes[i], f"Voltages along Branch {i+1}")
+        axs = axes[i] if len(branches) > 1 else axes
+        ax_plot_v_mags_violin(axs, nodes_res, branch)  # type: ignore
+        set_subplot_title(axs, f"Voltages along Branch {i+1}")
     plt.tight_layout()
 
     return fig, axes

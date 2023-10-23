@@ -186,10 +186,21 @@ def _add_node_trace(
             _node_trace(rmd, BLUE)
 
             # plot highlighted nodes second so they are on top
+            rmd = []
+            for nodes in highlights.values():
+                rmd.extend(nodes)
+            rmd = nodes_data.drop(rmd)
+            _node_trace(rmd, BLUE)
+
+            # plot highlighted nodes second so they are on top
             for color, nodes in highlights.items():
                 highlighted_nodes = nodes_data.loc[nodes]
                 _node_trace(highlighted_nodes, color)
         elif isinstance(highlights, list):
+            rmd = nodes_data.drop(highlights)
+            _node_trace(rmd, BLUE)
+
+            # plot highlighted nodes second so they are on top
             rmd = nodes_data.drop(highlights)
             _node_trace(rmd, BLUE)
 
