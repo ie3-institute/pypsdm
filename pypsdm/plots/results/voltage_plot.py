@@ -8,8 +8,8 @@ import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from pypsdm.models.result.grid.node import NodeResult, NodesResult 
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
+from pypsdm.models.result.grid.node import NodeResult, NodesResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     COLOR_PALETTE,
