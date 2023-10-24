@@ -25,7 +25,7 @@ def test_build_networkx_graph(gwr: GridWithResults):
     # correct line length in data dict
     for _, line in gwr.grid.raw_grid.lines.data.iterrows():
         assert G.has_edge(line["node_a"], line["node_b"])
-        assert G.edges[(line["node_a"], line["node_b"])]["length"] == line["length"]
+        assert G.edges[(line["node_a"], line["node_b"])]["weight"] == line["length"]
 
 
 def test_create_empty():
