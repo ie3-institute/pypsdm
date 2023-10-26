@@ -67,7 +67,7 @@ class RawGridContainer(ContainerMixin):
         graph = Graph()
         closed_switches = self.switches.get_closed()
         line_data_dicts = self.lines.data.apply(
-            lambda row: {"length": row["length"]}, axis=1
+            lambda row: {"weight": row["length"]}, axis=1
         )
 
         graph.add_nodes_from(self.nodes.uuid)
@@ -78,6 +78,14 @@ class RawGridContainer(ContainerMixin):
                 zip(self.transformers_2_w.node_a, self.transformers_2_w.node_b)
             )
         return graph
+
+    def filter_by_nodes(self, nodes: Union[str, list[str], set[str]]):
+        return RawGridContainer(
+            self.nodes.filter_by_nodes(nodes),
+            self.lines.filter_by_nodes(nodes, both_in_nodes=True),
+            self.transformers_2_w.filter_by_nodes(nodes, both_in_nodes=False),
+            self.switches.filter_by_nodes(nodes, both_in_nodes=True),
+        )
 
     @staticmethod
     def _find_branches(G: Graph, start_node):

@@ -19,7 +19,7 @@ def test_spa_container_from_csv(participants):
 
 
 def test_filter_by_node(participants):
-    filtered = participants.filter_by_node("401f37f8-6f2c-4564-bc78-6736cb9cbf8d")
+    filtered = participants.filter_by_nodes("401f37f8-6f2c-4564-bc78-6736cb9cbf8d")
     assert len(filtered.wecs) == 1
     assert len(filtered.loads) == 1
     assert len(filtered.biomass_plants) == 0

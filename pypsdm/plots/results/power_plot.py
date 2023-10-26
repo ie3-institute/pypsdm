@@ -119,6 +119,7 @@ def ax_plot_nodal_ps_violin(
     ax: Axes,
     nodes_res: EnhancedNodesResult,
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
+    ffill=True,
 ):
     """
     Plots violin plots for given nodes. If no nodes are passed all nodes are plotted.
@@ -131,9 +132,9 @@ def ax_plot_nodal_ps_violin(
 
     if nodes:
         # get v_mag in listed sequence
-        p = nodes_res.subset(nodes).p.reindex(columns=nodes)
+        p = nodes_res.subset(nodes).ps(ffill).reindex(columns=nodes)
     else:
-        p = nodes_res.p
+        p = nodes_res.ps(ffill)
 
     sns.violinplot(p, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
 

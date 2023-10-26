@@ -16,7 +16,7 @@ from pypsdm.plots.common.utils import (
 def ax_plot_time_series(
     ax: Axes,
     res: Series,
-    type: EntitiesEnum,
+    entity_type: EntitiesEnum,
     resolution: str,
     hourly_mean: bool = False,
     fill_from_index=False,
@@ -24,7 +24,7 @@ def ax_plot_time_series(
     set_x_label: bool = True,
     **kwargs,
 ):
-    args = get_label_and_color_dict(type)
+    args = get_label_and_color_dict(entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
     if set_x_label:
         set_date_format_and_label(ax, resolution)

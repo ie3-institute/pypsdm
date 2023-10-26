@@ -18,6 +18,7 @@ from pypsdm.processing.dataframe import join_dataframes
 class PQResultDict(ResultDict):
     entities: Dict[str, PQResult]
 
+    # TODO make ffill optional
     @property
     def p(self) -> DataFrame:
         if not self.entities.values():
@@ -28,6 +29,7 @@ class PQResultDict(ResultDict):
             .sort_index()
         )
 
+    # TODO make ffill optional
     @property
     def q(self) -> DataFrame:
         if not self.entities.values():

@@ -110,6 +110,9 @@ class ResultDict(Generic[T], ABC):
     def values(self):
         return self.entities.values()
 
+    def to_list(self):
+        return list(self.entities.values())
+
     def items(self):
         return self.entities.items()
 
