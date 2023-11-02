@@ -26,6 +26,7 @@ from pypsdm.processing.dataframe import compare_dfs
 if TYPE_CHECKING:
     from pypsdm.models.input.node import Nodes
 
+pd.set_option("mode.copy_on_write", True)
 EntityType = TypeVar("EntityType", bound="Entities")
 
 
@@ -230,15 +231,23 @@ class Entities(ABC):
     def find_nodes(self, nodes: Nodes) -> Nodes:
         return nodes.subset(self.node.to_list())
 
-    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         # local import to avoid circular imports
         from pypsdm.models.input.container.mixins import HasTypeMixin
+        from pypsdm.models.input.participant.em import EnergyManagementSystems
 
+        data = self.data.copy()
+        if isinstance(self, EnergyManagementSystems):
+            data["connected_assets"] = self.connected_assets.apply(
+                lambda x: f"{' '.join(x)}"
+            )
         if isinstance(self, HasTypeMixin):
             HasTypeMixin.to_csv(self, path, mkdirs, delimiter)
         else:
+            if self.additional_attributes():
+                data = data.drop(columns=self.additional_attributes())
             df_to_csv(
-                self.data,
+                data,
                 path,
                 self.get_enum().get_csv_input_file_name(),
                 mkdirs=mkdirs,
@@ -338,6 +347,7 @@ class Entities(ABC):
                 )
 
         if entity.has_type():
+            # TODO: Capture nonexistent type
             type_data = read_csv(path, entity.get_type_file_name(), delimiter)
             data = (
                 data.merge(
@@ -368,7 +378,7 @@ class Entities(ABC):
                 type_data = data["type"].apply(
                     lambda type_str: parse_evcs_type_info(type_str)
                 )
-                data = pd.concat([data, type_data])
+                data = pd.concat([data, type_data], axis=1)
 
         try:
             return data.set_index("uuid")
@@ -394,7 +404,7 @@ class Entities(ABC):
         pass
 
     @classmethod
-    def attributes(cls) -> List[str]:
+    def attributes(cls) -> list[str]:
         """
         Method that should hold all attributes field (transformed to snake_case and case-sensitive)
         of the corresponding PSDM entity
@@ -402,8 +412,16 @@ class Entities(ABC):
         """
         return ["id", "operates_from", "operates_until", "operator"]
 
+    @classmethod
+    def additional_attributes(cls) -> list[str]:
+        """
+        Method that should hold all fields we add to the original PSDM entity. These
+        are dropped when persisting the data, to keep the data consistent.
+        """
+        return []
+
     @staticmethod
-    def bool_attributes() -> List[str]:
+    def bool_attributes() -> list[str]:
         """
         Method that should hold all boolean attributes field (transformed to snake_case and case-sensitive)
         of the corresponding PSDM entity. It is mainly used for type casting of the data frame column.

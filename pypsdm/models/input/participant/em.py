@@ -21,12 +21,6 @@ class EnergyManagementSystems(SystemParticipants):
     def uuid_to_connected_assets(self):
         return self.connected_assets.to_dict()
 
-    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
-        self.data["connected_assets"] = self.connected_assets.apply(
-            lambda x: f"{' '.join(x)}"
-        )
-        return super().to_csv(path, mkdirs, delimiter)
-
     @staticmethod
     def attributes():
         return SystemParticipants.attributes() + [

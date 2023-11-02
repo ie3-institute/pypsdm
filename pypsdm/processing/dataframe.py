@@ -40,6 +40,17 @@ def filter_data_for_time_interval(
 
 
 def compare_dfs(a: DataFrame, b: DataFrame, check_like=True, **kwargs):
+    # compare columns
+    a_cols = set(a.columns)
+    b_cols = set(b.columns)
+
+    a_diff = a_cols - b_cols
+    if a_diff:
+        raise AssertionError(f"Columns: {a_diff} in left but not in right")
+    b_diff = b_cols - a_cols
+    if b_diff:
+        raise AssertionError(f"Columns: {b_diff} in right but not in left")
+
     pd.testing.assert_frame_equal(
         a,
         b,

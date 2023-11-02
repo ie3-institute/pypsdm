@@ -184,6 +184,10 @@ class ParticipantsResultContainer(ContainerMixin):
             self.flex.filter_for_time_interval(start, end),
         )
 
+    def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):
+        for participant in self.to_list(include_empty=False, include_flex=True):
+            participant.to_csv(path, delimiter, mkdirs=mkdirs)
+
     @classmethod
     def from_csv(
         cls,

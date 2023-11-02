@@ -58,6 +58,10 @@ class GridResultContainer(ContainerMixin):
             self.participants.filter_for_time_interval(start, end),
         )
 
+    def to_csv(self, path: str, delimiter: str = ",", mkdirs: bool = False):
+        for res in self.to_list(include_empty=False):
+            res.to_csv(path, delimiter=delimiter, mkdirs=mkdirs)
+
     @classmethod
     def from_csv(
         cls,

@@ -15,11 +15,6 @@ from pypsdm.models.result.participant.dict import ResultDict
 class FlexOptionsResult(ResultDict):
     entities: Dict[str, FlexOptionResult]
 
-    def to_csv(self, output_path: str):
-        self.to_df().to_csv(
-            os.path.join(output_path, "flex_df.csv"), index_label="time"
-        )
-
     def to_df(self) -> DataFrame:
         return pd.concat(
             [f.data for f in self.entities.values()],

@@ -29,7 +29,7 @@ class WindEnergyConverters(SpTypeMixin, SystemParticipants):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return ["market_reaction"]
+        return SystemParticipants.attributes() + ["market_reaction"]
 
     @staticmethod
     def type_attributes() -> list[str]:

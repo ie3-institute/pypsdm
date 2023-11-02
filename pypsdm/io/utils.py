@@ -119,7 +119,7 @@ def df_to_csv(
     df: DataFrame,
     path: Union[str, Path],
     file_name: str,
-    mkdirs=True,
+    mkdirs=False,
     delimiter: str = ",",
     index_label="uuid",
     datetime_pattern=DateTimePattern.UTC_TIME_PATTERN,

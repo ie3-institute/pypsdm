@@ -1,4 +1,6 @@
 import logging
+import os
+import uuid
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
@@ -13,6 +15,7 @@ from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date
 from pypsdm.models.enums import EntitiesEnum, EntityEnumType
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.result.entity import ResultEntities
+from pypsdm.processing.dataframe import join_dataframes
 
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 T = TypeVar("T", bound=ResultEntities)
@@ -185,6 +188,37 @@ class ResultDict(Generic[T], ABC):
             raise ComparisonError(
                 f"Comparison of {type(self)} failed", differences=differences
             )
+
+    def to_csv(
+        self,
+        path: str,
+        delimiter=",",
+        mkdirs=False,
+        resample_rate: Optional[str] = None,
+    ):
+        if mkdirs:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        file_name = self.entity_type.get_csv_result_file_name()
+
+        def prepare_data(data: DataFrame, input_model: str):
+            data = data.copy()
+            data = (
+                data.resample("60s").ffill().resample(resample_rate).mean()
+                if resample_rate
+                else data
+            )
+            data["uuid"] = data.apply(lambda _: str(uuid.uuid4()), axis=1)
+            data["input_model"] = input_model
+            data.index.name = "time"
+            return data
+
+        dfs = [
+            prepare_data(participant.data, input_model)
+            for input_model, participant in self.entities.items()
+        ]
+        df = join_dataframes(dfs)
+        df.to_csv(os.path.join(path, file_name), sep=delimiter, index=True)
 
     @classmethod
     def from_csv(

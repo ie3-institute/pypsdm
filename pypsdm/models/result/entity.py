@@ -14,6 +14,7 @@ from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.entity import EntityType
 from pypsdm.processing.dataframe import compare_dfs, filter_data_for_time_interval
 
+pd.set_option("mode.copy_on_write", True)
 ResultType = TypeVar("ResultType", bound="ResultEntities")
 
 
@@ -91,6 +92,18 @@ class ResultEntities(ABC):
             return self.data.iloc[0], self.data.index[0]
         else:
             return self.data.asof(dt), dt
+
+    def find_input_entity(self, input_model: EntityType) -> EntityType:
+        """
+        Finds the input entity for the object.
+        Args:
+            input_model: The input models within which the input entity should be found.
+        Returns:
+            The filtered input entities.
+        """
+        if self.entity_type != input_model.get_enum():
+            logging.warning("Input model type does not match result type!")
+        return input_model.subset([self.input_model])
 
     def compare(self, other) -> None:
         """
@@ -224,6 +237,7 @@ class ResultEntities(ABC):
         # todo: deal with duplicate indexes -> take later one
         data = data[~data.index.duplicated(keep="last")]
         data.sort_index(inplace=True)
+        data.index.name = "time"
         return cls(entity_type, input_model, name, data)
 
     # TODO: Check if end time is in or excluded
@@ -262,15 +276,3 @@ class ResultEntities(ABC):
         for result in results[1::]:
             agg += result
         return agg
-
-    def find_input_entity(self, input_model: EntityType) -> EntityType:
-        """
-        Finds the input entity for the object.
-        Args:
-            input_model: The input models within which the input entity should be found.
-        Returns:
-            The filtered input entities.
-        """
-        if self.entity_type != input_model.get_enum():
-            logging.warning("Input model type does not match result type!")
-        return input_model.subset([self.input_model])

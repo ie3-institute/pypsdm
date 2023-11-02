@@ -5,9 +5,6 @@ from abc import ABC, abstractmethod
 from pypsdm.errors import ComparisonError
 from pypsdm.io.utils import df_to_csv
 from pypsdm.models.enums import EntitiesEnum
-from pypsdm.models.input.connector.connector import Connector
-from pypsdm.models.input.entity import Entities
-from pypsdm.models.input.participant.participant import SystemParticipants
 
 
 class ContainerMixin(ABC):
@@ -33,7 +30,7 @@ class ContainerMixin(ABC):
     def create_empty(cls):
         pass
 
-    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         for entities in self.to_list():
             try:
                 entities.to_csv(path, delimiter=delimiter, mkdirs=mkdirs)
@@ -86,7 +83,7 @@ class HasTypeMixin(ABC):
     def type_uuid(self):
         return self.data["type_uuid"]
 
-    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         if mkdirs:
             os.makedirs(path, exist_ok=True)
         # persist entity_input.csv
@@ -106,11 +103,13 @@ class HasTypeMixin(ABC):
         # persist entity_type_input.csv
         type_data = (
             self.data[self.type_attributes()]
+            .drop_duplicates()
             .set_index("type_uuid", drop=True)
             .rename(columns={"type_id": "id"})
         )
+        type_data.index.name = "uuid"
         df_to_csv(
-            type_data.drop_duplicates(),
+            type_data,
             path,
             self.get_enum().get_type_file_name(),
             mkdirs=mkdirs,
@@ -119,23 +118,11 @@ class HasTypeMixin(ABC):
 
     @classmethod
     def attributes(cls, include_type_attrs: bool = True) -> list[str]:
-        base_attributes = []
-        # check if cls is a subclass of SystemParticipants
-        if issubclass(cls, SystemParticipants):
-            base_attributes += SystemParticipants.attributes()
-        elif issubclass(cls, Connector):
-            base_attributes += Connector.attributes()
-        elif issubclass(cls, Entities):
-            base_attributes += Entities.attributes()
-        else:
-            logging.warning(
-                "We expect the type that extends this mixin to be a subclass of a type with attributes!"
-            )
-        all_entity_attributes = base_attributes + cls.entity_attributes()
+        entity_attributes = cls.entity_attributes()
         return (
-            all_entity_attributes + cls.type_attributes()
+            entity_attributes + cls.type_attributes()
             if include_type_attrs
-            else all_entity_attributes
+            else entity_attributes
         )
 
     @staticmethod

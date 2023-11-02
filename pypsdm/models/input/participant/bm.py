@@ -6,7 +6,7 @@ from pypsdm.models.input.participant.participant import SystemParticipants
 
 
 @dataclass(frozen=True)
-class BiomassPlants(SystemParticipants, SpTypeMixin):
+class BiomassPlants(SpTypeMixin, SystemParticipants):
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.BIOMASS_PLANT
@@ -34,12 +34,9 @@ class BiomassPlants(SystemParticipants, SpTypeMixin):
     @staticmethod
     def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + [
-            "type",
             "market_reaction",
             "cost_controlled",
             "feed_in_tariff",
-            "type_id",
-            "active_power_gradient",
         ]
 
     @staticmethod
