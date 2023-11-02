@@ -77,7 +77,7 @@ class Transformers2W(HasTypeMixin, Connector):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return [
+        return Connector.attributes() + [
             "tap_pos",
             "auto_tap",
         ]

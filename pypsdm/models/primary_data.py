@@ -124,7 +124,7 @@ class PrimaryData:
         ts = self.time_series.filter_for_time_interval(start, end)
         return PrimaryData(ts, self.participant_mapping)
 
-    def to_csv(self, path: str, mkdirs=True, delimiter=","):
+    def to_csv(self, path: str, mkdirs=False, delimiter=","):
         write_ts = partial(PrimaryData._write_ts_df, path, mkdirs, delimiter)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             executor.map(write_ts, list(self.time_series.entities.values()))

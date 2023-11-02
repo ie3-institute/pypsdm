@@ -35,8 +35,4 @@ class SystemParticipantsWithCapacity(SystemParticipants):
     @staticmethod
     @abstractmethod
     def capacity_attribute() -> str:
-        pass
-
-    @staticmethod
-    def attributes():
-        return Entities.attributes() + ["node", "capacity"]
+        raise NotImplementedError

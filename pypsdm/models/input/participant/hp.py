@@ -21,7 +21,7 @@ class HeatPumps(SpTypeMixin, SystemParticipants):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return ["thermal_bus"]
+        return SystemParticipants.attributes() + ["thermal_bus"]
 
     @staticmethod
     def type_attributes() -> list[str]:

@@ -6,12 +6,12 @@
         {
             "label": "pytest-file",
             "type": "shell",
-            "command": "pytest ${file} -s"
+            "command": "poetry run pytest ${file} -s"
         },
         {
             "label": "pytest-selection",
             "type": "shell",
-            "command": "pytest ${file} -k ${selectedText} -s",
+            "command": "poetry run pytest ${file} -k ${selectedText} -s",
             "problemMatcher": []
         }
     ]

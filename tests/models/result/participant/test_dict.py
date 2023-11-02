@@ -55,3 +55,13 @@ def test_sub(res_dict):
     sub = res_dict - res_dict_b
     assert len(sub) == 1
     assert list(sub.entities.keys()) == ["a"]
+
+
+def test_to_csv(res_dict: PQResultDict, tmp_path):
+    res_dict.to_csv(tmp_path)
+    res_dict_b = PQResultDict.from_csv(
+        SystemParticipantsEnum.LOAD,
+        tmp_path,
+        ",",
+    )
+    assert res_dict.compare(res_dict_b) is None

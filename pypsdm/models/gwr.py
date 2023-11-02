@@ -98,6 +98,22 @@ class GridWithResults(ContainerMixin):
             self.grid, self.results.filter_for_time_interval(start, end)
         )
 
+    def to_csv(
+        self,
+        grid_path: str,
+        result_path: str,
+        mkdirs=False,
+        delimiter: str = ",",
+        include_primary_data: bool = True,
+    ) -> None:
+        self.grid.to_csv(
+            grid_path,
+            include_primary_data=include_primary_data,
+            mkdirs=mkdirs,
+            delimiter=delimiter,
+        )
+        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=False)
+
     @classmethod
     def from_csv(
         cls,

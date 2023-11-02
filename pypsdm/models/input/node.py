@@ -52,7 +52,7 @@ class Nodes(Entities):
     def get_slack_nodes(self):
         return Nodes(self.data[self.slack])
 
-    def to_csv(self, path: str, mkdirs=True, delimiter: str = ","):
+    def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         # filter columns latitude and longitude as they are not part of the original data model
         data = self.data.drop(columns=["latitude", "longitude"])
         if mkdirs:

@@ -84,7 +84,7 @@ class GridContainer(ContainerMixin):
         self,
         path: str,
         include_primary_data: bool,
-        mkdirs: bool = True,
+        mkdirs: bool = False,
         delimiter: str = ",",
     ):
         for container in self.to_list(include_primary_data=include_primary_data):

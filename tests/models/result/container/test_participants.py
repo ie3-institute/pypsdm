@@ -9,7 +9,7 @@ from pypsdm.processing.series import duration_weighted_sum
 
 
 @pytest.fixture
-def participants_results(gwr):
+def participants_results(gwr) -> ParticipantsResultContainer:
     return gwr.results.participants
 
 
@@ -63,3 +63,11 @@ def test_create_empty():
     # len(empty)
     if empty:
         raise AssertionError("Empty ParticipantsResult should be falsy")
+
+
+def test_participants_to_csv(participants_results, tmp_path, simulation_end):
+    participants_results.to_csv(tmp_path)
+    participants_results_b = ParticipantsResultContainer.from_csv(
+        tmp_path, ",", simulation_end
+    )
+    participants_results.compare(participants_results_b)

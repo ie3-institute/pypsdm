@@ -52,6 +52,14 @@ class EvChargingStations(SystemParticipants):
             "cos_phi_rated",
         ]
 
+    @staticmethod
+    def additional_attributes() -> list[str]:
+        return SystemParticipants.additional_attributes() + [
+            "power",
+            "current_type",
+            "synonymous_ids",
+        ]
+
 
 class EvcsLocationType(Enum):
     HOME = "HOME"

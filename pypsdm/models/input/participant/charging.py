@@ -12,7 +12,7 @@ class CurrentType(Enum):
 
 @dataclass(frozen=True)
 class ChargingPointType:
-    type_id: str
+    type: str
     # in kW
     power: float
     current_type: CurrentType
@@ -91,10 +91,7 @@ common_charging_point_types = [
 
 def get_common_charging_point_type(id: str):
     for charging_point_type in common_charging_point_types:
-        if (
-            id == charging_point_type.type_id
-            or id in charging_point_type.synonymous_ids
-        ):
+        if id == charging_point_type.type or id in charging_point_type.synonymous_ids:
             return charging_point_type
     return
 
@@ -116,4 +113,4 @@ def parse_evcs_type(type_str: str) -> ChargingPointType:
 
 def parse_evcs_type_info(type_str: str):
     evcs_type = parse_evcs_type(type_str)
-    return pd.Series(evcs_type.__dict__)
+    return pd.Series(evcs_type.__dict__).drop("type")

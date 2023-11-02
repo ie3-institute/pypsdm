@@ -25,7 +25,7 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return []
+        return SystemParticipantsWithCapacity.attributes()
 
     @staticmethod
     def type_attributes() -> list[str]:

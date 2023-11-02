@@ -66,7 +66,7 @@ class Lines(HasTypeMixin, Connector):
 
     @staticmethod
     def entity_attributes() -> List[str]:
-        return [
+        return Connector.attributes() + [
             "length",
             "geo_position",
             "olm_characteristic",

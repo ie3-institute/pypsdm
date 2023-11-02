@@ -1,7 +1,5 @@
-import os.path
-import uuid
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -11,7 +9,6 @@ from pypsdm.models.enums import SystemParticipantsEnum
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 from pypsdm.models.result.participant.dict import ResultDict
 from pypsdm.models.result.power import PQResult, PQWithSocResult
-from pypsdm.processing.dataframe import join_dataframes
 
 
 @dataclass(frozen=True)
@@ -54,7 +51,7 @@ class PQResultDict(ResultDict):
         return PQResult.sum(list(self.entities.values()))
 
     def energy(self) -> float:
-        # todo make concurrent
+        # TODO: make concurrent
         sum = 0
         for participant in self.entities.values():
             sum += participant.energy()
@@ -97,26 +94,6 @@ class PQResultDict(ResultDict):
             raise ComparisonError(
                 f"Found Differences in {type(self)} comparison: ", differences=errors
             )
-
-    def to_csv(self, path: str, resample_rate: Optional[str] = None):
-        file_name = self.entity_type.get_csv_result_file_name()
-
-        def resample(data: DataFrame, input_model: str):
-            data = (
-                data.resample("60s").ffill().resample(resample_rate).mean()
-                if resample_rate
-                else data
-            )
-            data["uuid"] = data.apply(lambda _: str(uuid.uuid4()), axis=1)
-            data["input_model"] = input_model
-            return data
-
-        resampled = [
-            resample(participant.data, input_model)
-            for input_model, participant in self.entities.items()
-        ]
-        df = join_dataframes(resampled)
-        df.to_csv(os.path.join(path, file_name))
 
 
 @dataclass(frozen=True)
