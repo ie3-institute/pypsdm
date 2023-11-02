@@ -84,8 +84,13 @@ class HasTypeMixin(ABC):
         return self.data["type_uuid"]
 
     def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
+        # Don't write empty entities
+        if not self:
+            return
+
         if mkdirs:
             os.makedirs(path, exist_ok=True)
+
         # persist entity_input.csv
         all_entity_attributes = self.attributes(include_type_attrs=False)
         all_entity_attributes.append("type_uuid")

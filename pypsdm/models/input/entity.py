@@ -236,6 +236,10 @@ class Entities(ABC):
         from pypsdm.models.input.container.mixins import HasTypeMixin
         from pypsdm.models.input.participant.em import EnergyManagementSystems
 
+        # Don't write empty entities
+        if not self:
+            return
+
         data = self.data.copy()
         if isinstance(self, EnergyManagementSystems):
             data["connected_assets"] = self.connected_assets.apply(
