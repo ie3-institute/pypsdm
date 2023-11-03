@@ -3,20 +3,25 @@ import re
 
 import pandas as pd
 
+from pypsdm.models.enums import EntitiesEnum
 from pypsdm.models.input.container.grid import GridContainer
+from pypsdm.models.input.entity import Entities
 
 
-def create_data(data_dict, data_func):
+def create_data(data_dict, data_func, entity_preprocessing: EntitiesEnum | None = None):
     nr_items = {len(values) for values in data_dict.values()}
     if not len(nr_items) == 1:
         raise ValueError(f"Number of items in each list must be equal. Got {nr_items}.")
-    return pd.concat(
+    data = pd.concat(
         [
             data_func(**dict(zip(data_dict.keys(), values)))
             for values in zip(*data_dict.values())
         ],
         axis=1,
     ).T
+    if entity_preprocessing:
+        data = Entities.preprocessing(entity_preprocessing, data)
+    return data
 
 
 def generate_function_from_attributes(cls, file_path):

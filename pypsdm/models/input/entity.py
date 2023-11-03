@@ -249,7 +249,19 @@ class Entities(ABC):
             HasTypeMixin.to_csv(self, path, mkdirs, delimiter)
         else:
             if self.additional_attributes():
-                data = data.drop(columns=self.additional_attributes())
+                additional_attributes = set(self.additional_attributes())
+                additional_not_in_data = additional_attributes - set(data.columns)
+                if additional_not_in_data:
+                    logging.warning(
+                        f"The following additional attributese were not found in the data: \n"
+                        f"{additional_not_in_data}.\n"
+                        "This might be due to not using the Entities.preprocessing() method "
+                        "when building the data."
+                    )
+                    additional_attributes = (
+                        additional_attributes - additional_not_in_data
+                    )
+                data = data.drop(columns=list(additional_attributes))
             df_to_csv(
                 data,
                 path,
@@ -360,6 +372,23 @@ class Entities(ABC):
                 .rename(columns={"id_type": "type_id", "uuid_type": "type_uuid"})
                 .drop(columns=["type"])
             )
+
+        data = cls.preprocessing(entity, data)
+
+        try:
+            return data.set_index("uuid")
+        except KeyError as e:
+            raise KeyError(
+                "Column 'uuid' not found. This might be due to wrong csv delimiter!", e
+            )
+
+    @staticmethod
+    def preprocessing(entity: EntitiesEnum, data: DataFrame) -> DataFrame:
+        """
+        We perform some data transformations on the data wich make them easier to handle.
+        Additional columns we add are droppen when persisting the data.
+        """
+
         # special data transformations
         match entity:
             # for raw grid elements
@@ -383,13 +412,7 @@ class Entities(ABC):
                     lambda type_str: parse_evcs_type_info(type_str)
                 )
                 data = pd.concat([data, type_data], axis=1)
-
-        try:
-            return data.set_index("uuid")
-        except KeyError as e:
-            raise KeyError(
-                "Column 'uuid' not found. This might be due to wrong csv delimiter!", e
-            )
+        return data
 
     @classmethod
     def create_empty(cls: Type[Self]) -> Self:
@@ -419,7 +442,8 @@ class Entities(ABC):
     @classmethod
     def additional_attributes(cls) -> list[str]:
         """
-        Method that should hold all fields we add to the original PSDM entity. These
+        Method that should hold all fields we add to the original PSDM entity.
+        See the preprocessing for all actual transformations. These
         are dropped when persisting the data, to keep the data consistent.
         """
         return []
