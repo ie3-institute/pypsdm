@@ -372,5 +372,4 @@ tests/temp/
 
 # can be removed later
 pypsdm/projects/
-transense_analysis/
-dsse_benchmark/
+nbs/simple_grid
