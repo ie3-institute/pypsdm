@@ -20,7 +20,6 @@ from pypsdm.models.enums import (
     RawGridElementsEnum,
     SystemParticipantsEnum,
 )
-from pypsdm.models.input.participant.charging import parse_evcs_type_info
 from pypsdm.processing.dataframe import compare_dfs
 
 if TYPE_CHECKING:
@@ -233,7 +232,7 @@ class Entities(ABC):
 
     def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         # local import to avoid circular imports
-        from pypsdm.models.input.container.mixins import HasTypeMixin
+        from pypsdm.models.input.mixins import HasTypeMixin
         from pypsdm.models.input.participant.em import EnergyManagementSystems
 
         # Don't write empty entities
@@ -408,6 +407,10 @@ class Entities(ABC):
                     lambda x: x.split(" ")
                 )
             case SystemParticipantsEnum.EV_CHARGING_STATION:
+                from pypsdm.models.input.participant.charging import (
+                    parse_evcs_type_info,
+                )
+
                 type_data = data["type"].apply(
                     lambda type_str: parse_evcs_type_info(type_str)
                 )

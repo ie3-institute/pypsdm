@@ -24,7 +24,7 @@ from pypsdm.models.result.power import PQResult
 @dataclass
 class PrimaryData:
     # ts_uuid -> ts
-    time_series: PQResultDict
+    time_series: "PQResultDict"
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
 
@@ -204,6 +204,8 @@ class PrimaryData:
 
     @classmethod
     def from_csv(cls, path: str | Path, delimiter: str):
+        from pypsdm.models.result.participant.pq_dict import PQResultDict
+
         # get all files that start with "its_"
         path = Path(path).resolve()
         ts_files = [file for file in os.listdir(path) if file.startswith("its_p")]

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.input.container.mixins import SpTypeMixin
+from pypsdm.models.input.participant.mixins import SpTypeMixin
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 
 

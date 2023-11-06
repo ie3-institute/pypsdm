@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.input.container.raw_grid import RawGridContainer
-from pypsdm.models.primary_data import PrimaryData
-from pypsdm.models.result.power import PQResult
+
+if TYPE_CHECKING:
+    from pypsdm.models.primary_data import PrimaryData
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,8 @@ class GridContainer(ContainerMixin):
         return grid if include_empty else [g for g in grid if g]
 
     def get_nodal_primary_data(self):
+        from pypsdm.models.result.power import PQResult
+
         time_series = []
         nodal_primary_data = dict()
         for node, participants_container in self.node_participants_map.items():
@@ -97,6 +102,8 @@ class GridContainer(ContainerMixin):
     def from_csv(
         cls, path: str, delimiter: str, primary_data_delimiter: Optional[str] = None
     ):
+        from pypsdm.models.primary_data import PrimaryData
+
         if not primary_data_delimiter:
             primary_data_delimiter = delimiter
         raw_grid = RawGridContainer.from_csv(path, delimiter)
@@ -107,6 +114,8 @@ class GridContainer(ContainerMixin):
 
     @classmethod
     def create_empty(cls):
+        from pypsdm.models.primary_data import PrimaryData
+
         return cls(
             raw_grid=RawGridContainer.create_empty(),
             participants=SystemParticipantsContainer.create_empty(),

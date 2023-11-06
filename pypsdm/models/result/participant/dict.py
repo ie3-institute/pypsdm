@@ -17,6 +17,7 @@ from pypsdm.models.input.entity import Entities
 from pypsdm.models.result.entity import ResultEntities
 from pypsdm.processing.dataframe import join_dataframes
 
+
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
 T = TypeVar("T", bound=ResultEntities)
 

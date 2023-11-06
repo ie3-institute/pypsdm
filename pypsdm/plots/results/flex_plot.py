@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 
 from pypsdm.models.enums import SystemParticipantsEnum
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.flex_option import FlexOptionResult
+from pypsdm.models.result.participant.flex_options import FlexOptionResult
 from pypsdm.models.result.power import PQResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
