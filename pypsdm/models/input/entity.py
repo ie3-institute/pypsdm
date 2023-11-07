@@ -157,8 +157,7 @@ class Entities(ABC):
 
     def subset(
         self: EntityType,
-        uuids: Union[list[str], Series, set[str], str]
-    ,
+        uuids: Union[list[str], Series, set[str], str],
         intersection: bool = False,
     ) -> EntityType:
         """
