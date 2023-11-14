@@ -51,14 +51,14 @@ def plot_all_participants_flex_range(
         if include_actual_res:
             ax_plot_active_power(
                 axs[idx],
-                participant_res.sum(),
+                participant_res.sum() * 1e3,
                 resolution,
                 hourly_mean=hourly_mean,
                 color=ORANGE,
                 label="p_actual",
             )
         axs[idx].legend()
-        axs[idx].set_ylabel("Power in MW")
+        axs[idx].set_ylabel("Power in kW")
 
     return fig, axs
 
@@ -86,7 +86,7 @@ def ax_plot_flex_range(
     hourly_mean: bool,
     actual_res: PQResult | None = None,
 ):
-    p_ref = flex_option.p_ref()
+    p_ref = flex_option.p_ref() * 1e3
     plot_func = partial(
         ax_plot_time_series,
         ax=ax,
@@ -96,13 +96,13 @@ def ax_plot_flex_range(
     )
 
     plot_func(
-        res=flex_option.p_max(),
+        res=flex_option.p_max() * 1e3,
         label="p_max",
         color=FLEX_MAX,
         fill_between=p_ref,
     )
     plot_func(
-        res=flex_option.p_min(),
+        res=flex_option.p_min() * 1e3,
         label="p_min",
         color=FLEX_MIN,
         fill_between=p_ref,
@@ -119,6 +119,6 @@ def ax_plot_flex_range(
             label="p_actual",
         )
 
-    ax.set_ylabel("Power in MW")
+    ax.set_ylabel("Power in kW")
 
     ax.legend()
