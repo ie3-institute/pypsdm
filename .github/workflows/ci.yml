@@ -42,6 +42,9 @@ jobs:
         os: [ "ubuntu-latest", "windows-latest" ]
         python-version: [ "3.11"]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       #----------------------------------------------
       #       check-out repo and set-up python
@@ -86,5 +89,5 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         run: |
-          source .venv/bin/activate
+          source $VENV
           pytest tests/
