@@ -13,7 +13,6 @@ def set_gruvbox_minor_dark_hard():
     background_color = "#1d2021"
     custom_params = {
         "figure.facecolor": background_color,
-        "figure.dpi": 300,
         "figure.figsize": [12, 4],
         "axes.facecolor": background_color,
         "axes.edgecolor": background_color,
@@ -26,7 +25,7 @@ def set_gruvbox_minor_dark_hard():
         "grid.linestyle": "--",
         "grid.linewidth": 0.5,
         "legend.facecolor": background_color,
-        "legend.edgecolor": tick_color,
+        "legend.edgecolor": dark_tick_color,
         "legend.labelcolor": tick_color,
         "text.color": tick_color,
     }
