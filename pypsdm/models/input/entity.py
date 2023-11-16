@@ -156,10 +156,14 @@ class Entities(ABC):
         return self.data.loc[uuid]
 
     def subset(
-        self: EntityType, uuids: Union[list[str], Series, set[str], str]
+        self: EntityType,
+        uuids: Union[list[str], Series, set[str], str],
+        intersection: bool = False,
     ) -> EntityType:
         """
-        Creates a subset of the Entities instance with the given uuids.
+        Creates a subset of the Entities instance with the given uuids. By default it expects all uuids to be
+        contained within the Entities. If intersection is set to True, it returns the Entities subset of uuids which are
+        present in the Entities instance.
 
         Args:
             uuids: The uuids to subset.
@@ -169,7 +173,10 @@ class Entities(ABC):
         """
         if isinstance(uuids, str):
             uuids = [uuids]
-        elif isinstance(uuids, set):
+        if intersection:
+            intersection = list(set(self.uuid) & set(uuids))
+            return type(self)(self.data.loc[intersection])
+        if isinstance(uuids, set):
             uuids = list(uuids)
         try:
             return type(self)(self.data.loc[uuids])

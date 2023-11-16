@@ -82,13 +82,24 @@ class PQResult(ResultEntities):
             self, data=generation
         )
 
-    def daily_usage(self, device_power_mw):
-        return (
-            self.p.groupby(self.p.index.date).apply(  # type: ignore
-                lambda series: duration_weighted_sum(series.abs())
-            )
-            / device_power_mw
-        )
+    def full_load_hours(self, device_power_kw, period="Y"):
+        """
+        Calculates the full load hours for the given period.
+
+        Args:
+            device_power_mw: The power of the device in MW
+            period: The period to calculate the full load hours for. Default is year.
+                    Use to_period() aliases, like Y for year, M for month, D for day, etc.
+                    (https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-period-aliases)
+
+        Returns:
+            A series with the full load hours within the determined periods.
+        """
+        return self.p.groupby(self.p.index.to_period(period)).apply(
+            lambda series: duration_weighted_sum(series.abs())
+        ) / (
+            device_power_kw / 1000
+        )  # convert to MW since results are in MW
 
     def annual_duration_series(self, drop_index=True):
         return (
