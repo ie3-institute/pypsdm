@@ -100,7 +100,10 @@ class GridContainer(ContainerMixin):
 
     @classmethod
     def from_csv(
-        cls, path: str, delimiter: str, primary_data_delimiter: Optional[str] = None
+        cls,
+        path: str,
+        delimiter: str | None = None,
+        primary_data_delimiter: Optional[str] = None,
     ):
         from pypsdm.models.primary_data import PrimaryData
 

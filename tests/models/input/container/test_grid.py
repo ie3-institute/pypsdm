@@ -29,7 +29,7 @@ def test_create_empty():
         raise AssertionError("Empty container should be falsy")
 
 
-def test_container_to_csv(gwr, delimiter):
+def test_container_to_csv(gwr):
     grid_container = gwr.grid
     path = os.path.join(ROOT_DIR, "tests", "temp", "grid")
     os.makedirs(path, exist_ok=True)

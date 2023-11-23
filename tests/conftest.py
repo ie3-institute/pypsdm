@@ -42,9 +42,7 @@ def gwr(
     return GridWithResults.from_csv(
         "vn_simona",
         input_path,
-        delimiter,
         result_path,
-        delimiter,
         simulation_end=simulation_end,
     )
 

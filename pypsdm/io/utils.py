@@ -48,7 +48,10 @@ def get_file_path(path: str | Path, file_name: str):
 
 
 def read_csv(
-    path: str | Path, file_name: str, delimiter: str, index_col: Optional[str] = None
+    path: str | Path,
+    file_name: str,
+    delimiter: str | None = None,
+    index_col: Optional[str] = None,
 ) -> DataFrame:
     full_path = get_file_path(path, file_name)
     if not full_path.exists():
@@ -86,7 +89,7 @@ def to_date_time(zoned_date_time: str) -> datetime:
 
 
 def csv_to_grpd_df(
-    file_name: str, simulation_data_path: str, delimiter: str
+    file_name: str, simulation_data_path: str, delimiter: str | None = None
 ) -> DataFrameGroupBy:
     """
     Reads in a PSDM csv results file cleans it up and groups it by input_archive model.

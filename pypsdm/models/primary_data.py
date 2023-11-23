@@ -203,7 +203,7 @@ class PrimaryData:
             )
 
     @classmethod
-    def from_csv(cls, path: str | Path, delimiter: str):
+    def from_csv(cls, path: str | Path, delimiter: str | None = None):
         from pypsdm.models.result.participant.pq_dict import PQResultDict
 
         # get all files that start with "its_"
@@ -222,7 +222,7 @@ class PrimaryData:
             )
 
             pa_read_time_series = partial(
-                PrimaryData._read_pd_time_series, path, delimiter
+                PrimaryData._read_pd_time_series, path, delimiter=delimiter
             )
 
             # TODO: Only parallel reading if a lot of ts files
@@ -244,7 +244,9 @@ class PrimaryData:
             )
 
     @staticmethod
-    def _read_pd_time_series(dir_path: Path | str, delimiter: str, ts_file: str):
+    def _read_pd_time_series(
+        dir_path: Path | str, ts_file: str, delimiter: str | None = None
+    ):
         ts_types = "|".join([e.value for e in TimeSeriesEnum])
         pattern = (
             f"({ts_types})_"
