@@ -320,7 +320,7 @@ class Entities(ABC):
         return replace(to_copy, **changes)
 
     @classmethod
-    def from_csv(cls: Type[Self], path: str, delimiter: str) -> Self:
+    def from_csv(cls: Type[Self], path: str, delimiter: str | None = None) -> Self:
         """
         Reads the entity data from a csv file.
 
@@ -331,11 +331,11 @@ class Entities(ABC):
         Returns:
            The corresponding entities object.
         """
-        return cls._from_csv(path, delimiter, cls.get_enum())
+        return cls._from_csv(path, cls.get_enum(), delimiter)
 
     @classmethod
     def _from_csv(
-        cls: Type[Self], path: str, delimiter: str, entity: EntitiesEnum
+        cls: Type[Self], path: str, entity: EntitiesEnum, delimiter: str | None = None
     ) -> Self:
         file_path = utils.get_file_path(path, entity.get_csv_input_file_name())
         if os.path.exists(file_path):
@@ -352,7 +352,7 @@ class Entities(ABC):
 
     @classmethod
     def _data_from_csv(
-        cls, entity: EntitiesEnum, path: str | Path, delimiter: str
+        cls, entity: EntitiesEnum, path: str | Path, delimiter: str | None = None
     ) -> DataFrame:
         data = read_csv(path, entity.get_csv_input_file_name(), delimiter)
 

@@ -67,7 +67,7 @@ class GridResultContainer(ContainerMixin):
         cls,
         name: str,
         simulation_data_path: str,
-        delimiter: str,
+        delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
         grid_container: Optional[GridContainer] = None,
         filter_start: Optional[datetime] = None,

@@ -108,8 +108,8 @@ class FlexOptionsResult(ResultDict):
         cls,
         sp_type: SystemParticipantsEnum,
         simulation_data_path: str,
-        delimiter: str,
         simulation_end: datetime,
+        delimiter: str | None = None,
         from_df: bool = False,
     ) -> "FlexOptionsResult":
         if from_df:

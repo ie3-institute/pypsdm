@@ -152,7 +152,9 @@ class SystemParticipantsContainer(ContainerMixin):
         )
 
     @staticmethod
-    def from_csv(path: str, delimiter: str) -> "SystemParticipantsContainer":
+    def from_csv(
+        path: str, delimiter: str | None = None
+    ) -> "SystemParticipantsContainer":
         loads = Loads.from_csv(path, delimiter)
         fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
         pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
