@@ -50,6 +50,9 @@ def join_series(series: list[Series]) -> DataFrame:
 def hourly_mean_resample(series: Series) -> Series:
     return series.resample("60s").ffill().resample("1h").mean()
 
+def quarter_hourly_mean_resample(series: Series) -> Series:
+    return series.resample("60s").ffill().resample("15min").mean()
+
 
 def load_and_generation(p_ts: Series) -> Tuple[float, float]:
     weighted_series = duration_weighted_series(p_ts)
