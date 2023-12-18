@@ -159,7 +159,9 @@ def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr):
         if gwr.grid.participants.pvs.__contains__(conected_asset):
             pv_srated = gwr.grid.participants.pvs.get(conected_asset)['s_rated']
 
-    ##### TODO FIXME: LOAD INCLUDED HERE OR NOT????????????????????????????????????????????????????????????????????
+    ##### TODO FIXME: LOAD INCLUDED HERE OR NOT, alternative: find load.s.max() from time-series and take it into account
+    #FIXME: p or s?
+    # FIXME: BS included here or not?
     s_rated_em_load_direction = load_srated + hp_srated + evcs_srated + bs_srated
     s_rated_em_feedin_direction = evcs_srated + bs_srated + pv_srated
     em_installed_capacity.loc[em_uuid] = [s_rated_em_load_direction, s_rated_em_feedin_direction]
