@@ -73,6 +73,56 @@ def do_all_glg_plots(x,y, sim_curve, quantile_95_tot):
     glg_plot_3(x,y)
 
 
+
+
+"""
+Kurvenanpassung
+"""
+
+# https://www.askpython.com/python/examples/curve-fitting-in-python
+# Die Kurvenanpassung wird nur für den Bereich vorgenommen, an dem die Funktion differenzierbar ist (wenn GZ nicht mehr 1)
+
+# allgemeine Gleichung der erweiterten GZ-Funktion
+
+def fit_function(n, *args):
+    a, b, c = args
+    return a * np.power(n, -b) + c
+
+def fit_sim_curve(x_values, y_values):
+    # Initialisierung mit Werten EV ungesteuert Dis Kippelt
+    p0 = [1.785, 0.631, 0.112]
+    popt, pcov = curve_fit(fit_function, x_values, y_values, p0, maxfev=10000)
+    # Anzahl der Datenpunkte
+    n = len(y_values)
+    # Anzahl der Fit-Parameter
+    p = len(popt)
+    # Mittelwert der abhängigen Variable
+    y_mean = np.mean(y_values)
+    # Regressionsabweichungen berechnen
+    residuals = y_values - fit_function(x_values, *popt)
+    # Summe der quadrierten Regressionsabweichungen
+    ss_res = np.sum(residuals ** 2)
+    # Gesamtsumme der quadrierten Abweichungen
+    ss_tot = np.sum((y_values - y_mean) ** 2)
+    # Bestimmtheitsmaß berechnen
+    r_squared = 1 - (ss_res / (n - p - 1)) / (ss_tot / (n - 1))
+    return popt, pcov, r_squared
+
+# popt ist ein Array aus den optimalen Parametern, sodass die Summe der Fehlerquadrate minimiert ist
+# pcov ist die zugehörige Kovarianzmatrix
+
+def curve_regression(quantile_95_indices, quantile_95):
+        # Kurvenregression
+        param_opt, param_cov, r_squared = fit_sim_curve(quantile_95_indices, quantile_95)
+        a_opt, b_opt, c_opt = param_opt
+        fitted_sim = fit_function(quantile_95_indices, a_opt, b_opt, c_opt)
+
+        x = np.arange(1, len(quantile_95_tot[0]) + 1)
+        y = np.ones_like(quantile_95_tot[0])
+        y[quantile_95_tot[0] < 1] = fitted_sim[:len(fitted_sim)]
+
+        return x,y
+
 # Get the folder path where the files are located
 folder_inputs = r'C:\tmp\20231121_flex_testminigrid_2023-11-21_08-37-58\input\grid'
 
