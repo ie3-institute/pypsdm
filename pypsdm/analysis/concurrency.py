@@ -220,3 +220,13 @@ def calc_glg(df, em_installed_capacity_res_2, len_curve, num_mc):
 
     return sim_curve, quantile_95, quantile_95_tot, quantile_95_indices
 
+
+def getCasesFromConditions(dict, cond1, cond2, cond3, cond4):
+    filtered_uuids = []
+
+    # Loop through the dictionary items and filter based on conditions
+    for uuid, values in dict.iterrows():
+        if values[0] == cond1 and values[1] == cond2 and values[2] == cond3 and values[3] == cond4:
+            filtered_uuids.append(uuid)
+    return filtered_uuids
+
