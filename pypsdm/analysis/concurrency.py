@@ -20,7 +20,7 @@ def glg_plot_1(x, y, sim_curve, quantile_95_tot):
     plt.grid(color='lightgrey', linestyle='-')
     plt.plot((quantile_95_tot.index + 1), quantile_95_tot, '.', label='95% Quantil', color=(0.517, 0.721, 0.094))
     plt.plot(x, y, label='Regressionskurve', color=(0.3, 0.3, 0.3))
-    plt.xlabel('Anzahl der Fahrzeuge')
+    plt.xlabel('Anzahl der Systemteilnehmer')
     plt.ylim(0, 1.1)
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
@@ -31,10 +31,10 @@ def glg_plot_2(x,y, quantile_95_tot):
 
     # plt.plot(x, gz_bi, label='V2G (Laden)', color=(0.517, 0.721, 0.094))
     # plt.plot(x, gz_bi_dis, label='V2G (Entladen)', color=(0.3, 0.3, 0.3))
-    plt.plot(x, y, label='Unidirektional', color=(0.717, 0.921, 0.294))
+    plt.plot(x, y, label='', color=(0.717, 0.921, 0.294))
     # plt.plot(x_unc, gz_unc, label='Ungesteuertes Laden', color=(0.6, 0.6, 0.6))
     plt.grid(color='lightgrey', linestyle='-')
-    plt.xlabel('Anzahl der Fahrzeuge')
+    plt.xlabel('Anzahl der Systemteilnehmer')
     plt.ylim(0, 1.3)
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
@@ -44,7 +44,7 @@ def glg_plot_2(x,y, quantile_95_tot):
     plt.plot(x, y, label='Regressionskurve', color=(0.6, 0.6, 0.6))
     plt.plot((quantile_95_tot.index + 1), quantile_95_tot, '.', label='95% Quantil', color=(0.517, 0.721, 0.094))
     plt.grid(color='lightgrey', linestyle='-')
-    plt.xlabel('Anzahl der Fahrzeuge')
+    plt.xlabel('Anzahl der Systemteilnehmer')
     plt.ylim(0, 1.1)
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
@@ -54,7 +54,7 @@ def glg_plot_2(x,y, quantile_95_tot):
 def glg_plot_3(x,y):
     plt.plot(x, y, label='95% Quantil', color=(0.517, 0.721, 0.094))
     plt.grid(color='lightgrey', linestyle='-')
-    plt.xlabel('Anzahl der Fahrzeuge')
+    plt.xlabel('Anzahl der Systemteilnehmer')
     plt.ylim(0, 1.1)
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
@@ -222,11 +222,21 @@ def calc_glg(df, em_installed_capacity_res_2, len_curve, num_mc):
 
 
 def getCasesFromConditions(dict, cond1, cond2, cond3, cond4):
-    filtered_uuids = []
+    filtered_uuids = data_frame[
+        (data_frame[0] == cond1) &
+        (data_frame[1] == cond2) &
+        (data_frame[2] == cond3) &
+        (data_frame[3] == cond4)
+    ].index.tolist()
 
-    # Loop through the dictionary items and filter based on conditions
-    for uuid, values in dict.iterrows():
-        if values[0] == cond1 and values[1] == cond2 and values[2] == cond3 and values[3] == cond4:
-            filtered_uuids.append(uuid)
-    return filtered_uuids
 
+def getCasesFromConditions2(data_frame, **conditions):
+    filtered_indices = data_frame.index.copy()  # Initialize with all indices
+
+    for col_name, cond in conditions.items():
+        if col_name in data_frame.columns:
+            filtered_indices = filtered_indices[data_frame[col_name] == cond]
+        else:
+            print(f"Column '{col_name}' not found.")
+
+    return filtered_indices.tolist()
