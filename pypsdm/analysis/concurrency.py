@@ -14,7 +14,7 @@ from pypsdm.processing.series import quarter_hourly_mean_resample
 """
 Plots
 """
-def glg_plot_1(sim_curve, quantile_95_tot):
+def glg_plot_1(x, y, sim_curve, quantile_95_tot):
     # Plot 1
     plt.plot((sim_curve.index + 1), sim_curve, label='Maximale Gleichzeitigkeit', color=(0.6, 0.6, 0.6))
     plt.grid(color='lightgrey', linestyle='-')
@@ -27,7 +27,7 @@ def glg_plot_1(sim_curve, quantile_95_tot):
     plt.legend()
     plt.show()
 
-def glg_plot_2(x,y):
+def glg_plot_2(x,y, quantile_95_tot):
 
     # plt.plot(x, gz_bi, label='V2G (Laden)', color=(0.517, 0.721, 0.094))
     # plt.plot(x, gz_bi_dis, label='V2G (Entladen)', color=(0.3, 0.3, 0.3))
@@ -64,10 +64,10 @@ def glg_plot_3(x,y):
 def do_all_glg_plots(x,y, sim_curve, quantile_95_tot):
     # Plot 2
 
-    glg_plot_2(x,y,)
+    glg_plot_2(x,y,quantile_95_tot)
 
     # Plot 1
-    glg_plot_1(sim_curve,quantile_95_tot)
+    glg_plot_1(x,y,sim_curve,quantile_95_tot)
 
     # Plot 3
     glg_plot_3(x,y)
@@ -111,7 +111,7 @@ def fit_sim_curve(x_values, y_values):
 # popt ist ein Array aus den optimalen Parametern, sodass die Summe der Fehlerquadrate minimiert ist
 # pcov ist die zugehörige Kovarianzmatrix
 
-def curve_regression(quantile_95_indices, quantile_95):
+def curve_regression(quantile_95_indices, quantile_95, quantile_95_tot):
         # Kurvenregression
         param_opt, param_cov, r_squared = fit_sim_curve(quantile_95_indices, quantile_95)
         a_opt, b_opt, c_opt = param_opt
