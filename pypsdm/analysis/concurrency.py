@@ -172,23 +172,23 @@ def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr):
 """
 
 
-def calculate_gz(df, df_inst, len_curve, num_mc):
-    sim_curve = pd.DataFrame(np.zeros((len_curve, 1)))
+def calculate_coincidence_curve_load_direction(df, df_inst, len_curve, num_mc):
+    coincidence_curve = pd.DataFrame(np.zeros((len_curve, 1)))
     quantile_95 = pd.DataFrame(np.zeros((len_curve, 1)))
 
     for n in range(1, len_curve + 1):
         temp_sim_max_abs = np.zeros(num_mc)
         temp_sim_max_norm = np.zeros(num_mc)
-        print("Calculate GZ for ev-number " + str(n))
+        print("Calculate coincidence factor for system participant number " + str(n))
         for mc in range(num_mc):
-            # Random choice n profiles
+            # Randomly choose n profiles
             profile_col = np.random.choice(df.columns, size=n, replace=False)
 
-            #  aggr. installierte Leistung der Profile bestimmen
-            filtered_df = df_inst[df_inst.index.isin(profile_col)]
+            # Filter DF of installed capacities by the choosen n profiles
+            df_inst_filtered = df_inst[df_inst.index.isin(profile_col)]
 
-            # agg_inst_power = filtered_df.s_rated_em_load_direction.sum()/1000
-            agg_inst_power = 0.003 * n
+            # get aggr. installed power of the choosen profiles in load direction in MW
+            agg_inst_power = df_inst_filtered.s_rated_em_load_direction.sum()/1000
 
             # do MC choice
             profile_row = np.random.choice(df.index, size=1, replace=False)
@@ -202,16 +202,16 @@ def calculate_gz(df, df_inst, len_curve, num_mc):
             tmp_norm = tmp_abs / agg_inst_power
             temp_sim_max_norm[mc] = tmp_norm
 
-        sim_curve.iloc[n - 1, 0] = temp_sim_max_norm.max()
+        coincidence_curve.iloc[n - 1, 0] = temp_sim_max_norm.max()
         quantile_95.iloc[n - 1, 0] = np.percentile(temp_sim_max_norm, 95, method='linear')
 
-    return sim_curve, quantile_95
+    return coincidence_curve, quantile_95
 
 
 def calc_glg(df, em_installed_capacity_res_2, len_curve, num_mc):
 
     # Start: GZ-Kurve
-    sim_curve, quantile_95_tot = calculate_gz(df, em_installed_capacity_res_2, len_curve, num_mc)
+    sim_curve, quantile_95_tot = calculate_coincidence_curve_load_direction(df, em_installed_capacity_res_2, len_curve, num_mc)
     quantile_95_cut = quantile_95_tot.iloc[:, 0] < 1
     quantile_95 = quantile_95_tot.loc[quantile_95_cut, 0].to_numpy()
     quantile_95_indices = pd.Series(range(1, len(quantile_95) + 1)).to_numpy()
