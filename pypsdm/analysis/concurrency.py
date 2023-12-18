@@ -124,32 +124,54 @@ def curve_regression(quantile_95_indices, quantile_95):
         return x,y
 
 # Get the folder path where the files are located
-folder_inputs = r'C:\tmp\20231121_flex_testminigrid_2023-11-21_08-37-58\input\grid'
-
-# Filenames
-file_names = [
-    'em_input.csv',
-    'evcs_input.csv',
-    'hp_input.csv',
-    'pv_input.csv',
-    'load_input.csv',
-    'storage_input.csv'
-]
-
-# Read input data
-print('Input data loading')
-
-data_input_em = pd.read_csv(os.path.join(folder_inputs,file_names[0]),index_col='uuid')
+"""
+ Gleichzeitigkeit
+"""
 
 
-# Remove em-system
-data_input_em = data_input_em[~data_input_em['id'].str.contains('em-system')]
+def calculate_gz(df, df_inst, len_curve, num_mc):
+    sim_curve = pd.DataFrame(np.zeros((len_curve, 1)))
+    quantile_95 = pd.DataFrame(np.zeros((len_curve, 1)))
 
-data_input_ev = pd.read_csv(os.path.join(folder_inputs, file_names[1]),index_col='uuid')
-data_input_hp = pd.read_csv(os.path.join(folder_inputs, file_names[2]),index_col='uuid')
-data_input_pv = pd.read_csv(os.path.join(folder_inputs, file_names[3]),index_col='uuid')
-data_input_lo = pd.read_csv(os.path.join(folder_inputs, file_names[4]),index_col='uuid')
-data_input_bs = pd.read_csv(os.path.join(folder_inputs, file_names[5]),index_col='uuid')
-data_input_em
+    for n in range(1, len_curve + 1):
+        temp_sim_max_abs = np.zeros(num_mc)
+        temp_sim_max_norm = np.zeros(num_mc)
+        print("Calculate GZ for ev-number " + str(n))
+        for mc in range(num_mc):
+            # Random choice n profiles
+            profile_col = np.random.choice(df.columns, size=n, replace=False)
 
+            #  aggr. installierte Leistung der Profile bestimmen
+            filtered_df = df_inst[df_inst.index.isin(profile_col)]
+
+            # agg_inst_power = filtered_df.s_rated_em_load_direction.sum()/1000
+            agg_inst_power = 0.003 * n
+
+            # do MC choice
+            profile_row = np.random.choice(df.index, size=1, replace=False)
+
+            # get mc profiles
+            mc_profile = df.loc[profile_row, profile_col]
+
+            tmp_abs = mc_profile.sum(axis=1).max()
+            temp_sim_max_abs[mc] = tmp_abs
+
+            tmp_norm = tmp_abs / agg_inst_power
+            temp_sim_max_norm[mc] = tmp_norm
+
+        sim_curve.iloc[n - 1, 0] = temp_sim_max_norm.max()
+        quantile_95.iloc[n - 1, 0] = np.percentile(temp_sim_max_norm, 95, method='linear')
+
+    return sim_curve, quantile_95
+
+
+def calc_glg(df, em_installed_capacity_res_2, len_curve, num_mc):
+
+    # Start: GZ-Kurve
+    sim_curve, quantile_95_tot = calculate_gz(df, em_installed_capacity_res_2, len_curve, num_mc)
+    quantile_95_cut = quantile_95_tot.iloc[:, 0] < 1
+    quantile_95 = quantile_95_tot.loc[quantile_95_cut, 0].to_numpy()
+    quantile_95_indices = pd.Series(range(1, len(quantile_95) + 1)).to_numpy()
+
+    return sim_curve, quantile_95, quantile_95_tot, quantile_95_indices
 
