@@ -123,7 +123,50 @@ def curve_regression(quantile_95_indices, quantile_95, quantile_95_tot):
 
         return x,y
 
-# Get the folder path where the files are located
+
+
+"""
+get installed capacity
+"""
+def get_installed_capacity(df_input, gwr):
+    em_installed_capacity_res = pd.DataFrame(columns=['s_rated_em_load_direction', 's_rated_em_feedin_direction'])
+    ems_grid = gwr.grid.participants.ems
+    for item in df_input:
+        val = getEmInstalledCapacatiyFromUuid(item, ems_grid, gwr)
+        em_installed_capacity_res.loc[item]= [val.values[0][0], val.values[0][1]]
+    return em_installed_capacity_res
+
+
+def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr):
+    load_srated = 0
+    hp_srated = 0
+    evcs_srated = 0
+    bs_srated = 0
+    pv_srated = 0
+    total_s_rated_em_load_direction = 0
+    total_s_rated_em_feedin_direction = 0
+    em_installed_capacity = pd.DataFrame(columns=['s_rated_em_load_direction', 's_rated_em_feedin_direction'])
+
+    for conected_asset in ems_grid.connected_assets.get(em_uuid):
+        if gwr.grid.participants.loads.__contains__(conected_asset):
+            load_srated = gwr.grid.participants.loads.get(conected_asset)['s_rated']
+        if gwr.grid.participants.hps.__contains__(conected_asset):
+            hp_srated = gwr.grid.participants.hps.get(conected_asset)['s_rated']
+        if gwr.grid.participants.evcs.__contains__(conected_asset):
+            evcs_srated = gwr.grid.participants.evcs.get(conected_asset)['power']
+        if gwr.grid.participants.storages.__contains__(conected_asset):
+            bs_srated = gwr.grid.participants.storages.get(conected_asset)['s_rated']
+        if gwr.grid.participants.pvs.__contains__(conected_asset):
+            pv_srated = gwr.grid.participants.pvs.get(conected_asset)['s_rated']
+
+    ##### TODO FIXME: LOAD INCLUDED HERE OR NOT????????????????????????????????????????????????????????????????????
+    s_rated_em_load_direction = load_srated + hp_srated + evcs_srated + bs_srated
+    s_rated_em_feedin_direction = evcs_srated + bs_srated + pv_srated
+    em_installed_capacity.loc[em_uuid] = [s_rated_em_load_direction, s_rated_em_feedin_direction]
+
+    return em_installed_capacity
+
+
 """
  Gleichzeitigkeit
 """
