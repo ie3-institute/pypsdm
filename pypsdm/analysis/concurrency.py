@@ -14,8 +14,15 @@ from pypsdm.processing.series import quarter_hourly_mean_resample
 """
 Plots
 """
-def glg_plot_1(x, y, sim_curve, quantile_95_tot):
+
+def save_plot_func(plt, folder, filename):
+    file = filename + '.png'
+    plt.savefig(
+        os.path.join(folder, file))
+
+def glg_plot_1(x, y, sim_curve, quantile_95_tot, save_plot, folder, filename, show_plot):
     # Plot 1
+    plt.clf()
     plt.plot((sim_curve.index + 1), sim_curve, label='Maximale Gleichzeitigkeit', color=(0.6, 0.6, 0.6))
     plt.grid(color='lightgrey', linestyle='-')
     plt.plot((quantile_95_tot.index + 1), quantile_95_tot, '.', label='95% Quantil', color=(0.517, 0.721, 0.094))
@@ -25,10 +32,15 @@ def glg_plot_1(x, y, sim_curve, quantile_95_tot):
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
     plt.legend()
-    plt.show()
+    if save_plot:
+        save_plot_func(plt, folder, filename)
+    if show_plot:
+        plt.show()
 
-def glg_plot_2(x,y, quantile_95_tot):
 
+
+def glg_plot_2a(x,y, quantile_95_tot, save_plot,folder, filename, show_plot):
+    plt.clf()
     # plt.plot(x, gz_bi, label='V2G (Laden)', color=(0.517, 0.721, 0.094))
     # plt.plot(x, gz_bi_dis, label='V2G (Entladen)', color=(0.3, 0.3, 0.3))
     plt.plot(x, y, label='', color=(0.717, 0.921, 0.294))
@@ -39,8 +51,13 @@ def glg_plot_2(x,y, quantile_95_tot):
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
     # plt.legend()
-    plt.show()
+    if save_plot:
+        save_plot_func(plt, folder, filename)
+    if show_plot:
+        plt.show()
 
+def glg_plot_2b(x, y, quantile_95_tot, save_plot, folder, filename, show_plot):
+    plt.clf()
     plt.plot(x, y, label='Regressionskurve', color=(0.6, 0.6, 0.6))
     plt.plot((quantile_95_tot.index + 1), quantile_95_tot, '.', label='95% Quantil', color=(0.517, 0.721, 0.094))
     plt.grid(color='lightgrey', linestyle='-')
@@ -49,31 +66,44 @@ def glg_plot_2(x,y, quantile_95_tot):
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
     plt.legend()
-    plt.show()
+    if save_plot:
+        save_plot_func(plt, folder, filename)
+    if show_plot:
+        plt.show()
 
-def glg_plot_3(x,y):
+def glg_plot_3(x,y, save_plot,folder, filename, show_plot):
+    plt.clf()
     plt.plot(x, y, label='95% Quantil', color=(0.517, 0.721, 0.094))
     plt.grid(color='lightgrey', linestyle='-')
     plt.xlabel('Anzahl der Systemteilnehmer')
     plt.ylim(0, 1.1)
     plt.xlim(0, 155)
     plt.ylabel('Gleichzeitigkeitsfaktor')
-    plt.show()
+    if save_plot:
+        save_plot_func(plt, folder, filename)
+    if show_plot:
+        plt.show()
 
 
-def do_all_glg_plots(x,y, sim_curve, quantile_95_tot):
+def show_all_glg_plots(x,y, sim_curve, quantile_95_tot, show_plot):
     # Plot 2
 
-    glg_plot_2(x,y,quantile_95_tot)
+    glg_plot_2a(x,y,quantile_95_tot, False, 'nn', 'nn', show_plot)
+    glg_plot_2b(x, y, quantile_95_tot, False, 'nn', 'nn', show_plot)
 
     # Plot 1
-    glg_plot_1(x,y,sim_curve,quantile_95_tot)
+    glg_plot_1(x,y,sim_curve,quantile_95_tot, False, 'nn', 'nn', show_plot)
 
     # Plot 3
-    glg_plot_3(x,y)
+    glg_plot_3(x,y, False, 'nn','nn', show_plot)
 
-
-
+def results_to_csv(x,y, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, folder, filename):
+    data = {'x': x, 'y': y, 'sim_curve': sim_curve[0], 'quantile_95_tot': quantile_95_tot[0],
+            'quantile_95': quantile_95[0], 'quantile_95_indicies': quantile_95_indices}
+    df = pd.DataFrame(data).set_index('x')
+    filename= filename + '.csv'
+    folder_filename= os.path.join(folder, filename)
+    df.to_csv(folder_filename)
 
 """
 Kurvenanpassung
