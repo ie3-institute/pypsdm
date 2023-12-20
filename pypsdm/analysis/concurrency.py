@@ -5,7 +5,7 @@ import csv
 from datetime import datetime
 from pypsdm.processing.series import (add_series,quarter_hourly_mean_resample )
 from pypsdm.models.result import (entity, )
-from pypsdm.models import (enums, )
+from pypsdm.models import (enums,gwr )
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 from pypsdm.processing.series import quarter_hourly_mean_resample
@@ -158,16 +158,16 @@ def curve_regression(quantile_95_indices, quantile_95, quantile_95_tot):
 """
 get installed capacity
 """
-def get_installed_capacity(df_input, gwr):
+def get_installed_capacity(df_input, gwr_container):
     em_installed_capacity_res = pd.DataFrame(columns=['s_rated_em_load_direction', 's_rated_em_feedin_direction'])
-    ems_grid = gwr.grid.participants.ems
+    ems_grid = gwr_container.grid.participants.ems
     for item in df_input:
-        val = getEmInstalledCapacatiyFromUuid(item, ems_grid, gwr)
+        val = getEmInstalledCapacatiyFromUuid(item, ems_grid, gwr_container)
         em_installed_capacity_res.loc[item]= [val.values[0][0], val.values[0][1]]
     return em_installed_capacity_res
 
 
-def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr):
+def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr_container):
     load_srated = 0
     hp_srated = 0
     evcs_srated = 0
@@ -178,16 +178,16 @@ def getEmInstalledCapacatiyFromUuid(em_uuid, ems_grid, gwr):
     em_installed_capacity = pd.DataFrame(columns=['s_rated_em_load_direction', 's_rated_em_feedin_direction'])
 
     for conected_asset in ems_grid.connected_assets.get(em_uuid):
-        if gwr.grid.participants.loads.__contains__(conected_asset):
-            load_srated = gwr.grid.participants.loads.get(conected_asset)['s_rated']
-        if gwr.grid.participants.hps.__contains__(conected_asset):
-            hp_srated = gwr.grid.participants.hps.get(conected_asset)['s_rated']
-        if gwr.grid.participants.evcs.__contains__(conected_asset):
-            evcs_srated = gwr.grid.participants.evcs.get(conected_asset)['power']
-        if gwr.grid.participants.storages.__contains__(conected_asset):
-            bs_srated = gwr.grid.participants.storages.get(conected_asset)['s_rated']
-        if gwr.grid.participants.pvs.__contains__(conected_asset):
-            pv_srated = gwr.grid.participants.pvs.get(conected_asset)['s_rated']
+        if gwr_container.grid.participants.loads.__contains__(conected_asset):
+            load_srated = gwr_container.grid.participants.loads.get(conected_asset)['s_rated']
+        if gwr_container.grid.participants.hps.__contains__(conected_asset):
+            hp_srated = gwr_container.grid.participants.hps.get(conected_asset)['s_rated']
+        if gwr_container.grid.participants.evcs.__contains__(conected_asset):
+            evcs_srated = gwr_container.grid.participants.evcs.get(conected_asset)['power']
+        if gwr_container.grid.participants.storages.__contains__(conected_asset):
+            bs_srated = gwr_container.grid.participants.storages.get(conected_asset)['s_rated']
+        if gwr_container.grid.participants.pvs.__contains__(conected_asset):
+            pv_srated = gwr_container.grid.participants.pvs.get(conected_asset)['s_rated']
 
     ##### TODO FIXME: LOAD INCLUDED HERE OR NOT, alternative: find load.s.max() from time-series and take it into account
     #FIXME: p or s?
