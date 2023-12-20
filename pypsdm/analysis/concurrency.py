@@ -278,7 +278,7 @@ def start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, out
     em_cases_dict = pd.read_csv(os.path.join(folder_glz_cases, file_name_glz_cases), index_col=0).rename_axis(
         index='em_uuid')
 
-    gwr_container = gwr.GridWithResults.from_csv('flex_minigrid', folder_inputs, ',', folder_res, ',', simulation_end=endtime)
+    gwr_container = gwr.GridWithResults.from_csv('flex_minigrid', folder_inputs, folder_res, simulation_end=endtime)
     df_input = em_cases_dict.index.tolist()
     em_installed_capacity_res_2 = get_installed_capacity(df_input,gwr_container)
     cases = [
