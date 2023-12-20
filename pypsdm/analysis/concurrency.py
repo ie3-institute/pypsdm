@@ -211,7 +211,7 @@ def calculate_coincidence_curve_load_direction(df, df_inst, len_curve, num_mc):
     for n in range(1, len_curve + 1):
         temp_sim_max_abs = np.zeros(num_mc)
         temp_sim_max_norm = np.zeros(num_mc)
-        print("Calculate coincidence factor for system participant number " + str(n))
+        #print("Calculate coincidence factor for system participant number " + str(n))
         for mc in range(num_mc):
             # Randomly choose n profiles
             profile_col = np.random.choice(df.columns, size=n, replace=False)
@@ -270,3 +270,81 @@ def getCasesFromConditions2(data_frame, **conditions):
             print(f"Column '{col_name}' not found.")
 
     return filtered_indices.tolist()
+
+def start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_of_mc):
+    #folder_inputs = folder_inputs + '\grid'
+    #folder_glz_cases = folder_inputs + '\GLZ'
+    file_name_glz_cases = 'em_to_case_dict.csv'
+    em_cases_dict = pd.read_csv(os.path.join(folder_glz_cases, file_name_glz_cases), index_col=0).rename_axis(
+        index='em_uuid')
+
+    gwr_container = gwr.GridWithResults.from_csv('flex_minigrid', folder_inputs, ',', folder_res, ',', simulation_end=endtime)
+    df_input = em_cases_dict.index.tolist()
+    em_installed_capacity_res_2 = get_installed_capacity(df_input,gwr_container)
+    cases = [
+        (1, 1, 1, 1),
+        (1, 1, 1, 0),
+        (1, 1, 0, 1),
+        (1, 1, 0, 0),
+        (1, 0, 1, 1),
+        (1, 0, 1, 0),
+        (1, 0, 0, 1),
+        (1, 0, 0, 0),
+        (0, 1, 1, 1),
+        (0, 1, 1, 0),
+        (0, 1, 0, 1),
+        (0, 1, 0, 0),
+        (0, 0, 1, 1),
+        (0, 0, 1, 0),
+        (0, 0, 0, 1),
+        (0, 0, 0, 0),
+    ]
+
+    for item in cases:
+        bs = item[0]
+        ev = item[1]
+        hp = item[2]
+        hp_new = item[3]
+        filename = 'pv1_bs' + str(bs) + '_ev' + str(ev) + '_hp' + str(hp) + '_hpnew' + str(hp_new)
+        ems_of_item_case = em_cases_dict[
+            (em_cases_dict['0'] == bs)
+            & (em_cases_dict['1'] == ev)
+            & (em_cases_dict['2'] == hp)
+            & (em_cases_dict['3'] == hp_new)
+            ]
+
+
+        new_df = pd.DataFrame()
+        for em_uuid in ems_of_item_case.index:
+            data_for_item = gwr_container.results.participants.ems[em_uuid].p
+            new_df[em_uuid] = data_for_item
+
+        len_of_ems = len(new_df.columns)
+        # len_curve = 150  # Ziel: 150, gibt die maximale Anzahl an EV innerhalb der GZ-Kurve an
+        len_curve = min(len(new_df.columns), 150)  # Ziel: 150, gibt die maximale Anzahl an Elementen innerhalb der GZ-Kurve an
+        num_mc = num_of_mc  # Ziel: 1000, Anzahl an Monte-Carlo-Iterationen pro Punkt in der GZ-Kurve
+        show_plots = False
+
+        """
+         Initialisierung
+        """
+
+        # Einlesen der Daten:
+        if len_of_ems > 2:
+            # FIXME: s anstatt P?
+            df_resample = quarter_hourly_mean_resample(new_df)
+            df = df_resample
+
+            sim_curve, quantile_95, quantile_95_tot, quantile_95_indices = calc_glg(df, em_installed_capacity_res_2,
+                                                                                    len_curve, num_mc)
+            x, y = curve_regression(quantile_95_indices, quantile_95, quantile_95_tot)
+
+            glg_plot_1(x, y, sim_curve, quantile_95_tot, True, output_folder, filename + 'plot1', show_plots)
+            glg_plot_2a(x, y, quantile_95_tot, True, output_folder, filename + 'plot2a', show_plots)
+            glg_plot_2b(x, y, quantile_95_tot, True, output_folder, filename + 'plot2b', show_plots)
+            glg_plot_3(x, y, True, output_folder, filename + 'plot3', show_plots)
+            csv_file = filename + '_csv'
+            results_to_csv(x, y, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, output_folder, csv_file)
+            print('Done for ' + filename + ' containing ' + len_of_ems.__str__() + ' elements')
+        else:
+            print('Warning, dataset ' + filename + ' contains less than 3 elements. Evaluation not possible.')
