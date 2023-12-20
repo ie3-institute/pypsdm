@@ -110,7 +110,7 @@ class RawGridContainer(ContainerMixin):
         return branches
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str) -> "RawGridContainer":
+    def from_csv(cls, path: str, delimiter: str | None = None) -> "RawGridContainer":
         nodes = Nodes.from_csv(path, delimiter)
         lines = Lines.from_csv(path, delimiter)
         transformers_2_w = Transformers2W.from_csv(path, delimiter)

@@ -225,7 +225,7 @@ class ResultDict(Generic[T], ABC):
         cls: Type[ResultDictType],
         entity_type: EntityEnumType,
         simulation_data_path: str,
-        delimiter: str,
+        delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
@@ -292,7 +292,7 @@ class ResultDict(Generic[T], ABC):
     def get_grpd_df(
         entity_type: EntityEnumType,
         simulation_data_path: str,
-        delimiter: str,
+        delimiter: str | None = None,
     ) -> Optional[DataFrameGroupBy]:
         file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(simulation_data_path, file_name)

@@ -234,8 +234,8 @@ class ParticipantsResultContainer(ContainerMixin):
             flex=FlexOptionsResult.from_csv(
                 SystemParticipantsEnum.FLEX_OPTIONS,
                 simulation_data_path,
-                delimiter,
                 simulation_end,
+                delimiter,
             ),
         )
         return (

@@ -68,7 +68,7 @@ class NodesResult(ResultDict):
     def from_csv(
         cls: Type[ResultDictType],
         simulation_data_path: str,
-        delimiter: str,
+        delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,

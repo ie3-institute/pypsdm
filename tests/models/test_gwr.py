@@ -68,8 +68,6 @@ def test_to_csv(gwr: GridWithResults, tmp_path):
     gwr_b = GridWithResults.from_csv(
         gwr.results.name,
         tmp_path,
-        ",",
         tmp_path,
-        ",",
     )
     gwr.compare(gwr_b)
