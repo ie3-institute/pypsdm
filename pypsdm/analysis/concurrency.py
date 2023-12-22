@@ -313,11 +313,16 @@ def start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, out
             & (em_cases_dict['3'] == hp_new)
             ]
 
+        dfs = []
 
-        new_df = pd.DataFrame()
         for em_uuid in ems_of_item_case.index:
             data_for_item = gwr_container.results.participants.ems[em_uuid].p
-            new_df[em_uuid] = data_for_item
+            # Create a DataFrame for each em_uuid and append it to the list
+            df = pd.DataFrame({em_uuid: data_for_item})
+            dfs.append(df)
+
+        # Concatenate all the DataFrames in the list along the columns axis
+        new_df = pd.concat(dfs, axis=1)
 
         len_of_ems = len(new_df.columns)
         # len_curve = 150  # Ziel: 150, gibt die maximale Anzahl an EV innerhalb der GZ-Kurve an
