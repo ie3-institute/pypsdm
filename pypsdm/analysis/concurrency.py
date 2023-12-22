@@ -353,3 +353,12 @@ def start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, out
             print('Done for ' + filename + ' containing ' + len_of_ems.__str__() + ' elements')
         else:
             print('Warning, dataset ' + filename + ' contains less than 3 elements. Evaluation not possible.')
+
+def start():
+    folder_inputs = r''
+    folder_glz_cases = r''
+    folder_res = r''
+    output_folder = r''
+    endtime = datetime(2019, 12, 31)
+    num_mc = 1000
+    start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc)
