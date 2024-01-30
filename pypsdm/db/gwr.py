@@ -16,11 +16,14 @@ from pypsdm.models.result import GridResultContainer
 GRID_ID_REGEX = re.compile(r"(\w+)-v(\d+)")
 
 # Simulation result folder naming strategy
-# [date(optional increment)]-[GRID_ID_REGEX]
-# e.g. 2023_11_23-1-my_grid-v1
-RESULT_DATE_REGEX = re.compile(r"(\d{4}_\d{2}_\d{2}(?:-\d+)?)")
+# [date[optional increment]]-[GRID_ID_REGEX][-optional suffix]
+# e.g. 2023_11_23-1-my_grid-v1-my_suffix
+RESULT_DATE_REGEX = re.compile(r"(\d{4}_\d{2}_\d{2})(?:-\d+)?")
+RESULT_SUFFIX_REGEX = re.compile(r"(?:-([\w-]+))?")
 RESULT_ID_REGEX = re.compile(
-    r"{}-({})".format(RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern)
+    r"{}-({}){}".format(
+        RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern, RESULT_SUFFIX_REGEX.pattern
+    )
 )
 
 
@@ -54,7 +57,10 @@ class LocalGwrDb(PathManagerMixin):
         return [self.path, self.grids_path, self.results_path]
 
     def list_grids(self, grid_id: str | None = None, path=False) -> list[str]:
-        """List all managed grid ids."""
+        """
+        List all managed grid ids. Only lists directories that are valid grid ids.
+        Valid grid ids are specified by GRID_ID_REGEX
+        """
         grids = os.listdir(self.grids_path)
         grids.sort(reverse=True)
         # ignore hidden files or directories
@@ -86,7 +92,7 @@ class LocalGwrDb(PathManagerMixin):
             for res in results:
                 match = self.match_res_id(res)
                 if match:
-                    _, grid_id = match
+                    _, grid_id, _ = match
                     if grid_id == grid_id:
                         filtered.append(res)
             results = filtered
@@ -102,7 +108,7 @@ class LocalGwrDb(PathManagerMixin):
         res_path = os.path.join(self.results_path, res_id, "rawOutputData")
         res_id_match = self.match_res_id(res_id)
         if res_id_match:
-            _, grid_id = res_id_match
+            _, grid_id, _ = res_id_match
         else:
             raise ValueError(
                 f"Invalid res_id: {res_id}, expected format: {RESULT_ID_REGEX.pattern}"
@@ -252,12 +258,12 @@ class LocalGwrDb(PathManagerMixin):
             return None
 
     @staticmethod
-    def match_res_id(res_id: str) -> tuple[str, str] | None:
+    def match_res_id(res_id: str) -> tuple[str, str, str | None] | None:
         """Match res_id and return date, grid_id and grid_version or None."""
         match = RESULT_ID_REGEX.match(res_id)
         if match:
-            date, grid_id, *_ = match.groups()
-            return date, grid_id
+            date, grid_id, *_, suffix = match.groups()
+            return date, grid_id, suffix
         else:
             return None
 
