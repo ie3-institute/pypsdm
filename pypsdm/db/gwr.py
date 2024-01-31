@@ -263,7 +263,7 @@ class LocalGwrDb(PathManagerMixin):
         if not force:
             if not grid_path.parent.name == "grids":
                 raise ValueError(
-                    f"""Expected grid path to be in grids directory, got {grid_path}. 
+                    f"""Expected grid path to be in grids directory, got {grid_path}.
                     Aborting to prevent accidental deletion. Set force=True to override."""
                 )
 
@@ -271,7 +271,7 @@ class LocalGwrDb(PathManagerMixin):
                 if os.path.isdir(f):
                     raise ValueError(
                         f"""Expected grid path {grid_path} to only contain files,
-                        but found directory {f}. Aborting to prevent accidental 
+                        but found directory {f}. Aborting to prevent accidental
                         deletion. Set force=True to override."""
                     )
         shutil.rmtree(grid_path)

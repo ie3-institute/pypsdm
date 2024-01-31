@@ -2,7 +2,6 @@ import pandas as pd
 
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.result.grid.switch import SwitchesResult, SwitchResult
-from tests.conftest import result_path
 
 
 def get_switch_result(closed):
