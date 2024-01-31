@@ -16,16 +16,7 @@ from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 
 @dataclass(frozen=True)
 class NodeResult(ResultEntities):
-    def __eq__(self, other):
-        if not isinstance(other, NodeResult):
-            return False
-        return (
-            (self.input_model == other.input_model)
-            & (self.name == other.name)
-            & (self.data.equals(other.data))
-        )
-
-    def __add__(self, other):
+    def __add__(self, _):
         return NotImplemented
 
     @property

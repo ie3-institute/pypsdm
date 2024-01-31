@@ -50,6 +50,7 @@ class ResultEntities(ABC):
             return False
         try:
             compare_dfs(self.data, other.data)
+            return True
         except ComparisonError:
             return False
 
