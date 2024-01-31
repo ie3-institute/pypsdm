@@ -35,9 +35,9 @@ class EntitiesEnum(Enum):
         # locally to avoid circular imports
         from pypsdm.models.result.grid.connector import ConnectorResult
         from pypsdm.models.result.grid.node import NodeResult
+        from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
         from pypsdm.models.result.power import PQResult, PQWithSocResult
-        from pypsdm.models.result.grid.switch import SwitchResult
 
         if isinstance(self, SystemParticipantsEnum):
             if self.has_soc():

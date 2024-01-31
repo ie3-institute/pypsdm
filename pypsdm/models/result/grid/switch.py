@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional, Type
+
 import pandas as pd
 from pandas import DataFrame
 
-from typing import Optional, Type
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.result.entity import ResultEntities
