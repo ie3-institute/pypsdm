@@ -10,6 +10,7 @@ from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
 from pypsdm.models.result.grid.connector import ConnectorsResult
 from pypsdm.models.result.grid.node import NodesResult
+from pypsdm.models.result.grid.switch import SwitchesResult
 from pypsdm.models.result.grid.transformer import Transformers2WResult
 
 
@@ -19,6 +20,7 @@ class GridResultContainer(ContainerMixin):
     nodes: NodesResult
     lines: ConnectorsResult
     transformers_2w: ConnectorsResult
+    switches: SwitchesResult
     participants: ParticipantsResultContainer
 
     def __len__(self):
@@ -46,6 +48,7 @@ class GridResultContainer(ContainerMixin):
             self.nodes.filter_by_date_time(time),
             self.lines.filter_by_date_time(time),
             self.transformers_2w.filter_by_date_time(time),
+            self.switches.filter_by_date_time(time),
             self.participants.filter_by_date_time(time),
         )
 
@@ -55,6 +58,7 @@ class GridResultContainer(ContainerMixin):
             self.nodes.filter_for_time_interval(start, end),
             self.lines.filter_for_time_interval(start, end),
             self.transformers_2w.filter_for_time_interval(start, end),
+            self.switches.filter_for_time_interval(start, end),
             self.participants.filter_for_time_interval(start, end),
         )
 
@@ -105,10 +109,20 @@ class GridResultContainer(ContainerMixin):
                 filter_start,
                 filter_end,
             )
+            switches_future = executor.submit(
+                SwitchesResult.from_csv,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                grid_container.raw_grid.switches if grid_container else None,
+                filter_start,
+                filter_end,
+            )
 
             nodes = nodes_future.result()
             transformers_2_w = transformers_2_w_future.result()
             lines = lines_future.result()
+            switches = switches_future.result()
 
         if simulation_end is None:
             if len(nodes.entities) == 0:
@@ -120,14 +134,14 @@ class GridResultContainer(ContainerMixin):
 
         participants = ParticipantsResultContainer.from_csv(
             simulation_data_path,
-            delimiter,
             simulation_end,  # type: ignore
             grid_container=grid_container,
             filter_start=filter_start,
             filter_end=filter_end,
+            delimiter=delimiter,
         )
 
-        return cls(name, nodes, lines, transformers_2_w, participants)
+        return cls(name, nodes, lines, transformers_2_w, switches, participants)
 
     @classmethod
     def create_empty(cls):
@@ -138,5 +152,6 @@ class GridResultContainer(ContainerMixin):
             transformers_2w=ConnectorsResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),
+            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
             participants=ParticipantsResultContainer.create_empty(),
         )

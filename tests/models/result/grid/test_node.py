@@ -18,6 +18,14 @@ def get_node_result(v_mags, v_angs):
     return NodeResult(RawGridElementsEnum.NODE, "test_node", None, data)
 
 
+def test_compare():
+    a = get_node_result(v_mags=[1, 2, 3], v_angs=[1, 2, 3])
+    b = get_node_result(v_mags=[1, 2, 3], v_angs=[1, 2, 3])
+    c = get_node_result(v_mags=[1, 2, 3], v_angs=[1, 2, 4])
+    assert a == b
+    assert a != c
+
+
 def test_v_complex_pos_angle():
     v_mags = [1.01, 1.02, 1.03]
     v_angs = [1, 2, 3]
@@ -49,7 +57,8 @@ def test_filter_for_time_interval(gwr):
     filtered_test_node_res = test_node_res.filter_for_time_interval(start, end)
     assert len(filtered_test_node_res) == 1
     filtered = nodes_res.filter_for_time_interval(start, end)
-    assert filtered.entities[node_uuid] == filtered_test_node_res
+    entity = filtered.entities[node_uuid]
+    assert entity == filtered_test_node_res
 
 
 def test_vmags(gwr):

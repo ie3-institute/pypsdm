@@ -16,11 +16,14 @@ from pypsdm.models.result import GridResultContainer
 GRID_ID_REGEX = re.compile(r"(\w+)-v(\d+)")
 
 # Simulation result folder naming strategy
-# [date(optional increment)]-[GRID_ID_REGEX]
-# e.g. 2023_11_23-1-my_grid-v1
-RESULT_DATE_REGEX = re.compile(r"(\d{4}_\d{2}_\d{2}(?:-\d+)?)")
+# [date[optional increment]]-[GRID_ID_REGEX][-optional suffix]
+# e.g. 2023_11_23-1-my_grid-v1-my_suffix
+RESULT_DATE_REGEX = re.compile(r"(\d{4}_\d{2}_\d{2})(?:-\d+)?")
+RESULT_SUFFIX_REGEX = re.compile(r"(?:-([\w-]+))?")
 RESULT_ID_REGEX = re.compile(
-    r"{}-({})".format(RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern)
+    r"{}-({}){}".format(
+        RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern, RESULT_SUFFIX_REGEX.pattern
+    )
 )
 
 
@@ -53,26 +56,97 @@ class LocalGwrDb(PathManagerMixin):
     def additional_paths(self) -> list[Path]:
         return [self.path, self.grids_path, self.results_path]
 
+    def get_grid_path(self, identifier: str, should_exist: bool = True) -> Path | None:
+        """
+        Get grid from identifier. Identifier can be either grid id or result id.
+        If result id is given, the corresponding grid is returned.
+
+        Set should_exist to False to get the correct path given the identifier
+        even if the grid does not exist. NOTE: In this case the identifier needs
+        to be a valid grid id.
+        """
+        grid_id = None
+        if identifier in self.list_grids():
+            grid_id = identifier
+        if identifier in self.list_results():
+            match = self.match_res_id(identifier)
+            if match:
+                _, grid_id, _ = match
+            else:
+                raise ValueError(
+                    f"Unable to retrieve grid id from result identifier: {identifier}."
+                )
+        if grid_id is None:
+            if should_exist:
+                return None
+            else:
+                if self.match_grid_id(identifier):
+                    return self.grids_path.joinpath(identifier)
+                else:
+                    raise ValueError(
+                        f"Invalid grid_id: {identifier}, expected format: {GRID_ID_REGEX.pattern}. See `create_grid_id` to create valid ids"
+                    )
+        return self.grids_path.joinpath(grid_id)
+
+    def get_result_path(self, res_id: str, should_exist: bool = True) -> Path | None:
+        """
+        Get result path from res_id. By default returns is none if res_id does not exist.
+        Set should_exist to False to get the correct path even if the result does not exist.
+        """
+        if not self.match_res_id(res_id):
+            raise ValueError(
+                f"Invalid res_id: {res_id}, expected format: {RESULT_ID_REGEX.pattern}. See `create_res_id` to create valid ids"
+            )
+        if should_exist:
+            if res_id in self.list_results():
+                return self.results_path.joinpath(res_id)
+            else:
+                return None
+        return self.results_path.joinpath(res_id)
+
     def list_grids(self, grid_id: str | None = None, path=False) -> list[str]:
-        """List all managed grid ids."""
+        """
+        List all managed grid ids. Only lists directories that are valid grid ids.
+        Valid grid ids are specified by GRID_ID_REGEX.
+
+        If a grid_id is given we return all versions of this grid. You can either
+        pass only the base id to search for or a versioned id.
+
+        Args:
+            grid_id (str, optional): Search for versions of specific grid. Defaults to None.
+            path (bool, optional): Return paths instead of ids. Defaults to False.
+
+        Returns:
+            list[str]: List of grid ids or paths.
+        """
+
         grids = os.listdir(self.grids_path)
         grids.sort(reverse=True)
         # ignore hidden files or directories
         grids = [grid for grid in grids if not grid.startswith(".")]
+
+        # If a versioned id is given, extract the base id
         if grid_id:
+            match = self.match_grid_id(grid_id)
+            if match:
+                base_id, _ = match
+            else:
+                base_id = grid_id
+
             filtered = []
             for grid in grids:
-                match = self.match_grid_id(grid_id)
+                match = self.match_grid_id(grid)
                 if match:
-                    grid_id, _ = match
-                    if grid_id == grid_id:
+                    name, _ = match
+                    if name == base_id:
                         filtered.append(grid)
             grids = filtered
+
         if path:
             grids = [str(self.grids_path.joinpath(grid)) for grid in grids]
         return grids
 
-    def list_grid_results(self, grid_id: str | None = None) -> list[str]:
+    def list_results(self, grid_id: str | None = None) -> list[str]:
         """
         List all grid results. If grid_id is specified, only results for this grid are
         returned. Grids are sorted by date, most recent first.
@@ -86,7 +160,7 @@ class LocalGwrDb(PathManagerMixin):
             for res in results:
                 match = self.match_res_id(res)
                 if match:
-                    _, grid_id = match
+                    _, grid_id, _ = match
                     if grid_id == grid_id:
                         filtered.append(res)
             results = filtered
@@ -94,7 +168,7 @@ class LocalGwrDb(PathManagerMixin):
 
     def read_gwr_most_recent(self, grid_id) -> GridWithResults:
         """Read most recent GridWithResults."""
-        result = self.list_grid_results(grid_id)[0]
+        result = self.list_results(grid_id)[0]
         return self.read_gwr(result)
 
     def read_gwr(self, res_id: str) -> GridWithResults:
@@ -102,21 +176,21 @@ class LocalGwrDb(PathManagerMixin):
         res_path = os.path.join(self.results_path, res_id, "rawOutputData")
         res_id_match = self.match_res_id(res_id)
         if res_id_match:
-            _, grid_id = res_id_match
+            _, grid_id, _ = res_id_match
         else:
             raise ValueError(
                 f"Invalid res_id: {res_id}, expected format: {RESULT_ID_REGEX.pattern}"
             )
 
-        grid_path = os.path.join(self.grids_path, grid_id)
-        if not os.path.exists(grid_path):
+        grid_path = self.get_grid_path(grid_id)
+        if grid_path is None:
             raise FileNotFoundError(
                 f"Grid with id {grid_id} does not exist at {grid_path}."
             )
 
         return GridWithResults.from_csv(
             name=grid_id,
-            grid_path=grid_path,
+            grid_path=str(grid_path),
             result_path=res_path,
         )
 
@@ -132,22 +206,13 @@ class LocalGwrDb(PathManagerMixin):
             GridContainer: GridContainer instance.
         """
         # check if grid or result id
-        if identifier in self.list_grids():
-            grid_id = identifier
-        elif identifier in self.list_grid_results():
-            match = self.match_res_id(identifier)
-            if match:
-                _, grid_id = match
-            else:
-                raise ValueError(
-                    f"Invalid result dentifier: {identifier}. Expected format: {RESULT_ID_REGEX.pattern}"
-                )
-        else:
-            raise ValueError(
-                f"Invalid identifier: {identifier}. Expected either grid or result identifier."
+        grid_path = self.get_grid_path(identifier)
+        if grid_path is None:
+            raise FileNotFoundError(
+                f"Grid or result with id {identifier} does not exist in database."
             )
         return GridContainer.from_csv(
-            str(self.grids_path.joinpath(grid_id)),
+            str(grid_path),
             delimiter=",",
         )
 
@@ -158,6 +223,58 @@ class LocalGwrDb(PathManagerMixin):
             str(self.results_path.joinpath(res_id)),
             delimiter=",",
         )
+
+    def add_grid(
+        self,
+        grid: GridContainer,
+        grid_id: str,
+        include_primary_data: bool = True,
+    ):
+        """
+        Adds grid to local database.
+
+        Args:
+            grid (GridContainer): GridContainer instance.
+            version (int): Grid version. Defaults to 1.
+
+        Returns:
+            The created grid id
+        """
+        destination_dir = self.get_grid_path(grid_id, should_exist=False)
+        if destination_dir is None:
+            raise ValueError("Unable to create grid id.")
+        if destination_dir.exists():
+            raise FileExistsError(f"Grid with id {grid_id} already exists.")
+        os.makedirs(destination_dir)
+        grid.to_csv(str(destination_dir), include_primary_data=include_primary_data)
+        return grid_id
+
+    def remove_grid(self, grid_id: str, force: bool = False):
+        """
+        Removes grid from file system.
+        ATTENTION: Files will be permanently deleted so use with caution.
+        """
+
+        grid_path = self.get_grid_path(grid_id)
+        if grid_path is None:
+            raise FileNotFoundError(f"Grid with id {grid_id} does not exist.")
+
+        # Do some safety checks
+        if not force:
+            if not grid_path.parent.name == "grids":
+                raise ValueError(
+                    f"""Expected grid path to be in grids directory, got {grid_path}.
+                    Aborting to prevent accidental deletion. Set force=True to override."""
+                )
+
+            for f in os.listdir(grid_path):
+                if os.path.isdir(f):
+                    raise ValueError(
+                        f"""Expected grid path {grid_path} to only contain files,
+                        but found directory {f}. Aborting to prevent accidental
+                        deletion. Set force=True to override."""
+                    )
+        shutil.rmtree(grid_path)
 
     def add_grid_from_path(
         self, grid_path: str | Path, grid_name: str, version: int = 1, move=False
@@ -241,36 +358,54 @@ class LocalGwrDb(PathManagerMixin):
         else:
             shutil.copytree(results_path, destination_dir)
 
-    @staticmethod
-    def match_grid_id(grid_id) -> tuple[str, str] | None:
-        """Matches grid_id and returns grid_id and grid_version or None."""
-        match = GRID_ID_REGEX.match(grid_id)
-        if match:
-            grid_id, grid_version = match.groups()
-            return grid_id, grid_version
+    def create_grid_id(self, grid_id: str) -> str:
+        grids = self.list_grids(grid_id)
+        if grids:
+            max_version = 1
+            for grid in grids:
+                match = self.match_grid_id(grid)
+                if match:
+                    _, version = match
+                    if version > max_version:
+                        max_version = version
+            version = max_version + 1
         else:
-            return None
-
-    @staticmethod
-    def match_res_id(res_id: str) -> tuple[str, str] | None:
-        """Match res_id and return date, grid_id and grid_version or None."""
-        match = RESULT_ID_REGEX.match(res_id)
-        if match:
-            date, grid_id, *_ = match.groups()
-            return date, grid_id
-        else:
-            return None
-
-    @staticmethod
-    def create_grid_id(grid_id: str, version: int = 1) -> str:
+            version = 1
         grid_id = f"{grid_id}-v{version}"
         match = GRID_ID_REGEX.match(grid_id)
         assert match, f"Invalid grid_id: {grid_id}"
         return grid_id
 
     @staticmethod
-    def create_res_id(grid_id: str, date: datetime) -> str:
+    def match_grid_id(grid_id) -> tuple[str, int] | None:
+        """Matches grid_id and returns grid_id and grid_version or None."""
+        match = GRID_ID_REGEX.match(grid_id)
+        if match:
+            grid_id, grid_version = match.groups()
+            return grid_id, int(grid_version)
+        else:
+            return None
+
+    @staticmethod
+    def match_res_id(res_id: str) -> tuple[str, str, str | None] | None:
+        """Match res_id and return date, grid_id and grid_version or None."""
+        match = RESULT_ID_REGEX.match(res_id)
+        if match:
+            date, grid_id, *_, suffix = match.groups()
+            return date, grid_id, suffix
+        else:
+            return None
+
+    # TODO: Check if method always creats unused ids
+    @staticmethod
+    def create_res_id(
+        grid_id: str, date: datetime | None = None, suffix: str | None = None
+    ) -> str:
+        if not date:
+            date = datetime.now()
         res_id = f"{date.strftime('%Y_%m_%d')}-{grid_id}"
+        if suffix:
+            res_id = res_id + f"-{suffix}"
         match = RESULT_ID_REGEX.match(res_id)
         assert match, f"Invalid res_id: {res_id}"
         return res_id

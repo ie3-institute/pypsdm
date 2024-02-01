@@ -28,9 +28,11 @@ class PQResult(ResultEntities):
         q_sum = add_series(self.q, other.q, "q")
         summed_data = p_sum.to_frame().join(q_sum)
         return PQResult(
-            self.entity_type
-            if self.entity_type == other.entity_type
-            else SystemParticipantsEnum.PARTICIPANTS_SUM,
+            (
+                self.entity_type
+                if self.entity_type == other.entity_type
+                else SystemParticipantsEnum.PARTICIPANTS_SUM
+            ),
             "PQResult - Sum",
             "PQResult - Sum",
             summed_data,

@@ -50,7 +50,8 @@ class ResultEntities(ABC):
             return False
         try:
             compare_dfs(self.data, other.data)
-        except ComparisonError:
+            return True
+        except AssertionError:
             return False
 
     def __repr__(self):

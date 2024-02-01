@@ -192,9 +192,9 @@ class ParticipantsResultContainer(ContainerMixin):
     def from_csv(
         cls,
         simulation_data_path: str,
-        delimiter: str,
         simulation_end: datetime,
         grid_container: Optional[GridContainer] = None,
+        delimiter: Optional[str] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -204,9 +204,9 @@ class ParticipantsResultContainer(ContainerMixin):
             pa_from_csv_for_participant = partial(
                 ParticipantsResultContainer.from_csv_for_participant,
                 simulation_data_path,
-                delimiter,
                 simulation_end,
                 grid_container,
+                delimiter=delimiter,
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
@@ -217,9 +217,9 @@ class ParticipantsResultContainer(ContainerMixin):
             )
             participant_result_map = {}
             for participant_result in participant_results:
-                participant_result_map[
-                    participant_result.entity_type
-                ] = participant_result
+                participant_result_map[participant_result.entity_type] = (
+                    participant_result
+                )
 
         res = ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
@@ -247,10 +247,10 @@ class ParticipantsResultContainer(ContainerMixin):
     @staticmethod
     def from_csv_for_participant(
         simulation_data_path: str,
-        delimiter: str,
         simulation_end: datetime,
         grid_container: Optional[GridContainer],
         participant: SystemParticipantsEnum,
+        delimiter: Optional[str] = None,
     ):
         if grid_container:
             input_entities = grid_container.participants.get_participants(participant)
