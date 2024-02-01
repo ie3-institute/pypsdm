@@ -152,5 +152,6 @@ class GridResultContainer(ContainerMixin):
             transformers_2w=ConnectorsResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),
+            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
             participants=ParticipantsResultContainer.create_empty(),
         )

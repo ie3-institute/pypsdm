@@ -15,7 +15,7 @@ def test_regex():
 
 
 def test_match_grid_id():
-    name, version = "my_grid", "1"
+    name, version = "my_grid", 1
     match = LocalGwrDb.match_grid_id(f"{name}-v{version}")
     if match:
         assert match[0] == name

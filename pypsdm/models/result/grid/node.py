@@ -16,6 +16,11 @@ from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 
 @dataclass(frozen=True)
 class NodeResult(ResultEntities):
+    # NOTE: this does not work if not specified explicitly although it should
+    # be inherited from ResultEntities
+    def __eq__(self, other) -> bool:
+        return super().__eq__(other)
+
     def __add__(self, _):
         return NotImplemented
 

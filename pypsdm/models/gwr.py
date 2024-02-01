@@ -14,6 +14,7 @@ from pypsdm.models.result.container.participants import ParticipantsResultContai
 from pypsdm.models.result.grid.connector import ConnectorsResult
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
 from pypsdm.models.result.grid.node import NodesResult
+from pypsdm.models.result.grid.switch import SwitchesResult
 from pypsdm.models.result.grid.transformer import Transformers2WResult
 
 
@@ -52,6 +53,7 @@ class GridWithResults(ContainerMixin):
             transformers_2w=Transformers2WResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),
+            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
             participants=participants,
         )
 
