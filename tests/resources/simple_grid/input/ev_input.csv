@@ -1,0 +1,4 @@
+uuid,id,operates_from,operates_until,operator,node,q_characteristics,type
+7d81b25b-1f2d-447e-a0e4-5396a849b4ea,EV_NS_02,,,,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"cosPhiFixed:{(0.0, 1)}",e6852a4d-51d6-4a8a-86ca-680ca4f93c2b
+54acf4fa-49ee-4c35-8541-a518eba61c84,EV_NS_03,,,,1dcddd06-f41a-405b-9686-7f7942852196,"cosPhiFixed:{(0.0, 1)}",a117f662-b70d-4982-abe7-031972787939
+0a085e92-0914-4eeb-8bdd-9353c17bf3f2,EV_NS_04,,,,e3c3c6a3-c383-4dbb-9b3f-a14125615386,"cosPhiFixed:{(0.0, 1)}",94c9d86c-43c3-4424-bee6-ea31daf526bc

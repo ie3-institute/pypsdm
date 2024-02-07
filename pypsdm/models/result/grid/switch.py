@@ -13,6 +13,9 @@ from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 
 @dataclass(frozen=True)
 class SwitchResult(ResultEntities):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __add__(self, _):
         return NotImplemented
 
@@ -28,6 +31,9 @@ class SwitchResult(ResultEntities):
 @dataclass(frozen=True)
 class SwitchesResult(ResultDict):
     entities: dict[str, SwitchResult]
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     @property
     def closed(self) -> DataFrame:

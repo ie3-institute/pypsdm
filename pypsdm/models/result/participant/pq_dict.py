@@ -15,6 +15,9 @@ from pypsdm.models.result.power import PQResult, PQWithSocResult
 class PQResultDict(ResultDict):
     entities: Dict[str, PQResult]
 
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     # TODO make ffill optional
     @property
     def p(self) -> DataFrame:

@@ -29,6 +29,9 @@ class ParticipantsResultContainer(ContainerMixin):
     hps: PQResultDict
     flex: FlexOptionsResult
 
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __len__(self):
         participants = self.to_list(include_empty=False)
         return sum([len(participant) for participant in participants])

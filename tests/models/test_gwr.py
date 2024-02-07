@@ -71,3 +71,4 @@ def test_to_csv(gwr: GridWithResults, tmp_path):
         tmp_path,
     )
     gwr.compare(gwr_b)
+    assert gwr == gwr_b

@@ -16,8 +16,6 @@ from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 
 @dataclass(frozen=True)
 class NodeResult(ResultEntities):
-    # NOTE: this does not work if not specified explicitly although it should
-    # be inherited from ResultEntities
     def __eq__(self, other) -> bool:
         return super().__eq__(other)
 
@@ -59,6 +57,9 @@ class NodeResult(ResultEntities):
 @dataclass(frozen=True)
 class NodesResult(ResultDict):
     entities: dict[str, NodeResult]
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     @classmethod
     def from_csv(

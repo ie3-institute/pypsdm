@@ -20,6 +20,16 @@ class GridContainer(ContainerMixin):
     primary_data: PrimaryData
     node_participants_map: Dict[str, SystemParticipantsContainer]
 
+    def __eq__(self, other):
+        if not isinstance(other, GridContainer):
+            return False
+        if not self.node_participants_map == other.node_participants_map:
+            return False
+        return super().__eq__(other)
+
+    def __bool__(self):
+        return len(self.to_list(include_primary_data=True)) > 0
+
     @property
     def nodes(self):
         return self.raw_grid.nodes
@@ -75,9 +85,6 @@ class GridContainer(ContainerMixin):
     @property
     def hps(self):
         return self.participants.hps
-
-    def __bool__(self):
-        return len(self.to_list(include_primary_data=True)) > 0
 
     def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
         grid = (
@@ -144,7 +151,7 @@ class GridContainer(ContainerMixin):
     def to_csv(
         self,
         path: str,
-        include_primary_data: bool,
+        include_primary_data: bool = True,
         mkdirs: bool = False,
         delimiter: str = ",",
     ):

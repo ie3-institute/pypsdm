@@ -15,6 +15,9 @@ from pypsdm.models.result.participant.dict import ResultDict
 
 @dataclass(frozen=True)
 class ConnectorResult(ResultEntities):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __add__(self, other):
         raise NotImplementedError("Adding connector results is not defined")
 
@@ -66,6 +69,9 @@ class ConnectorResult(ResultEntities):
 @dataclass(frozen=True)
 class ConnectorsResult(ResultDict):
     entities: dict[str, ConnectorResult]
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     @property
     def i_a_ang(self) -> DataFrame:

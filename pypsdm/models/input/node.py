@@ -13,6 +13,9 @@ from pypsdm.models.input.entity import Entities
 class Nodes(Entities):
     data: DataFrame
 
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @property
     def geo_position(self):
         return self.data["geo_position"]

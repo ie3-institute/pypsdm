@@ -6,6 +6,9 @@ from pypsdm.models.input.participant.participant import SystemParticipantsWithCa
 
 
 class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
+    def __eq__(self, other: object) -> bool:
+        return SystemParticipantsWithCapacity.__eq__(self, other)
+
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.STORAGE

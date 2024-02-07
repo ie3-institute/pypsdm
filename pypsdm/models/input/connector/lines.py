@@ -10,6 +10,10 @@ from pypsdm.models.input.mixins import HasTypeMixin
 
 @dataclass(frozen=True)
 class Lines(HasTypeMixin, Connector):
+
+    def __eq__(self, other: object) -> bool:
+        return Connector.__eq__(self, other)
+
     @property
     def length(self) -> Series:
         return self.data["length"]

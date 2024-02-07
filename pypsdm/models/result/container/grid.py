@@ -23,6 +23,9 @@ class GridResultContainer(ContainerMixin):
     switches: SwitchesResult
     participants: ParticipantsResultContainer
 
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @property
     def ems(self):
         return self.participants.ems

@@ -15,6 +15,9 @@ from pypsdm.processing.series import add_series, hourly_mean_resample
 
 @dataclass(frozen=True)
 class FlexOptionResult(ResultEntities):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __add__(self, other: "FlexOptionResult"):
         p_ref_sum = add_series(self.p_ref(), other.p_ref(), "p_ref")
         p_min_sum = add_series(self.p_min(), other.p_min(), "p_min")
@@ -74,6 +77,9 @@ class FlexOptionResult(ResultEntities):
 @dataclass(frozen=True)
 class FlexOptionsResult(ResultDict):
     entities: Dict[str, FlexOptionResult]
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     def to_df(self) -> DataFrame:
         return pd.concat(
