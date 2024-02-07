@@ -41,6 +41,20 @@ class ParticipantsResultContainer(ContainerMixin):
             raise ValueError("Only datetime slicing is supported")
         return self.filter_for_time_interval(start, stop)
 
+    def __add__(self, other: "ParticipantsResultContainer"):
+        return ParticipantsResultContainer(
+            ems=self.ems + other.ems,
+            loads=self.loads + other.loads,
+            fixed_feed_ins=self.fixed_feed_ins + other.fixed_feed_ins,
+            pvs=self.pvs + other.pvs,
+            wecs=self.wecs + other.wecs,
+            storages=self.storages + other.storages,
+            evcs=self.evcs + other.evcs,
+            evs=self.evs + other.evs,
+            hps=self.hps + other.hps,
+            flex=self.flex + other.flex,
+        )
+
     @property
     def p(self) -> DataFrame:
         p_series = {
@@ -182,6 +196,36 @@ class ParticipantsResultContainer(ContainerMixin):
             self.evs.filter_for_time_interval(start, end),
             self.hps.filter_for_time_interval(start, end),
             self.flex.filter_for_time_interval(start, end),
+        )
+
+    def concat(self, other: "ParticipantsResultContainer", deep=True, keep="last"):
+        """
+        Concatenates the data of the current and the other ParticipantsResultContainer
+        object. Concatenation is done along the index (appending rows).
+
+        NOTE: This only makes sense if result indexes are continuous. Given that
+        we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        If you want to add the underlying entities, use the `__add__` method.
+
+        Args:
+            other: The other ResultDict object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        return ParticipantsResultContainer(
+            self.ems.concat(other.ems, deep=deep, keep=keep),
+            self.loads.concat(other.loads, deep=deep, keep=keep),
+            self.fixed_feed_ins.concat(other.fixed_feed_ins, deep=deep, keep=keep),
+            self.pvs.concat(other.pvs, deep=deep, keep=keep),
+            self.wecs.concat(other.wecs, deep=deep, keep=keep),
+            self.storages.concat(other.storages, deep=deep, keep=keep),
+            self.evcs.concat(other.evcs, deep=deep, keep=keep),
+            self.evs.concat(other.evs, deep=deep, keep=keep),
+            self.hps.concat(other.hps, deep=deep, keep=keep),
+            self.flex.concat(other.flex, deep=deep, keep=keep),
         )
 
     def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):

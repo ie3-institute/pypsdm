@@ -1,5 +1,7 @@
 from pypsdm.db.gwr import GRID_ID_REGEX, RESULT_DATE_REGEX, RESULT_ID_REGEX, LocalGwrDb
 
+# TODO: Write tets for LocalGwrDb (include creation utils from tests/db/utils)
+
 
 def test_regex():
     assert GRID_ID_REGEX.match("my_grid-v1")

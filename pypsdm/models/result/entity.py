@@ -143,15 +143,39 @@ class ResultEntities(ABC):
                 differences=[(type(self), str(e))],
             )
 
+    def concat(
+        self: ResultType, other: ResultType, deep: bool = False, keep: str = "last"
+    ) -> ResultType:
+        """
+        Concatenates the data of the current and the other ResultEntities object.
+
+        NOTE: This only makes sense if their indexes are continuous. Given that
+        we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        If you want to add the underlying entities, use the `__add__` method.
+
+        Args:
+            other: The other ResultDict object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        if not self.input_model == other.input_model:
+            raise ValueError("Input models do not match.")
+        data = pd.concat([self.data, other.data], axis=0)
+        data.sort_index(inplace=True)
+        data = data[~data.index.duplicated(keep=keep)]  # type: ignore
+        return self.copy(deep, data=data)
+
     def copy(
         self: ResultType,
-        deep=True,
+        deep: bool = True,
         **changes,
     ) -> ResultType:
         """
         Creates a copy of the current ResultEntities instance.
         By default does a deep copy of all data and replaces the given changes.
-        When deep is false, only the references to the data of the non-changed attribtues are copied.
 
         Args:
             deep: Whether to do a deep copy of the data.
@@ -160,8 +184,10 @@ class ResultEntities(ABC):
         Returns:
             The copy of the current Entities instance.
         """
-        to_copy = copy.deepcopy(self) if deep else self
-        return replace(to_copy, **changes)
+        shallow_copy = replace(self, **changes)
+        if deep:
+            return copy.deepcopy(shallow_copy)
+        return shallow_copy
 
     @staticmethod
     @abstractmethod

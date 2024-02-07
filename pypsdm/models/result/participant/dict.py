@@ -189,6 +189,41 @@ class ResultDict(Generic[T], ABC):
                 f"Comparison of {type(self)} failed", differences=differences
             )
 
+    def concat(
+        self: ResultDictType, other: ResultDictType, deep: bool = True, keep="last"
+    ):
+        """
+        Concatenates the data of the two ResultDicts, which means concatenating
+        the data of their entities.
+
+        NOTE: This only makes sense if the entities indexes are continuous. Given
+        that we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        Args:
+            other: The other ResultEntities object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        if not isinstance(other, type(self)):
+            raise TypeError(f"Cannot concatenate {type(self)} and {type(other)}")
+        if self.entity_type != other.entity_type:
+            raise TypeError(
+                f"Cannot add {type(self)} and {type(other)}. Entities are of different entity types"
+            )
+
+        if not set(self.entities.keys()) == set(other.entities.keys()):
+            raise ValueError(
+                "ResultDicts need to contain the same entities to be concatenated"
+            )
+        concat_entities = {}
+        for key, entity in self.entities.items():
+            concat_entities[key] = entity.concat(
+                other.entities[key], deep=deep, keep=keep
+            )
+        return type(self)(self.entity_type, concat_entities)
+
     def to_csv(
         self,
         path: str,
