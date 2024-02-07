@@ -23,8 +23,128 @@ class GridWithResults(ContainerMixin):
     grid: GridContainer
     results: GridResultContainer
 
+    @property
+    def participants(self):
+        return self.grid.participants
+
+    @property
+    def nodes(self):
+        return self.grid.nodes
+
+    @property
+    def lines(self):
+        return self.grid.lines
+
+    @property
+    def transformers_2_w(self):
+        return self.grid.transformers_2_w
+
+    @property
+    def switches(self):
+        return self.grid.switches
+
+    @property
+    def ems(self):
+        return self.participants.ems
+
+    @property
+    def loads(self):
+        return self.participants.loads
+
+    @property
+    def fixed_feed_ins(self):
+        return self.participants.fixed_feed_ins
+
+    @property
+    def pvs(self):
+        return self.participants.pvs
+
+    @property
+    def biomass_plants(self):
+        return self.participants.biomass_plants
+
+    @property
+    def wecs(self):
+        return self.participants.wecs
+
+    @property
+    def storages(self):
+        return self.participants.storages
+
+    @property
+    def evs(self):
+        return self.participants.evs
+
+    @property
+    def evcs(self):
+        return self.participants.evcs
+
+    @property
+    def hps(self):
+        return self.participants.hps
+
+    @property
+    def nodes_res(self):
+        return self.results.nodes
+
+    @property
+    def lines_res(self):
+        return self.results.lines
+
+    @property
+    def transformers_2_w_res(self):
+        return self.results.transformers_2w
+
+    @property
+    def switches_res(self):
+        return self.results.switches
+
+    @property
+    def participants_res(self):
+        return self.results.participants
+
+    @property
+    def ems_res(self):
+        return self.participants_res.ems
+
+    @property
+    def loads_res(self):
+        return self.participants_res.loads
+
+    @property
+    def fixed_feed_ins_res(self):
+        return self.participants_res.fixed_feed_ins
+
+    @property
+    def pvs_res(self):
+        return self.participants_res.pvs
+
+    @property
+    def wecs_res(self):
+        return self.participants_res.wecs
+
+    @property
+    def storages_res(self):
+        return self.participants_res.storages
+
+    @property
+    def evs_res(self):
+        return self.participants_res.evs
+
+    @property
+    def evcs_res(self):
+        return self.participants_res.evcs
+
+    @property
+    def hps_res(self):
+        return self.participants_res.hps
+
+    @property
+    def flex_res(self):
+        return self.participants_res.flex
+
     def nodal_energies(self) -> dict[str, float]:
-        return {uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuid}
+        return {uuid: self.nodal_energy(uuid) for uuid in self.grid.nodes.uuid}
 
     def to_list(self, include_empty: bool = False) -> list:
         elems = [self.grid, self.results]
@@ -42,12 +162,12 @@ class GridWithResults(ContainerMixin):
     def nodal_result(self, node_uuid: str) -> "GridResultContainer":
         node_participants = self.grid.node_participants_map[node_uuid]
         participants_uuids = node_participants.uuids()
-        participants = self.results.participants.subset(participants_uuids)
+        participants = self.participants_res.subset(participants_uuids)
         return GridResultContainer(
             name=node_uuid,
             nodes=NodesResult(
                 RawGridElementsEnum.NODE,
-                {node_uuid: self.results.nodes.entities[node_uuid]},
+                {node_uuid: self.nodes_res.entities[node_uuid]},
             ),
             lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
             transformers_2w=Transformers2WResult.create_empty(
@@ -60,11 +180,11 @@ class GridWithResults(ContainerMixin):
     def em_results(
         self,
     ) -> list[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
-        uuid_to_connected_asset = self.grid.participants.ems.uuid_to_connected_assets()
+        uuid_to_connected_asset = self.ems.uuid_to_connected_assets()
         return [
             (
-                self.grid.participants.subset(connected_assets + [em_uuid]),
-                self.results.participants.subset(connected_assets + [em_uuid]),
+                self.participants.subset(connected_assets + [em_uuid]),
+                self.participants_res.subset(connected_assets + [em_uuid]),
             )
             for (em_uuid, connected_assets) in uuid_to_connected_asset.items()
         ]
@@ -88,7 +208,7 @@ class GridWithResults(ContainerMixin):
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
             uuid
-        ), self.results.participants.find_participant_result(uuid)
+        ), self.participants_res.find_participant_result(uuid)
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridWithResults(

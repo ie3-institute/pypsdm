@@ -23,6 +23,46 @@ class GridResultContainer(ContainerMixin):
     switches: SwitchesResult
     participants: ParticipantsResultContainer
 
+    @property
+    def ems(self):
+        return self.participants.ems
+
+    @property
+    def loads(self):
+        return self.participants.loads
+
+    @property
+    def fixed_feed_ins(self):
+        return self.participants.fixed_feed_ins
+
+    @property
+    def pvs(self):
+        return self.participants.pvs
+
+    @property
+    def wecs(self):
+        return self.participants.wecs
+
+    @property
+    def storages(self):
+        return self.participants.storages
+
+    @property
+    def evs(self):
+        return self.participants.evs
+
+    @property
+    def evcs(self):
+        return self.participants.evcs
+
+    @property
+    def hps(self):
+        return self.participants.hps
+
+    @property
+    def flex(self):
+        return self.participants.flex
+
     def __len__(self):
         return (
             len(self.nodes)
