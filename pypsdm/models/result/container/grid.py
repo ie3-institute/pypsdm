@@ -31,12 +31,18 @@ class GridResultContainer(ContainerMixin):
             + len(self.participants)
         )
 
-    # todo: implement slicing
+    # TODO: implement slicing
     def __getitem__(self, slice_val):
         raise NotImplementedError
 
     def to_list(self, include_empty: bool = False) -> list:
-        res = [self.nodes, self.lines, self.transformers_2w, self.participants]
+        res = [
+            self.nodes,
+            self.lines,
+            self.transformers_2w,
+            self.switches,
+            self.participants,
+        ]
         return res if include_empty else [r for r in res if r]
 
     def uuids(self) -> set[str]:
@@ -60,6 +66,30 @@ class GridResultContainer(ContainerMixin):
             self.transformers_2w.filter_for_time_interval(start, end),
             self.switches.filter_for_time_interval(start, end),
             self.participants.filter_for_time_interval(start, end),
+        )
+
+    def concat(self, other: "GridResultContainer", deep: bool = True, keep="last"):
+        """
+        Concatenates the data of the two containers, which means concatenating
+        the data of their entities.
+
+        NOTE: This only makes sense if the entities indexes are continuous. Given
+        that we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        Args:
+            other: The other GridResultContainer object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        return GridResultContainer(
+            self.name,
+            self.nodes.concat(other.nodes),
+            self.lines.concat(other.lines),
+            self.transformers_2w.concat(other.transformers_2w),
+            self.switches.concat(other.switches),
+            self.participants.concat(other.participants),
         )
 
     def to_csv(self, path: str, delimiter: str = ",", mkdirs: bool = False):

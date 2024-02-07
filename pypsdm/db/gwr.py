@@ -19,7 +19,7 @@ GRID_ID_REGEX = re.compile(r"(\w+)-v(\d+)")
 # [date[optional increment]]-[GRID_ID_REGEX][-optional suffix]
 # e.g. 2023_11_23-1-my_grid-v1-my_suffix
 RESULT_DATE_REGEX = re.compile(r"(\d{4}_\d{2}_\d{2})(?:-\d+)?")
-RESULT_SUFFIX_REGEX = re.compile(r"(?:-([\w-]+))?")
+RESULT_SUFFIX_REGEX = re.compile(r"(?:-(.+))?")
 RESULT_ID_REGEX = re.compile(
     r"{}-({}){}".format(
         RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern, RESULT_SUFFIX_REGEX.pattern
@@ -311,6 +311,7 @@ class LocalGwrDb(PathManagerMixin):
         self,
         results_path: str | Path,
         versioned_grid_id: str,
+        suffix: str | None = None,
         date: datetime | None = None,
         move=False,
     ):
@@ -325,8 +326,8 @@ class LocalGwrDb(PathManagerMixin):
             date (datetime, optional): Date of results. Defaults to None.
             move (bool, optional): Move results to database source path. Defaults to False.
         """
-        versioned_grid_id_match = GRID_ID_REGEX.match(versioned_grid_id)
-        if not versioned_grid_id_match:
+        versioned_grid_id_match = self.match_grid_id(versioned_grid_id)
+        if versioned_grid_id_match is None:
             raise ValueError(
                 f"Invalid grid_id: {versioned_grid_id}, expected format: {GRID_ID_REGEX.pattern}"
             )
@@ -349,7 +350,7 @@ class LocalGwrDb(PathManagerMixin):
             date = datetime.fromtimestamp(raw_output_path_stat.st_mtime)
 
         # Add result data
-        res_id = self.create_res_id(versioned_grid_id, date)
+        res_id = self.create_res_id(versioned_grid_id, date, suffix)
         destination_dir = self.results_path.joinpath(res_id)
         if destination_dir.exists():
             raise FileExistsError(f"Results with id {res_id} already exists.")
