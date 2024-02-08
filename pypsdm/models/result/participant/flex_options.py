@@ -1,6 +1,4 @@
-import os.path
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Dict, List
 
 import pandas as pd
@@ -108,48 +106,3 @@ class FlexOptionsResult(ResultDict):
 
     def sum(self) -> FlexOptionResult:
         return FlexOptionResult.sum(list(self.entities.values()))
-
-    @classmethod
-    def from_csv(
-        cls,
-        sp_type: SystemParticipantsEnum,
-        simulation_data_path: str,
-        simulation_end: datetime,
-        delimiter: str | None = None,
-        from_df: bool = False,
-    ) -> "FlexOptionsResult":
-        if from_df:
-            path = os.path.join(simulation_data_path, "flex_df.csv")
-            if not os.path.exists(path):
-                return cls.create_empty(SystemParticipantsEnum.FLEX_OPTIONS)
-            data = pd.read_csv(
-                os.path.join(simulation_data_path, "flex_df.csv"),
-                delimiter=delimiter,
-                index_col=0,
-                header=[0, 1],
-            )
-            data_dicts = {}
-            for uuid in data.columns.get_level_values(0):
-                data_dicts[uuid] = data[uuid]
-            return cls(SystemParticipantsEnum.FLEX_OPTIONS, data_dicts)
-
-        participant_grpd_df = ResultDict.get_grpd_df(
-            sp_type,
-            simulation_data_path,
-            delimiter,
-        )
-
-        if not participant_grpd_df:
-            return cls.create_empty(SystemParticipantsEnum.FLEX_OPTIONS)
-
-        participants = dict(
-            participant_grpd_df.apply(
-                lambda grp: FlexOptionResult.build(
-                    sp_type,
-                    grp.name,
-                    grp.drop(columns=["input_model"]),
-                    simulation_end,
-                )
-            )
-        )
-        return cls(sp_type, participants)

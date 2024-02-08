@@ -12,7 +12,7 @@ from pandas.core.groupby.generic import DataFrameGroupBy
 
 from pypsdm.errors import ComparisonError
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
-from pypsdm.models.enums import EntitiesEnum, EntityEnumType
+from pypsdm.models.enums import EntitiesEnum
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.result.entity import ResultEntities
 from pypsdm.processing.dataframe import join_dataframes
@@ -258,7 +258,7 @@ class ResultDict(Generic[T], ABC):
     @classmethod
     def from_csv(
         cls: Type[ResultDictType],
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         simulation_data_path: str,
         delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
@@ -299,12 +299,12 @@ class ResultDict(Generic[T], ABC):
         )
 
     @classmethod
-    def create_empty(cls: Type[Self], entity_type: EntityEnumType) -> Self:
+    def create_empty(cls: Type[Self], entity_type: EntitiesEnum) -> Self:
         return cls(entity_type, dict())
 
     @staticmethod
     def build_for_entity(
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         input_model: str,
         data: DataFrame,
         simulation_end: datetime,
@@ -325,7 +325,7 @@ class ResultDict(Generic[T], ABC):
 
     @staticmethod
     def get_grpd_df(
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         simulation_data_path: str,
         delimiter: str | None = None,
     ) -> Optional[DataFrameGroupBy]:
@@ -343,7 +343,7 @@ class ResultDict(Generic[T], ABC):
         return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
-    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[Path]:
+    def safe_get_path(entity_type: EntitiesEnum, data_path: str) -> Optional[Path]:
         file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(data_path, file_name)
         if path.exists():

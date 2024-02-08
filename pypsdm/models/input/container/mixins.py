@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import Self
 
 from pypsdm.errors import ComparisonError
 
@@ -24,10 +25,10 @@ class ContainerMixin(ABC):
 
     @classmethod
     @abstractmethod
-    def create_empty(cls):
+    def create_empty(cls) -> Self:
         pass
 
-    def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
+    def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):
         for entities in self.to_list():
             try:
                 entities.to_csv(path, delimiter=delimiter, mkdirs=mkdirs)

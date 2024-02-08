@@ -257,10 +257,7 @@ class ParticipantsResultContainer(ContainerMixin):
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
-                filter(
-                    lambda x: x != SystemParticipantsEnum.FLEX_OPTIONS,
-                    SystemParticipantsEnum.values(),
-                ),
+                SystemParticipantsEnum.values(),
             )
             participant_result_map = {}
             for participant_result in participant_results:
@@ -278,12 +275,7 @@ class ParticipantsResultContainer(ContainerMixin):
             evcs=participant_result_map[SystemParticipantsEnum.EV_CHARGING_STATION],
             evs=participant_result_map[SystemParticipantsEnum.ELECTRIC_VEHICLE],
             hps=participant_result_map[SystemParticipantsEnum.HEAT_PUMP],
-            flex=FlexOptionsResult.from_csv(
-                SystemParticipantsEnum.FLEX_OPTIONS,
-                simulation_data_path,
-                simulation_end,
-                delimiter,
-            ),
+            flex=participant_result_map[SystemParticipantsEnum.FLEX_OPTIONS],
         )
         return (
             res
@@ -303,22 +295,23 @@ class ParticipantsResultContainer(ContainerMixin):
             input_entities = grid_container.participants.get_participants(participant)
         else:
             input_entities = None
+        dict_type = ParticipantsResultContainer.get_result_dict_type(participant)
+        return dict_type.from_csv(
+            participant,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+        )
+
+    @staticmethod
+    def get_result_dict_type(participant: SystemParticipantsEnum):
         if participant.has_soc():
-            return PQWithSocResultDict.from_csv(
-                participant,
-                simulation_data_path,
-                delimiter,
-                simulation_end,
-                input_entities,
-            )
+            return PQWithSocResultDict
+        elif participant == SystemParticipantsEnum.FLEX_OPTIONS:
+            return FlexOptionsResult
         else:
-            return PQResultDict.from_csv(
-                participant,
-                simulation_data_path,
-                delimiter,
-                simulation_end,
-                input_entities=input_entities,
-            )
+            return PQResultDict
 
     @classmethod
     def create_empty(cls):

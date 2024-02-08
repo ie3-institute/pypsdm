@@ -5,17 +5,12 @@ from datetime import datetime
 from typing import Optional, Tuple, Union
 
 from pypsdm.io.utils import check_filter
-from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.connector import ConnectorsResult
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
-from pypsdm.models.result.grid.node import NodesResult
-from pypsdm.models.result.grid.switch import SwitchesResult
-from pypsdm.models.result.grid.transformer import Transformers2WResult
 
 
 @dataclass(frozen=True)
@@ -84,20 +79,24 @@ class GridWithResults(ContainerMixin):
         return self.participants.hps
 
     @property
+    def raw_grid_res(self):
+        return self.results.raw_grid
+
+    @property
     def nodes_res(self):
-        return self.results.nodes
+        return self.raw_grid_res.nodes
 
     @property
     def lines_res(self):
-        return self.results.lines
+        return self.raw_grid_res.lines
 
     @property
     def transformers_2_w_res(self):
-        return self.results.transformers_2w
+        return self.raw_grid_res.transformers_2w
 
     @property
     def switches_res(self):
-        return self.results.switches
+        return self.raw_grid_res.switches
 
     @property
     def participants_res(self):
@@ -165,15 +164,7 @@ class GridWithResults(ContainerMixin):
         participants = self.participants_res.subset(participants_uuids)
         return GridResultContainer(
             name=node_uuid,
-            nodes=NodesResult(
-                RawGridElementsEnum.NODE,
-                {node_uuid: self.nodes_res.entities[node_uuid]},
-            ),
-            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
-            transformers_2w=Transformers2WResult.create_empty(
-                RawGridElementsEnum.TRANSFORMER_2_W
-            ),
-            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
+            raw_grid=self.raw_grid_res.nodal_result(node_uuid),
             participants=participants,
         )
 

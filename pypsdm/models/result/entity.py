@@ -85,14 +85,14 @@ class ResultEntities(ABC):
             logging.warning(
                 "Trying to access data after last time step. Returning last time step."
             )
-            return self.data.iloc[-1], self.data.index[-1]
+            return self.data.iloc[-1], self.data.index[-1]  # type: ignore
         if dt < self.data.index[0]:
             logging.warning(
                 "Trying to access data before first time step. Returning first time step."
             )
-            return self.data.iloc[0], self.data.index[0]
+            return self.data.iloc[0], self.data.index[0]  # type: ignore
         else:
-            return self.data.asof(dt), dt
+            return self.data.asof(dt), dt  # type: ignore
 
     def find_input_entity(self, input_model: EntityType) -> EntityType:
         """
