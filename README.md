@@ -6,9 +6,7 @@ It is currently under development. So if you want to use it, expect it to change
 
 ## Installation
 
-We use [poetry](https://python-poetry.org/docs/) for dependency management.
-
-To install the package run
+To add the project as dependency run 
 ```console
 pip install pypsdm
 ```
@@ -18,6 +16,13 @@ poetry add pypsdm
 ```
 depending on your depedency management system. 
 
+If you want to clone and explore the repository locally, run
+```console
+poetry install 
+```
+inside the repository root folder.
+For more information about poetry, refer to their [documentation](https://python-poetry.org/docs/).
+
 ## Documentation
 
 Please refer to:
@@ -26,7 +31,7 @@ Please refer to:
 - `docs/nbs/result_models.ipynb`
 - `docs/nbs/plotting_utilities.ipynb`
 
-to see exemplary notebooks outlining some of the basic functionalites.
+to see exemplary notebooks outlining some of the basic functionalities.
 
 ## Quickstart:
 
@@ -60,3 +65,10 @@ from pypsdm.models.results import GridResultContainer
 result_path = "/path/to/my/psdm/results"
 results = GridResultContainer.from_csv(result_path)
 ```
+
+## Known Issues
+
+- When adding the project as a dependency the language server of the code editors do not 
+suggest autoimports for all symbols of the project, which means they have to be imported
+manually. It might  have something to do with how poetry publishes the artifacts. If you
+have an idea what the issue could be any tipps are welcome.
