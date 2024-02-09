@@ -167,7 +167,6 @@ class GridWithResults(ContainerMixin):
         participants_uuids = node_participants.uuids()
         participants = self.participants_res.subset(participants_uuids)
         return GridResultContainer(
-            name=node_uuid,
             raw_grid=self.raw_grid_res.nodal_result(node_uuid),
             participants=participants,
         )
@@ -234,7 +233,6 @@ class GridWithResults(ContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        name: str,
         grid_path: str,
         result_path: str,
         grid_delimiter: str | None = None,
@@ -257,7 +255,6 @@ class GridWithResults(ContainerMixin):
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
 
         results = GridResultContainer.from_csv(
-            name,
             result_path,
             result_delimiter,
             simulation_end,

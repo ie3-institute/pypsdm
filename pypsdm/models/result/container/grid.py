@@ -11,7 +11,6 @@ from pypsdm.models.result.container.raw_grid import RawGridResultContainer
 
 @dataclass(frozen=True)
 class GridResultContainer(ContainerMixin):
-    name: str
     raw_grid: RawGridResultContainer
     participants: ParticipantsResultContainer
 
@@ -94,14 +93,12 @@ class GridResultContainer(ContainerMixin):
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridResultContainer(
-            self.name,
             self.raw_grid.filter_by_date_time(time),
             self.participants.filter_by_date_time(time),
         )
 
     def filter_for_time_interval(self, start: datetime, end: datetime):
         return GridResultContainer(
-            self.name,
             self.raw_grid.filter_for_time_interval(start, end),
             self.participants.filter_for_time_interval(start, end),
         )
@@ -122,7 +119,6 @@ class GridResultContainer(ContainerMixin):
             keep: How to handle duplicate indexes. "last" by default.
         """
         return GridResultContainer(
-            self.name,
             self.raw_grid.concat(other.raw_grid, deep=deep, keep=keep),
             self.participants.concat(other.participants, deep=deep, keep=keep),
         )
@@ -130,7 +126,6 @@ class GridResultContainer(ContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        name: str,
         simulation_data_path: str,
         delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
@@ -158,12 +153,11 @@ class GridResultContainer(ContainerMixin):
             delimiter=delimiter,
         )
 
-        return cls(name, raw_grid, participants)
+        return cls(raw_grid, participants)
 
     @classmethod
     def create_empty(cls):
         return cls(
-            name="Empty Container",
             raw_grid=RawGridResultContainer.create_empty(),
             participants=ParticipantsResultContainer.create_empty(),
         )

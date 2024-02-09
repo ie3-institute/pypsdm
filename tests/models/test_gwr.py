@@ -66,7 +66,6 @@ def test_create_empty():
 def test_to_csv(gwr: GridWithResults, tmp_path):
     gwr.to_csv(tmp_path, tmp_path, include_primary_data=True)
     gwr_b = GridWithResults.from_csv(
-        gwr.results.name,
         tmp_path,
         tmp_path,
     )
