@@ -21,8 +21,8 @@ from pypsdm.plots.results.power_plot import ax_plot_active_power
 
 def plot_all_participants_flex_range(
     participants_res_container: ParticipantsResultContainer,
-    title: str,
     resolution: str,
+    title: str = "Participants Flex Range",
     hourly_mean: bool = False,
     include_actual_res=False,
 ):
@@ -33,11 +33,10 @@ def plot_all_participants_flex_range(
         )
         if res.entity_type != SystemParticipantsEnum.LOAD
     ]
-
     plot_count = len(em_res_list)
-    fig, axs = plt.subplots(plot_count, 1, figsize=(10, 11), sharex=True, sharey=False)
 
-    # plt.tight_layout()
+    fig, axs = plt.subplots(plot_count, 1, figsize=(10, 11), sharex=True, sharey=False)
+    fig.suptitle(title)
     plt.subplots_adjust(hspace=0.5)
 
     for idx, participant_res in enumerate(em_res_list):

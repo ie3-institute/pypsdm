@@ -600,7 +600,7 @@ def ax_plot_soc(
 
 
 def plot_sorted_annual_load_duration(
-    res: PQResult, s_rated_mw: float = None, fill_from_index=False, **kwargs
+    res: PQResult, s_rated_mw: float | None = None, fill_from_index=False, **kwargs
 ):
     args = get_label_and_color_dict(res.entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
