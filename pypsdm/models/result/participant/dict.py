@@ -44,25 +44,16 @@ class ResultDict(Generic[T], ABC):
     def __contains__(self, uuid):
         return uuid in self.entities
 
-    def __getitem__(self, get) -> T | Self:
+    def __getitem__(self, get) -> T:
         match get:
             case str():
                 return self.entities[get]
             case slice():
-                start, stop, step = get.start, get.stop, get.step
-                if step is not None:
-                    logging.warning("Step is not supported for slicing. Ignoring it.")
-                if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-                    raise ValueError("Only datetime slicing is supported")
-                entities = {
-                    key: e.filter_for_time_interval(start, stop)
-                    for key, e in self.entities.items()
-                }
-                return type(self)(self.entity_type, entities)
-            case _:
                 raise ValueError(
-                    "Only get by uuid or datetime slice for filtering is supported."
+                    "If you want to filter by time interval use filter_for_time_interval method instead."
                 )
+            case _:
+                raise ValueError("Only get by uuid is supported.")
 
     def __add__(self: ResultDictType, other: ResultDictType):
         """
@@ -232,7 +223,7 @@ class ResultDict(Generic[T], ABC):
         resample_rate: Optional[str] = None,
     ):
         if mkdirs:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+            os.makedirs(path, exist_ok=True)
 
         file_name = self.entity_type.get_csv_result_file_name()
 

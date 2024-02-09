@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 
 
 def set_sns_style(style: str = "whitegrid", context: str = "notebook"):
-    sns.set_style(style)
-    sns.set_context(context)
+    sns.set_style(style)  # type: ignore
+    sns.set_context(context)  # type: ignore
 
 
 def set_gruvbox_minor_dark_hard():

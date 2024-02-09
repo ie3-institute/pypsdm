@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
@@ -31,13 +32,25 @@ class EnhancedNodeResult(NodeResult):
     def from_node_result(
         cls, node_res: NodeResult, pq: PQResult
     ) -> "EnhancedNodeResult":
+
+        if pq:
+            # First time step of nodal voltages will most likely be nan because SIMONA pf calculation
+            # starts at t+1. In this case we drop the time step.
+            data = (
+                pd.concat([node_res.data, pq.data], axis=1)
+                .sort_index()
+                .ffill()
+                .dropna()
+            )
+        else:
+            data = node_res.data
+            data["p"] = np.nan
+            data["q"] = np.nan
         return cls(
             RawGridElementsEnum.NODE,
             node_res.input_model,
             node_res.name,
-            # First time step of nodal voltages will most likely be nan because SIMONA pf calculation
-            # starts at t+1. In this case we drop the time step.
-            pd.concat([node_res.data, pq.data], axis=1).sort_index().ffill().dropna(),
+            data,
         )
 
 

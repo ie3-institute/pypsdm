@@ -23,6 +23,10 @@ class GridWithResults(ContainerMixin):
         return self.grid.participants
 
     @property
+    def raw_grid(self):
+        return self.grid.raw_grid
+
+    @property
     def nodes(self):
         return self.grid.nodes
 
@@ -185,7 +189,7 @@ class GridWithResults(ContainerMixin):
 
         with ProcessPoolExecutor() as executor:
             futures = {
-                executor.submit(self.calc_pq, uuid, nodal_result)
+                executor.submit(self._calc_pq, uuid, nodal_result)
                 for uuid, nodal_result in nodal_results.items()
             }
 
@@ -225,7 +229,7 @@ class GridWithResults(ContainerMixin):
             mkdirs=mkdirs,
             delimiter=delimiter,
         )
-        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=False)
+        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=mkdirs)
 
     @classmethod
     def from_csv(
@@ -278,6 +282,9 @@ class GridWithResults(ContainerMixin):
         )
 
     @staticmethod
-    def calc_pq(uuid, nodal_result: GridResultContainer):
+    def _calc_pq(uuid, nodal_result: GridResultContainer):
+        """
+        NOTE: Utilit
+        """
         pq = nodal_result.participants.sum()
         return uuid, pq

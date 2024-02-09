@@ -88,8 +88,9 @@ def plot_all_nodal_ps_branch_violin(
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
-        ax_plot_nodal_ps_violin(axes[i], nodes_res, branch)  # type: ignore
-        set_subplot_title(axes[i], f"Nodal Actice Power Along Branch {i+1}")
+        ax = axes[i] if len(branches) > 1 else axes
+        ax_plot_nodal_ps_violin(ax, nodes_res, branch)  # type: ignore
+        set_subplot_title(ax, f"Nodal Actice Power Along Branch {i+1}")
     plt.tight_layout()
 
     return fig, axes
@@ -132,9 +133,9 @@ def ax_plot_nodal_ps_violin(
 
     if nodes:
         # get v_mag in listed sequence
-        p = nodes_res.subset(nodes).ps(ffill).reindex(columns=nodes)
+        p = nodes_res.subset(nodes).p.reindex(columns=nodes)
     else:
-        p = nodes_res.ps(ffill)
+        p = nodes_res.p
 
     sns.violinplot(p, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
 
@@ -206,9 +207,9 @@ def plot_em(
 
 def plot_aggregated_load_and_generation(
     participants: Union[ParticipantsResultContainer, list[PQResult]],
-    title: str,
     resolution: str,
-    hourly_mean: bool,
+    title: str = "Aggregated Load and Generation",
+    hourly_mean: bool = False,
     with_residual=True,
 ):
     if with_residual:
@@ -512,7 +513,7 @@ def ax_plot_reactive_power(
 
     ax = ax_plot_time_series(
         ax,
-        res.q,
+        res.q * 1e3,
         res.entity_type,
         resolution,
         hourly_mean=hourly_mean,
@@ -521,7 +522,7 @@ def ax_plot_reactive_power(
         set_x_label=set_x_label,
         **kwargs,
     )
-    ax.set_ylabel("Reactive Power in MVar")
+    ax.set_ylabel("Reactive Power in kVar")
 
 
 def ax_plot_power_angle(
