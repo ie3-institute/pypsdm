@@ -1,0 +1,3 @@
+uuid,id,operates_from,operates_until,operator,node_a,node_b,parallel_devices,tap_pos,auto_tap,type
+a0a83838-279a-449c-95d1-11e8aacc7736,HV1-MV3.101-Trafo1,,,,b0bbd85c-6540-4418-b083-455daed681bd,5d50a881-c383-463e-8355-41b3dd57422d,1,-1,true,39fc51d2-d708-4f6d-be67-29365e1ecf64
+53a15362-ac7d-455b-a5bc-9accce186097,HV1-MV3.101-Trafo2,,,,b0bbd85c-6540-4418-b083-455daed681bd,5d50a881-c383-463e-8355-41b3dd57422d,1,-1,true,39fc51d2-d708-4f6d-be67-29365e1ecf64
