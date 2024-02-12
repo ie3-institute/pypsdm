@@ -32,7 +32,6 @@ class EnhancedNodeResult(NodeResult):
     def from_node_result(
         cls, node_res: NodeResult, pq: PQResult
     ) -> "EnhancedNodeResult":
-
         if pq:
             # First time step of nodal voltages will most likely be nan because SIMONA pf calculation
             # starts at t+1. In this case we drop the time step.
@@ -43,7 +42,7 @@ class EnhancedNodeResult(NodeResult):
                 .dropna()
             )
         else:
-            data = node_res.data
+            data = node_res.data.copy()
             data["p"] = np.nan
             data["q"] = np.nan
         return cls(

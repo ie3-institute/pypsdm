@@ -281,7 +281,7 @@ class GridWithResults(ContainerMixin):
     @staticmethod
     def _calc_pq(uuid, nodal_result: GridResultContainer):
         """
-        NOTE: Utilit
+        NOTE: Utility function for parallel processing of building EnhancedNodesResult
         """
         pq = nodal_result.participants.sum()
         return uuid, pq

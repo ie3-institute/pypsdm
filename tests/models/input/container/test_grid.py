@@ -39,4 +39,5 @@ def test_container_to_csv(gwr):
 def test_compare(gwr):
     grid_a = gwr.grid
     grid_b = copy.deepcopy(grid_a)
-    assert grid_a.compare(grid_b) is None
+    grid_a.compare(grid_b)
+    assert grid_a == grid_b

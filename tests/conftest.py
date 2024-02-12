@@ -7,9 +7,8 @@ from definitions import ROOT_DIR
 from pypsdm.models.gwr import GridWithResults
 from pypsdm.models.input.container.grid import GridContainer
 
+
 # Note: the fixture scope defines how long the fixture is valid and prevents reevaluation
-
-
 @pytest.fixture(scope="session")
 def input_path():
     return os.path.join(ROOT_DIR, "tests", "resources", "vn_simona", "input")
@@ -36,9 +35,7 @@ def delimiter():
 
 
 @pytest.fixture(scope="session")
-def gwr(
-    input_path, result_path, simulation_start, simulation_end, delimiter
-) -> GridWithResults:
+def gwr(input_path, result_path, simulation_end) -> GridWithResults:
     return GridWithResults.from_csv(
         input_path,
         result_path,
