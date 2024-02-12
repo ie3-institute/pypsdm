@@ -10,7 +10,7 @@ Its main functionalities include:
 
 It is currently under development. So if you want to use it, expect it to change quite frequently for now.
 
-![PyPI - Version](https://img.shields.io/pypi/v/:pypsdm)
+![PyPI - Version](https://img.shields.io/pypi/v/pypsdm)
 
 ## Installation
 
