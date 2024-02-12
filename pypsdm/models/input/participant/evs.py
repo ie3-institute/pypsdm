@@ -7,6 +7,9 @@ from pypsdm.models.input.participant.participant import SystemParticipantsWithCa
 
 @dataclass(frozen=True)
 class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.ELECTRIC_VEHICLE

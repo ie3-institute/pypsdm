@@ -1,0 +1,12 @@
+uuid,closed,id,node_a,node_b,operates_from,operates_until,operator
+17eb35bc-bf79-4a74-bbe3-690cfb2885a2,false,MV3.101 loop_line_switch 8.2,a5ccf309-420a-474f-a6ed-96cb3ffa2e56,557b9f51-d83c-476c-a84c-d240530c203d,,,
+94feb25f-473b-444c-9172-02a473cba65e,false,MV3.101 loop_line_switch 4.2,8f65cec0-ee20-4f8c-8bdc-41f3218c067e,46b59740-e384-4038-beae-3de74fa9a3c6,,,
+b17b9afc-bbbe-4288-bfd2-5dfbd0b571e5,false,MV3.101 loop_line_switch 1.2,28a6c897-d718-4eb8-9088-4e8d455e5e8e,5d60f397-ce09-4dc5-87c9-0382e71c694e,,,
+43a560db-589b-4817-9fa9-07d3621d30fd,false,MV3.101 loop_line_switch 9.2,bd345c13-e871-4357-af6e-3969889ff035,effcc0e0-e7f0-4594-9ff4-32855011aa5e,,,
+d146cc7a-7861-4c97-82a9-df7693031cec,false,MV3.101 loop_line_switch 3.2,9e018a70-4da0-4f41-9a45-455b1173c3d2,ef10dec9-bbbe-4fe9-856c-28f44b5551bf,,,
+15f882f5-9936-4bb7-bb73-90b12bf5000a,false,MV3.101 loop_line_switch 6.2,b649cc84-5230-485a-808c-2078624d3681,fad370e8-1530-4310-8181-eacbd141642b,,,
+7fd035b5-6a36-4dcf-b37c-9eb76cd8692c,false,MV3.101 loop_line_switch 5.2,e9333524-c914-4799-961b-cfe5adfc5f52,8b864fa2-3051-4369-91ec-9e17b71a1423,,,
+5de8ea91-891f-434d-845a-2253f94de87a,false,MV3.101 loop_line_switch 10.2,42a7a176-bb8b-4281-8ba4-b2a2486f6b90,335dc8f6-35c6-4c94-bf39-a77cbee563e8,,,
+971b3477-213a-4b1b-9833-1c2facfcd232,false,MV3.101 loop_line_switch 7.2,01dca738-329e-4c8d-900c-fd0f48acc874,8252e667-afbf-4fff-b0b8-595f40b82273,,,
+b4f5f2b9-b033-4271-8c2e-9c809ea72fc3,false,MV3.101 loop_line_switch 11.2,a0716f3b-09b0-437c-98c4-dd18397051f1,a4b428dc-15dd-4b48-a115-322988f0cf73,,,
+7111ce99-02e4-429c-b34d-2244a7d6ac73,false,MV3.101 loop_line_switch 2.2,c69cc803-396c-4b15-af99-5eade9fcb66a,41fcce35-df2e-4053-8c3f-2aba19d62a77,,,

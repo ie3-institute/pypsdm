@@ -7,6 +7,9 @@ from pypsdm.models.input.node import Nodes
 
 @dataclass(frozen=True)
 class SystemParticipants(Entities, ABC):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @property
     def node(self):
         return self.data["node"]
@@ -29,6 +32,9 @@ class SystemParticipants(Entities, ABC):
 
 @dataclass(frozen=True)
 class SystemParticipantsWithCapacity(SystemParticipants):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def capacity(self):
         return self.data[self.capacity_attribute()]
 

@@ -5,17 +5,12 @@ from datetime import datetime
 from typing import Optional, Tuple, Union
 
 from pypsdm.io.utils import check_filter
-from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.connector import ConnectorsResult
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
-from pypsdm.models.result.grid.node import NodesResult
-from pypsdm.models.result.grid.switch import SwitchesResult
-from pypsdm.models.result.grid.transformer import Transformers2WResult
 
 
 @dataclass(frozen=True)
@@ -26,6 +21,10 @@ class GridWithResults(ContainerMixin):
     @property
     def participants(self):
         return self.grid.participants
+
+    @property
+    def raw_grid(self):
+        return self.grid.raw_grid
 
     @property
     def nodes(self):
@@ -84,20 +83,24 @@ class GridWithResults(ContainerMixin):
         return self.participants.hps
 
     @property
+    def raw_grid_res(self):
+        return self.results.raw_grid
+
+    @property
     def nodes_res(self):
-        return self.results.nodes
+        return self.raw_grid_res.nodes
 
     @property
     def lines_res(self):
-        return self.results.lines
+        return self.raw_grid_res.lines
 
     @property
     def transformers_2_w_res(self):
-        return self.results.transformers_2w
+        return self.raw_grid_res.transformers_2w
 
     @property
     def switches_res(self):
-        return self.results.switches
+        return self.raw_grid_res.switches
 
     @property
     def participants_res(self):
@@ -164,16 +167,7 @@ class GridWithResults(ContainerMixin):
         participants_uuids = node_participants.uuids()
         participants = self.participants_res.subset(participants_uuids)
         return GridResultContainer(
-            name=node_uuid,
-            nodes=NodesResult(
-                RawGridElementsEnum.NODE,
-                {node_uuid: self.nodes_res.entities[node_uuid]},
-            ),
-            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
-            transformers_2w=Transformers2WResult.create_empty(
-                RawGridElementsEnum.TRANSFORMER_2_W
-            ),
-            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
+            raw_grid=self.raw_grid_res.nodal_result(node_uuid),
             participants=participants,
         )
 
@@ -194,7 +188,7 @@ class GridWithResults(ContainerMixin):
 
         with ProcessPoolExecutor() as executor:
             futures = {
-                executor.submit(self.calc_pq, uuid, nodal_result)
+                executor.submit(self._calc_pq, uuid, nodal_result)
                 for uuid, nodal_result in nodal_results.items()
             }
 
@@ -234,12 +228,11 @@ class GridWithResults(ContainerMixin):
             mkdirs=mkdirs,
             delimiter=delimiter,
         )
-        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=False)
+        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=mkdirs)
 
     @classmethod
     def from_csv(
         cls,
-        name: str,
         grid_path: str,
         result_path: str,
         grid_delimiter: str | None = None,
@@ -262,7 +255,6 @@ class GridWithResults(ContainerMixin):
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
 
         results = GridResultContainer.from_csv(
-            name,
             result_path,
             result_delimiter,
             simulation_end,
@@ -287,6 +279,9 @@ class GridWithResults(ContainerMixin):
         )
 
     @staticmethod
-    def calc_pq(uuid, nodal_result: GridResultContainer):
+    def _calc_pq(uuid, nodal_result: GridResultContainer):
+        """
+        NOTE: Utility function for parallel processing of building EnhancedNodesResult
+        """
         pq = nodal_result.participants.sum()
         return uuid, pq

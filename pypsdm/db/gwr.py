@@ -189,7 +189,6 @@ class LocalGwrDb(PathManagerMixin):
             )
 
         return GridWithResults.from_csv(
-            name=grid_id,
             grid_path=str(grid_path),
             result_path=res_path,
         )

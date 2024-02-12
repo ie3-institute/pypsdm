@@ -23,6 +23,9 @@ from pypsdm.processing.series import (
 
 @dataclass(frozen=True)
 class PQResult(ResultEntities):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __add__(self, other: "PQResult"):
         p_sum = add_series(self.p, other.p, "p")
         q_sum = add_series(self.q, other.q, "q")
@@ -52,11 +55,6 @@ class PQResult(ResultEntities):
 
     # commutative multiplication (a*b=b*a)
     __rmul__ = __mul__
-
-    def __eq__(self, other):
-        if not isinstance(other, PQResult):
-            return False
-        return (self.data == other.data).all()
 
     @property
     def p(self):
@@ -158,6 +156,9 @@ class PQResult(ResultEntities):
 
 @dataclass(frozen=True)
 class PQWithSocResult(PQResult):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def add_with_soc(
         self, this_capacity: float, other: "PQWithSocResult", other_capacity: float
     ):

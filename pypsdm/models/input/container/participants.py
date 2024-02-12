@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from typing import Union
 
@@ -103,7 +102,6 @@ class SystemParticipantsContainer(ContainerMixin):
         elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
         else:
-            logging.error(f"No return value for system participant of type: {sp_type}")
             return None
 
     def find_participant(self, uuid: str):

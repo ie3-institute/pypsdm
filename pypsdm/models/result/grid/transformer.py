@@ -16,6 +16,9 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class Transformer2WResult(ConnectorResult):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @property
     def tap_pos(self) -> Series:
         return self.data["tap_pos"]

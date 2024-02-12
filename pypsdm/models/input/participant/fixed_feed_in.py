@@ -6,6 +6,9 @@ from pypsdm.models.input.participant.participant import SystemParticipants
 
 @dataclass(frozen=True)
 class FixedFeedIns(SystemParticipants):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @staticmethod
     def get_enum() -> SystemParticipantsEnum:
         return SystemParticipantsEnum.FIXED_FEED_IN

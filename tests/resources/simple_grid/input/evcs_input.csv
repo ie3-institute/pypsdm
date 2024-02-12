@@ -1,0 +1,4 @@
+uuid,id,operates_from,operates_until,operator,node,q_characteristics,cos_phi_rated,charging_points,location_type,type,v2g_support
+08367f08-772e-4bc2-b38a-bf8575c8ed62,EVCS_NS_02,,,,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"cosPhiFixed:{(0.0, 0.9)}",0.9,1,HOME,EVCS_NS_02(3.7|AC),false
+4602fd48-b8be-41f2-8514-6e119309f409,EVCS_NS_03,,,,1dcddd06-f41a-405b-9686-7f7942852196,"cosPhiFixed:{(0.0, 0.9)}",0.9,1,HOME,EVCS_NS_03(3.7|AC),false
+432d69a8-e8eb-4db0-93ec-3abe61194472,EVCS_NS_04,,,,e3c3c6a3-c383-4dbb-9b3f-a14125615386,"cosPhiFixed:{(0.0, 0.9)}",0.9,1,HOME,EVCS_NS_04(3.7|AC),false

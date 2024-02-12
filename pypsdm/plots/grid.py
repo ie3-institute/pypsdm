@@ -6,13 +6,13 @@ from pandas import Series
 from shapely.geometry import LineString
 
 from pypsdm.models.input.container.grid import GridContainer
-from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, rgb_to_hex
+from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
 
 def grid_plot(
     grid: GridContainer,
-    node_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
-    line_highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+    line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
 ) -> go.Figure:
     """
@@ -97,15 +97,21 @@ def _add_line_trace(
     hover_text = line_data["id"]
 
     color = GREEN
+    highlighted = False
     if isinstance(highlights, dict):
         for line_color, lines in highlights.items():
             if line_data.name in lines:  # type: ignore
                 color = line_color
+                highlighted = True
     elif highlights is not None:
-        color = RED if line_data.name in highlights else GREEN
+        if line_data.name in highlights:
+            color = RED
+            highlighted = True
 
     if (highlight_disconnected is False) and is_disconnected:
-        color = GREY
+        # Highlights override the disconnected status
+        if not highlighted:
+            color = GREY
 
     # Add the lines
     fig.add_trace(

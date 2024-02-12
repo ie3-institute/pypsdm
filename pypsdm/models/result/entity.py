@@ -60,7 +60,7 @@ class ResultEntities(ABC):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, where: Union[slice, datetime, list[datetime]]):
+    def __getitem__(self, where: Union[slice, datetime, list[datetime]]) -> Self:
         if isinstance(where, slice):
             start, stop, step = where.start, where.stop, where.step
             if step is not None:
@@ -79,20 +79,22 @@ class ResultEntities(ABC):
             return self.build(
                 self.entity_type, self.input_model, data, max_dt, name=self.name
             )
+        else:
+            raise ValueError("Expected datetime slice, or datetime object(s).")
 
     def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
         if dt > self.data.index[-1]:
             logging.warning(
                 "Trying to access data after last time step. Returning last time step."
             )
-            return self.data.iloc[-1], self.data.index[-1]
+            return self.data.iloc[-1], self.data.index[-1]  # type: ignore
         if dt < self.data.index[0]:
             logging.warning(
                 "Trying to access data before first time step. Returning first time step."
             )
-            return self.data.iloc[0], self.data.index[0]
+            return self.data.iloc[0], self.data.index[0]  # type: ignore
         else:
-            return self.data.asof(dt), dt
+            return self.data.asof(dt), dt  # type: ignore
 
     def find_input_entity(self, input_model: EntityType) -> EntityType:
         """
@@ -268,9 +270,7 @@ class ResultEntities(ABC):
         return cls(entity_type, input_model, name, data)
 
     # TODO: Check if end time is in or excluded
-    def filter_for_time_interval(
-        self, start: datetime, end: datetime
-    ) -> "ResultEntities":
+    def filter_for_time_interval(self, start: datetime, end: datetime) -> Self:
         """
         Filters the data for the given time interval. The data can also be filtered via object[datetime:datetime].
         See __getitem__ for more information.
