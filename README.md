@@ -1,8 +1,16 @@
-# psdm-analysis
+# pypsdm
 
-The psdm-analysis tool is meant to parse the [Power System Data Model (PSDM)](https://github.com/ie3-institute/PowerSystemDataModel) as well as provide calculation and plotting utilities to analyze the respective data.
+pypsdm aims to make power system model analysis a breeze. It is based upon the [Power System Data Model (PSDM)](https://github.com/ie3-institute/PowerSystemDataModel). 
+
+Its main functionalities include:
+
+- parsing grid models and associated result data
+- calculation utilities for event discrete time series data 
+- plotting capabilities for grid and result data
 
 It is currently under development. So if you want to use it, expect it to change quite frequently for now.
+
+![PyPI - Version](https://img.shields.io/pypi/v/pypsdm)
 
 ## Installation
 
