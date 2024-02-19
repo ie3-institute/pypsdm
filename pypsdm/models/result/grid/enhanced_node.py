@@ -103,16 +103,8 @@ class EnhancedNodesResult(NodesResult):
             entities = {}
             for uuid, pq_res in nodal_pq.items():
                 data = pq_res.data
-                data['v_mag'] = np.nan
-                data['v_ang'] = np.nan
-                entity = EnhancedNodeResult(
-                    RawGridElementsEnum.NODE,
-                    uuid,
-                    None,
-                    data
-                )
+                data["v_mag"] = np.nan
+                data["v_ang"] = np.nan
+                entity = EnhancedNodeResult(RawGridElementsEnum.NODE, uuid, None, data)
                 entities[uuid] = entity
-            return cls(
-                RawGridElementsEnum.NODE,
-                entities
-            )
+            return cls(RawGridElementsEnum.NODE, entities)

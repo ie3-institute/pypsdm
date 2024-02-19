@@ -44,9 +44,9 @@ def test_compare(gwr: GridWithResults):
         line_uuid = raw_grid_container.lines.uuid[0]
         raw_grid_container_b.lines.data.loc[line_uuid, "length"] = 42
         trafo_uuid = raw_grid_container.transformers_2_w.uuid[0]
-        raw_grid_container_b.transformers_2_w.data.loc[trafo_uuid, "node_a"] = (
-            "I was changed.."
-        )
+        raw_grid_container_b.transformers_2_w.data.loc[
+            trafo_uuid, "node_a"
+        ] = "I was changed.."
         raw_grid_container.compare(raw_grid_container_b)
 
     assert len(comp_exc.value.differences) == 2

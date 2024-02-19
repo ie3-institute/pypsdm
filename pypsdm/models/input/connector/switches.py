@@ -7,7 +7,6 @@ from pypsdm.models.input.connector.connector import Connector
 
 @dataclass(frozen=True)
 class Switches(Connector):
-
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
