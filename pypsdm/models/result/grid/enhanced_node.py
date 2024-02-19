@@ -102,7 +102,7 @@ class EnhancedNodesResult(NodesResult):
         else:
             entities = {}
             for uuid, pq_res in nodal_pq.items():
-                data =  pq_res.data
+                data = pq_res.data
                 data['v_mag'] = np.nan
                 data['v_ang'] = np.nan
                 entity = EnhancedNodeResult(
