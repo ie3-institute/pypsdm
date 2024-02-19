@@ -80,7 +80,7 @@ class RawGridResultContainer(ContainerMixin):
         )
 
     def nodal_result(self, node_uuid: str) -> "RawGridResultContainer":
-        if not node_uuid in self.nodes:
+        if node_uuid not in self.nodes:
             return RawGridResultContainer.create_empty()
         return RawGridResultContainer(
             nodes=NodesResult(
