@@ -25,6 +25,7 @@ RESULT_ID_REGEX = re.compile(
         RESULT_DATE_REGEX.pattern, GRID_ID_REGEX.pattern, RESULT_SUFFIX_REGEX.pattern
     )
 )
+DB_ENV_VAR = "LOCAL_GWR_DB"
 
 
 @dataclass
@@ -42,7 +43,13 @@ class LocalGwrDb(PathManagerMixin):
 
     path: Path
 
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path | None = None):
+        if path is None:
+            path = os.environ.get(DB_ENV_VAR)
+            if path is None:
+                raise ValueError(
+                    f"Database path not specified. Set {DB_ENV_VAR} environment variable or pass path as argument."
+                )
         self.path = Path(path) if isinstance(path, str) else path
 
     @property

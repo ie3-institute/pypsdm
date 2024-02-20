@@ -1,4 +1,12 @@
-from pypsdm.db.gwr import GRID_ID_REGEX, RESULT_DATE_REGEX, RESULT_ID_REGEX, LocalGwrDb
+import os
+
+from pypsdm.db.gwr import (
+    DB_ENV_VAR,
+    GRID_ID_REGEX,
+    RESULT_DATE_REGEX,
+    RESULT_ID_REGEX,
+    LocalGwrDb,
+)
 
 # TODO: Write tets for LocalGwrDb (include creation utils from tests/db/utils)
 
@@ -59,3 +67,10 @@ def test_match_res_id():
         assert match[2] == suffix
     else:
         assert ValueError("Invalid result id")
+
+
+def test_load_from_env_var():
+    # set env var
+    os.environ[DB_ENV_VAR] = "/tmp"
+    db = LocalGwrDb()
+    assert str(db.path) == "/tmp"
