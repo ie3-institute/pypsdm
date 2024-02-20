@@ -109,6 +109,9 @@ class Entities(ABC):
 
         return type(self)(self.data.drop(indices_to_remove))
 
+    def __getitem__(self, get: str) -> pd.Series:
+        return self.data.loc[get]
+
     @property
     def uuid(self) -> Series:
         """
