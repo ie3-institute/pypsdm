@@ -319,7 +319,7 @@ class LocalGwrDb(PathManagerMixin):
         date: datetime | None = None,
     ):
         """
-        Adds results to local "database". 
+        Adds results to local "database".
         NOTE: There needs to be a grid with the given versioned_grid_id in the database.
 
         Args:
@@ -340,8 +340,8 @@ class LocalGwrDb(PathManagerMixin):
             raise FileNotFoundError(
                 f"Grid with id {versioned_grid_id} does not exist. Please add grid first."
             )
-        
-        if not date: 
+
+        if not date:
             date = datetime.now()
 
         # Add result data
@@ -349,7 +349,7 @@ class LocalGwrDb(PathManagerMixin):
         destination_dir = self.results_path.joinpath(res_id)
         if destination_dir.exists():
             raise FileExistsError(f"Results with id {res_id} already exists.")
-        results.to_csv(str(destination_dir), mkdirs=True)        
+        results.to_csv(str(destination_dir), mkdirs=True)
 
     def add_results_from_path(
         self,

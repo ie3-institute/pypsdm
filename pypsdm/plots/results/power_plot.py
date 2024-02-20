@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 from pypsdm.models.gwr import GridWithResults
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
+from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
 from pypsdm.models.result.participant.pq_dict import PQResultDict, PQWithSocResultDict
 from pypsdm.models.result.power import PQResult, PQWithSocResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
@@ -83,7 +83,7 @@ def plot_all_nodal_ps_branch_violin(
         fig, axes
     """
     branches = gwr.grid.raw_grid.get_branches()
-    nodes_res = gwr.build_enhanced_nodes_result()
+    nodes_res = gwr.build_extended_nodes_result()
     width, height = FIGSIZE
     height = height * len(branches)
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
@@ -97,28 +97,28 @@ def plot_all_nodal_ps_branch_violin(
 
 
 def plot_nodal_ps_violin(
-    enhanced_nodes_res: EnhancedNodesResult,
+    extended_nodes_res: ExtendedNodesResult,
     nodes: Optional[list[str]] = None,
 ):
     """
     Plots violin plots for all given nodes.
 
     Args:
-        enhanced_nodes_res: EnhancedNodesResult to plot.
+        extended_nodes_res: ExtendedNodesResult to plot.
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
 
     Returns:
         fig, ax
     """
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_nodal_ps_violin(ax, enhanced_nodes_res, nodes)
+    ax_plot_nodal_ps_violin(ax, extended_nodes_res, nodes)
     set_title(ax, "Nodal Active Power")
     return fig, ax
 
 
 def ax_plot_nodal_ps_violin(
     ax: Axes,
-    nodes_res: EnhancedNodesResult,
+    nodes_res: ExtendedNodesResult,
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
     ffill=True,
 ):
@@ -127,7 +127,7 @@ def ax_plot_nodal_ps_violin(
 
     Args:
         ax: Axes object
-        nodes_res: NodesResult or EnhancedNodesResult object
+        nodes_res: NodesResult or ExtendedNodesResult object
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
     """
 

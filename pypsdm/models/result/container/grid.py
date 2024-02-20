@@ -1,7 +1,7 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
-import os
 
 from pypsdm.io.utils import check_filter
 from pypsdm.models.input.container.grid import GridContainer

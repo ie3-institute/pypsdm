@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import pandas as pd
-from loguru import logger
 from pandas import DataFrame
 
 

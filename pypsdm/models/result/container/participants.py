@@ -1,9 +1,9 @@
 import concurrent.futures
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 from typing import Optional, Tuple, Union
-import os
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -252,7 +252,7 @@ class ParticipantsResultContainer(ContainerMixin):
         if len(res_files) == 0:
             raise FileNotFoundError(
                 f"No simulation results found in '{simulation_data_path}'."
-            )        
+            )
 
         check_filter(filter_start, filter_end)
         with concurrent.futures.ProcessPoolExecutor() as executor:
