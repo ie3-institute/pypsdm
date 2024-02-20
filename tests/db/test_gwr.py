@@ -69,8 +69,8 @@ def test_match_res_id():
         assert ValueError("Invalid result id")
 
 
-def test_load_from_env_var():
+def test_load_from_env_var(tmp_path):
     # set env var
-    os.environ[DB_ENV_VAR] = "/tmp"
+    os.environ[DB_ENV_VAR] = str(tmp_path)
     db = LocalGwrDb()
-    assert str(db.path) == "/tmp"
+    assert str(db.path) == str(tmp_path)
