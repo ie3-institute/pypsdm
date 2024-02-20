@@ -17,6 +17,7 @@ from pypsdm.plots.common.utils import (
     LABEL_PAD,
     set_subplot_title,
     set_title,
+    set_suptitle,
     set_xlabels_rotated,
     set_ylabel,
 )
@@ -25,6 +26,8 @@ from pypsdm.plots.common.utils import (
 def plot_all_v_mag_branch_violin(
     nodes_res: Union[NodesResult, EnhancedNodesResult],
     branches: list[list[str]],
+    title: str | None = None,
+    **kwargs
 ):
     """
     Plots violin plots for all nodes across all branches.
@@ -41,8 +44,13 @@ def plot_all_v_mag_branch_violin(
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
         axs = axes[i] if len(branches) > 1 else axes
-        ax_plot_v_mags_violin(axs, nodes_res, branch)  # type: ignore
-        set_subplot_title(axs, f"Voltages along Branch {i+1}")
+        ax_plot_v_mags_violin(axs, nodes_res, branch, **kwargs)  # type: ignore
+        if len(branches) > 1:
+            set_subplot_title(axs, f"Voltages along Branch {i+1}")
+    
+    if not title:
+        title = "Voltage Magnitudes along Branches"
+    set_suptitle(fig, title)
     plt.tight_layout()
 
     return fig, axes
@@ -50,7 +58,9 @@ def plot_all_v_mag_branch_violin(
 
 def plot_v_mags_violin(
     nodes_res: Union[NodesResult, EnhancedNodesResult],
-    nodes: Optional[list[str]] = None,
+    nodes: list[str] | None = None,
+    title: str | None = None,
+    **kwargs,
 ):
     """
     Plots violin plots for all given nodes .
@@ -63,8 +73,11 @@ def plot_v_mags_violin(
         fig, ax
     """
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_v_mags_violin(ax, nodes_res, nodes)
-    set_title(ax, "Voltage Magnitudes along Branch")
+    ax_plot_v_mags_violin(ax, nodes_res, nodes, **kwargs)
+
+    if not title:
+        title = "Voltage Magnitudes"
+    set_title(ax, title)
     return fig, ax
 
 
@@ -72,6 +85,7 @@ def ax_plot_v_mags_violin(
     ax: Axes,
     nodes_res: Union[NodesResult, EnhancedNodesResult],
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
+    **kwargs,
 ):
     """
     Plots violin plots for given nodes. If no nodes are passed all nodes are plotted.
@@ -88,7 +102,10 @@ def ax_plot_v_mags_violin(
     else:
         v_mag = nodes_res.v_mag
 
-    sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
+    if "color" in kwargs:
+        sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, **kwargs)
+    else: 
+        sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
