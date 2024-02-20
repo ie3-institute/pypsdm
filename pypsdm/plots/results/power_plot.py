@@ -98,7 +98,7 @@ def plot_all_nodal_ps_branch_violin(
 
 def plot_nodal_ps_violin(
     enhanced_nodes_res: EnhancedNodesResult,
-    nodes: Optional[list[str]],
+    nodes: Optional[list[str]] = None,
 ):
     """
     Plots violin plots for all given nodes.
