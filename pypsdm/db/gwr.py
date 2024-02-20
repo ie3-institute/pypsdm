@@ -173,7 +173,12 @@ class LocalGwrDb(PathManagerMixin):
 
     def read_gwr(self, res_id: str) -> GridWithResults:
         """Read GridWithResults."""
-        res_path = os.path.join(self.results_path, res_id, "rawOutputData")
+
+        raw_output_path = os.path.join(self.results_path, res_id, "rawOutputData")
+        if os.path.exists(raw_output_path):
+            res_path = raw_output_path
+        else:
+            res_path = os.path.join(self.results_path, res_id)
         res_id_match = self.match_res_id(res_id)
         if res_id_match:
             _, grid_id, _ = res_id_match
@@ -306,6 +311,46 @@ class LocalGwrDb(PathManagerMixin):
             shutil.copytree(grid_path, destination_dir)
         return versioned_id
 
+    def add_results(
+        self,
+        results: GridResultContainer,
+        versioned_grid_id: str,
+        suffix: str | None = None,
+        date: datetime | None = None,
+    ):
+        """
+        Adds results to local "database". 
+        NOTE: There needs to be a grid with the given versioned_grid_id in the database.
+
+        Args:
+            results (GridResultContainer): GridResultContainer instance.
+            versioned_grid_id (str): Versioned grid id.
+            date (datetime, optional): Date of results. Defaults to None.
+            move (bool, optional): Move results to database source path. Defaults to False.
+        """
+        versioned_grid_id_match = self.match_grid_id(versioned_grid_id)
+        if versioned_grid_id_match is None:
+            raise ValueError(
+                f"Invalid grid_id: {versioned_grid_id}, expected format: {GRID_ID_REGEX.pattern}"
+            )
+
+        # Check if corresponding grid exists
+        grid_path = self.grids_path.joinpath(versioned_grid_id)
+        if not grid_path.exists():
+            raise FileNotFoundError(
+                f"Grid with id {versioned_grid_id} does not exist. Please add grid first."
+            )
+        
+        if not date: 
+            date = datetime.now()
+
+        # Add result data
+        res_id = self.create_res_id(versioned_grid_id, date, suffix)
+        destination_dir = self.results_path.joinpath(res_id)
+        if destination_dir.exists():
+            raise FileExistsError(f"Results with id {res_id} already exists.")
+        results.to_csv(str(destination_dir), mkdirs=True)        
+
     def add_results_from_path(
         self,
         results_path: str | Path,
@@ -338,15 +383,10 @@ class LocalGwrDb(PathManagerMixin):
                 f"Grid with id {versioned_grid_id} does not exist. Please add grid first."
             )
 
-        # Check if results are present where expected
-        raw_output_path = os.path.join(results_path, "rawOutputData")
-        if not os.path.exists(raw_output_path):
-            raise FileNotFoundError(f"Expected results at {raw_output_path}.")
-
         if not date:
             # Get date where result folder was created
-            raw_output_path_stat = os.stat(raw_output_path)
-            date = datetime.fromtimestamp(raw_output_path_stat.st_mtime)
+            result_path_stat = os.stat(results_path)
+            date = datetime.fromtimestamp(result_path_stat.st_mtime)
 
         # Add result data
         res_id = self.create_res_id(versioned_grid_id, date, suffix)
