@@ -1,0 +1,2 @@
+uuid,id,r_sc,x_sc,g_m,b_m,s_rated,v_rated_a,v_rated_b,d_v,d_phi,tap_side,tap_neutr,tap_min,tap_max
+39fc51d2-d708-4f6d-be67-29365e1ecf64,63 MVA 110/10 kV YNd5,0.6146031746031745,34.56596500037509,1818.1818181818176,-1015.6886939330392,63000.0,110.0,10.0,1.5,0.0,false,0,-9,9

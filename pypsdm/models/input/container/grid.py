@@ -20,8 +20,71 @@ class GridContainer(ContainerMixin):
     primary_data: PrimaryData
     node_participants_map: Dict[str, SystemParticipantsContainer]
 
+    def __eq__(self, other):
+        if not isinstance(other, GridContainer):
+            return False
+        if not self.node_participants_map == other.node_participants_map:
+            return False
+        return super().__eq__(other)
+
     def __bool__(self):
         return len(self.to_list(include_primary_data=True)) > 0
+
+    @property
+    def nodes(self):
+        return self.raw_grid.nodes
+
+    @property
+    def lines(self):
+        return self.raw_grid.lines
+
+    @property
+    def transformers_2_w(self):
+        return self.raw_grid.transformers_2_w
+
+    @property
+    def switches(self):
+        return self.raw_grid.switches
+
+    @property
+    def ems(self):
+        return self.participants.ems
+
+    @property
+    def loads(self):
+        return self.participants.loads
+
+    @property
+    def fixed_feed_ins(self):
+        return self.participants.fixed_feed_ins
+
+    @property
+    def pvs(self):
+        return self.participants.pvs
+
+    @property
+    def biomass_plants(self):
+        return self.participants.biomass_plants
+
+    @property
+    def wecs(self):
+        return self.participants.wecs
+
+    @property
+    def storages(self):
+        return self.participants.storages
+
+    @property
+    def evs(self):
+        return self.participants.evs
+
+    @property
+    def evcs(self):
+        return self.participants.evcs
+
+    @property
+    def hps(self):
+        return self.participants.hps
 
     def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
         grid = (
@@ -88,7 +151,7 @@ class GridContainer(ContainerMixin):
     def to_csv(
         self,
         path: str,
-        include_primary_data: bool,
+        include_primary_data: bool = True,
         mkdirs: bool = False,
         delimiter: str = ",",
     ):

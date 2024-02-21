@@ -8,7 +8,6 @@ def test_to_csv(gwr: GridWithResults, tmp_path, simulation_end):
         tmp_path,
     )
     grid_b = GridResultContainer.from_csv(
-        grid.name,
         tmp_path,
         ",",
         simulation_end=simulation_end,

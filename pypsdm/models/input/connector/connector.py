@@ -12,6 +12,10 @@ ConnectorType = TypeVar("ConnectorType", bound="Connector")
 
 @dataclass(frozen=True)
 class Connector(Entities, ABC):
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     @property
     def node_a(self):
         return self.data["node_a"]

@@ -29,6 +29,9 @@ class ParticipantsResultContainer(ContainerMixin):
     hps: PQResultDict
     flex: FlexOptionsResult
 
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
     def __len__(self):
         participants = self.to_list(include_empty=False)
         return sum([len(participant) for participant in participants])
@@ -40,6 +43,20 @@ class ParticipantsResultContainer(ContainerMixin):
         if not (isinstance(start, datetime) and isinstance(stop, datetime)):
             raise ValueError("Only datetime slicing is supported")
         return self.filter_for_time_interval(start, stop)
+
+    def __add__(self, other: "ParticipantsResultContainer"):
+        return ParticipantsResultContainer(
+            ems=self.ems + other.ems,
+            loads=self.loads + other.loads,
+            fixed_feed_ins=self.fixed_feed_ins + other.fixed_feed_ins,
+            pvs=self.pvs + other.pvs,
+            wecs=self.wecs + other.wecs,
+            storages=self.storages + other.storages,
+            evcs=self.evcs + other.evcs,
+            evs=self.evs + other.evs,
+            hps=self.hps + other.hps,
+            flex=self.flex + other.flex,
+        )
 
     @property
     def p(self) -> DataFrame:
@@ -184,6 +201,36 @@ class ParticipantsResultContainer(ContainerMixin):
             self.flex.filter_for_time_interval(start, end),
         )
 
+    def concat(self, other: "ParticipantsResultContainer", deep=True, keep="last"):
+        """
+        Concatenates the data of the current and the other ParticipantsResultContainer
+        object. Concatenation is done along the index (appending rows).
+
+        NOTE: This only makes sense if result indexes are continuous. Given that
+        we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        If you want to add the underlying entities, use the `__add__` method.
+
+        Args:
+            other: The other ResultDict object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        return ParticipantsResultContainer(
+            self.ems.concat(other.ems, deep=deep, keep=keep),
+            self.loads.concat(other.loads, deep=deep, keep=keep),
+            self.fixed_feed_ins.concat(other.fixed_feed_ins, deep=deep, keep=keep),
+            self.pvs.concat(other.pvs, deep=deep, keep=keep),
+            self.wecs.concat(other.wecs, deep=deep, keep=keep),
+            self.storages.concat(other.storages, deep=deep, keep=keep),
+            self.evcs.concat(other.evcs, deep=deep, keep=keep),
+            self.evs.concat(other.evs, deep=deep, keep=keep),
+            self.hps.concat(other.hps, deep=deep, keep=keep),
+            self.flex.concat(other.flex, deep=deep, keep=keep),
+        )
+
     def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):
         for participant in self.to_list(include_empty=False, include_flex=True):
             participant.to_csv(path, delimiter, mkdirs=mkdirs)
@@ -192,9 +239,9 @@ class ParticipantsResultContainer(ContainerMixin):
     def from_csv(
         cls,
         simulation_data_path: str,
-        delimiter: str,
         simulation_end: datetime,
         grid_container: Optional[GridContainer] = None,
+        delimiter: Optional[str] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
@@ -204,22 +251,19 @@ class ParticipantsResultContainer(ContainerMixin):
             pa_from_csv_for_participant = partial(
                 ParticipantsResultContainer.from_csv_for_participant,
                 simulation_data_path,
-                delimiter,
                 simulation_end,
                 grid_container,
+                delimiter=delimiter,
             )
             participant_results = executor.map(
                 pa_from_csv_for_participant,
-                filter(
-                    lambda x: x != SystemParticipantsEnum.FLEX_OPTIONS,
-                    SystemParticipantsEnum.values(),
-                ),
+                SystemParticipantsEnum.values(),
             )
             participant_result_map = {}
             for participant_result in participant_results:
-                participant_result_map[
-                    participant_result.entity_type
-                ] = participant_result
+                participant_result_map[participant_result.entity_type] = (
+                    participant_result
+                )
 
         res = ParticipantsResultContainer(
             loads=participant_result_map[SystemParticipantsEnum.LOAD],
@@ -231,12 +275,7 @@ class ParticipantsResultContainer(ContainerMixin):
             evcs=participant_result_map[SystemParticipantsEnum.EV_CHARGING_STATION],
             evs=participant_result_map[SystemParticipantsEnum.ELECTRIC_VEHICLE],
             hps=participant_result_map[SystemParticipantsEnum.HEAT_PUMP],
-            flex=FlexOptionsResult.from_csv(
-                SystemParticipantsEnum.FLEX_OPTIONS,
-                simulation_data_path,
-                simulation_end,
-                delimiter,
-            ),
+            flex=participant_result_map[SystemParticipantsEnum.FLEX_OPTIONS],
         )
         return (
             res
@@ -247,31 +286,32 @@ class ParticipantsResultContainer(ContainerMixin):
     @staticmethod
     def from_csv_for_participant(
         simulation_data_path: str,
-        delimiter: str,
         simulation_end: datetime,
         grid_container: Optional[GridContainer],
         participant: SystemParticipantsEnum,
+        delimiter: Optional[str] = None,
     ):
         if grid_container:
             input_entities = grid_container.participants.get_participants(participant)
         else:
             input_entities = None
+        dict_type = ParticipantsResultContainer.get_result_dict_type(participant)
+        return dict_type.from_csv(
+            participant,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+        )
+
+    @staticmethod
+    def get_result_dict_type(participant: SystemParticipantsEnum):
         if participant.has_soc():
-            return PQWithSocResultDict.from_csv(
-                participant,
-                simulation_data_path,
-                delimiter,
-                simulation_end,
-                input_entities,
-            )
+            return PQWithSocResultDict
+        elif participant == SystemParticipantsEnum.FLEX_OPTIONS:
+            return FlexOptionsResult
         else:
-            return PQResultDict.from_csv(
-                participant,
-                simulation_data_path,
-                delimiter,
-                simulation_end,
-                input_entities=input_entities,
-            )
+            return PQResultDict
 
     @classmethod
     def create_empty(cls):

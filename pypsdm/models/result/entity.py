@@ -50,7 +50,8 @@ class ResultEntities(ABC):
             return False
         try:
             compare_dfs(self.data, other.data)
-        except ComparisonError:
+            return True
+        except AssertionError:
             return False
 
     def __repr__(self):
@@ -59,7 +60,7 @@ class ResultEntities(ABC):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, where: Union[slice, datetime, list[datetime]]):
+    def __getitem__(self, where: Union[slice, datetime, list[datetime]]) -> Self:
         if isinstance(where, slice):
             start, stop, step = where.start, where.stop, where.step
             if step is not None:
@@ -78,20 +79,22 @@ class ResultEntities(ABC):
             return self.build(
                 self.entity_type, self.input_model, data, max_dt, name=self.name
             )
+        else:
+            raise ValueError("Expected datetime slice, or datetime object(s).")
 
     def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
         if dt > self.data.index[-1]:
             logging.warning(
                 "Trying to access data after last time step. Returning last time step."
             )
-            return self.data.iloc[-1], self.data.index[-1]
+            return self.data.iloc[-1], self.data.index[-1]  # type: ignore
         if dt < self.data.index[0]:
             logging.warning(
                 "Trying to access data before first time step. Returning first time step."
             )
-            return self.data.iloc[0], self.data.index[0]
+            return self.data.iloc[0], self.data.index[0]  # type: ignore
         else:
-            return self.data.asof(dt), dt
+            return self.data.asof(dt), dt  # type: ignore
 
     def find_input_entity(self, input_model: EntityType) -> EntityType:
         """
@@ -142,15 +145,39 @@ class ResultEntities(ABC):
                 differences=[(type(self), str(e))],
             )
 
+    def concat(
+        self: ResultType, other: ResultType, deep: bool = False, keep: str = "last"
+    ) -> ResultType:
+        """
+        Concatenates the data of the current and the other ResultEntities object.
+
+        NOTE: This only makes sense if their indexes are continuous. Given that
+        we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        If you want to add the underlying entities, use the `__add__` method.
+
+        Args:
+            other: The other ResultDict object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        if not self.input_model == other.input_model:
+            raise ValueError("Input models do not match.")
+        data = pd.concat([self.data, other.data], axis=0)
+        data.sort_index(inplace=True)
+        data = data[~data.index.duplicated(keep=keep)]  # type: ignore
+        return self.copy(deep, data=data)
+
     def copy(
         self: ResultType,
-        deep=True,
+        deep: bool = True,
         **changes,
     ) -> ResultType:
         """
         Creates a copy of the current ResultEntities instance.
         By default does a deep copy of all data and replaces the given changes.
-        When deep is false, only the references to the data of the non-changed attribtues are copied.
 
         Args:
             deep: Whether to do a deep copy of the data.
@@ -159,8 +186,10 @@ class ResultEntities(ABC):
         Returns:
             The copy of the current Entities instance.
         """
-        to_copy = copy.deepcopy(self) if deep else self
-        return replace(to_copy, **changes)
+        shallow_copy = replace(self, **changes)
+        if deep:
+            return copy.deepcopy(shallow_copy)
+        return shallow_copy
 
     @staticmethod
     @abstractmethod
@@ -241,9 +270,7 @@ class ResultEntities(ABC):
         return cls(entity_type, input_model, name, data)
 
     # TODO: Check if end time is in or excluded
-    def filter_for_time_interval(
-        self, start: datetime, end: datetime
-    ) -> "ResultEntities":
+    def filter_for_time_interval(self, start: datetime, end: datetime) -> Self:
         """
         Filters the data for the given time interval. The data can also be filtered via object[datetime:datetime].
         See __getitem__ for more information.

@@ -35,6 +35,7 @@ class EntitiesEnum(Enum):
         # locally to avoid circular imports
         from pypsdm.models.result.grid.connector import ConnectorResult
         from pypsdm.models.result.grid.node import NodeResult
+        from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
         from pypsdm.models.result.power import PQResult, PQWithSocResult
 
@@ -51,6 +52,8 @@ class EntitiesEnum(Enum):
                     return Transformer2WResult
                 case RawGridElementsEnum.LINE:
                     return ConnectorResult
+                case RawGridElementsEnum.SWITCH:
+                    return SwitchResult
                 case _:
                     raise NotImplementedError(
                         f"Result type {self} not implemented yet!"

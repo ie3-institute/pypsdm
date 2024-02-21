@@ -43,6 +43,15 @@ class Entities(ABC):
 
     data: DataFrame
 
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        try:
+            self.compare(other)
+        except ComparisonError:
+            return False
+        return True
+
     def __len__(self):
         return len(self.data)
 

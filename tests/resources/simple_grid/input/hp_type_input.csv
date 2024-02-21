@@ -1,0 +1,4 @@
+uuid,id,capex,opex,s_rated,cos_phi_rated,p_thermal
+392f183f-7d9b-48aa-8ba9-a1fb34db7592,Type_HP_NS_02,0,0,4,0.9,12
+cd06b2d7-bfb3-41d0-a878-a02dfbae9b4a,Type_HP_NS_03,0,0,3,0.9,9
+df09ca44-6b61-4679-82e3-afd76168adc1,Type_HP_NS_04,0,0,6,0.9,18

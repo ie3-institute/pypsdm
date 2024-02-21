@@ -5,16 +5,12 @@ from datetime import datetime
 from typing import Optional, Tuple, Union
 
 from pypsdm.io.utils import check_filter
-from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.connector import ConnectorsResult
 from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
-from pypsdm.models.result.grid.node import NodesResult
-from pypsdm.models.result.grid.transformer import Transformers2WResult
 
 
 @dataclass(frozen=True)
@@ -22,8 +18,136 @@ class GridWithResults(ContainerMixin):
     grid: GridContainer
     results: GridResultContainer
 
+    @property
+    def participants(self):
+        return self.grid.participants
+
+    @property
+    def raw_grid(self):
+        return self.grid.raw_grid
+
+    @property
+    def nodes(self):
+        return self.grid.nodes
+
+    @property
+    def lines(self):
+        return self.grid.lines
+
+    @property
+    def transformers_2_w(self):
+        return self.grid.transformers_2_w
+
+    @property
+    def switches(self):
+        return self.grid.switches
+
+    @property
+    def ems(self):
+        return self.participants.ems
+
+    @property
+    def loads(self):
+        return self.participants.loads
+
+    @property
+    def fixed_feed_ins(self):
+        return self.participants.fixed_feed_ins
+
+    @property
+    def pvs(self):
+        return self.participants.pvs
+
+    @property
+    def biomass_plants(self):
+        return self.participants.biomass_plants
+
+    @property
+    def wecs(self):
+        return self.participants.wecs
+
+    @property
+    def storages(self):
+        return self.participants.storages
+
+    @property
+    def evs(self):
+        return self.participants.evs
+
+    @property
+    def evcs(self):
+        return self.participants.evcs
+
+    @property
+    def hps(self):
+        return self.participants.hps
+
+    @property
+    def raw_grid_res(self):
+        return self.results.raw_grid
+
+    @property
+    def nodes_res(self):
+        return self.raw_grid_res.nodes
+
+    @property
+    def lines_res(self):
+        return self.raw_grid_res.lines
+
+    @property
+    def transformers_2_w_res(self):
+        return self.raw_grid_res.transformers_2w
+
+    @property
+    def switches_res(self):
+        return self.raw_grid_res.switches
+
+    @property
+    def participants_res(self):
+        return self.results.participants
+
+    @property
+    def ems_res(self):
+        return self.participants_res.ems
+
+    @property
+    def loads_res(self):
+        return self.participants_res.loads
+
+    @property
+    def fixed_feed_ins_res(self):
+        return self.participants_res.fixed_feed_ins
+
+    @property
+    def pvs_res(self):
+        return self.participants_res.pvs
+
+    @property
+    def wecs_res(self):
+        return self.participants_res.wecs
+
+    @property
+    def storages_res(self):
+        return self.participants_res.storages
+
+    @property
+    def evs_res(self):
+        return self.participants_res.evs
+
+    @property
+    def evcs_res(self):
+        return self.participants_res.evcs
+
+    @property
+    def hps_res(self):
+        return self.participants_res.hps
+
+    @property
+    def flex_res(self):
+        return self.participants_res.flex
+
     def nodal_energies(self) -> dict[str, float]:
-        return {uuid: self.nodal_energy(uuid) for uuid in self.grid.raw_grid.nodes.uuid}
+        return {uuid: self.nodal_energy(uuid) for uuid in self.grid.nodes.uuid}
 
     def to_list(self, include_empty: bool = False) -> list:
         elems = [self.grid, self.results]
@@ -41,28 +165,20 @@ class GridWithResults(ContainerMixin):
     def nodal_result(self, node_uuid: str) -> "GridResultContainer":
         node_participants = self.grid.node_participants_map[node_uuid]
         participants_uuids = node_participants.uuids()
-        participants = self.results.participants.subset(participants_uuids)
+        participants = self.participants_res.subset(participants_uuids)
         return GridResultContainer(
-            name=node_uuid,
-            nodes=NodesResult(
-                RawGridElementsEnum.NODE,
-                {node_uuid: self.results.nodes.entities[node_uuid]},
-            ),
-            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
-            transformers_2w=Transformers2WResult.create_empty(
-                RawGridElementsEnum.TRANSFORMER_2_W
-            ),
+            raw_grid=self.raw_grid_res.nodal_result(node_uuid),
             participants=participants,
         )
 
     def em_results(
         self,
     ) -> list[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
-        uuid_to_connected_asset = self.grid.participants.ems.uuid_to_connected_assets()
+        uuid_to_connected_asset = self.ems.uuid_to_connected_assets()
         return [
             (
-                self.grid.participants.subset(connected_assets + [em_uuid]),
-                self.results.participants.subset(connected_assets + [em_uuid]),
+                self.participants.subset(connected_assets + [em_uuid]),
+                self.participants_res.subset(connected_assets + [em_uuid]),
             )
             for (em_uuid, connected_assets) in uuid_to_connected_asset.items()
         ]
@@ -72,7 +188,7 @@ class GridWithResults(ContainerMixin):
 
         with ProcessPoolExecutor() as executor:
             futures = {
-                executor.submit(self.calc_pq, uuid, nodal_result)
+                executor.submit(self._calc_pq, uuid, nodal_result)
                 for uuid, nodal_result in nodal_results.items()
             }
 
@@ -86,7 +202,7 @@ class GridWithResults(ContainerMixin):
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
             uuid
-        ), self.results.participants.find_participant_result(uuid)
+        ), self.participants_res.find_participant_result(uuid)
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridWithResults(
@@ -112,12 +228,11 @@ class GridWithResults(ContainerMixin):
             mkdirs=mkdirs,
             delimiter=delimiter,
         )
-        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=False)
+        self.results.to_csv(result_path, delimiter=delimiter, mkdirs=mkdirs)
 
     @classmethod
     def from_csv(
         cls,
-        name: str,
         grid_path: str,
         result_path: str,
         grid_delimiter: str | None = None,
@@ -140,7 +255,6 @@ class GridWithResults(ContainerMixin):
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
 
         results = GridResultContainer.from_csv(
-            name,
             result_path,
             result_delimiter,
             simulation_end,
@@ -165,6 +279,9 @@ class GridWithResults(ContainerMixin):
         )
 
     @staticmethod
-    def calc_pq(uuid, nodal_result: GridResultContainer):
+    def _calc_pq(uuid, nodal_result: GridResultContainer):
+        """
+        NOTE: Utility function for parallel processing of building EnhancedNodesResult
+        """
         pq = nodal_result.participants.sum()
         return uuid, pq

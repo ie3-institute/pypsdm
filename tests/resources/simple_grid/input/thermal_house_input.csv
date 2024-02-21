@@ -1,0 +1,4 @@
+uuid,id,thermal_bus,operates_from,operates_until,operator,eth_losses,eth_capa,target_temperature,upper_temperature_limit,lower_temperature_limit
+130b90ae-adf7-43ad-b7ab-7fef73706009,TH_NS_02,f974062a-a736-464f-8585-2673104527d8,,,,0.101,8.801,20,22,18
+6db8de70-74c5-4b35-95eb-d434761712ca,TH_NS_03,921fed18-91fc-4188-85d2-765e5473d3fc,,,,0.121,9.121,20,22,18
+31c5c458-9e7d-419a-b3a6-38e7a6dfee7b,TH_NS_04,ca466226-cd32-4b30-b7ee-734983e34d35,,,,0.131,12.131,20,22,18

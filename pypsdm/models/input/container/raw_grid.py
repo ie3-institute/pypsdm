@@ -18,6 +18,9 @@ class RawGridContainer(ContainerMixin):
     transformers_2_w: Transformers2W
     switches: Switches
 
+    def __eq__(self, other):
+        return super().__eq__(other)
+
     def to_list(self, include_empty: bool = False) -> list[Entities]:
         grid_elements = [self.nodes, self.lines, self.transformers_2_w, self.switches]
         return grid_elements if include_empty else [e for e in grid_elements if e]

@@ -1,0 +1,4 @@
+uuid,id,operates_from,operates_until,operator,node,q_characteristics,s_rated,albedo,azimuth,elevation_angle,eta_conv,k_g,k_t,market_reaction,cos_phi_rated
+35b25f11-434b-49c8-acba-797a986f52b4,PV_NS_02,,,,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"cosPhiFixed:{(0.0, 0.9)}",4,0.21,90,40,97,0.9,1,false,0.9
+d4f0ff3a-a44d-4ec9-9f23-a435acd8fbc9,PV_NS_03,,,,1dcddd06-f41a-405b-9686-7f7942852196,"cosPhiFixed:{(0.0, 0.9)}",6,0.21,0,45,97,0.9,1,false,0.9
+718ac721-c577-4341-b1d0-f7545d56fa2d,PV_NS_04,,,,e3c3c6a3-c383-4dbb-9b3f-a14125615386,"cosPhiFixed:{(0.0, 0.9)}",10,0.21,-90,30,97,0.9,1,false,0.9

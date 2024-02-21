@@ -7,6 +7,9 @@ from pypsdm.models.input.mixins import HasTypeMixin
 
 @dataclass(frozen=True)
 class Transformers2W(HasTypeMixin, Connector):
+    def __eq__(self, other: object) -> bool:
+        return Connector.__eq__(self, other)
+
     @property
     def type_id(self):
         return self.data["type_id"]

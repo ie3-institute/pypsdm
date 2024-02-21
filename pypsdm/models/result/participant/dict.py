@@ -12,7 +12,7 @@ from pandas.core.groupby.generic import DataFrameGroupBy
 
 from pypsdm.errors import ComparisonError
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
-from pypsdm.models.enums import EntitiesEnum, EntityEnumType
+from pypsdm.models.enums import EntitiesEnum
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.result.entity import ResultEntities
 from pypsdm.processing.dataframe import join_dataframes
@@ -44,25 +44,16 @@ class ResultDict(Generic[T], ABC):
     def __contains__(self, uuid):
         return uuid in self.entities
 
-    def __getitem__(self, get) -> T | Self:
+    def __getitem__(self, get) -> T:
         match get:
             case str():
                 return self.entities[get]
             case slice():
-                start, stop, step = get.start, get.stop, get.step
-                if step is not None:
-                    logging.warning("Step is not supported for slicing. Ignoring it.")
-                if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-                    raise ValueError("Only datetime slicing is supported")
-                entities = {
-                    key: e.filter_for_time_interval(start, stop)
-                    for key, e in self.entities.items()
-                }
-                return type(self)(self.entity_type, entities)
-            case _:
                 raise ValueError(
-                    "Only get by uuid or datetime slice for filtering is supported."
+                    "If you want to filter by time interval use filter_for_time_interval method instead."
                 )
+            case _:
+                raise ValueError("Only get by uuid is supported.")
 
     def __add__(self: ResultDictType, other: ResultDictType):
         """
@@ -189,6 +180,41 @@ class ResultDict(Generic[T], ABC):
                 f"Comparison of {type(self)} failed", differences=differences
             )
 
+    def concat(
+        self: ResultDictType, other: ResultDictType, deep: bool = True, keep="last"
+    ):
+        """
+        Concatenates the data of the two ResultDicts, which means concatenating
+        the data of their entities.
+
+        NOTE: This only makes sense if the entities indexes are continuous. Given
+        that we deal with discrete event data that means that the last state of self
+        is valid until the first state of other. Which would probably not be what
+        you want in case the results are separated by a year.
+
+        Args:
+            other: The other ResultEntities object to concatenate with.
+            deep: Whether to do a deep copy of the data.
+            keep: How to handle duplicate indexes. "last" by default.
+        """
+        if not isinstance(other, type(self)):
+            raise TypeError(f"Cannot concatenate {type(self)} and {type(other)}")
+        if self.entity_type != other.entity_type:
+            raise TypeError(
+                f"Cannot add {type(self)} and {type(other)}. Entities are of different entity types"
+            )
+
+        if not set(self.entities.keys()) == set(other.entities.keys()):
+            raise ValueError(
+                "ResultDicts need to contain the same entities to be concatenated"
+            )
+        concat_entities = {}
+        for key, entity in self.entities.items():
+            concat_entities[key] = entity.concat(
+                other.entities[key], deep=deep, keep=keep
+            )
+        return type(self)(self.entity_type, concat_entities)
+
     def to_csv(
         self,
         path: str,
@@ -197,7 +223,7 @@ class ResultDict(Generic[T], ABC):
         resample_rate: Optional[str] = None,
     ):
         if mkdirs:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+            os.makedirs(path, exist_ok=True)
 
         file_name = self.entity_type.get_csv_result_file_name()
 
@@ -223,7 +249,7 @@ class ResultDict(Generic[T], ABC):
     @classmethod
     def from_csv(
         cls: Type[ResultDictType],
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         simulation_data_path: str,
         delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
@@ -264,12 +290,12 @@ class ResultDict(Generic[T], ABC):
         )
 
     @classmethod
-    def create_empty(cls: Type[Self], entity_type: EntityEnumType) -> Self:
+    def create_empty(cls: Type[Self], entity_type: EntitiesEnum) -> Self:
         return cls(entity_type, dict())
 
     @staticmethod
     def build_for_entity(
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         input_model: str,
         data: DataFrame,
         simulation_end: datetime,
@@ -290,7 +316,7 @@ class ResultDict(Generic[T], ABC):
 
     @staticmethod
     def get_grpd_df(
-        entity_type: EntityEnumType,
+        entity_type: EntitiesEnum,
         simulation_data_path: str,
         delimiter: str | None = None,
     ) -> Optional[DataFrameGroupBy]:
@@ -308,7 +334,7 @@ class ResultDict(Generic[T], ABC):
         return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
-    def safe_get_path(entity_type: EntityEnumType, data_path: str) -> Optional[Path]:
+    def safe_get_path(entity_type: EntitiesEnum, data_path: str) -> Optional[Path]:
         file_name = entity_type.get_csv_result_file_name()
         path = get_file_path(data_path, file_name)
         if path.exists():
