@@ -269,7 +269,7 @@ def calc_glg(load, df, node_installed_capacity, len_curve, num_mc):
     return sim_curve, quantile_95, quantile_95_tot_modified, quantile_95_indices
 
 
-def simultaneity_analysis_with_ems(folder_inputs, folder_glz_cases, folder_res, endtime, len_of_curve, num_of_mc, show_plots, folder_output):
+def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, len_of_curve, num_of_mc, show_plots, folder_output):
     print("Start Simultaneity Analysis:")
     # Ziel: 1000, Anzahl an Monte-Carlo-Iterationen pro Punkt in der GZ-Kurve
     if num_of_mc < 1000:
