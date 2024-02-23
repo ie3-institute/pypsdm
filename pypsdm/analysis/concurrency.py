@@ -10,6 +10,8 @@ from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 from pypsdm.processing.series import quarter_hourly_mean_resample
 from pypsdm.models.input.container.grid import GridContainer
+from pypsdm.models.result.power import PQResult
+from pypsdm.models.enums import RawGridElementsEnum
 
 """
 Plots
@@ -178,12 +180,7 @@ def getInstalledCapacatiy(grid_container: GridContainer):
 
     sp_count_and_power = grid_container.get_nodal_sp_count_and_power()
 
-    # Alternativ: Taking max of time series as installed capacity instead of s_rated from input data
-    # load_srated = gwr_container.results.participants.loads.get(connected_asset).p.max()*1000
 
-    ##### TODO FIXME: LOAD INCLUDED HERE OR NOT, alternative: find load.s.max() from time-series and take it into account
-    # FIXME: p or s?
-    # FIXME: BS included here or not?
     for node in grid_container.nodes.node:
         data = sp_count_and_power.get(node, {})
         load_rated_power = getFloatFromString(data.get('load', ''))
@@ -192,9 +189,11 @@ def getInstalledCapacatiy(grid_container: GridContainer):
         pv_rated_power = getFloatFromString(data.get('pv', ''))
         storage_rated_power = getFloatFromString(data.get('storage', ''))
 
-
+        # TODO: BS needs to be included in load direction for EM strategy grid-friendly and market
+        # TODO: BS needs to be included in feed-in direction for EM strategy grid-friendly and market
+        # TODO: EV needs to be included in fee-in direction for EM strategy grid-friendly and market
         s_rated_load_direction = load_rated_power + hp_rated_power + ev_rated_power # + storage_rated_power
-        s_rated_feedin_direction = ev_rated_power + pv_rated_power # + bs_srated
+        s_rated_feedin_direction = pv_rated_power # + ev_rated_power + storage_rated_power
         installed_capacity.loc[node] = [s_rated_load_direction, s_rated_feedin_direction]
 
     return installed_capacity
@@ -237,8 +236,7 @@ def calculate_coincidence_curve(load, df, df_inst, len_curve, num_mc):
             # get mc profiles
             mc_profile = df.loc[:, profile_col]
 
-            #.abs um die Rückspeisungen im Feed-in Fall zu erhalten, sonst ist mc_profile.sum(axis=1).max() = 0!
-            tmp_abs = mc_profile.sum(axis=1).abs().max()
+            tmp_abs = mc_profile.sum(axis=1).max()
             temp_sim_max_abs[mc] = tmp_abs
 
             if agg_inst_power == 0:
@@ -354,9 +352,20 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
         dfs_feedin = []
         if len(node_of_item_case) > 0:
             for node_uuid in node_of_item_case.index:
-                data_for_item = pd.DataFrame(gwr_nodal_results[node_uuid].p)
-                load_data_for_item = data_for_item['p'].apply(lambda x: max(0, x))
-                feedin_data_for_item = data_for_item['p'].apply(lambda x: min(0, x))
+                nodal_result = gwr_nodal_results[node_uuid].data
+                # Filter for p < 0 and set p, q to 0
+                nodal_result_load = nodal_result.copy()
+                load_mask = nodal_result_load['p'] < 0
+                nodal_result_load.loc[load_mask, ['p', 'q']] = 0.0
+                # Filter for p > 0 and set p, q to 0
+                nodal_result_feedin = nodal_result.copy()
+                feedin_mask = nodal_result_feedin['p'] > 0
+                nodal_result_feedin.loc[feedin_mask, ['p', 'q']] = 0.0
+
+                pqResult_for_load = PQResult(RawGridElementsEnum.NODE,node_uuid,node_uuid+"_Load",nodal_result_load)
+                pqResult_for_feedin = PQResult(RawGridElementsEnum.NODE,node_uuid,node_uuid+"_Feedin",nodal_result_feedin)
+                load_data_for_item = pqResult_for_load.complex_power().abs()
+                feedin_data_for_item = pqResult_for_feedin.complex_power().abs()
                 # Create a DataFrame for each node_uuid and append it to the list
                 load_df = pd.DataFrame({node_uuid: load_data_for_item})
                 feedin_df = pd.DataFrame({node_uuid: feedin_data_for_item})
@@ -377,7 +386,6 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
 
             # Einlesen der Daten:
             if len_of_load_df > 4:
-                # FIXME: s anstatt P?
                 df_resample = quarter_hourly_mean_resample(new_df_load)
 
                 sim_curve, quantile_95, quantile_95_tot, quantile_95_indices = calc_glg(True, df_resample, node_installed_capacity, len_curve, num_of_mc)
@@ -406,7 +414,6 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
 
             # Einlesen der Daten:
             if len_of_feedin_df > 4:
-                # FIXME: s anstatt P?
                 df_resample = quarter_hourly_mean_resample(new_df_feedin)
 
                 sim_curve, quantile_95, quantile_95_tot, quantile_95_indices = calc_glg(False, df_resample,
