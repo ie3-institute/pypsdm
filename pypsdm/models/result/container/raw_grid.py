@@ -1,4 +1,5 @@
 import concurrent.futures
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
@@ -103,6 +104,14 @@ class RawGridResultContainer(ContainerMixin):
         filter_end: Optional[datetime] = None,
     ):
         check_filter(filter_start, filter_end)
+
+        res_files = [
+            f for f in os.listdir(simulation_data_path) if f.endswith("_res.csv")
+        ]
+        if len(res_files) == 0:
+            raise FileNotFoundError(
+                f"No simulation results found in '{simulation_data_path}'."
+            )
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             nodes_future = executor.submit(

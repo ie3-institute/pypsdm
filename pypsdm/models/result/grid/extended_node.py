@@ -10,9 +10,9 @@ from pypsdm.models.result.power import PQResult
 
 
 @dataclass(frozen=True)
-class EnhancedNodeResult(NodeResult):
+class ExtendedNodeResult(NodeResult):
     def __eq__(self, other):
-        if not isinstance(other, EnhancedNodeResult):
+        if not isinstance(other, ExtendedNodeResult):
             return False
         return (
             (self.input_model == other.input_model)
@@ -31,7 +31,7 @@ class EnhancedNodeResult(NodeResult):
     @classmethod
     def from_node_result(
         cls, node_res: NodeResult, pq: PQResult
-    ) -> "EnhancedNodeResult":
+    ) -> "ExtendedNodeResult":
         if pq:
             # First time step of nodal voltages will most likely be nan because SIMONA pf calculation
             # starts at t+1. In this case we drop the time step.
@@ -54,8 +54,8 @@ class EnhancedNodeResult(NodeResult):
 
 
 @dataclass(frozen=True)
-class EnhancedNodesResult(NodesResult):
-    entities: dict[str, EnhancedNodeResult]
+class ExtendedNodesResult(NodesResult):
+    entities: dict[str, ExtendedNodeResult]
 
     @property
     def p(self) -> DataFrame:
@@ -94,7 +94,7 @@ class EnhancedNodesResult(NodesResult):
         return cls(
             RawGridElementsEnum.NODE,
             {
-                uuid: EnhancedNodeResult.from_node_result(result, nodal_pq[uuid])
+                uuid: ExtendedNodeResult.from_node_result(result, nodal_pq[uuid])
                 for uuid, result in nodes_result.entities.items()
             },
         )

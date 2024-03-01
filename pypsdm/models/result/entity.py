@@ -253,6 +253,9 @@ class ResultEntities(ABC):
         if data.empty:
             return cls.create_empty(entity_type, input_model, name)
 
+        if end.tzinfo is not None:
+            end = end.replace(tzinfo=None)
+
         if "time" in data.columns:
             data["time"] = data["time"].apply(
                 lambda date_string: to_date_time(date_string)
