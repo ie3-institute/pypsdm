@@ -10,7 +10,7 @@ from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
+from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
 
 
 @dataclass(frozen=True)
@@ -183,7 +183,7 @@ class GridWithResults(ContainerMixin):
             for (em_uuid, connected_assets) in uuid_to_connected_asset.items()
         ]
 
-    def build_enhanced_nodes_result(self):
+    def build_extended_nodes_result(self):
         nodal_results = self.nodal_results()
 
         with ProcessPoolExecutor() as executor:
@@ -197,7 +197,7 @@ class GridWithResults(ContainerMixin):
                 uuid, pq = future.result()
                 nodal_pq[uuid] = pq
 
-        return EnhancedNodesResult.from_nodes_result(self.results.nodes, nodal_pq)
+        return ExtendedNodesResult.from_nodes_result(self.results.nodes, nodal_pq)
 
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
@@ -281,7 +281,7 @@ class GridWithResults(ContainerMixin):
     @staticmethod
     def _calc_pq(uuid, nodal_result: GridResultContainer):
         """
-        NOTE: Utility function for parallel processing of building EnhancedNodesResult
+        NOTE: Utility function for parallel processing of building ExtendedNodesResult
         """
         pq = nodal_result.participants.sum()
         return uuid, pq

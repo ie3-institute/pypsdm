@@ -23,6 +23,13 @@ def filter_data_for_time_interval(
         return data
     if not data.index.is_monotonic_increasing:
         data = data.sort_index()
+
+    # Remove time zone to make datetime objects comparable
+    if start.tzinfo is not None:
+        start = start.replace(tzinfo=None)
+    if end.tzinfo is not None:
+        end = end.replace(tzinfo=None)
+
     # we want the first value to be start if present and if not the last value before start
     all_after_start = (data.index > start).all()
     all_after_end = (data.index >= end).all()

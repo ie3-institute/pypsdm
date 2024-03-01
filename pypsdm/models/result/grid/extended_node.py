@@ -95,7 +95,7 @@ class EnhancedNodesResult(NodesResult):
             return cls(
                 RawGridElementsEnum.NODE,
                 {
-                    uuid: EnhancedNodeResult.from_node_result(result, nodal_pq[uuid])
+                    uuid: ExtendedNodeResult.from_node_result(result, nodal_pq[uuid])
                     for uuid, result in nodes_result.entities.items()
                 },
             )

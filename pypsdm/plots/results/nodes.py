@@ -9,7 +9,7 @@ from pypsdm.plots.results.voltage_plot import ax_plot_v_mags_violin
 
 def voltage_power_along_branches_violin(gwr: GridWithResults):
     branches = gwr.grid.raw_grid.get_branches()
-    nodes_res = gwr.build_enhanced_nodes_result()
+    nodes_res = gwr.build_extended_nodes_result()
     width, height = FIGSIZE
     height = height * len(branches) * 2
     fig = plt.figure(figsize=(width, height))
