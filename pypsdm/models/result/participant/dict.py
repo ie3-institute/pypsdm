@@ -1,4 +1,3 @@
-import logging
 import os
 import uuid
 from abc import ABC
@@ -7,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Generic, Optional, Self, Type, TypeVar, Union
 
+from loguru import logger
 from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
 
@@ -264,7 +264,7 @@ class ResultDict(Generic[T], ABC):
             delimiter,
         )
         if not grpd_df:
-            logging.debug("There are no " + str(cls))
+            logger.debug("There are no " + str(cls))
             return cls.create_empty(entity_type)
         if simulation_end is None:
             simulation_end = to_date_time(grpd_df["time"].max().max())
@@ -304,7 +304,7 @@ class ResultDict(Generic[T], ABC):
         name = None
         if input_entities is not None:
             if input_model not in input_entities.id.index:
-                logging.debug(
+                logger.debug(
                     f"Input model {input_model} of type {entity_type} not found in input entities. It seems like the wrong input_entities have been passed. Not assigning a name to the result."
                 )
             else:
@@ -324,7 +324,7 @@ class ResultDict(Generic[T], ABC):
         path = get_file_path(simulation_data_path, file_name)
 
         if not path.exists():
-            logging.info(
+            logger.info(
                 "No results built for {} since {} does not exist".format(
                     file_name, str(path)
                 )
@@ -340,7 +340,7 @@ class ResultDict(Generic[T], ABC):
         if path.exists():
             return path
         else:
-            logging.info(
+            logger.info(
                 "No results built for {} since {} does not exist".format(
                     file_name, str(path)
                 )
