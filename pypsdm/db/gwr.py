@@ -1,9 +1,13 @@
 import os
 import re
 import shutil
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+
+from loguru import logger
+from pyhocon import ConfigFactory, ConfigTree, HOCONConverter
 
 from pypsdm.db.utils import PathManagerMixin
 from pypsdm.models.gwr import GridWithResults
@@ -50,6 +54,12 @@ class LocalGwrDb(PathManagerMixin):
                 raise ValueError(
                     f"Database path not specified. Set {DB_ENV_VAR} environment variable or pass path as argument."
                 )
+            if path.startswith("~"):
+                path = os.path.expanduser(path)
+            path = Path(path).absolute()
+        else:
+            if path.startswith("~"):
+                path = os.path.expanduser(path)
         self.path = Path(path) if isinstance(path, str) else path
 
     @property
@@ -173,6 +183,46 @@ class LocalGwrDb(PathManagerMixin):
             results = filtered
         return results
 
+    def open_configs(self, grid_id: str):
+        path = self.get_grid_path(grid_id)
+        if path:
+            conf_path = path.joinpath("configs")
+            if conf_path.exists():
+                self.open_in_file_explorer()
+            else:
+                raise FileNotFoundError(
+                    f"No configs for {grid_id} exist in {conf_path}."
+                )
+        else:
+            raise FileNotFoundError(f"Grid with id {grid_id} does not exist.")
+
+    def copy_configs(
+        self, grid_id: str, target_grid_id: str, adjust_grid_path: bool = True
+    ):
+
+        origin_grid_path = self.get_grid_path(grid_id)
+        if not origin_grid_path:
+            raise FileNotFoundError(f"Grid with id {grid_id} does not exist.")
+
+        origin_conf_path = origin_grid_path.joinpath("configs")
+        if not origin_conf_path.exists():
+            logger.debug(f"No configs for {grid_id} exist in {origin_conf_path}.")
+            return
+
+        target_grid_path = self.get_grid_path(target_grid_id)
+        if not target_grid_path:
+            raise FileNotFoundError(f"Grid with id {target_grid_id} does not exist.")
+        target_conf_path = target_grid_path.joinpath("configs")
+        target_conf_path.mkdir(exist_ok=True)
+
+        for file in os.listdir(origin_conf_path):
+            conf = ConfigFactory.parse_file(origin_conf_path.joinpath(file))
+            if adjust_grid_path:
+                conf = self.adjust_conf_path(conf, str(target_grid_path))
+            conf = HOCONConverter.to_hocon(conf)
+            with open(os.path.join(target_conf_path, file), "w") as f:
+                f.write(conf)
+
     def read_gwr_most_recent(self, grid_id) -> GridWithResults:
         """Read most recent GridWithResults."""
         result = self.list_results(grid_id)[0]
@@ -224,7 +274,6 @@ class LocalGwrDb(PathManagerMixin):
             )
         return GridContainer.from_csv(
             str(grid_path),
-            delimiter=",",
         )
 
     def read_results(self, res_id: str):
@@ -232,7 +281,6 @@ class LocalGwrDb(PathManagerMixin):
         return GridResultContainer.from_csv(
             res_id,
             str(self.results_path.joinpath(res_id)),
-            delimiter=",",
         )
 
     def add_grid(
@@ -456,3 +504,36 @@ class LocalGwrDb(PathManagerMixin):
         match = RESULT_ID_REGEX.match(res_id)
         assert match, f"Invalid res_id: {res_id}"
         return res_id
+
+    def adjust_conf_path(self, conf: ConfigTree, new_grid_path: str):
+        grid_paths_to_adjust = [
+            "simona.input.grid.datasource.csvParams.directoryPath",
+            "simona.input.primary.csvParams.directoryPath",
+        ]
+
+        updated = deepcopy(conf)
+        for p in grid_paths_to_adjust:
+            if p in conf:
+                updated.put(p, new_grid_path)
+            else:
+                raise ValueError(f"Path {p} not found in config.")
+
+        grid_id = Path(new_grid_path).name
+        res_id = self.create_res_id(grid_id)
+        output_conf = "simona.output.base.dir"
+
+        if output_conf in updated:
+            updated.put(output_conf, os.path.join(self.results_path, res_id))
+            updated.put("simona.output.base.addTimestampToOutputDir", "false")
+
+        updated.put("siona.simulationName", res_id)
+
+        slack_volt_src = "simona.input.grid.slackVoltageSource.directoryPath"
+        if slack_volt_src in conf:
+            sl_volt_path = conf.get(slack_volt_src)
+            if sl_volt_path:
+                file_name = Path(sl_volt_path).name
+                new_sl_volt_path = os.path.join(new_grid_path, file_name)
+                updated.put(slack_volt_src, new_sl_volt_path)
+
+        return updated
