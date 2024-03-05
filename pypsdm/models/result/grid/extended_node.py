@@ -91,10 +91,20 @@ class ExtendedNodesResult(NodesResult):
     def from_nodes_result(
         cls, nodes_result: NodesResult, nodal_pq: dict[str, PQResult]
     ):
-        return cls(
-            RawGridElementsEnum.NODE,
-            {
-                uuid: ExtendedNodeResult.from_node_result(result, nodal_pq[uuid])
-                for uuid, result in nodes_result.entities.items()
-            },
-        )
+        if nodes_result:
+            return cls(
+                RawGridElementsEnum.NODE,
+                {
+                    uuid: ExtendedNodeResult.from_node_result(result, nodal_pq[uuid])
+                    for uuid, result in nodes_result.entities.items()
+                },
+            )
+        else:
+            entities = {}
+            for uuid, pq_res in nodal_pq.items():
+                data = pq_res.data
+                data["v_mag"] = np.nan
+                data["v_ang"] = np.nan
+                entity = ExtendedNodeResult(RawGridElementsEnum.NODE, uuid, None, data)
+                entities[uuid] = entity
+            return cls(RawGridElementsEnum.NODE, entities)
