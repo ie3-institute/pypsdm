@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import json
-import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
@@ -10,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Self, Tuple, Type, TypeVar, Union
 
 import pandas as pd
+from loguru import logger
 from pandas import DataFrame, Series
 
 from pypsdm.errors import ComparisonError
@@ -79,7 +79,7 @@ class Entities(ABC):
 
         columns_diff = set(self.data.columns).symmetric_difference(other.data.columns)
         if len(columns_diff) > 0 and columns_diff.issubset(self.attributes()):
-            logging.warning(
+            logger.warning(
                 "The two Entities instances have different columns: %s", columns_diff
             )
         return type(self)(pd.concat([self.data, other.data]))
@@ -110,7 +110,17 @@ class Entities(ABC):
         return type(self)(self.data.drop(indices_to_remove))
 
     def __getitem__(self, get: str) -> pd.Series:
-        return self.data.loc[get]
+        try:
+            return self.data.loc[get]
+        except KeyError:
+            subset = self.subset_id(get)
+            if len(subset) == 1:
+                return subset.data.iloc[0]
+            if len(subset) > 1:
+                raise KeyError(
+                    f"Multiple entities with the same id found. Please use the uuids instead."
+                )
+            raise KeyError(f"Entity with id {get} not found.")
 
     @property
     def uuid(self) -> Series:
@@ -270,7 +280,7 @@ class Entities(ABC):
                 additional_attributes = set(self.additional_attributes())
                 additional_not_in_data = additional_attributes - set(data.columns)
                 if additional_not_in_data:
-                    logging.warning(
+                    logger.warning(
                         f"The following additional attributese were not found in the data: \n"
                         f"{additional_not_in_data}.\n"
                         "This might be due to not using the Entities.preprocessing() method "
@@ -353,7 +363,7 @@ class Entities(ABC):
         if os.path.exists(file_path):
             return cls(Entities._data_from_csv(entity, path, delimiter))
         else:
-            logging.debug(
+            logger.debug(
                 "There is no file named: "
                 + str(file_path)
                 + ". No "
@@ -374,7 +384,7 @@ class Entities(ABC):
                 data[col] = data[col].apply(lambda x: bool_converter(x))
                 data[col] = data[col].astype(bool)
             except ValueError as e:
-                logging.error(
+                logger.error(
                     f"Could not convert column {col} to bool. "
                     f"Please check the values in the csv file. "
                     f"Error: {e}"
@@ -404,7 +414,7 @@ class Entities(ABC):
     def preprocessing(entity: EntitiesEnum, data: DataFrame) -> DataFrame:
         """
         We perform some data transformations on the data wich make them easier to handle.
-        Additional columns we add are droppen when persisting the data.
+        Additional columns we add are dropped when persisting the data.
         """
 
         # special data transformations
