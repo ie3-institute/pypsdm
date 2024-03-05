@@ -2,7 +2,6 @@ from functools import partial
 from typing import Optional, Union
 
 import numpy as np
-import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
@@ -15,7 +14,6 @@ from pypsdm.models.result.power import PQResult, PQWithSocResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     BLUE,
-    COLOR_PALETTE,
     FIGSIZE,
     FILL_ALPHA,
     GREEN,

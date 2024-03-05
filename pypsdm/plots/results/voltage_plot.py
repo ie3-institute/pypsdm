@@ -12,7 +12,6 @@ from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
 from pypsdm.models.result.grid.node import NodeResult, NodesResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
-    COLOR_PALETTE,
     FIGSIZE,
     LABEL_PAD,
     set_subplot_title,

@@ -118,7 +118,7 @@ class Entities(ABC):
                 return subset.data.iloc[0]
             if len(subset) > 1:
                 raise KeyError(
-                    f"Multiple entities with the same id found. Please use the uuids instead."
+                    "Multiple entities with the same id found. Please use the uuids instead."
                 )
             raise KeyError(f"Entity with id {get} not found.")
 
