@@ -8,30 +8,29 @@ from pypsdm.models.gwr import GridWithResults
 from pypsdm.models.input.container.grid import GridContainer
 
 
-# Note: the fixture scope defines how long the fixture is valid and prevents reevaluation
-@pytest.fixture(scope="session")
+@pytest.fixture()
+def resources_path():
+    return os.path.join(ROOT_DIR, "tests", "resources")
+
+
+@pytest.fixture()
 def input_path():
     return os.path.join(ROOT_DIR, "tests", "resources", "vn_simona", "input")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def result_path():
     return os.path.join(ROOT_DIR, "tests", "resources", "vn_simona", "results")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def simulation_start():
     return datetime(year=2011, month=1, day=1, hour=12)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def simulation_end():
     return datetime(year=2012, month=2, day=3, hour=4, minute=15)
-
-
-@pytest.fixture(scope="session")
-def delimiter():
-    return ","
 
 
 @pytest.fixture(scope="session")

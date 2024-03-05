@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pytest
 
-from pypsdm.models.input.connector.lines import Lines
+from pypsdm import Lines
 from pypsdm.processing.dataframe import compare_dfs
 
 

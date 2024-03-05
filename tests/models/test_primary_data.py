@@ -5,8 +5,8 @@ from pypsdm.models.primary_data import PrimaryData
 
 
 @pytest.fixture
-def primary_data(input_path, delimiter):
-    return PrimaryData.from_csv(input_path, delimiter)
+def primary_data(input_path):
+    return PrimaryData.from_csv(input_path)
 
 
 def test_reading_of_primary_data(primary_data):
@@ -24,8 +24,8 @@ def test_reading_of_primary_data(primary_data):
     assert participant_pd.data["p"][0] == 3.999998968803
 
 
-def test_to_csv(primary_data: PrimaryData, tmpdir, delimiter):
+def test_to_csv(primary_data: PrimaryData, tmpdir):
     tmpdir = str(tmpdir)
-    primary_data.to_csv(tmpdir, delimiter=",")
-    pd_read = PrimaryData.from_csv(tmpdir, delimiter)
+    primary_data.to_csv(tmpdir)
+    pd_read = PrimaryData.from_csv(tmpdir)
     primary_data.compare(pd_read)

@@ -5,10 +5,9 @@ from pypsdm.processing.dataframe import compare_dfs
 
 
 @pytest.fixture
-def switches(input_path, delimiter):
+def switches(input_path):
     switches = Switches.from_csv(
         input_path,
-        delimiter,
     )
     return switches
 
