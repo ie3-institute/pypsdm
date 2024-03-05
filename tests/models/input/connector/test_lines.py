@@ -67,10 +67,10 @@ def test_attributes(lines):
     assert set(lines.attributes()) == set(lines.data.columns)
 
 
-def test_to_csv(lines: Lines, tmp_path, delimiter):
+def test_to_csv(lines: Lines, tmp_path):
     path = os.path.join(tmp_path, "lines")
     os.makedirs(path, exist_ok=True)
-    lines.to_csv(path, delimiter)
-    lines2 = Lines.from_csv(path, delimiter)
+    lines.to_csv(path)
+    lines2 = Lines.from_csv(path)
     # todo this needs to be tested for other participants
     compare_dfs(lines.data, lines2.data)
