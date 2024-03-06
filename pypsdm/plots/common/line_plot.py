@@ -1,5 +1,4 @@
-import logging
-
+from loguru import logger
 from matplotlib.axes import Axes
 from pandas import Series
 
@@ -31,7 +30,7 @@ def ax_plot_time_series(
     try:
         res = plot_resample(res, hourly_mean)
     except TypeError as e:
-        logging.warn(
+        logger.warning(
             f"Could not resample time series. Plotting without resampling. Error: {e}"
         )
     ax.plot(res, **kwargs)

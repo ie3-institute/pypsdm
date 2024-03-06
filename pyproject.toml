@@ -10,7 +10,7 @@ python = ">3.11, <3.12"
 pandas = ">1.2, <2.1"
 jupyter = "^1.0.0"
 matplotlib = "^3.6.0"
-seaborn = "^0.12.1"
+seaborn = "0.13"
 plotly = "^5.6.0"
 requests = "^2.27.1"
 numpy = "^1.24.1"
@@ -21,6 +21,9 @@ python-dotenv = "^1.0.0" # Can probably be removed in the future
 shapely = "^2.0.1"
 networkx = "^3.1"
 black = {extras = ["jupyter"], version = "~24.1.1"}
+loguru = "^0.7.2"
+sqlmodel = "^0.0.16"
+pyhocon = "^0.3.60"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"

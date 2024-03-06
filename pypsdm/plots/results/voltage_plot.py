@@ -12,7 +12,6 @@ from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
 from pypsdm.models.result.grid.node import NodeResult, NodesResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
-    COLOR_PALETTE,
     FIGSIZE,
     LABEL_PAD,
     set_subplot_title,
@@ -52,6 +51,7 @@ def plot_all_v_mag_branch_violin(
         title = "Voltage Magnitudes along Branches"
     set_suptitle(fig, title)
     plt.tight_layout()
+    plt.grid(True)
 
     return fig, axes
 
@@ -102,12 +102,11 @@ def ax_plot_v_mags_violin(
     else:
         v_mag = nodes_res.v_mag
 
-    if "color" in kwargs:
-        sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, **kwargs)
-    else:
-        sns.violinplot(
-            v_mag, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE
-        )
+    data = []
+    for col in v_mag.columns:
+        data.append(v_mag[col].dropna().values)
+
+    ax.violinplot(data, **kwargs)
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()

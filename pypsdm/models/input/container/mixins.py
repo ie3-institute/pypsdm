@@ -1,6 +1,9 @@
-import logging
+import copy
 from abc import ABC, abstractmethod
+from dataclasses import replace
 from typing import Self
+
+from loguru import logger
 
 from pypsdm.errors import ComparisonError
 
@@ -33,7 +36,28 @@ class ContainerMixin(ABC):
             try:
                 entities.to_csv(path, delimiter=delimiter, mkdirs=mkdirs)
             except Exception as e:
-                logging.error(f"Could not write {type(entities)} to {path}. Error: {e}")
+                logger.error(f"Could not write {type(entities)} to {path}. Error: {e}")
+
+    def copy(
+        self: Self,
+        deep=True,
+        **changes,
+    ) -> Self:
+        """
+        Creates a copy of the current container instance.
+        By default does a deep copy of all data and replaces the given changes.
+        When deep is false, only the references to the data of the non-changed
+        attribtues are copied.
+
+        Args:
+            deep: Whether to do a deep copy of the data.
+            **changes: The changes to apply to the copy.
+
+        Returns:
+            The copy of the current container instance.
+        """
+        to_copy = copy.deepcopy(self) if deep else self
+        return replace(to_copy, **changes)
 
     def compare(self, other) -> None:
         """

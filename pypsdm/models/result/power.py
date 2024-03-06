@@ -73,6 +73,9 @@ class PQResult(ResultEntities):
     def energy(self) -> float:
         return duration_weighted_sum(self.p)
 
+    def reactive_energy(self) -> float:
+        return duration_weighted_sum(self.q)
+
     def load_and_generation(self) -> Tuple[float, float]:
         return load_and_generation(self.p)
 

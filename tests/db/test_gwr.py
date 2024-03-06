@@ -1,5 +1,7 @@
 import os
 
+from pyhocon import ConfigFactory, HOCONConverter
+
 from pypsdm.db.gwr import (
     DB_ENV_VAR,
     GRID_ID_REGEX,
@@ -74,3 +76,10 @@ def test_load_from_env_var(tmp_path):
     os.environ[DB_ENV_VAR] = str(tmp_path)
     db = LocalGwrDb()
     assert str(db.path) == str(tmp_path)
+
+
+def test_read_conf(resources_path):
+    conf_path = os.path.join(resources_path, "vn_simona", "vn_simona.conf")
+    conf = ConfigFactory.parse_file(conf_path)
+    out = HOCONConverter.to_hocon(conf)
+    print("out: ", out)

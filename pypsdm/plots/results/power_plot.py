@@ -2,7 +2,6 @@ from functools import partial
 from typing import Optional, Union
 
 import numpy as np
-import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
@@ -15,7 +14,6 @@ from pypsdm.models.result.power import PQResult, PQWithSocResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     BLUE,
-    COLOR_PALETTE,
     FIGSIZE,
     FILL_ALPHA,
     GREEN,
@@ -72,12 +70,14 @@ def plot_apparent_power_components(
 
 def plot_all_nodal_ps_branch_violin(
     gwr: GridWithResults,
+    **kwargs,
 ):
     """
     Plots active power violin plots for all nodes across all branches.
 
     Args:
         gwr: GridWithResults object
+        exclude: Optional list of node uuids that should be excluded from the plot.
 
     Returns:
         fig, axes
@@ -89,7 +89,7 @@ def plot_all_nodal_ps_branch_violin(
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
         ax = axes[i] if len(branches) > 1 else axes
-        ax_plot_nodal_ps_violin(ax, nodes_res, branch)  # type: ignore
+        ax_plot_nodal_ps_violin(ax, nodes_res, branch, **kwargs)  # type: ignore
         set_subplot_title(ax, f"Nodal Actice Power Along Branch {i+1}")
     plt.tight_layout()
 
@@ -97,8 +97,7 @@ def plot_all_nodal_ps_branch_violin(
 
 
 def plot_nodal_ps_violin(
-    extended_nodes_res: ExtendedNodesResult,
-    nodes: Optional[list[str]] = None,
+    extended_nodes_res: ExtendedNodesResult, nodes: Optional[list[str]] = None, **kwargs
 ):
     """
     Plots violin plots for all given nodes.
@@ -106,12 +105,12 @@ def plot_nodal_ps_violin(
     Args:
         extended_nodes_res: ExtendedNodesResult to plot.
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
-
     Returns:
         fig, ax
     """
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_nodal_ps_violin(ax, extended_nodes_res, nodes)
+    ax_plot_nodal_ps_violin(ax, extended_nodes_res, nodes, **kwargs)
+    plt.grid(True)
     set_title(ax, "Nodal Active Power")
     return fig, ax
 
@@ -120,7 +119,7 @@ def ax_plot_nodal_ps_violin(
     ax: Axes,
     nodes_res: ExtendedNodesResult,
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
-    ffill=True,
+    **kwargs,
 ):
     """
     Plots violin plots for given nodes. If no nodes are passed all nodes are plotted.
@@ -129,21 +128,26 @@ def ax_plot_nodal_ps_violin(
         ax: Axes object
         nodes_res: NodesResult or ExtendedNodesResult object
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
+        exclude: Optional list of node uuids that should be excluded from the plot.
     """
 
     if nodes:
         # get v_mag in listed sequence
-        p = nodes_res.subset(nodes).p.reindex(columns=nodes)
+        p = nodes_res.subset(nodes).p().reindex(columns=nodes)
     else:
         p = nodes_res.p
 
-    sns.violinplot(p, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
+    data = []
+    for col in p.columns:
+        data.append((p[col].dropna() * 1e3).values)
+
+    ax.violinplot(data, **kwargs)
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
     x_labels = list(p.columns.map(lambda uuid: uuid_to_id[uuid]))
     set_xlabels_rotated(ax, x_labels, ha="right")
-    set_ylabel(ax, "Nodal active power in MW")
+    set_ylabel(ax, "Nodal active power in kW")
     _ = ax.set_xticklabels(x_labels, rotation=45, ha="right")
 
 
