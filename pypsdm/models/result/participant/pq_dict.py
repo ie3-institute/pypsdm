@@ -18,37 +18,64 @@ class PQResultDict(ResultDict):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
-    # TODO make ffill optional
-    @property
-    def p(self) -> DataFrame:
+    def p(
+        self,
+        ffill=True,
+    ) -> DataFrame:
+        """
+        Returns a DataFrame with the p values of all participants.
+
+        NOTE: By default forward fills the resulting nan values that occur in case of
+        different time resolutions of the pq results. This is valid if you are dealing
+        with event discrete time series data. This might not be what you want otherwise
+
+        Args:
+            ffill: Forward fill the resulting nan values
+
+        Returns:
+            DataFrame: DataFrame with the p values of all participants
+        """
         if not self.entities.values():
             return pd.DataFrame()
-        return (
-            pd.DataFrame({p_uuid: res.p for p_uuid, res in self.entities.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
+        data = pd.DataFrame(
+            {p_uuid: res.p for p_uuid, res in self.entities.items()}
+        ).sort_index()
+        if ffill:
+            return data.fillna(method="ffill")
+        return data
 
-    # TODO make ffill optional
-    @property
-    def q(self) -> DataFrame:
+    def q(self, ffill=True) -> DataFrame:
+        """
+        Returns a DataFrame with the q values of all participants.
+
+        NOTE: By default forward fills the resulting nan values that occur in case of
+        different time resolutions of the pq results. This is valid if you are dealing
+        with event discrete time series data. This might not be what you want otherwise
+
+        Args:
+            ffill: Forward fill the resulting nan values
+
+        Returns:
+            DataFrame: DataFrame with the q values of all participants
+        """
         if not self.entities.values():
             return pd.DataFrame()
-        return (
-            pd.DataFrame({p_uuid: res.q for p_uuid, res in self.entities.items()})
-            .fillna(method="ffill")
-            .sort_index()
-        )
+        data = pd.DataFrame(
+            {p_uuid: res.q for p_uuid, res in self.entities.items()}
+        ).sort_index()
+        if ffill:
+            return data.fillna(method="ffill")
+        return data
 
-    def p_sum(self) -> Series:
+    def p_sum(self, ffill=True) -> Series:
         if not self.entities:
             return Series(dtype=float)
-        return self.p.fillna(method="ffill").sum(axis=1).rename("p_sum")
+        return self.p(ffill).fillna(method="ffill").sum(axis=1).rename("p_sum")
 
-    def q_sum(self):
+    def q_sum(self, ffill=True):
         if not self.entities:
             return Series(dtype=float)
-        return self.q.fillna(method="ffill").sum(axis=1).rename("q_sum")
+        return self.q().fillna(method="ffill").sum(axis=1).rename("q_sum")
 
     def sum(self) -> PQResult:
         return PQResult.sum(list(self.entities.values()))

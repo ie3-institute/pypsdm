@@ -64,13 +64,11 @@ class PrimaryData:
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
 
-    @property
-    def p(self):
-        return self.time_series.p
+    def p(self, ffill=True):
+        return self.time_series.p(ffill)
 
-    @property
-    def q(self):
-        return self.time_series.q
+    def q(self, ffill=True):
+        return self.time_series.q(ffill)
 
     def p_sum(self) -> Series:
         return self.time_series.p_sum()

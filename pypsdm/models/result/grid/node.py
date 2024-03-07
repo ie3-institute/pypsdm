@@ -30,12 +30,18 @@ class NodeResult(ResultEntities):
     def v_ang(self) -> Series:
         return self.data["v_ang"]
 
-    def v_complex(self, v_rated_kv_src: Real | Nodes) -> Series:
-        v_rated_kv = (
-            v_rated_kv_src
-            if isinstance(v_rated_kv_src, Real)
-            else v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
-        )
+    def v_complex(self, v_rated_kv_src: Real | Nodes | None = None) -> Series:
+        if isinstance(v_rated_kv_src, Nodes):
+            v_rated_kv = v_rated_kv_src.subset(self.input_model).v_rated.iloc[0]
+        elif isinstance(v_rated_kv_src, Real):
+            v_rated_kv = v_rated_kv_src
+        elif v_rated_kv_src is None:
+            v_rated_kv = 1
+        else:
+            raise ValueError(
+                f"Received unexpected type for v_rated: {type(v_rated_kv_src)}"
+            )
+
         return (self.v_mag * v_rated_kv) * np.exp(1j * np.radians(self.v_ang))
 
     @staticmethod
@@ -81,7 +87,6 @@ class NodesResult(ResultDict):
             filter_end,
         )
 
-    @property
     def v_mag(self) -> DataFrame:
         if not self.entities:
             return pd.DataFrame()
@@ -93,7 +98,6 @@ class NodesResult(ResultDict):
             axis=1,
         )
 
-    @property
     def v_ang(self) -> DataFrame:
         if not self.entities:
             return pd.DataFrame()
@@ -104,6 +108,17 @@ class NodesResult(ResultDict):
             ],
             axis=1,
         )
+
+    def v_complex(self, nodes: Nodes | None = None) -> DataFrame:
+        if not self.entities:
+            return pd.DataFrame().astype(complex)
+        return pd.concat(
+            [
+                node_res.v_complex(nodes).rename(node_res.input_model).rename(uuid)
+                for uuid, node_res in self.entities.items()
+            ],
+            axis=1,
+        )  # type: ignore
 
     def v_mag_describe(self) -> DataFrame:
         return self._describe(self.v_mag)
