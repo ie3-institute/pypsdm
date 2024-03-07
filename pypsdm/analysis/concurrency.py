@@ -17,6 +17,25 @@ from pypsdm.models.enums import RawGridElementsEnum
 Plots
 """
 
+def do_plots(direction, sim_curve, quantile_95, quantile_95_tot, quantile_95_indices, coincidence_curve_abs, folder_output, filename, show_plots, len_curve):
+
+    x, y = curve_regression(quantile_95_indices, quantile_95, quantile_95_tot)
+
+    y_modified = y.copy()
+    y_limit = 1.1
+    y_limit2 = 1.3
+
+    glg_plot_1(x, y_modified, sim_curve, quantile_95_tot, True, folder_output, filename + 'plot1_' +direction,
+               show_plots, y_limit, len_curve + 5)
+    glg_plot_2a(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2a_' +direction, show_plots, y_limit2,
+                len_curve + 5)
+    glg_plot_2b(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2b_' +direction, show_plots, y_limit,
+                len_curve + 5)
+    glg_plot_3(x, y_modified, True, folder_output, filename + 'plot3_' +direction, show_plots, y_limit, len_curve + 5)
+    csv_file = filename + '_csv_'+ direction
+    results_to_csv(x, y_modified, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, coincidence_curve_abs,
+                   folder_output, csv_file)
+
 def save_plot_func(plt, folder, filename):
     file = filename + '.png'
     plt.savefig(
@@ -99,9 +118,9 @@ def show_all_glg_plots(x,y, sim_curve, quantile_95_tot, show_plot):
     # Plot 3
     glg_plot_3(x,y, False, 'nn','nn', show_plot)
 
-def results_to_csv(x,y, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, folder, filename):
+def results_to_csv(x,y, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, coincidence_curve_abs, folder, filename):
     data = {'x': x, 'y': y, 'sim_curve': sim_curve[0], 'quantile_95_tot': quantile_95_tot[0],
-            'quantile_95': quantile_95[0], 'quantile_95_indicies': quantile_95_indices}
+            'quantile_95': quantile_95[0], 'quantile_95_indicies': quantile_95_indices, 'coincidence_curve_abs': coincidence_curve_abs[0]}
     df = pd.DataFrame(data).set_index('x')
     filename= filename + '.csv'
     folder_filename= os.path.join(folder, filename)
@@ -204,20 +223,22 @@ def getInstalledCapacatiy(grid_container: GridContainer):
 """
 
 
-def calculate_coincidence_curve(load, df, df_inst, len_curve, num_mc):
-    coincidence_curve = pd.DataFrame(np.zeros((len_curve, 1)))
-    quantile_95 = pd.DataFrame(np.zeros((len_curve, 1)))
+def calculate_coincidence_curve(df, df_inst, len_curve, num_mc):
+    coincidence_curve_load = pd.DataFrame(np.zeros((len_curve, 1)))
+    coincidence_curve_load_abs = pd.DataFrame(np.zeros((len_curve, 1)))
+    quantile_95_load = pd.DataFrame(np.zeros((len_curve, 1)))
+    coincidence_curve_feedin = pd.DataFrame(np.zeros((len_curve, 1)))
+    coincidence_curve_feedin_abs = pd.DataFrame(np.zeros((len_curve, 1)))
+    quantile_95_feedin = pd.DataFrame(np.zeros((len_curve, 1)))
 
     for n in range(1, len_curve + 1):
         if n % 25 == 0 or n==1:
-            if load:
-                print("Lastrichtung")
-            else:
-                print("Einspeiserichtung")
             print("Starte für n=",n)
 
         temp_sim_max_abs = np.zeros(num_mc)
         temp_sim_max_norm = np.zeros(num_mc)
+        temp_sim_min_abs = np.zeros(num_mc)
+        temp_sim_min_norm = np.zeros(num_mc)
 
         for mc in range(num_mc):
             # Randomly choose n profiles
@@ -226,45 +247,51 @@ def calculate_coincidence_curve(load, df, df_inst, len_curve, num_mc):
             # Filter DF of installed capacities by the choosen n profiles
             df_inst_filtered = df_inst[df_inst.index.isin(profile_col)]
 
-            if load:
-                # get aggr. installed power of the choosen profiles in load direction in MW
-                agg_inst_power = df_inst_filtered.s_rated_load_direction.sum()/1000
-            else:
-                agg_inst_power = df_inst_filtered.s_rated_feedin_direction.sum() / 1000
-
+            # get aggr. installed power of the choosen profiles in load direction in MW
+            agg_inst_power_load = df_inst_filtered.s_rated_load_direction.sum()/1000
+            agg_inst_power_feedin = df_inst_filtered.s_rated_feedin_direction.sum() / 1000
 
             # get mc profiles
             mc_profile = df.loc[:, profile_col]
 
-            tmp_abs = mc_profile.sum(axis=1).max()
-            temp_sim_max_abs[mc] = tmp_abs
+            tmp_abs_max = mc_profile.sum(axis=1).max()
+            temp_sim_max_abs[mc] = tmp_abs_max
+            tmp_abs_min = mc_profile.sum(axis=1).min() * -1
+            temp_sim_min_abs[mc] = tmp_abs_min
 
-            if agg_inst_power == 0:
-                tmp_norm = 0.0
-            else:
-                tmp_norm = tmp_abs / agg_inst_power
-            temp_sim_max_norm[mc] = tmp_norm
+            tmp_norm_load = 0.0 if tmp_abs_max < 0 or agg_inst_power_load == 0 else tmp_abs_max / agg_inst_power_load
 
-        coincidence_curve.iloc[n - 1, 0] = temp_sim_max_norm.max()
-        quantile_95.iloc[n - 1, 0] = np.percentile(temp_sim_max_norm, 95, method='linear')
+            tmp_norm_feedin = 0.0 if tmp_abs_min > 0 or agg_inst_power_feedin == 0 else tmp_abs_min / agg_inst_power_feedin
 
-    return coincidence_curve, quantile_95
+            temp_sim_max_norm[mc] = tmp_norm_load
+            temp_sim_min_norm[mc] = tmp_norm_feedin
 
+        coincidence_curve_load.iloc[n - 1, 0] = temp_sim_max_norm.max()
+        coincidence_curve_load_abs.iloc[n - 1, 0] = temp_sim_max_abs.max()
+        quantile_95_load.iloc[n - 1, 0] = np.percentile(temp_sim_max_norm, 95, method='linear')
 
-def calc_glg(load, df, node_installed_capacity, len_curve, num_mc):
-    if load:
-        sim_curve, quantile_95_tot = calculate_coincidence_curve(True, df, node_installed_capacity, len_curve, num_mc)
-    else:
-        sim_curve, quantile_95_tot = calculate_coincidence_curve(False, df, node_installed_capacity, len_curve,
-                                                                                num_mc)
+        coincidence_curve_feedin.iloc[n - 1, 0] = temp_sim_min_norm.max()
+        coincidence_curve_feedin_abs.iloc[n - 1, 0] = temp_sim_min_abs.max()
+        quantile_95_feedin.iloc[n - 1, 0] = np.percentile(temp_sim_min_norm, 95, method='linear')
+
+    return coincidence_curve_load, coincidence_curve_load_abs, quantile_95_load, coincidence_curve_feedin, coincidence_curve_feedin_abs, quantile_95_feedin
 
 
-    quantile_95_tot_modified = quantile_95_tot.copy()
-    quantile_95_tot_modified.loc[quantile_95_tot_modified.iloc[:, 0] > 1.0, quantile_95_tot_modified.columns[0]] = 1.0
-    quantile_95 = quantile_95_tot_modified.loc[:, 0].to_numpy()
-    quantile_95_indices = pd.Series(range(1, len(quantile_95) + 1)).to_numpy()
+def calc_glg(df, node_installed_capacity, len_curve, num_mc):
 
-    return sim_curve, quantile_95, quantile_95_tot_modified, quantile_95_indices
+    sim_curve_load, coincidence_curve_load_abs, quantile_95_tot_load , sim_curve_feedin, coincidence_curve_feedin_abs, quantile_95_tot_feedin = calculate_coincidence_curve(df, node_installed_capacity, len_curve, num_mc)
+
+    quantile_95_tot_load_modified = quantile_95_tot_load.copy()
+    quantile_95_tot_load_modified.loc[quantile_95_tot_load_modified.iloc[:, 0] > 1.0, quantile_95_tot_load_modified.columns[0]] = 1.0
+    quantile_95_load = quantile_95_tot_load_modified.loc[:, 0].to_numpy()
+    quantile_95_indices_load = pd.Series(range(1, len(quantile_95_load) + 1)).to_numpy()
+
+    quantile_95_tot_feedin_modified = quantile_95_tot_feedin.copy()
+    quantile_95_tot_feedin_modified.loc[quantile_95_tot_feedin_modified.iloc[:, 0] > 1.0, quantile_95_tot_feedin_modified.columns[0]] = 1.0
+    quantile_95_feedin = quantile_95_tot_feedin_modified.loc[:, 0].to_numpy()
+    quantile_95_indices_feedin = pd.Series(range(1, len(quantile_95_feedin) + 1)).to_numpy()
+
+    return sim_curve_load, quantile_95_load, quantile_95_tot_load_modified, quantile_95_indices_load, coincidence_curve_load_abs, sim_curve_feedin, quantile_95_feedin, quantile_95_tot_feedin_modified, quantile_95_indices_feedin, coincidence_curve_feedin_abs
 
 
 def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, len_of_curve, num_of_mc, show_plots, folder_output):
@@ -348,103 +375,44 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
             & (node_cases_dict['5'] == hp_new)
             ]
 
-        dfs_load = []
-        dfs_feedin = []
+        dfs = []
         if len(node_of_item_case) > 0:
             for node_uuid in node_of_item_case.index:
                 nodal_result = gwr_nodal_results[node_uuid].data
-                # Filter for p < 0 and set p, q to 0
-                nodal_result_load = nodal_result.copy()
-                load_mask = nodal_result_load['p'] < 0
-                nodal_result_load.loc[load_mask, ['p', 'q']] = 0.0
-                # Filter for p > 0 and set p, q to 0
-                nodal_result_feedin = nodal_result.copy()
-                feedin_mask = nodal_result_feedin['p'] > 0
-                nodal_result_feedin.loc[feedin_mask, ['p', 'q']] = 0.0
 
-                pqResult_for_load = PQResult(RawGridElementsEnum.NODE,node_uuid,node_uuid+"_Load",nodal_result_load)
-                pqResult_for_feedin = PQResult(RawGridElementsEnum.NODE,node_uuid,node_uuid+"_Feedin",nodal_result_feedin)
-                load_data_for_item = pqResult_for_load.complex_power().abs()
-                feedin_data_for_item = pqResult_for_feedin.complex_power().abs()
-                # Create a DataFrame for each node_uuid and append it to the list
-                load_df = pd.DataFrame({node_uuid: load_data_for_item})
-                feedin_df = pd.DataFrame({node_uuid: feedin_data_for_item})
-                dfs_load.append(load_df)
-                dfs_feedin.append(feedin_df)
+                pqResult = PQResult(RawGridElementsEnum.NODE,node_uuid,node_uuid,nodal_result)
+
+                sign = np.sign(pqResult.p)
+                magnitude = pqResult.complex_power().abs()
+
+                # Adjust magnitude for feed-in scenarios
+                magnitude[sign < 0] *= -1
+
+                df = pd.DataFrame({node_uuid: magnitude})
+                dfs.append(df)
 
             # Concatenate all the DataFrames in the list along the columns axis
 
-            new_df_load = pd.concat(dfs_load, axis=1)
-            new_df_feedin = pd.concat(dfs_feedin, axis=1)
+            new_df = pd.concat(dfs, axis=1)
 
-            ##### LOAD DIRECTION
-
-            len_of_load_df = len(new_df_load.columns)
+            len_of_df = len(new_df.columns)
 
             # len_curve = 150
-            len_curve = min(len_of_load_df,len_of_curve)
+            len_curve = min(len_of_df,len_of_curve)
 
             # Einlesen der Daten:
-            if len_of_load_df > 4:
-                df_resample = quarter_hourly_mean_resample(new_df_load)
+            if len_of_df > 4:
+                df_resample = quarter_hourly_mean_resample(new_df)
+                sim_curve_load, quantile_95_load, quantile_95_tot_load, quantile_95_indices_load, coincidence_curve_load_abs, sim_curve_feedin, quantile_95_feedin, quantile_95_tot_feedin, quantile_95_indices_feedin, coincidence_curve_feedin_abs = calc_glg(df_resample, node_installed_capacity, len_curve, num_of_mc)
 
-                sim_curve, quantile_95, quantile_95_tot, quantile_95_indices = calc_glg(True, df_resample, node_installed_capacity, len_curve, num_of_mc)
+                #Load
+                print('Load')
+                do_plots('load', sim_curve_load, quantile_95_load, quantile_95_tot_load, quantile_95_indices_load, coincidence_curve_load_abs,folder_output, filename, show_plots, len_curve)
+                #Feedin
+                print('Feed-In')
+                do_plots('feedin', sim_curve_feedin, quantile_95_feedin, quantile_95_tot_feedin, quantile_95_indices_feedin, coincidence_curve_feedin_abs, folder_output, filename, show_plots, len_curve)
 
-                x, y = curve_regression(quantile_95_indices, quantile_95, quantile_95_tot)
-
-                y_modified = y.copy()
-                y_modified[y_modified > 1.0] = 1.0
-
-                glg_plot_1(x, y_modified, sim_curve, quantile_95_tot, True, folder_output, filename + 'plot1_load', show_plots, 1.1, len_curve+5)
-                glg_plot_2a(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2a_load', show_plots, 1.3, len_curve+5)
-                glg_plot_2b(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2b_load', show_plots, 1.1, len_curve+5)
-                glg_plot_3(x, y_modified, True, folder_output, filename + 'plot3_load', show_plots, 1.1, len_curve+5)
-                csv_file = filename + '_csv_load'
-                results_to_csv(x, y_modified, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices, folder_output, csv_file)
-                print('Done for ' + filename + ' containing ' + len_of_load_df.__str__() + ' elements')
-            else:
-                print('Warning, dataset ' + filename + ' contains less than 5 elements. Evaluation not possible.')
-
-            ##### FEEDIN DIRECTION
-
-            len_of_feedin_df = len(new_df_feedin.columns)
-
-            # len_curve = 150
-            len_curve = min(len_of_feedin_df, len_of_curve)
-
-            # Einlesen der Daten:
-            if len_of_feedin_df > 4:
-                df_resample = quarter_hourly_mean_resample(new_df_feedin)
-
-                sim_curve, quantile_95, quantile_95_tot, quantile_95_indices = calc_glg(False, df_resample,
-                                                                                        node_installed_capacity,
-                                                                                        len_curve, num_of_mc)
-
-                x, y = curve_regression(quantile_95_indices, quantile_95, quantile_95_tot)
-
-                y_modified = y.copy()
-                y_modified[y_modified > 1.0] = 1.0
-
-                glg_plot_1(x, y_modified, sim_curve, quantile_95_tot, True, folder_output, filename + 'plot1_feedin',
-                           show_plots, 1.1, len_curve + 5)
-                glg_plot_2a(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2a_feedin', show_plots,
-                            1.3, len_curve + 5)
-                glg_plot_2b(x, y_modified, quantile_95_tot, True, folder_output, filename + 'plot2b_feedin', show_plots,
-                            1.1, len_curve + 5)
-                glg_plot_3(x, y_modified, True, folder_output, filename + 'plot3_feedin', show_plots, 1.1, len_curve + 5)
-                csv_file = filename + '_csv_feedin'
-                results_to_csv(x, y_modified, sim_curve, quantile_95_tot, quantile_95, quantile_95_indices,
-                               folder_output, csv_file)
-                print('Done for ' + filename + ' containing ' + len_of_feedin_df.__str__() + ' elements')
+                print('Done for ' + filename + ' containing ' + len_of_df.__str__() + ' elements')
             else:
                 print('Warning, dataset ' + filename + ' contains less than 5 elements. Evaluation not possible.')
             print("Simultaneity Analysis finished")
-
-def start():
-    folder_inputs = r''
-    folder_glz_cases = r''
-    folder_res = r''
-    output_folder = r''
-    endtime = datetime(2019, 12, 31)
-    num_mc = 1000
-    start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc)
