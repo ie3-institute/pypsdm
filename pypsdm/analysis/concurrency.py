@@ -424,4 +424,4 @@ def start():
     output_folder = r''
     endtime = datetime(2019, 12, 31)
     num_mc = 1000
-    start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc)
+    simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc, False, output_folder)
