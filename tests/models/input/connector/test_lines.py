@@ -1,9 +1,12 @@
+import math
 import os
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from pypsdm import Lines
+from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.processing.dataframe import compare_dfs
 
 
@@ -74,3 +77,78 @@ def test_to_csv(lines: Lines, tmp_path):
     lines2 = Lines.from_csv(path)
     # todo this needs to be tested for other participants
     compare_dfs(lines.data, lines2.data)
+
+
+def test_gij(simple_grid: GridContainer):
+    gij = simple_grid.lines.gij()
+
+    uuid = "ca425259-fab4-4dc1-99c9-c19031121645"
+    line = simple_grid.lines[uuid]
+    length = line.length
+    r = line.r * length
+    x = line.x * length
+    l_gij = r / (r**2 + x**2)
+
+    assert math.isclose(gij[uuid], l_gij)
+
+    # SIMONA pu result
+    nom_imp = 0.266666666666666
+    assert math.isclose(gij[uuid], 26.066167336648626 / nom_imp)
+
+
+def test_bij(simple_grid: GridContainer):
+    bij = simple_grid.lines.bij()
+
+    uuid = "ca425259-fab4-4dc1-99c9-c19031121645"
+
+    # SIMONA pu result
+    nom_imp = 0.266666666666666
+    assert math.isclose(bij[uuid], -6.679455380016211 / nom_imp)
+
+
+def test_yij(simple_grid: GridContainer):
+    yij = simple_grid.lines.yij()
+
+    uuid = "ca425259-fab4-4dc1-99c9-c19031121645"
+
+    # SIMONA pu result
+    nom_imp = 0.266666666666666
+    expected = (26.066167336648626 + 1j * -6.679455380016211,)
+    assert math.isclose(yij[uuid].real, expected[0].real / nom_imp)
+    assert math.isclose(yij[uuid].imag, expected[0].imag / nom_imp)
+
+
+def test_yi0(simple_grid: GridContainer):
+    y0 = simple_grid.lines.y0()
+    uuid = "ca425259-fab4-4dc1-99c9-c19031121645"
+
+    # SIMONA pu result
+    nom_imp = 0.266666666666666
+    expected = 0.0 + 1j * 6.534520000000001 * 1e-7
+    assert math.isclose(y0[uuid].real, expected.real / nom_imp)
+    assert math.isclose(y0[uuid].imag, expected.imag / nom_imp)
+
+
+def test_admittance_matrix(simple_grid):
+    uuid_idx = {
+        "b7a5be0d-2662-41b2-99c6-3b8121a75e9e": 0,
+        "df97c0d1-379b-417a-a473-8e7fe37da99d": 1,
+        "1dcddd06-f41a-405b-9686-7f7942852196": 2,
+        "e3c3c6a3-c383-4dbb-9b3f-a14125615386": 3,
+        "6a4547a8-630b-46e4-8144-9cd649e67c07": 4,
+    }
+
+    Y = simple_grid.lines.admittance_matrix(uuid_idx)
+
+    # SIMONA pu result
+    nom_imp = 0.266666666666666
+    first_row = [
+        32.081436722029075 + 1j * -8.220864674942618,
+        0,
+        -6.015269385380451 + 1j * 1.5414127800037403,
+        0,
+        -26.066167336648626 + 1j * 6.679455380016211,
+    ]
+    expected = [x / nom_imp for x in first_row]
+
+    assert np.allclose(Y[0], expected)
