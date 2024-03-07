@@ -416,3 +416,12 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
             else:
                 print('Warning, dataset ' + filename + ' contains less than 5 elements. Evaluation not possible.')
             print("Simultaneity Analysis finished")
+
+def start():
+    folder_inputs = r''
+    folder_glz_cases = r''
+    folder_res = r''
+    output_folder = r''
+    endtime = datetime(2019, 12, 31)
+    num_mc = 1000
+    start_simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc)
