@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import csv
-from datetime import datetime, timezone
+from datetime import datetime
 from pypsdm.processing.series import (add_series,quarter_hourly_mean_resample )
 from pypsdm.models.result import (entity, )
 from pypsdm.models import (enums,gwr )
@@ -17,7 +17,7 @@ from pypsdm.models.enums import RawGridElementsEnum
 Plots
 """
 
-def do_plots(direction, sim_curve, quantile_95, quantile_95_tot, quantile_95_indices, coincidence_curve_abs, folder_output, filename, show_plots, len_curve):
+def do_plots(direction: str, sim_curve, quantile_95, quantile_95_tot, quantile_95_indices, coincidence_curve_abs, folder_output, filename, show_plots, len_curve):
 
     x, y = curve_regression(quantile_95_indices, quantile_95, quantile_95_tot)
 
@@ -140,7 +140,7 @@ def fit_function(n, *args):
     a, b, c = args
     return a * np.power(n, -b) + c
 
-def fit_sim_curve(x_values, y_values):
+def fit_sim_curve(x_values: pd.DataFrame, y_values: pd.DataFrame):
     # Initialisierung mit Werten EV ungesteuert Dis Kippelt
     p0 = [1.785, 0.631, 0.112]
     popt, pcov = curve_fit(fit_function, x_values, y_values, p0, maxfev=10000)
@@ -168,7 +168,7 @@ def fit_sim_curve(x_values, y_values):
 Kurvenregression
 """
 
-def curve_regression(quantile_95_indices, quantile_95, quantile_95_tot):
+def curve_regression(quantile_95_indices: pd.DataFrame, quantile_95: pd.DataFrame, quantile_95_tot: pd.DataFrame):
         # Kurvenregression
         param_opt, param_cov, r_squared = fit_sim_curve(quantile_95_indices, quantile_95)
         a_opt, b_opt, c_opt = param_opt
@@ -182,7 +182,7 @@ def curve_regression(quantile_95_indices, quantile_95, quantile_95_tot):
 
 
 
-def getFloatFromString(string):
+def getFloatFromString(string: str):
     try:
         rated_power_str = string.split(',')[1].split(':')[1].strip()
         return float(rated_power_str.split()[0])
@@ -223,7 +223,7 @@ def getInstalledCapacatiy(grid_container: GridContainer):
 """
 
 
-def calculate_coincidence_curve(df, df_inst, len_curve, num_mc):
+def calculate_coincidence_curve(df: pd.DataFrame, df_inst: pd.DataFrame, len_curve: int, num_mc: int):
     coincidence_curve_load = pd.DataFrame(np.zeros((len_curve, 1)))
     coincidence_curve_load_abs = pd.DataFrame(np.zeros((len_curve, 1)))
     quantile_95_load = pd.DataFrame(np.zeros((len_curve, 1)))
@@ -277,7 +277,7 @@ def calculate_coincidence_curve(df, df_inst, len_curve, num_mc):
     return coincidence_curve_load, coincidence_curve_load_abs, quantile_95_load, coincidence_curve_feedin, coincidence_curve_feedin_abs, quantile_95_feedin
 
 
-def calc_glg(df, node_installed_capacity, len_curve, num_mc):
+def calc_glg(df: pd.DataFrame, node_installed_capacity: pd.DataFrame, len_curve: int, num_mc: int):
 
     sim_curve_load, coincidence_curve_load_abs, quantile_95_tot_load , sim_curve_feedin, coincidence_curve_feedin_abs, quantile_95_tot_feedin = calculate_coincidence_curve(df, node_installed_capacity, len_curve, num_mc)
 
@@ -294,7 +294,7 @@ def calc_glg(df, node_installed_capacity, len_curve, num_mc):
     return sim_curve_load, quantile_95_load, quantile_95_tot_load_modified, quantile_95_indices_load, coincidence_curve_load_abs, sim_curve_feedin, quantile_95_feedin, quantile_95_tot_feedin_modified, quantile_95_indices_feedin, coincidence_curve_feedin_abs
 
 
-def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, len_of_curve, num_of_mc, show_plots, folder_output):
+def simultaneity_analysis(folder_inputs:str, folder_glz_cases:str, folder_res:str, endtime:datetime, len_of_curve:int, num_of_mc:int, show_plots:bool, folder_output:str):
     print("Start Simultaneity Analysis:")
     # Ziel: 1000, Anzahl an Monte-Carlo-Iterationen pro Punkt in der GZ-Kurve
     if num_of_mc < 1000:
@@ -424,4 +424,4 @@ def start():
     output_folder = r''
     endtime = datetime(2020, 1, 1, tzinfo=timezone.utc)
     num_mc = 1000
-    simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc, False, output_folder)
+    simultaneity_analysis(folder_inputs=folder_inputs, folder_glz_cases=folder_glz_cases, folder_res=folder_res, endtime=endtime, len_of_curve=150, num_of_mc=num_mc, show_plots=False, folder_output=output_folder)
