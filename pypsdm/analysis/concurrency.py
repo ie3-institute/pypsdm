@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import csv
-from datetime import datetime
+from datetime import datetime, timezone
 from pypsdm.processing.series import (add_series,quarter_hourly_mean_resample )
 from pypsdm.models.result import (entity, )
 from pypsdm.models import (enums,gwr )
@@ -422,6 +422,6 @@ def start():
     folder_glz_cases = r''
     folder_res = r''
     output_folder = r''
-    endtime = datetime(2019, 12, 31)
+    endtime = datetime(2020, 1, 1, tzinfo=timezone.UTC)
     num_mc = 1000
     simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc, False, output_folder)
