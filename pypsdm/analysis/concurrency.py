@@ -422,6 +422,6 @@ def start():
     folder_glz_cases = r''
     folder_res = r''
     output_folder = r''
-    endtime = datetime(2020, 1, 1, tzinfo=timezone.UTC)
+    endtime = datetime(2020, 1, 1, tzinfo=timezone.utc)
     num_mc = 1000
     simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, output_folder, endtime, num_mc, False, output_folder)
