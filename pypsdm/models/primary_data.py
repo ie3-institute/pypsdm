@@ -1,6 +1,5 @@
 import concurrent.futures
 import copy
-import logging
 import os
 import re
 import uuid
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Union
 
 import pandas as pd
+from loguru import logger
 from pandas import Series
 
 from pypsdm.errors import ComparisonError
@@ -55,7 +55,7 @@ class PrimaryData:
             case slice():
                 start, stop, step = get.start, get.stop, get.step
                 if step is not None:
-                    logging.warning("Step is not supported for slicing. Ignoring it.")
+                    logger.warning("Step is not supported for slicing. Ignoring it.")
                 if not (isinstance(start, datetime) and isinstance(stop, datetime)):
                     raise ValueError("Only datetime slicing is supported")
                 return self.filter_for_time_interval(start, stop)
@@ -238,7 +238,7 @@ class PrimaryData:
             return PrimaryData(time_series, participant_mapping)
 
         else:
-            logging.debug(f"No primary data in path {path}")
+            logger.debug(f"No primary data in path {path}")
             return PrimaryData(
                 PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
             )

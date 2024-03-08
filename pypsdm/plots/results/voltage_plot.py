@@ -8,14 +8,14 @@ import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from pypsdm.models.result.grid.enhanced_node import EnhancedNodesResult
+from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
 from pypsdm.models.result.grid.node import NodeResult, NodesResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
-    COLOR_PALETTE,
     FIGSIZE,
     LABEL_PAD,
     set_subplot_title,
+    set_suptitle,
     set_title,
     set_xlabels_rotated,
     set_ylabel,
@@ -23,8 +23,10 @@ from pypsdm.plots.common.utils import (
 
 
 def plot_all_v_mag_branch_violin(
-    nodes_res: Union[NodesResult, EnhancedNodesResult],
+    nodes_res: Union[NodesResult, ExtendedNodesResult],
     branches: list[list[str]],
+    title: str | None = None,
+    **kwargs,
 ):
     """
     Plots violin plots for all nodes across all branches.
@@ -41,44 +43,56 @@ def plot_all_v_mag_branch_violin(
     fig, axes = plt.subplots(nrows=len(branches), figsize=(width, height))
     for i, branch in enumerate(branches):
         axs = axes[i] if len(branches) > 1 else axes
-        ax_plot_v_mags_violin(axs, nodes_res, branch)  # type: ignore
-        set_subplot_title(axs, f"Voltages along Branch {i+1}")
+        ax_plot_v_mags_violin(axs, nodes_res, branch, **kwargs)  # type: ignore
+        if len(branches) > 1:
+            set_subplot_title(axs, f"Voltages along Branch {i+1}")
+
+    if not title:
+        title = "Voltage Magnitudes along Branches"
+    set_suptitle(fig, title)
     plt.tight_layout()
+    plt.grid(True)
 
     return fig, axes
 
 
 def plot_v_mags_violin(
-    nodes_res: Union[NodesResult, EnhancedNodesResult],
-    nodes: Optional[list[str]] = None,
+    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes: list[str] | None = None,
+    title: str | None = None,
+    **kwargs,
 ):
     """
     Plots violin plots for all given nodes .
 
     Args:
-        nodes_res: NodesResult or EnhancedNodesResult object
+        nodes_res: NodesResult or ExtendedNodesResult object
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
 
     Returns:
         fig, ax
     """
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    ax_plot_v_mags_violin(ax, nodes_res, nodes)
-    set_title(ax, "Voltage Magnitudes along Branch")
+    ax_plot_v_mags_violin(ax, nodes_res, nodes, **kwargs)
+
+    if not title:
+        title = "Voltage Magnitudes"
+    set_title(ax, title)
     return fig, ax
 
 
 def ax_plot_v_mags_violin(
     ax: Axes,
-    nodes_res: Union[NodesResult, EnhancedNodesResult],
+    nodes_res: Union[NodesResult, ExtendedNodesResult],
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
+    **kwargs,
 ):
     """
     Plots violin plots for given nodes. If no nodes are passed all nodes are plotted.
 
     Args:
         ax: Axes object
-        nodes_res: NodesResult or EnhancedNodesResult object
+        nodes_res: NodesResult or ExtendedNodesResult object
         nodes: Optional list of node uuids that should be plotted. Order is preserved.
     """
 
@@ -88,7 +102,11 @@ def ax_plot_v_mags_violin(
     else:
         v_mag = nodes_res.v_mag
 
-    sns.violinplot(v_mag, showmedians=True, ax=ax, linewidth=0.5, palette=COLOR_PALETTE)
+    data = []
+    for col in v_mag.columns:
+        data.append(v_mag[col].dropna().values)
+
+    ax.violinplot(data, **kwargs)
 
     # set labels
     uuid_to_id = nodes_res.uuid_to_id_map()
@@ -99,7 +117,7 @@ def ax_plot_v_mags_violin(
 
 
 def plot_v_mag_branch(
-    nodes_res: Union[NodesResult, EnhancedNodesResult],
+    nodes_res: Union[NodesResult, ExtendedNodesResult],
     branch: list[str],  # branches can be found by GridContainer.get_branches()
     time: datetime,
     in_kw: bool = False,
@@ -108,7 +126,7 @@ def plot_v_mag_branch(
     Plots voltage magnitudes of nodes along the given branch.
 
     Args:
-        nodes_res: NodesResult or EnhancedNodesResult object
+        nodes_res: NodesResult or ExtendedNodesResult object
         branch: list of node uuids that form the branch
         time: datetime for which the voltage magnitudes should be plotted
         in_kw: if True, power is plotted in kW instead of MW
@@ -124,7 +142,7 @@ def plot_v_mag_branch(
 
 def ax_plot_v_mag_branch(
     ax: Axes,
-    nodes_res: Union[NodesResult, EnhancedNodesResult],
+    nodes_res: Union[NodesResult, ExtendedNodesResult],
     branch: list[str],
     time: datetime,
     fig: Optional[Figure] = None,  # used to plot colorbar
@@ -135,14 +153,14 @@ def ax_plot_v_mag_branch(
 
     Args:
         ax: Axes object
-        nodes_res: NodesResult or EnhancedNodesResult object
+        nodes_res: NodesResult or ExtendedNodesResult object
         branch: list of node uuids that form the branch
         time: datetime for which the voltage magnitudes should be plotted
         fig: Optional Figure object which is used to plot the colorbar
         in_kw: if True, power is plotted in kW instead of MW
     """
 
-    with_power = isinstance(nodes_res, EnhancedNodesResult)
+    with_power = isinstance(nodes_res, ExtendedNodesResult)
 
     v_mags = []
     x_ticks = []

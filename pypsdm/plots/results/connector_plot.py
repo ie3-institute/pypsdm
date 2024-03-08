@@ -1,8 +1,8 @@
-import logging
 from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from loguru import logger
 from matplotlib.axes import Axes
 
 from pypsdm.models.gwr import GridWithResults
@@ -200,7 +200,7 @@ def ax_plot_line_current(
 
     if include_utilisation:
         if i_max_src is None:
-            logging.warning("No i_max_src provided. Cannot plot utilisation")
+            logger.warning("No i_max_src provided. Cannot plot utilisation")
             return
         if isinstance(i_max_src, float) or isinstance(i_max_src, int):
             line_i_max = i_max_src

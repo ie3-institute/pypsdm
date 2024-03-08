@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
@@ -133,6 +134,14 @@ class GridResultContainer(ContainerMixin):
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
     ):
+        res_files = [
+            f for f in os.listdir(simulation_data_path) if f.endswith("_res.csv")
+        ]
+        if len(res_files) == 0:
+            raise FileNotFoundError(
+                f"No simulation results found in '{simulation_data_path}'."
+            )
+
         check_filter(filter_start, filter_end)
 
         raw_grid = RawGridResultContainer.from_csv(

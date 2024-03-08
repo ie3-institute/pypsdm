@@ -33,13 +33,12 @@ def create_custom_pq_res():
 
 # TODO: Replace from csv tests with sample_data tests
 @pytest.fixture
-def wec_results(result_path, delimiter):
+def wec_results(result_path):
     simulation_end = datetime(year=2011, month=1, day=1, hour=14)
     wecs = PQResultDict.from_csv(
         SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
         result_path,
-        delimiter,
-        simulation_end,
+        simulation_end=simulation_end,
     )
     return wecs
 

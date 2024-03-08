@@ -1,11 +1,11 @@
 import copy
-import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import Optional, Self, Tuple, Type, TypeVar, Union
 
 import pandas as pd
+from loguru import logger
 from pandas import DataFrame, Series
 
 from pypsdm.errors import ComparisonError
@@ -64,7 +64,7 @@ class ResultEntities(ABC):
         if isinstance(where, slice):
             start, stop, step = where.start, where.stop, where.step
             if step is not None:
-                logging.warning("Step is not supported for slicing. Ignoring it.")
+                logger.warning("Step is not supported for slicing. Ignoring it.")
             if not (isinstance(start, datetime) and isinstance(stop, datetime)):
                 raise ValueError("Only datetime slicing is supported")
             return self.filter_for_time_interval(start, stop)
@@ -84,12 +84,12 @@ class ResultEntities(ABC):
 
     def _get_data_by_datetime(self, dt: datetime) -> Tuple[Series, datetime]:
         if dt > self.data.index[-1]:
-            logging.warning(
+            logger.warning(
                 "Trying to access data after last time step. Returning last time step."
             )
             return self.data.iloc[-1], self.data.index[-1]  # type: ignore
         if dt < self.data.index[0]:
-            logging.warning(
+            logger.warning(
                 "Trying to access data before first time step. Returning first time step."
             )
             return self.data.iloc[0], self.data.index[0]  # type: ignore
@@ -105,7 +105,7 @@ class ResultEntities(ABC):
             The filtered input entities.
         """
         if self.entity_type != input_model.get_enum():
-            logging.warning("Input model type does not match result type!")
+            logger.warning("Input model type does not match result type!")
         return input_model.subset([self.input_model])
 
     def compare(self, other) -> None:
@@ -252,6 +252,9 @@ class ResultEntities(ABC):
         """
         if data.empty:
             return cls.create_empty(entity_type, input_model, name)
+
+        if end.tzinfo is not None:
+            end = end.replace(tzinfo=None)
 
         if "time" in data.columns:
             data["time"] = data["time"].apply(

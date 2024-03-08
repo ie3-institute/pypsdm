@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from pypsdm.models.gwr import GridWithResults
-from pypsdm.models.result.grid.enhanced_node import EnhancedNodeResult
+from pypsdm.models.result.grid.extended_node import ExtendedNodeResult
 
 
 @pytest.fixture
@@ -33,14 +33,14 @@ def test_nodal_energies(gwr, node_uuid):
     assert nodal_energies[node_uuid] == gwr.nodal_energy(node_uuid)
 
 
-def test_build_enhanced_nodes_result(gwr, node_uuid):
-    enhanced_node_results = gwr.build_enhanced_nodes_result()
-    assert len(enhanced_node_results) == 299
+def test_build_extended_nodes_result(gwr, node_uuid):
+    extended_nodes_result = gwr.build_extended_nodes_result()
+    assert len(extended_nodes_result) == 299
     node_res = gwr.nodal_result(node_uuid)
-    expected = EnhancedNodeResult.from_node_result(
+    expected = ExtendedNodeResult.from_node_result(
         node_res.nodes.entities[node_uuid], node_res.participants.sum()
     )
-    actual = enhanced_node_results.entities[node_uuid]
+    actual = extended_nodes_result.entities[node_uuid]
     assert actual.data.equals(expected.data)
 
 

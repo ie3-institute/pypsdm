@@ -1,3 +1,4 @@
+import random
 from uuid import uuid4
 
 import pandas as pd
@@ -8,6 +9,7 @@ from pypsdm.models.input.participant import evcs
 from pypsdm.models.input.participant.em import EnergyManagementSystems
 from pypsdm.models.input.participant.evcs import EvChargingStations
 from pypsdm.models.input.participant.evs import ElectricVehicles
+from pypsdm.models.input.participant.fixed_feed_in import FixedFeedIns
 from pypsdm.models.input.participant.hp import HeatPumps
 from pypsdm.models.input.participant.load import Loads
 from pypsdm.models.input.participant.pv import PhotovoltaicPowerPlants
@@ -63,6 +65,23 @@ def create_pv_data(
             "cos_phi_rated": cos_phi_rated,
         }
     ).rename(uuid)
+
+
+def sample_azimuth():
+    # Values from BW Speichermonitoring study
+    x = random.random()
+    if 0 <= x < 0.38:
+        return 0
+    elif 0.38 <= x < 0.5:
+        return 90
+    elif 0.5 <= x < 0.62:
+        return -90
+    elif 0.62 <= x < 0.81:
+        return 45
+    elif 0.81 <= x < 0.95:
+        return -45
+    else:
+        return sample_azimuth()
 
 
 def create_storages(data_dict):
@@ -351,3 +370,36 @@ def create_energy_management_systems(data_dict):
     return EnergyManagementSystems(
         create_data(data_dict, create_energy_management_systems_data)
     )
+
+
+def create_fixed_feed_ins(data_dict):
+    return FixedFeedIns(create_data(data_dict, create_energy_management_systems_data))
+
+
+def create_fixed_feed_in_data(
+    id,
+    node,
+    s_rated,
+    cos_phi_rated,
+    q_characteristics=None,
+    uuid=None,
+    operates_from=None,
+    operates_until=None,
+    operator=None,
+):
+    if not uuid:
+        uuid = str(uuid4())
+    if not q_characteristics:
+        q_characteristics = fixed_q_characteristics(0.9)
+    return pd.Series(
+        {
+            "id": id,
+            "node": node,
+            "s_rated": s_rated,
+            "cos_phi_rated": cos_phi_rated,
+            "q_characteristics": q_characteristics,
+            "operates_from": operates_from,
+            "operates_until": operates_until,
+            "operator": operator,
+        }
+    ).rename(uuid)
