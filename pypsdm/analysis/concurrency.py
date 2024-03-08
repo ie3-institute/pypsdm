@@ -305,7 +305,7 @@ def simultaneity_analysis(folder_inputs, folder_glz_cases, folder_res, endtime, 
         index='em_uuid')
 
     gwr_container = gwr.GridWithResults.from_csv(folder_inputs, folder_res, ',', simulation_end=endtime)
-    gwr_nodal_results = gwr_container.build_enhanced_nodes_result()
+    gwr_nodal_results = gwr_container.build_extended_nodes_result()
     node_installed_capacity = getInstalledCapacatiy(gwr_container.grid)
     cases = [
         (1, 1, 1, 1, 1, 1),
