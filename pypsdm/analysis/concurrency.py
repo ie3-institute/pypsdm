@@ -261,7 +261,7 @@ def calculate_coincidence_curve(df: pd.DataFrame, df_inst: pd.DataFrame, len_cur
 
             tmp_norm_load = 0.0 if tmp_abs_max < 0 or agg_inst_power_load == 0 else tmp_abs_max / agg_inst_power_load
 
-            tmp_norm_feedin = 0.0 if tmp_abs_min > 0 or agg_inst_power_feedin == 0 else tmp_abs_min / agg_inst_power_feedin
+            tmp_norm_feedin = 0.0 if tmp_abs_min < 0 or agg_inst_power_feedin == 0 else tmp_abs_min / agg_inst_power_feedin
 
             temp_sim_max_norm[mc] = tmp_norm_load
             temp_sim_min_norm[mc] = tmp_norm_feedin
