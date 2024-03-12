@@ -177,6 +177,33 @@ class SystemParticipantsContainer(ContainerMixin):
         )
 
     @classmethod
+    def create(
+        cls,
+        ems=EnergyManagementSystems.create_empty(),
+        loads=Loads.create_empty(),
+        fixed_feed_ins=FixedFeedIns.create_empty(),
+        pvs=PhotovoltaicPowerPlants.create_empty(),
+        bms=BiomassPlants.create_empty(),
+        wecs=WindEnergyConverters.create_empty(),
+        storages=Storages.create_empty(),
+        evs=ElectricVehicles.create_empty(),
+        evcs=EvChargingStations.create_empty(),
+        hps=HeatPumps.create_empty(),
+    ):
+        return cls(
+            ems=ems,
+            loads=loads,
+            fixed_feed_ins=fixed_feed_ins,
+            pvs=pvs,
+            biomass_plants=bms,
+            wecs=wecs,
+            storages=storages,
+            evs=evs,
+            evcs=evcs,
+            hps=hps,
+        )
+
+    @classmethod
     def create_empty(cls):
         return cls(
             EnergyManagementSystems.create_empty(),

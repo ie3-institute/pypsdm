@@ -90,6 +90,12 @@ class RawGridContainer(ContainerMixin):
             self.switches.filter_by_nodes(nodes, both_in_nodes=True),
         )
 
+    def admittance_matrix(self, uuid_to_idx: dict):
+        """TODO: `parallelDevices` not yet considered."""
+        lines_admittance = self.lines.admittance_matrix(uuid_to_idx)
+        transformers_admittance = self.transformers_2_w.admittance_matrix(uuid_to_idx)
+        return lines_admittance + transformers_admittance
+
     @staticmethod
     def _find_branches(G: Graph, start_node):
         visited = set()

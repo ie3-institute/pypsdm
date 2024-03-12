@@ -113,6 +113,7 @@ class Lines(HasTypeMixin, Connector):
         return (self.g * 1e-6 * self.length / 2).rename("g0")
 
     def admittance_matrix(self, uuid_to_idx: dict) -> np.ndarray:
+        """TODO: `parallelDevices` not yet considered."""
         if len(self) == 0:
             logger.warning("No lines. Returning empty array.")
             return np.array([])
