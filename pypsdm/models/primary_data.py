@@ -28,6 +28,15 @@ class PrimaryData:
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
 
+    def __init__(
+        self, time_series: "PQResultDict", participant_mapping: dict[str, str]
+    ):
+        for ts in time_series.values():
+            if not isinstance(ts.entity_type, TimeSeriesEnum):
+                raise ValueError("Time series must be of type TimeSeriesEnum")
+        self.time_series = time_series
+        self.participant_mapping = participant_mapping
+
     def __eq__(self, other):
         try:
             self.compare(other)
@@ -64,13 +73,11 @@ class PrimaryData:
                     "Only get by uuid or datetime slice for filtering is supported."
                 )
 
-    @property
-    def p(self):
-        return self.time_series.p
+    def p(self, ffill=True):
+        return self.time_series.p(ffill)
 
-    @property
-    def q(self):
-        return self.time_series.q
+    def q(self, ffill=True):
+        return self.time_series.q(ffill)
 
     def p_sum(self) -> Series:
         return self.time_series.p_sum()
@@ -126,8 +133,20 @@ class PrimaryData:
 
     def to_csv(self, path: str, mkdirs=False, delimiter=","):
         write_ts = partial(PrimaryData._write_ts_df, path, mkdirs, delimiter)
+
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            executor.map(write_ts, list(self.time_series.entities.values()))
+            futures = [
+                executor.submit(write_ts, pq)
+                for pq in list(self.time_series.entities.values())
+            ]
+
+            for future in concurrent.futures.as_completed(futures):
+                maybe_exception = future.result()
+                if isinstance(maybe_exception, Exception):
+                    raise maybe_exception
+
+        for pq in list(self.time_series.entities.values()):
+            self._write_ts_df(path, mkdirs, delimiter, pq)
 
         # write mapping data
         index = [str(uuid.uuid4()) for _ in range(len(self.participant_mapping))]
@@ -148,24 +167,30 @@ class PrimaryData:
         )
 
     @staticmethod
-    def _write_ts_df(path: str, mkdirs: bool, delimiter: str, ts: PQResult):
-        data = copy.deepcopy(ts.data)
-        if not isinstance(ts.entity_type, TimeSeriesEnum):
-            raise ValueError(
-                f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
+    def _write_ts_df(
+        path: str, mkdirs: bool, delimiter: str, ts: PQResult
+    ) -> None | Exception:
+        try:
+            data = copy.deepcopy(ts.data)
+            if not isinstance(ts.entity_type, TimeSeriesEnum):
+                raise ValueError(
+                    f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
+                )
+            ts_name = ts.entity_type.get_csv_input_file_name(ts.input_model)
+            data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
+            data["time"] = data.index
+            data.set_index("uuid", inplace=True)
+            df_to_csv(
+                data,
+                path,
+                ts_name,
+                mkdirs=mkdirs,
+                delimiter=delimiter,
+                index_label="uuid",
             )
-        ts_name = ts.entity_type.get_csv_input_file_name(ts.input_model)
-        data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
-        data["time"] = data.index
-        data.set_index("uuid", inplace=True)
-        df_to_csv(
-            data,
-            path,
-            ts_name,
-            mkdirs=mkdirs,
-            delimiter=delimiter,
-            index_label="uuid",
-        )
+            return None
+        except Exception as e:
+            return e
 
     def compare(self, other):
         if not isinstance(other, type(self)):

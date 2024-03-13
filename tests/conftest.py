@@ -47,3 +47,10 @@ def grid(input_path) -> GridContainer:
     return GridContainer.from_csv(
         input_path,
     )
+
+
+@pytest.fixture(scope="session")
+def simple_grid(resources_path) -> GridContainer:
+    return GridContainer.from_csv(
+        os.path.join(resources_path, "simple_grid", "input"),
+    )

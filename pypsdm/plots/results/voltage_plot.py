@@ -98,9 +98,9 @@ def ax_plot_v_mags_violin(
 
     if nodes:
         # get v_mag in listed sequence
-        v_mag = nodes_res.subset(nodes).v_mag.reindex(columns=nodes)
+        v_mag = nodes_res.subset(nodes).v_mag().reindex(columns=nodes)
     else:
-        v_mag = nodes_res.v_mag
+        v_mag = nodes_res.v_mag()
 
     data = []
     for col in v_mag.columns:

@@ -60,21 +60,21 @@ def wec_b(wec_results):
 
 
 def test_p(wec_results):
-    p = wec_results.p
+    p = wec_results.p()
     assert len(p) == 4
     assert len(p.columns) == 2
     assert is_close(p.sum()[wec_a_uuid], -1.1)
 
 
 def test_q(wec_results):
-    q = wec_results.q
+    q = wec_results.q()
     assert len(q) == 4
     assert len(q.columns) == 2
     assert is_close(q.sum()[wec_a_uuid], -0.7)
 
 
 def test_p_sum(wec_results):
-    p = wec_results.p
+    p = wec_results.p()
     p_sum = wec_results.p_sum()
     now = datetime(2011, 1, 1, 13, 30)
     previous = datetime(2011, 1, 1, 13, 0)
@@ -83,7 +83,7 @@ def test_p_sum(wec_results):
 
 
 def test_q_sum(wec_results):
-    q = wec_results.q
+    q = wec_results.q()
     q_sum = wec_results.q_sum()
     now = datetime(2011, 1, 1, 13, 30)
     previous = datetime(2011, 1, 1, 13, 0)

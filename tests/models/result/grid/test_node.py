@@ -63,14 +63,14 @@ def test_filter_for_time_interval(gwr):
 
 def test_vmags(gwr):
     nodes_res = gwr.results.nodes
-    v_mags = nodes_res.v_mag
+    v_mags = nodes_res.v_mag()
     assert len(v_mags) == 3
     assert len(v_mags.columns) == 299
 
 
 def test_vangs(gwr):
     nodes_res = gwr.results.nodes
-    v_angs = nodes_res.v_ang
+    v_angs = nodes_res.v_ang()
     assert len(v_angs) == 3
     assert len(v_angs.columns) == 299
 

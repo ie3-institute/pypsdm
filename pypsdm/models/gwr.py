@@ -197,7 +197,9 @@ class GridWithResults(ContainerMixin):
                 uuid, pq = future.result()
                 nodal_pq[uuid] = pq
 
-        return ExtendedNodesResult.from_nodes_result(self.results.nodes, nodal_pq)
+        return ExtendedNodesResult.from_nodes_result(
+            self.results.nodes, nodal_pq, fill_zero=True
+        )
 
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
