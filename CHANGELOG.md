@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - `LocalGwrDb` supports copying configs [#159](https://github.com/ie3-institute/pypsdm/pull/159)
 - `Entities` support `__getitem__` with uuds [#159](https://github.com/ie3-institute/pypsdm/pull/159)
 - Support for lines and transformer admittance matrix calculation [#161](https://github.com/ie3-institute/pypsdm/pull/161)
+- `ExtendedNodeResult` support for averaging out powers of participants, that have been used for powerflow calculation [#168](https://github.com/ie3-institute/pypsdm/issues/168)
 
 ### Changed
 - Renamed `EnhancedNodeResult` and `EnhancedNodesResult` to `ExtendedNoderesult` and `ExtendedNodesresult` [#155](https://github.com/ie3-institute/pypsdm/pull/155)
