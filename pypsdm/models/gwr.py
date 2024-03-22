@@ -207,8 +207,8 @@ class GridWithResults(ContainerMixin):
         nodes_res = self.nodes_res
         for uuid, node_res in nodes_res.items():
             node_s = s[uuid]  # type: ignore
-            node_p = node_s.apply(lambda x: x.real)
-            node_q = node_s.apply(lambda x: x.imag)
+            node_p = node_s.apply(lambda x: x.real if x.real > 1e-8 else 0.0)
+            node_q = node_s.apply(lambda x: x.imag if x.imag > 1e-8 else 0.0)
             ext_node_res_data = node_res.data.copy()
             ext_node_res_data["p"] = node_p
             ext_node_res_data["q"] = node_q
