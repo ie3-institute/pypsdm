@@ -1,10 +1,10 @@
 import copy
+import os
 from datetime import datetime
 
 import pytest
 
 from pypsdm.models.gwr import GridWithResults
-from pypsdm.models.result.grid.extended_node import ExtendedNodeResult
 
 
 @pytest.fixture
@@ -31,17 +31,6 @@ def test_nodal_results(gwr, node_uuid):
 def test_nodal_energies(gwr, node_uuid):
     nodal_energies = gwr.nodal_energies()
     assert nodal_energies[node_uuid] == gwr.nodal_energy(node_uuid)
-
-
-def test_build_extended_nodes_result(gwr, node_uuid):
-    extended_nodes_result = gwr.build_extended_nodes_result()
-    assert len(extended_nodes_result) == 299
-    node_res = gwr.nodal_result(node_uuid)
-    expected = ExtendedNodeResult.from_node_result(
-        node_res.nodes.entities[node_uuid], node_res.participants.sum()
-    )
-    actual = extended_nodes_result.entities[node_uuid]
-    assert actual.data.equals(expected.data)
 
 
 def test_filter_by_date_time(gwr):
@@ -71,3 +60,19 @@ def test_to_csv(gwr: GridWithResults, tmp_path):
     )
     gwr.compare(gwr_b)
     assert gwr == gwr_b
+
+
+def test_build_extended_nodes_result(resources_path):
+    sb_input = os.path.join(resources_path, "simbench", "input")
+    sb_results = os.path.join(resources_path, "simbench", "results")
+    gwr = GridWithResults.from_csv(sb_input, sb_results)
+    ext_nodes_res = gwr.build_extended_nodes_result()
+    assert len(ext_nodes_res) == len(gwr.nodes_res)
+
+    # Compare sum of participants power at node with calculated node power
+    uuid = next(iter(gwr.nodes_res.keys()))
+    # Shift since pf takes average of power of previous time interval
+    expected = gwr.nodal_result(uuid).participants.sum().data.shift(1).iloc[1::]
+    actual = ext_nodes_res[uuid].data.iloc[1::]
+    p_delta = expected.p - actual.p
+    assert (p_delta < 1e-8).all()

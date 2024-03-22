@@ -1,8 +1,9 @@
-import concurrent
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
 
 from pypsdm.io.utils import check_filter
 from pypsdm.models.input.container.grid import GridContainer
@@ -10,7 +11,10 @@ from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
 from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
+from pypsdm.models.result.grid.extended_node import (
+    ExtendedNodeResult,
+    ExtendedNodesResult,
+)
 
 
 @dataclass(frozen=True)
@@ -183,23 +187,43 @@ class GridWithResults(ContainerMixin):
             for (em_uuid, connected_assets) in uuid_to_connected_asset.items()
         ]
 
-    def build_extended_nodes_result(self):
-        nodal_results = self.nodal_results()
+    def build_extended_nodes_result(self) -> ExtendedNodesResult:
+        """
+        Builds extended nodes result by calculation the complex power using the grids
+        admittance matrix and the complex nodal voltages.
+        """
+        uuid_to_idx = {uuid: idx for idx, uuid in enumerate(self.nodes.uuid.to_list())}
+        uuid_order = [
+            x[0] for x in sorted(list(uuid_to_idx.items()), key=lambda x: x[1])
+        ]
+        Y = self.raw_grid.admittance_matrix(uuid_to_idx)
+        v_complex = self.nodes_res.v_complex(self.nodes)
+        v_complex = v_complex.reindex(columns=uuid_order)
+        i = v_complex @ Y
+        i.columns = v_complex.columns
+        s: pd.DataFrame = -(v_complex * np.conj(i))
 
-        with ProcessPoolExecutor() as executor:
-            futures = {
-                executor.submit(self._calc_pq, uuid, nodal_result)
-                for uuid, nodal_result in nodal_results.items()
-            }
-
-            nodal_pq = {}
-            for future in concurrent.futures.as_completed(futures):  # type: ignore
-                uuid, pq = future.result()
-                nodal_pq[uuid] = pq
-
-        return ExtendedNodesResult.from_nodes_result(
-            self.results.nodes, nodal_pq, fill_zero=True
+        ext_nodes_results = {}
+        nodes_res = self.nodes_res
+        for uuid, node_res in nodes_res.items():
+            node_s = s[uuid]  # type: ignore
+            node_p = node_s.apply(lambda x: x.real)
+            node_q = node_s.apply(lambda x: x.imag)
+            ext_node_res_data = node_res.data.copy()
+            ext_node_res_data["p"] = node_p
+            ext_node_res_data["q"] = node_q
+            ext_node_res = ExtendedNodeResult(
+                entity_type=node_res.entity_type,
+                input_model=node_res.input_model,
+                name=node_res.name,
+                data=ext_node_res_data,
+            )
+            ext_nodes_results[uuid] = ext_node_res
+        ext_nodes_results = ExtendedNodesResult(
+            entity_type=nodes_res.entity_type,
+            entities=ext_nodes_results,
         )
+        return ext_nodes_results
 
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
