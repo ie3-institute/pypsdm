@@ -1,4 +1,5 @@
 import copy
+import math
 import os
 from datetime import datetime
 
@@ -70,9 +71,14 @@ def test_build_extended_nodes_result(resources_path):
     assert len(ext_nodes_res) == len(gwr.nodes_res)
 
     # Compare sum of participants power at node with calculated node power
-    uuid = next(iter(gwr.nodes_res.keys()))
-    # Shift since pf takes average of power of previous time interval
-    expected = gwr.nodal_result(uuid).participants.sum().data.shift(1).iloc[1::]
-    actual = ext_nodes_res[uuid].data.iloc[1::]
-    p_delta = expected.p - actual.p
-    assert (p_delta < 1e-8).all()
+    for uuid in ext_nodes_res.keys():
+        excluded = gwr.transformers_2_w.node.to_list()
+        if uuid in excluded:
+            continue
+        expected = gwr.nodal_result(uuid).participants.sum().data.shift(1).iloc[1::]
+        actual = ext_nodes_res[uuid].data.iloc[1::]
+        if len(expected.p) == 0:
+            assert math.isclose(actual.p.sum(), 0, rel_tol=1e-8)
+            continue
+        p_delta = expected.p - actual.p
+        assert (p_delta < 1e-8).all(), f"Unexpected deviation for {uuid}"
