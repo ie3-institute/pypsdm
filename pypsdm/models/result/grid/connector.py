@@ -23,10 +23,16 @@ class ConnectorResult(ResultEntities):
 
     @property
     def i_a_ang(self) -> Series:
+        """
+        Port a current angle in degrees.
+        """
         return self.data["i_a_ang"]
 
     @property
     def i_a_mag(self) -> Series:
+        """
+        Port a current magnitude in Ampere.
+        """
         return self.data["i_a_mag"]
 
     @property
@@ -35,10 +41,16 @@ class ConnectorResult(ResultEntities):
 
     @property
     def i_b_ang(self) -> Series:
+        """
+        Port b current angle in degrees.
+        """
         return self.data["i_b_ang"]
 
     @property
     def i_b_mag(self) -> Series:
+        """
+        Port b current magnitude in Ampere.
+        """
         return self.data["i_b_mag"]
 
     @property
