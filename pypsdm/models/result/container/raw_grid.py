@@ -9,6 +9,7 @@ from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.result.grid.connector import ConnectorsResult
+from pypsdm.models.result.grid.line import LinesResult
 from pypsdm.models.result.grid.node import NodesResult
 from pypsdm.models.result.grid.switch import SwitchesResult
 from pypsdm.models.result.grid.transformer import Transformers2WResult
@@ -17,7 +18,7 @@ from pypsdm.models.result.grid.transformer import Transformers2WResult
 @dataclass(frozen=True)
 class RawGridResultContainer(ContainerMixin):
     nodes: NodesResult
-    lines: ConnectorsResult
+    lines: LinesResult
     transformers_2w: ConnectorsResult
     switches: SwitchesResult
 
@@ -88,7 +89,7 @@ class RawGridResultContainer(ContainerMixin):
                 RawGridElementsEnum.NODE,
                 {node_uuid: self.nodes.entities[node_uuid]},
             ),
-            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
+            lines=LinesResult.create_empty(RawGridElementsEnum.LINE),
             transformers_2w=Transformers2WResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),
@@ -136,7 +137,7 @@ class RawGridResultContainer(ContainerMixin):
                 filter_end,
             )
             lines_future = executor.submit(
-                ConnectorsResult.from_csv,
+                LinesResult.from_csv,
                 RawGridElementsEnum.LINE,
                 simulation_data_path,
                 delimiter,
@@ -174,7 +175,7 @@ class RawGridResultContainer(ContainerMixin):
     def create_empty(cls):
         return cls(
             nodes=NodesResult.create_empty(RawGridElementsEnum.NODE),
-            lines=ConnectorsResult.create_empty(RawGridElementsEnum.LINE),
+            lines=LinesResult.create_empty(RawGridElementsEnum.LINE),
             transformers_2w=ConnectorsResult.create_empty(
                 RawGridElementsEnum.TRANSFORMER_2_W
             ),

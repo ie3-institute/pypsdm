@@ -33,7 +33,7 @@ class EntitiesEnum(Enum):
 
     def get_result_type(self):
         # locally to avoid circular imports
-        from pypsdm.models.result.grid.connector import ConnectorResult
+        from pypsdm.models.result.grid.line import LineResult
         from pypsdm.models.result.grid.node import NodeResult
         from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
@@ -51,7 +51,7 @@ class EntitiesEnum(Enum):
                 case RawGridElementsEnum.TRANSFORMER_2_W:
                     return Transformer2WResult
                 case RawGridElementsEnum.LINE:
-                    return ConnectorResult
+                    return LineResult
                 case RawGridElementsEnum.SWITCH:
                     return SwitchResult
                 case _:
