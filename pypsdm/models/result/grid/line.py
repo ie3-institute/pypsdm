@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class LineResult(ConnectorResult):
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     def utilisation(
         self, i_max_src: Lines | float, side: Literal["a", "b"] = "a"
@@ -38,6 +40,9 @@ class LineResult(ConnectorResult):
 @dataclass(frozen=True)
 class LinesResult(ConnectorsResult):
     entities: dict[str, LineResult]
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
 
     def utilisation(self, lines: Lines, side: Literal["a", "b"] = "a") -> pd.DataFrame:
         if not self.entities.values():
