@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from pandas import Series
 
+from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.result.grid.connector import ConnectorResult, ConnectorsResult
 from pypsdm.models.result.power import PQResult
 
@@ -69,6 +70,7 @@ class Transformer2WResult(ConnectorResult):
             raise ValueError('Side has to be either "hv" or "lv"')
 
 
-@dataclass(frozen=True)
 class Transformers2WResult(ConnectorsResult):
-    entities: dict[str, Transformer2WResult]
+
+    def __init__(self, data: dict[str, Transformer2WResult]):
+        super().__init__(RawGridElementsEnum.TRANSFORMER_2_W, data)

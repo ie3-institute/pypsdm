@@ -114,7 +114,7 @@ class PrimaryData:
     def get_for_participant(self, participant: str) -> PQResult | None:
         ts_uuid = self.participant_mapping.get(participant)
         if ts_uuid:
-            return self.time_series.entities[ts_uuid]
+            return self.time_series[ts_uuid]
         else:
             return None
 
@@ -136,8 +136,7 @@ class PrimaryData:
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             futures = [
-                executor.submit(write_ts, pq)
-                for pq in list(self.time_series.entities.values())
+                executor.submit(write_ts, pq) for pq in list(self.time_series.values())
             ]
 
             for future in concurrent.futures.as_completed(futures):
@@ -145,7 +144,7 @@ class PrimaryData:
                 if isinstance(maybe_exception, Exception):
                     raise maybe_exception
 
-        for pq in list(self.time_series.entities.values()):
+        for pq in list(self.time_series.values()):
             self._write_ts_df(path, mkdirs, delimiter, pq)
 
         # write mapping data

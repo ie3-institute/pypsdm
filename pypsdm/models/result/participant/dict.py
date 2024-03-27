@@ -1,10 +1,11 @@
+import inspect
 import os
 import uuid
 from abc import ABC
-from dataclasses import dataclass
+from collections import UserDict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Generic, Optional, Self, Type, TypeVar, Union
+from typing import Dict, Generic, Optional, Type, TypeVar, Union
 
 from loguru import logger
 from pandas import DataFrame
@@ -14,40 +15,38 @@ from pypsdm.errors import ComparisonError
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
 from pypsdm.models.enums import EntitiesEnum
 from pypsdm.models.input.entity import Entities
-from pypsdm.models.result.entity import ResultEntities
+from pypsdm.models.result.entity import ResultEntity
 from pypsdm.processing.dataframe import join_dataframes
 
+EntityDictType = TypeVar("EntityDictType", bound="EntityDict")
 ResultDictType = TypeVar("ResultDictType", bound="ResultDict")
-T = TypeVar("T", bound=ResultEntities)
+T = TypeVar("T", bound=ResultEntity)
 
 
-@dataclass(frozen=True)
-class ResultDict(Generic[T], ABC):
-    entity_type: EntitiesEnum
-    entities: Dict[str, T]
+class EntityDict(UserDict, Generic[T], ABC):
+
+    def __init__(self, entity_type: EntitiesEnum, data: Dict[str, T] | None = None):
+        self.entity_type = entity_type
+        data = data or {}
+        super().__init__(data)
+        self.data = data
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
         if self.entity_type != other.entity_type:
             return False
-        for key, res in self.entities.items():
-            if key not in other.entities:
+        for key, res in self.data.items():
+            if key not in other.data:
                 return False
-            if res != other.entities[key]:
+            if res != other.data[key]:
                 return False
         return True
-
-    def __len__(self):
-        return len(self.entities)
-
-    def __contains__(self, uuid):
-        return uuid in self.entities
 
     def __getitem__(self, get) -> T:
         match get:
             case str():
-                return self.entities[get]
+                return self.data[get]
             case slice():
                 raise ValueError(
                     "If you want to filter by time interval use filter_for_time_interval method instead."
@@ -55,7 +54,7 @@ class ResultDict(Generic[T], ABC):
             case _:
                 raise ValueError("Only get by uuid is supported.")
 
-    def __add__(self: ResultDictType, other: ResultDictType):
+    def __add__(self: EntityDictType, other: EntityDictType):
         """
         Add two ResultDicts together. The entity types must be the same.
 
@@ -74,9 +73,9 @@ class ResultDict(Generic[T], ABC):
             raise TypeError(
                 f"Cannot add {type(self)} and {type(other)}. Entities are of different entity types"
             )
-        return type(self)(self.entity_type, {**self.entities, **other.entities})
+        return type(self)(self.entity_type, {**self.data, **other.data})
 
-    def __sub__(self: ResultDictType, other: ResultDictType):
+    def __sub__(self: EntityDictType, other: EntityDictType):
         """
         Creates a new dict with the elements of self minus all keys of other. The entity types must be the same.
 
@@ -92,34 +91,16 @@ class ResultDict(Generic[T], ABC):
             raise TypeError(
                 f"Cannot subtract {type(self)} and {type(other)}. Entities are of different entity types"
             )
-        keys = self.entities.keys() - other.entities.keys()
-        return type(self)(self.entity_type, {key: self.entities[key] for key in keys})
-
-    def __iter__(self):
-        return self.entities.__iter__()
-
-    def keys(self):
-        return self.entities.keys()
-
-    def values(self):
-        return self.entities.values()
+        keys = self.data.keys() - other.data.keys()
+        return type(self)(self.entity_type, {key: self.data[key] for key in keys})
 
     def to_list(self):
-        return list(self.entities.values())
-
-    def items(self):
-        return self.entities.items()
-
-    def uuids(self):
-        return list(self.entities.keys())
-
-    def results(self):
-        return list(self.entities.values())
+        return list(self.data.values())
 
     # noinspection PyArgumentList
     def subset(self, uuids):
         matched_participants = {
-            uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids
+            uuid: self.data[uuid] for uuid in self.data.keys() & uuids
         }
 
         return type(self)(self.entity_type, matched_participants)
@@ -131,7 +112,7 @@ class ResultDict(Generic[T], ABC):
         :return:
         """
 
-        rmd_uuids = self.entities.keys() - uuids
+        rmd_uuids = self.data.keys() - uuids
         return self.subset(uuids), self.subset(rmd_uuids)
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
@@ -142,7 +123,7 @@ class ResultDict(Generic[T], ABC):
         """
         return type(self)(
             self.entity_type,
-            {uuid: result[time] for uuid, result in self.entities.items()},
+            {uuid: result[time] for uuid, result in self.data.items()},
         )
 
     # noinspection PyArgumentList
@@ -151,12 +132,12 @@ class ResultDict(Generic[T], ABC):
             self.entity_type,
             {
                 uuid: result.filter_for_time_interval(start, end)
-                for uuid, result in self.entities.items()
+                for uuid, result in self.data.items()
             },
         )
 
     def uuid_to_id_map(self) -> dict[str, Optional[str]]:
-        return {uuid: result.name for uuid, result in self.entities.items()}
+        return {uuid: result.name for uuid, result in self.data.items()}
 
     def compare(self, other):
         if not isinstance(other, type(self)):
@@ -167,12 +148,12 @@ class ResultDict(Generic[T], ABC):
         differences = []
         if self.entity_type != other.entity_type:
             differences.append(f"Entity type {self.entity_type} != {other.entity_type}")
-        for key, entity in self.entities.items():
-            if key not in other.entities:
+        for key, entity in self.data.items():
+            if key not in other.data:
                 differences.append(f"Entity {key} not in other")
             else:
                 try:
-                    entity.compare(other.entities[key])
+                    entity.compare(other.data[key])
                 except ComparisonError as e:
                     differences.extend(e.differences)
         if differences:
@@ -181,7 +162,7 @@ class ResultDict(Generic[T], ABC):
             )
 
     def concat(
-        self: ResultDictType, other: ResultDictType, deep: bool = True, keep="last"
+        self: EntityDictType, other: EntityDictType, deep: bool = True, keep="last"
     ):
         """
         Concatenates the data of the two ResultDicts, which means concatenating
@@ -204,51 +185,24 @@ class ResultDict(Generic[T], ABC):
                 f"Cannot add {type(self)} and {type(other)}. Entities are of different entity types"
             )
 
-        if not set(self.entities.keys()) == set(other.entities.keys()):
+        if not set(self.data.keys()) == set(other.data.keys()):
             raise ValueError(
                 "ResultDicts need to contain the same entities to be concatenated"
             )
         concat_entities = {}
-        for key, entity in self.entities.items():
-            concat_entities[key] = entity.concat(
-                other.entities[key], deep=deep, keep=keep
-            )
+        for key, entity in self.data.items():
+            concat_entities[key] = entity.concat(other.data[key], deep=deep, keep=keep)
         return type(self)(self.entity_type, concat_entities)
 
-    def to_csv(
-        self,
-        path: str,
-        delimiter=",",
-        mkdirs=False,
-        resample_rate: Optional[str] = None,
-    ):
-        if mkdirs:
-            os.makedirs(path, exist_ok=True)
 
-        file_name = self.entity_type.get_csv_result_file_name()
+class ResultDict(EntityDict, Generic[T], ABC):
 
-        def prepare_data(data: DataFrame, input_model: str):
-            data = data.copy()
-            data = (
-                data.resample("60s").ffill().resample(resample_rate).mean()
-                if resample_rate
-                else data
-            )
-            data["uuid"] = data.apply(lambda _: str(uuid.uuid4()), axis=1)
-            data["input_model"] = input_model
-            data.index.name = "time"
-            return data
-
-        dfs = [
-            prepare_data(participant.data, input_model)
-            for input_model, participant in self.entities.items()
-        ]
-        df = join_dataframes(dfs)
-        df.to_csv(os.path.join(path, file_name), sep=delimiter, index=True)
+    def __init__(self, entity_type: EntitiesEnum, data: Dict[str, T] | None):
+        super().__init__(entity_type, data)
 
     @classmethod
     def from_csv(
-        cls: Type[ResultDictType],
+        cls: Type[EntityDictType],
         entity_type: EntitiesEnum,
         simulation_data_path: str,
         delimiter: str | None = None,
@@ -256,16 +210,24 @@ class ResultDict(Generic[T], ABC):
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
-    ) -> ResultDictType:
+    ) -> EntityDictType:
         check_filter(filter_start, filter_end)
         grpd_df = ResultDict.get_grpd_df(
             entity_type,
             simulation_data_path,
             delimiter,
         )
+        parameters = inspect.signature(cls.__init__).parameters
         if not grpd_df:
             logger.debug("There are no " + str(cls))
-            return cls.create_empty(entity_type)
+            if len(parameters) == 2:
+                res = cls({})
+            else:
+                res = cls(
+                    entity_type,
+                    {},
+                )
+            return res
         if simulation_end is None:
             simulation_end = to_date_time(grpd_df["time"].max().max())
         entities = dict(
@@ -279,19 +241,19 @@ class ResultDict(Generic[T], ABC):
                 )
             )
         )
-        res = cls(
-            entity_type,
-            entities,
-        )
+
+        if len(parameters) == 2:
+            res = cls(entities)
+        else:
+            res = cls(
+                entity_type,
+                entities,
+            )
         return (
             res
             if not filter_start
             else res.filter_for_time_interval(filter_start, filter_end)
         )
-
-    @classmethod
-    def create_empty(cls: Type[Self], entity_type: EntitiesEnum) -> Self:
-        return cls(entity_type, dict())
 
     @staticmethod
     def build_for_entity(
@@ -300,7 +262,7 @@ class ResultDict(Generic[T], ABC):
         data: DataFrame,
         simulation_end: datetime,
         input_entities: Optional[Entities],
-    ) -> ResultEntities:
+    ) -> ResultEntity:
         name = None
         if input_entities is not None:
             if input_model not in input_entities.id.index:
@@ -346,3 +308,34 @@ class ResultDict(Generic[T], ABC):
                 )
             )
             return None
+
+    def to_csv(
+        self,
+        path: str,
+        delimiter=",",
+        mkdirs=False,
+        resample_rate: Optional[str] = None,
+    ):
+        if mkdirs:
+            os.makedirs(path, exist_ok=True)
+
+        file_name = self.entity_type.get_csv_result_file_name()
+
+        def prepare_data(data: DataFrame, input_model: str):
+            data = data.copy()
+            data = (
+                data.resample("60s").ffill().resample(resample_rate).mean()
+                if resample_rate
+                else data
+            )
+            data["uuid"] = data.apply(lambda _: str(uuid.uuid4()), axis=1)
+            data["input_model"] = input_model
+            data.index.name = "time"
+            return data
+
+        dfs = [
+            prepare_data(participant.data, input_model)
+            for input_model, participant in self.data.items()
+        ]
+        df = join_dataframes(dfs)
+        df.to_csv(os.path.join(path, file_name), sep=delimiter, index=True)

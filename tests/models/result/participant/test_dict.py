@@ -40,21 +40,21 @@ def test_add(res_dict):
     res_dict_b = PQResultDict(SystemParticipantsEnum.LOAD, {"c": c})
     res_dict_add = res_dict + res_dict_b
     assert len(res_dict_add) == 3
-    assert list(res_dict_add.entities.keys()) == ["a", "b", "c"]
-    assert id(res_dict_add.entities["a"]) == id(res_dict.entities["a"])
+    assert list(res_dict_add.keys()) == ["a", "b", "c"]
+    assert id(res_dict_add["a"]) == id(res_dict["a"])
 
     # test with key already in dict
     res_dict_c = res_dict.subset(["b"])
     res_dict_add = res_dict + res_dict_c
     assert len(res_dict_add) == 2
-    assert list(res_dict_add.entities.keys()) == ["a", "b"]
+    assert list(res_dict_add.keys()) == ["a", "b"]
 
 
 def test_sub(res_dict):
     res_dict_b = res_dict.subset(["b"])
     sub = res_dict - res_dict_b
     assert len(sub) == 1
-    assert list(sub.entities.keys()) == ["a"]
+    assert list(sub.keys()) == ["a"]
 
 
 def test_to_csv(res_dict: PQResultDict, tmp_path):

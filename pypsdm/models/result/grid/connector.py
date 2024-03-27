@@ -2,19 +2,20 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import List
+from typing import Generic, List
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from pypsdm.models.result.entity import ResultEntities
+from pypsdm.models.enums import EntitiesEnum
+from pypsdm.models.result.entity import ResultEntity
 from pypsdm.models.result.grid.node import NodeResult
-from pypsdm.models.result.participant.dict import ResultDict
+from pypsdm.models.result.participant.dict import ResultDict, T
 
 
 @dataclass(frozen=True)
-class ConnectorResult(ResultEntities):
+class ConnectorResult(ResultEntity):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
@@ -78,9 +79,10 @@ class ConnectorResult(ResultEntities):
         return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag"]
 
 
-@dataclass(frozen=True)
-class ConnectorsResult(ResultDict):
-    entities: dict[str, ConnectorResult]
+class ConnectorsResult(ResultDict, Generic[T]):
+
+    def __init__(self, entity_type: EntitiesEnum, data: dict[str, T]):
+        super().__init__(entity_type, data)
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
@@ -90,7 +92,7 @@ class ConnectorsResult(ResultDict):
         return pd.concat(
             [
                 node_res.i_a_ang.rename(node_res.input_model)
-                for node_res in self.entities.values()
+                for node_res in self.values()
             ],
             axis=1,
         )
@@ -100,7 +102,7 @@ class ConnectorsResult(ResultDict):
         return pd.concat(
             [
                 node_res.i_a_mag.rename(node_res.input_model)
-                for node_res in self.entities.values()
+                for node_res in self.values()
             ],
             axis=1,
         )
@@ -110,7 +112,7 @@ class ConnectorsResult(ResultDict):
         return pd.concat(
             [
                 node_res.i_b_ang.rename(node_res.input_model)
-                for node_res in self.entities.values()
+                for node_res in self.values()
             ],
             axis=1,
         )
@@ -120,7 +122,7 @@ class ConnectorsResult(ResultDict):
         return pd.concat(
             [
                 node_res.i_b_mag.rename(node_res.input_model)
-                for node_res in self.entities.values()
+                for node_res in self.values()
             ],
             axis=1,
         )

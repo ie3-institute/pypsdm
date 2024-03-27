@@ -11,7 +11,7 @@ import pandas as pd
 from pandas import Series
 
 from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
-from pypsdm.models.result.entity import ResultEntities
+from pypsdm.models.result.entity import ResultEntity
 from pypsdm.processing.dataframe import divide_positive_negative
 from pypsdm.processing.series import (
     add_series,
@@ -22,7 +22,7 @@ from pypsdm.processing.series import (
 
 
 @dataclass(frozen=True)
-class PQResult(ResultEntities):
+class PQResult(ResultEntity):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 

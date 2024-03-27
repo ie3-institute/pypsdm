@@ -5,14 +5,14 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.result.entity import ResultEntities
+from pypsdm.models.result.entity import ResultEntity
 from pypsdm.models.result.participant.dict import ResultDict
 from pypsdm.models.result.power import PQResult
 from pypsdm.processing.series import add_series, hourly_mean_resample
 
 
 @dataclass(frozen=True)
-class FlexOptionResult(ResultEntities):
+class FlexOptionResult(ResultEntity):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
@@ -72,17 +72,18 @@ class FlexOptionResult(ResultEntities):
         )
 
 
-@dataclass(frozen=True)
 class FlexOptionsResult(ResultDict):
-    entities: Dict[str, FlexOptionResult]
+
+    def __init__(self, data: dict[str, FlexOptionResult]):
+        super().__init__(SystemParticipantsEnum.FLEX_OPTIONS, data)
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
     def to_df(self) -> DataFrame:
         return pd.concat(
-            [f.data for f in self.entities.values()],
-            keys=self.entities.keys(),
+            [f.data for f in self.values()],
+            keys=self.keys(),
             axis=1,
         ).ffill()
 
@@ -98,11 +99,11 @@ class FlexOptionsResult(ResultDict):
                 participant_uuids = []
                 [
                     (participant_uuids.append(uuid), flex_dfs.append(flex.data))
-                    for uuid, flex in flex_res.entities.items()
+                    for uuid, flex in flex_res.items()
                 ]
                 flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
                 flex_midfs[res.entity_type.value] = flex_midf
         return pd.concat(flex_midfs.values(), keys=(flex_midfs.keys()), axis=1).ffill()
 
     def sum(self) -> FlexOptionResult:
-        return FlexOptionResult.sum(list(self.entities.values()))
+        return FlexOptionResult.sum(list(self.values()))

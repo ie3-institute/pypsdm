@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING, Literal
 
 import pandas as pd
 
+from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.result.grid.connector import ConnectorResult, ConnectorsResult
+from pypsdm.models.result.participant.dict import T
 
 if TYPE_CHECKING:
     from pypsdm.models.input.connector.lines import Lines
@@ -37,21 +39,22 @@ class LineResult(ConnectorResult):
         return i.abs() / line_i_max
 
 
-@dataclass(frozen=True)
 class LinesResult(ConnectorsResult):
-    entities: dict[str, LineResult]
+
+    def __init__(self, data: dict[str, T]):
+        super().__init__(RawGridElementsEnum.LINE, data)
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
     def utilisation(self, lines: Lines, side: Literal["a", "b"] = "a") -> pd.DataFrame:
-        if not self.entities.values():
+        if not self.values():
             return pd.DataFrame()
 
         data = pd.DataFrame(
             {
                 line_uuid: line.utilisation(lines, side)
-                for line_uuid, line in self.entities.items()
+                for line_uuid, line in self.items()
             }
         ).sort_index()
 

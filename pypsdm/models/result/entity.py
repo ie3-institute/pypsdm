@@ -15,11 +15,16 @@ from pypsdm.models.input.entity import EntityType
 from pypsdm.processing.dataframe import compare_dfs, filter_data_for_time_interval
 
 pd.set_option("mode.copy_on_write", True)
-ResultType = TypeVar("ResultType", bound="ResultEntities")
+ResultType = TypeVar("ResultType", bound="ResultEntity")
 
 
 @dataclass(frozen=True)
-class ResultEntities(ABC):
+class TsEntity(ABC):
+    pass
+
+
+@dataclass(frozen=True)
+class ResultEntity(ABC):
     """
     Abstract base class for all result entities. Results are time series data, which can be mapped to their respective input entities via `input_model`.
     The time series is event discrete. Which means every state is valid until the next state is reached. The time series data is stored in the `data` attribute.

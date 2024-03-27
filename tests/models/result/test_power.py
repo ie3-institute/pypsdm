@@ -95,7 +95,7 @@ def test_filter_for_time_interval(wec_results):
     start = datetime(2011, 1, 1, 13, 30)
     end = datetime(2011, 1, 1, 14, 0)
     filtered = wec_results.filter_for_time_interval(start, end)
-    assert len(filtered.entities.keys()) == 2
+    assert len(filtered.keys()) == 2
     filtered_wec_a = filtered.get(wec_a_uuid)
     filtered_wec_b = filtered.get(wec_b_uuid)
     assert len(filtered_wec_a.data) == 2

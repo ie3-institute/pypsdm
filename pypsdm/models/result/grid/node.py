@@ -10,12 +10,12 @@ from pandas import DataFrame, Series
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.input.node import Nodes
-from pypsdm.models.result.entity import ResultEntities
+from pypsdm.models.result.entity import ResultEntity
 from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 
 
 @dataclass(frozen=True)
-class NodeResult(ResultEntities):
+class NodeResult(ResultEntity):
     def __eq__(self, other) -> bool:
         return super().__eq__(other)
 
@@ -60,9 +60,10 @@ class NodeResult(ResultEntities):
         return NodeResult(RawGridElementsEnum.NODE, uuid, name, data)
 
 
-@dataclass(frozen=True)
 class NodesResult(ResultDict):
-    entities: dict[str, NodeResult]
+
+    def __init__(self, data: dict[str, NodeResult]):
+        super().__init__(RawGridElementsEnum.NODE, data)
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
@@ -88,43 +89,37 @@ class NodesResult(ResultDict):
         )
 
     def v_mag(self) -> DataFrame:
-        if not self.entities:
+        if not self.data:
             return pd.DataFrame()
         return pd.concat(
-            [
-                node_res.v_mag.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
+            [node_res.v_mag.rename(node_res.input_model) for node_res in self.values()],
             axis=1,
         )
 
     def v_ang(self) -> DataFrame:
-        if not self.entities:
+        if not self.data:
             return pd.DataFrame()
         return pd.concat(
-            [
-                node_res.v_ang.rename(node_res.input_model)
-                for node_res in self.entities.values()
-            ],
+            [node_res.v_ang.rename(node_res.input_model) for node_res in self.values()],
             axis=1,
         )
 
     def v_complex(self, nodes: Nodes | None = None) -> DataFrame:
-        if not self.entities:
+        if not self:
             return pd.DataFrame().astype(complex)
         return pd.concat(
             [
                 node_res.v_complex(nodes).rename(node_res.input_model).rename(uuid)
-                for uuid, node_res in self.entities.items()
+                for uuid, node_res in self.items()
             ],
             axis=1,
         )  # type: ignore
 
     def v_mag_describe(self) -> DataFrame:
-        return self._describe(self.v_mag)
+        return self._describe(self.v_mag())
 
     def v_ang_describe(self) -> DataFrame:
-        return self._describe(self.v_ang)
+        return self._describe(self.v_ang())
 
     @staticmethod
     def _describe(data: DataFrame):

@@ -86,14 +86,11 @@ class RawGridResultContainer(ContainerMixin):
             return RawGridResultContainer.create_empty()
         return RawGridResultContainer(
             nodes=NodesResult(
-                RawGridElementsEnum.NODE,
-                {node_uuid: self.nodes.entities[node_uuid]},
+                {node_uuid: self.nodes[node_uuid]},
             ),
-            lines=LinesResult.create_empty(RawGridElementsEnum.LINE),
-            transformers_2w=Transformers2WResult.create_empty(
-                RawGridElementsEnum.TRANSFORMER_2_W
-            ),
-            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
+            lines=LinesResult({}),
+            transformers_2w=Transformers2WResult({}),
+            switches=SwitchesResult({}),
         )
 
     @classmethod
@@ -162,11 +159,11 @@ class RawGridResultContainer(ContainerMixin):
             switches = switches_future.result()
 
         if simulation_end is None:
-            if len(nodes.entities) == 0:
+            if len(nodes) == 0:
                 raise ValueError(
                     "Can't determine simulation end time automatically. No node results to base it on. Please configure 'simulation_end' manually."
                 )
-            some_node_res = next(iter(nodes.entities.values()))
+            some_node_res = next(iter(nodes.values()))
             simulation_end = some_node_res.data.index.max()
 
         return cls(nodes, lines, transformers_2_w, switches)
@@ -174,10 +171,8 @@ class RawGridResultContainer(ContainerMixin):
     @classmethod
     def create_empty(cls):
         return cls(
-            nodes=NodesResult.create_empty(RawGridElementsEnum.NODE),
-            lines=LinesResult.create_empty(RawGridElementsEnum.LINE),
-            transformers_2w=ConnectorsResult.create_empty(
-                RawGridElementsEnum.TRANSFORMER_2_W
-            ),
-            switches=SwitchesResult.create_empty(RawGridElementsEnum.SWITCH),
+            nodes=NodesResult({}),
+            lines=LinesResult({}),
+            transformers_2w=Transformers2WResult({}),
+            switches=SwitchesResult({}),
         )

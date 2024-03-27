@@ -127,7 +127,7 @@ class ParticipantsResultContainer(ContainerMixin):
         if include_empty:
             return {res.entity_type: res for res in self.to_list()}
         else:
-            return {res.entity_type: res for res in self.to_list() if res.entities}
+            return {res.entity_type: res for res in self.to_list() if res}
 
     def energies(self) -> dict[EntitiesEnum, float]:
         return {
@@ -168,9 +168,7 @@ class ParticipantsResultContainer(ContainerMixin):
         all_participants = required_participants + optional
         if not include_empty:
             all_participants = [
-                participants
-                for participants in all_participants
-                if participants.entities
+                participants for participants in all_participants if participants
             ]
         return all_participants
 
@@ -325,22 +323,14 @@ class ParticipantsResultContainer(ContainerMixin):
     @classmethod
     def create_empty(cls):
         return ParticipantsResultContainer(
-            loads=PQResultDict.create_empty(SystemParticipantsEnum.LOAD),
-            fixed_feed_ins=PQResultDict.create_empty(
-                SystemParticipantsEnum.FIXED_FEED_IN
-            ),
-            pvs=PQResultDict.create_empty(
-                SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT
-            ),
-            wecs=PQResultDict.create_empty(
-                SystemParticipantsEnum.WIND_ENERGY_CONVERTER
-            ),
-            storages=PQWithSocResultDict.create_empty(SystemParticipantsEnum.STORAGE),
-            ems=PQResultDict.create_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT),
-            evcs=PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE),
-            evs=PQWithSocResultDict.create_empty(
-                SystemParticipantsEnum.ELECTRIC_VEHICLE
-            ),
-            hps=PQResultDict.create_empty(SystemParticipantsEnum.HEAT_PUMP),
-            flex=FlexOptionsResult.create_empty(SystemParticipantsEnum.FLEX_OPTIONS),
+            loads=PQResultDict(SystemParticipantsEnum.LOAD, {}),
+            fixed_feed_ins=PQResultDict(SystemParticipantsEnum.FIXED_FEED_IN, {}),
+            pvs=PQResultDict(SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT, {}),
+            wecs=PQResultDict(SystemParticipantsEnum.WIND_ENERGY_CONVERTER, {}),
+            storages=PQWithSocResultDict(SystemParticipantsEnum.STORAGE, {}),
+            ems=PQResultDict(SystemParticipantsEnum.ENERGY_MANAGEMENT, {}),
+            evcs=PQResultDict(SystemParticipantsEnum.ELECTRIC_VEHICLE, {}),
+            evs=PQWithSocResultDict(SystemParticipantsEnum.ELECTRIC_VEHICLE, {}),
+            hps=PQResultDict(SystemParticipantsEnum.HEAT_PUMP, {}),
+            flex=FlexOptionsResult({}),
         )

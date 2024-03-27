@@ -11,9 +11,10 @@ from pypsdm.models.result.participant.dict import ResultDict
 from pypsdm.models.result.power import PQResult, PQWithSocResult
 
 
-@dataclass(frozen=True)
 class PQResultDict(ResultDict):
-    entities: Dict[str, PQResult]
+
+    def __init__(self, entity_type: SystemParticipantsEnum, data: Dict[str, PQResult]):
+        super().__init__(entity_type, data)
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
@@ -35,10 +36,10 @@ class PQResultDict(ResultDict):
         Returns:
             DataFrame: DataFrame with the p values of all participants
         """
-        if not self.entities.values():
+        if not self.values():
             return pd.DataFrame()
         data = pd.DataFrame(
-            {p_uuid: res.p for p_uuid, res in self.entities.items()}
+            {p_uuid: res.p for p_uuid, res in self.items()}
         ).sort_index()
         if ffill:
             return data.fillna(method="ffill")
@@ -58,42 +59,39 @@ class PQResultDict(ResultDict):
         Returns:
             DataFrame: DataFrame with the q values of all participants
         """
-        if not self.entities.values():
+        if not self.values():
             return pd.DataFrame()
         data = pd.DataFrame(
-            {p_uuid: res.q for p_uuid, res in self.entities.items()}
+            {p_uuid: res.q for p_uuid, res in self.items()}
         ).sort_index()
         if ffill:
             return data.fillna(method="ffill")
         return data
 
     def p_sum(self, ffill=True) -> Series:
-        if not self.entities:
+        if not self.data:
             return Series(dtype=float)
         return self.p(ffill).fillna(method="ffill").sum(axis=1).rename("p_sum")
 
     def q_sum(self, ffill=True):
-        if not self.entities:
+        if not self.data:
             return Series(dtype=float)
-        return self.q().fillna(method="ffill").sum(axis=1).rename("q_sum")
+        return self.q(ffill).fillna(method="ffill").sum(axis=1).rename("q_sum")
 
     def sum(self) -> PQResult:
-        return PQResult.sum(list(self.entities.values()))
+        return PQResult.sum(list(self.values()))
 
     def energy(self) -> float:
         # TODO: make concurrent
         sum = 0
-        for participant in self.entities.values():
+        for participant in self.values():
             sum += participant.energy()
         return sum
-
-    def get(self, key: str) -> PQResult:
-        return self.entities[key]
 
     def subset(self, uuids):
         return type(self)(
             self.entity_type,
-            {uuid: self.entities[uuid] for uuid in self.entities.keys() & uuids},
+            {uuid: self[uuid] for uuid in self.keys() & uuids},
         )
 
     def load_and_generation(self):
@@ -103,8 +101,8 @@ class PQResultDict(ResultDict):
         errors = []
 
         # Compare time series
-        self_keys = set(self.entities.keys())
-        other_keys = set(other.entities.keys())
+        self_keys = set(self.keys())
+        other_keys = set(other.keys())
         entity_differences = self_keys.symmetric_difference(other_keys)
         if entity_differences:
             errors.append(
@@ -116,7 +114,7 @@ class PQResultDict(ResultDict):
         key_intersection = self_keys & other_keys
         for key in key_intersection:
             try:
-                self.entities[key].compare(other.entities[key])
+                self[key].compare(other[key])
             except ComparisonError as e:
                 errors.append(e)
 
@@ -129,13 +127,13 @@ class PQResultDict(ResultDict):
 @dataclass(frozen=True)
 class PQWithSocResultDict(PQResultDict):
     entity_type: SystemParticipantsEnum
-    entities: Dict[str, PQWithSocResult]
+    data: Dict[str, PQWithSocResult]
 
     def sum_with_soc(self, inputs: SystemParticipantsWithCapacity) -> PQWithSocResult:
-        if not self.entities:
+        if not self.data:
             return PQWithSocResult.create_empty(self.entity_type, "", "")
         capacity_participant = []
-        for participant_uuid, res in self.entities.items():
+        for participant_uuid, res in self.data.items():
             capacity = inputs.get(participant_uuid)[inputs.capacity_attribute()]
             capacity_participant.append((capacity, res))
         return PQWithSocResult.sum_with_soc(capacity_participant)
