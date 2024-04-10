@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
+import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import Engine, create_engine, text
 from sqlmodel import Session, select
@@ -27,7 +28,7 @@ class WeatherProxy:
             - WEATHER_DB_NAME
         """
         if not engine:
-            engine = get_db_engine(echo)
+            engine = create_engine_from_env(echo)
         self.engine = engine
 
     def get_weather(self, time: datetime, coordinate_id: int) -> Optional[WeatherValue]:
@@ -39,14 +40,22 @@ class WeatherProxy:
             return result
 
     def get_weather_for_interval(
-        self, start: datetime, stop: datetime, coordiante_id: int
+        self, start: datetime, stop: datetime, coordinate_id: int | set[int]
     ) -> list[WeatherValue]:
         with Session(self.engine) as session:
-            statement = select(WeatherValue).where(
-                WeatherValue.time >= start,  # type: ignore
-                WeatherValue.time <= stop,  # type: ignore
-                WeatherValue.coordinate_id == coordiante_id,
-            )
+
+            if isinstance(coordinate_id, int):
+                statement = select(WeatherValue).where(
+                    WeatherValue.time >= start,  # type: ignore
+                    WeatherValue.time <= stop,  # type: ignore
+                    WeatherValue.coordinate_id == coordinate_id,
+                )
+            elif isinstance(coordinate_id, set):
+                statement = select(WeatherValue).where(
+                    WeatherValue.time >= start,  # type: ignore
+                    WeatherValue.time <= stop,  # type: ignore
+                    WeatherValue.coordinate_id.in_(coordinate_id),  # type: ignore
+                )
             result = session.exec(statement).all()
             return list(result)
 
@@ -66,7 +75,7 @@ class WeatherProxy:
         id_column="id",
         point_column="coordinate",
     ) -> list[tuple[Coordinate, float]]:
-        query = create_query_n_nearest_points(
+        query = _create_query_n_nearest_points(
             x, y, n, schema_name, table_name, id_column, point_column
         )
         with self.engine.connect() as conn:
@@ -78,7 +87,7 @@ class WeatherProxy:
             return coords
 
 
-def create_query_n_nearest_points(
+def _create_query_n_nearest_points(
     x: float,
     y: float,
     n: int,
@@ -100,7 +109,7 @@ def create_query_n_nearest_points(
     return query
 
 
-def get_db_engine(echo=False) -> Engine:
+def create_engine_from_env(echo=False) -> Engine:
     load_dotenv()
     username = os.getenv("WEATHER_DB_USER")
     password = os.getenv("WEATHER_DB_PASSWORD")
@@ -109,3 +118,82 @@ def get_db_engine(echo=False) -> Engine:
     database = os.getenv("WEATHER_DB_NAME")
     DATABASE_URL = f"postgresql://{username}:{password}@{host}:{port}/{database}"
     return create_engine(DATABASE_URL, echo=echo)
+
+
+def create_engine_from_params(
+    username: str, password: str, host: str, port: str, database: str, echo=False
+) -> Engine:
+    return create_engine(
+        f"postgresql://{username}:{password}@{host}:{port}/{database}", echo=echo
+    )
+
+
+def weighted_interpolation_coordinates(
+    target: tuple[float, float],
+    nearest_coords: list[tuple[Coordinate, float]],
+) -> list[tuple[Coordinate, float]]:
+    """
+    Given a list of nearest surrounding cordinates with respect to a target coordinate,
+    find the nearest coordinate in each quadrant and weigh them by their distance to
+    the target.
+
+    Requires at least one coordinate in each quadrant (meaing top left, top right,
+    bottom left, bottom right).
+
+    Args:
+        target (tuple[float, float]): Target coordinate (x (longitude), y (latitude))
+        nearest_coords (list[tuple[Coordinate, float]]): List of nearest coordinates
+            with their distances to the target
+    """
+
+    x, y = target
+
+    # Check if the queried coordinate is surrounded in each quadrant
+    quadrants: list[tuple[Coordinate | None, float]] = [
+        (None, float("inf")) for _ in range(4)
+    ]  # [Q1, Q2, Q3, Q4]
+    for point, distance in nearest_coords:
+
+        if point.x < x and point.y > y:
+            if quadrants[0][0]:
+                if distance < quadrants[0][1]:
+                    quadrants[0] = (point, distance)
+            else:
+                quadrants[0] = (point, distance)
+
+        if point.x > x and point.y > y:
+            if quadrants[1][0]:
+                if distance < quadrants[1][1]:
+                    quadrants[1] = (point, distance)
+            else:
+                quadrants[1] = (point, distance)
+
+        if point.x < x and point.y < y:
+            if quadrants[2][0]:
+                if distance < quadrants[2][1]:
+                    quadrants[2] = (point, distance)
+            else:
+                quadrants[2] = (point, distance)
+
+        if point.x > x and point.y < y:
+            if quadrants[3][0]:
+                if distance < quadrants[3][1]:
+                    quadrants[3] = (point, distance)
+            else:
+                quadrants[3] = (point, distance)
+
+    acc_dist = 0
+    for q in quadrants:
+        if q[0]:
+            acc_dist += q[1]
+        else:
+            raise ValueError("Not all quadrants are filled")
+
+    n = len(quadrants)
+    weighted_coordinates = []
+    for q in quadrants:
+        if q[0]:
+            weight = (1 - (q[1] / acc_dist)) / (n - 1)
+            weighted_coordinates.append((q[0], weight))
+
+    return weighted_coordinates
