@@ -34,14 +34,14 @@ def test_lines_result(gwr):
 
 def check_connector_res(connector_res, connectors_uuids, expected_nr_uuids):
     assert len(connector_res) == expected_nr_uuids
-    assert len(connector_res.i_a_ang.columns) == expected_nr_uuids
-    assert set(connector_res.i_a_ang.columns) == connectors_uuids
-    assert len(connector_res.i_a_mag.columns) == expected_nr_uuids
-    assert set(connector_res.i_a_mag.columns) == connectors_uuids
-    assert len(connector_res.i_b_ang.columns) == expected_nr_uuids
-    assert set(connector_res.i_b_ang.columns) == connectors_uuids
-    assert len(connector_res.i_b_mag.columns) == expected_nr_uuids
-    assert set(connector_res.i_b_mag.columns) == connectors_uuids
+    assert len(connector_res.i_a_ang().columns) == expected_nr_uuids
+    assert set(connector_res.i_a_ang().columns) == connectors_uuids
+    assert len(connector_res.i_a_mag().columns) == expected_nr_uuids
+    assert set(connector_res.i_a_mag().columns) == connectors_uuids
+    assert len(connector_res.i_b_ang().columns) == expected_nr_uuids
+    assert set(connector_res.i_b_ang().columns) == connectors_uuids
+    assert len(connector_res.i_b_mag().columns) == expected_nr_uuids
+    assert set(connector_res.i_b_mag().columns) == connectors_uuids
 
 
 def test_line_result(gwr):

@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from pypsdm.io.utils import check_filter
 from pypsdm.models.input.container.grid import GridContainer
@@ -196,8 +197,16 @@ class GridWithResults(ContainerMixin):
         uuid_order = [
             x[0] for x in sorted(list(uuid_to_idx.items()), key=lambda x: x[1])
         ]
+
+        voltage_levels = self.nodes.v_rated.value_counts()
+        if len(voltage_levels) > 2:
+            raise NotImplementedError(
+                f"Only implemented for two voltage levels {len(voltage_levels)}"
+            )
+        lv_voltage = voltage_levels.index[0]
+
         Y = self.raw_grid.admittance_matrix(uuid_to_idx)
-        v_complex = self.nodes_res.v_complex(self.nodes)
+        v_complex = self.nodes_res.v_complex(lv_voltage)  # type: ignore
         v_complex = v_complex.reindex(columns=uuid_order)
         i = v_complex @ Y
         i.columns = v_complex.columns
@@ -208,8 +217,8 @@ class GridWithResults(ContainerMixin):
         for uuid, node_res in nodes_res.items():
             node_s = s[uuid]  # type: ignore
             # power values below 1e-9 are most likel a result of float calculation imprecision
-            node_p = node_s.apply(lambda x: x.real if x.real > 1e-9 else 0.0)
-            node_q = node_s.apply(lambda x: x.imag if x.imag > 1e-9 else 0.0)
+            node_p = node_s.apply(lambda x: x.real if abs(x.real) > 1e-9 else 0.0)
+            node_q = node_s.apply(lambda x: x.imag if abs(x.imag) > 1e-9 else 0.0)
             ext_node_res_data = node_res.data.copy()
             ext_node_res_data["p"] = node_p
             ext_node_res_data["q"] = node_q
@@ -271,6 +280,8 @@ class GridWithResults(ContainerMixin):
     ) -> "GridWithResults":
         check_filter(filter_start, filter_end)
 
+        logger.info(f"Reading grid from {grid_path}")
+
         if not primary_data_delimiter:
             primary_data_delimiter = grid_delimiter
 
@@ -280,6 +291,8 @@ class GridWithResults(ContainerMixin):
 
         if not grid:
             raise ValueError(f"Grid is empty. Is the path correct? {grid_path}")
+
+        logger.info(f"Reading results from {result_path}")
 
         results = GridResultContainer.from_csv(
             result_path,

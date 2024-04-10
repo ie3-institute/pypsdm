@@ -121,9 +121,9 @@ class RawGridContainer(ContainerMixin):
     @classmethod
     def from_csv(cls, path: str, delimiter: str | None = None) -> "RawGridContainer":
         nodes = Nodes.from_csv(path, delimiter)
-        lines = Lines.from_csv(path, delimiter)
-        transformers_2_w = Transformers2W.from_csv(path, delimiter)
-        switches = Switches.from_csv(path, delimiter)
+        lines = Lines.from_csv(path, delimiter, must_exist=False)
+        transformers_2_w = Transformers2W.from_csv(path, delimiter, must_exist=False)
+        switches = Switches.from_csv(path, delimiter, must_exist=False)
         return cls(
             nodes=nodes,
             lines=lines,

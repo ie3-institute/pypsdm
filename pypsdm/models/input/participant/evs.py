@@ -33,6 +33,7 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
     @staticmethod
     def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + [
+            "s_rated_dc",
             "e_storage",
             "e_cons",
         ]

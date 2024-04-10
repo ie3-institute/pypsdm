@@ -153,16 +153,16 @@ class SystemParticipantsContainer(ContainerMixin):
     def from_csv(
         path: str, delimiter: str | None = None
     ) -> "SystemParticipantsContainer":
-        loads = Loads.from_csv(path, delimiter)
-        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter)
-        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter)
-        biomass_plants = BiomassPlants.from_csv(path, delimiter)
-        wecs = WindEnergyConverters.from_csv(path, delimiter)
-        storages = Storages.from_csv(path, delimiter)
-        ems = EnergyManagementSystems.from_csv(path, delimiter)
-        evs = ElectricVehicles.from_csv(path, delimiter)
-        evcs = EvChargingStations.from_csv(path, delimiter)
-        hps = HeatPumps.from_csv(path, delimiter)
+        loads = Loads.from_csv(path, delimiter, must_exist=False)
+        fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter, must_exist=False)
+        pvs = PhotovoltaicPowerPlants.from_csv(path, delimiter, must_exist=False)
+        biomass_plants = BiomassPlants.from_csv(path, delimiter, must_exist=False)
+        wecs = WindEnergyConverters.from_csv(path, delimiter, must_exist=False)
+        storages = Storages.from_csv(path, delimiter, must_exist=False)
+        ems = EnergyManagementSystems.from_csv(path, delimiter, must_exist=False)
+        evs = ElectricVehicles.from_csv(path, delimiter, must_exist=False)
+        evcs = EvChargingStations.from_csv(path, delimiter, must_exist=False)
+        hps = HeatPumps.from_csv(path, delimiter, must_exist=False)
         return SystemParticipantsContainer(
             ems,
             loads,

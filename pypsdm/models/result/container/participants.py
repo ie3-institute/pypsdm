@@ -240,7 +240,7 @@ class ParticipantsResultContainer(ContainerMixin):
     def from_csv(
         cls,
         simulation_data_path: str,
-        simulation_end: datetime,
+        simulation_end: Optional[datetime] = None,
         grid_container: Optional[GridContainer] = None,
         delimiter: Optional[str] = None,
         filter_start: Optional[datetime] = None,
@@ -270,6 +270,11 @@ class ParticipantsResultContainer(ContainerMixin):
             )
             participant_result_map = {}
             for participant_result in participant_results:
+                if isinstance(participant_result, Tuple):
+                    e, participant = participant_result
+                    raise IOError(
+                        f"Error reading participant result for: {participant}"
+                    ) from e
                 participant_result_map[participant_result.entity_type] = (
                     participant_result
                 )
@@ -295,23 +300,30 @@ class ParticipantsResultContainer(ContainerMixin):
     @staticmethod
     def from_csv_for_participant(
         simulation_data_path: str,
-        simulation_end: datetime,
-        grid_container: Optional[GridContainer],
+        simulation_end: datetime | None,
+        grid_container: GridContainer | None,
         participant: SystemParticipantsEnum,
-        delimiter: Optional[str] = None,
+        delimiter: str | None = None,
     ):
-        if grid_container:
-            input_entities = grid_container.participants.get_participants(participant)
-        else:
-            input_entities = None
-        dict_type = ParticipantsResultContainer.get_result_dict_type(participant)
-        return dict_type.from_csv(
-            participant,
-            simulation_data_path,
-            delimiter,
-            simulation_end,
-            input_entities,
-        )
+        try:
+            if grid_container:
+                input_entities = grid_container.participants.get_participants(
+                    participant
+                )
+            else:
+                input_entities = None
+            dict_type = ParticipantsResultContainer.get_result_dict_type(participant)
+            return dict_type.from_csv(
+                participant,
+                simulation_data_path,
+                delimiter,
+                simulation_end,
+                input_entities,
+                must_exist=False,
+            )
+
+        except Exception as e:
+            return (e, participant)
 
     @staticmethod
     def get_result_dict_type(participant: SystemParticipantsEnum):

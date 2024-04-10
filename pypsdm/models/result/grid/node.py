@@ -76,6 +76,7 @@ class NodesResult(ResultDict):
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
     ) -> ResultDictType:
         return super().from_csv(
             RawGridElementsEnum.NODE,
@@ -85,6 +86,7 @@ class NodesResult(ResultDict):
             input_entities,
             filter_start,
             filter_end,
+            must_exist=must_exist,
         )
 
     def v_mag(self) -> DataFrame:
@@ -109,7 +111,7 @@ class NodesResult(ResultDict):
             axis=1,
         )
 
-    def v_complex(self, nodes: Nodes | None = None) -> DataFrame:
+    def v_complex(self, nodes: Nodes | float | None = None) -> DataFrame:
         if not self.entities:
             return pd.DataFrame().astype(complex)
         return pd.concat(

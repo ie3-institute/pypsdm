@@ -153,6 +153,14 @@ class GridResultContainer(ContainerMixin):
             filter_end=filter_end,
         )
 
+        if simulation_end is None:
+            if len(raw_grid.nodes) == 0:
+                raise ValueError(
+                    f"No node simulation results found in '{simulation_data_path}'. Can not determine simulation end time. Please provide it manually."
+                )
+            sample_res = raw_grid.nodes[list(raw_grid.nodes.keys())[0]]
+            simulation_end = sample_res.data.index.max()
+
         participants = ParticipantsResultContainer.from_csv(
             simulation_data_path,
             simulation_end,  # type: ignore

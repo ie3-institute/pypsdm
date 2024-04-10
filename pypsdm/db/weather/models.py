@@ -36,17 +36,34 @@ class WeatherValue(SQLModel, table=True):
         return self.t2m - 273.15
 
     @property
-    def wind_velicty_u(self):
+    def wind_velocity_u(self):
         return self.u131m
 
     @property
-    def wind_velicty_v(self):
+    def wind_velocity_v(self):
         return self.v131m
+
+    @staticmethod
+    def name_mapping():
+        return {
+            "time": "time",
+            "aswdifd_s": "diffuse_irradiance",
+            "aswdir_s": "direct_irradiance",
+            "t2m": "temperature",
+            "u131m": "wind_velocity_u",
+            "v131m": "wind_velocity_v",
+        }
 
 
 class Coordinate(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     coordinate: str = Field()
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     @property
     def point(self) -> Point:
@@ -59,5 +76,13 @@ class Coordinate(SQLModel, table=True):
         return self.point.y
 
     @property
+    def y(self) -> float:
+        return self.point.y
+
+    @property
     def longitude(self) -> float:
+        return self.point.x
+
+    @property
+    def x(self) -> float:
         return self.point.x

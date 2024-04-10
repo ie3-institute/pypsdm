@@ -41,6 +41,10 @@ class ExtendedNodeResult(NodeResult):
     def q(self) -> Series:
         return self.data["q"]
 
+    @property
+    def s(self) -> Series:
+        return self.p + 1j * self.q
+
     @classmethod
     def from_node_result(
         cls,
@@ -80,20 +84,7 @@ class ExtendedNodeResult(NodeResult):
 class ExtendedNodesResult(NodesResult):
     entities: dict[str, ExtendedNodeResult]  # type: ignore
 
-    def p(self, ffill=True) -> DataFrame:
-        """
-        Returns a DataFrame with the p values of all nodes.
-
-        NOTE: By default forward fills the resulting nan values that occur in case of
-        different time resolutions of the pq results. This is valid if you are dealing
-        with event discrete time series data. This might not be what you want otherwise
-
-        Args:
-            ffill: Forward fill the resulting nan values
-
-        Returns:
-            DataFrame: DataFrame with the p values of all nodes
-        """
+    def p(self) -> DataFrame:
         data = pd.concat(
             [
                 node_res.p.rename(node_res.input_model)
@@ -101,37 +92,26 @@ class ExtendedNodesResult(NodesResult):
             ],
             axis=1,
         ).sort_index()
-        if ffill:
-            data = data.ffill()
         return data
 
-    def q(self, ffill=True) -> DataFrame:
-        """
-        Returns a DataFrame with the q values of all nodes.
+    def q(self) -> DataFrame:
+        data = pd.concat(
+            [
+                node_res.q.rename(node_res.input_model)
+                for node_res in self.entities.values()
+            ],
+            axis=1,
+        ).sort_index()
+        return data
 
-        NOTE: By default forward fills the resulting nan values that occur in case of
-        different time resolutions of the pq results. This is valid if you are dealing
-        with event discrete time series data. This might not be what you want otherwise
-
-        Args:
-            ffill: Forward fill the resulting nan values
-
-        Returns:
-            DataFrame: DataFrame with the q values of all nodes
-        """
-        data = (
-            pd.concat(
-                [
-                    node_res.q.rename(node_res.input_model)
-                    for node_res in self.entities.values()
-                ],
-                axis=1,
-            )
-            .sort_index()
-            .ffill()
-        )
-        if ffill:
-            data = data.ffill()
+    def s(self) -> DataFrame:
+        data = pd.concat(
+            [
+                node_res.s.rename(node_res.input_model)
+                for node_res in self.entities.values()
+            ],
+            axis=1,
+        ).sort_index()
         return data
 
     @classmethod

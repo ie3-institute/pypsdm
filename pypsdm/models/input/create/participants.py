@@ -373,7 +373,7 @@ def create_energy_management_systems(data_dict):
 
 
 def create_fixed_feed_ins(data_dict):
-    return FixedFeedIns(create_data(data_dict, create_energy_management_systems_data))
+    return FixedFeedIns(create_data(data_dict, create_fixed_feed_in_data))
 
 
 def create_fixed_feed_in_data(

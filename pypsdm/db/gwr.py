@@ -197,9 +197,12 @@ class LocalGwrDb(PathManagerMixin):
             raise FileNotFoundError(f"Grid with id {grid_id} does not exist.")
 
     def copy_configs(
-        self, grid_id: str, target_grid_id: str, adjust_grid_path: bool = True
+        self,
+        grid_id: str,
+        target_grid_id: str,
+        adjust_grid_path: bool = True,
+        copy_slack_volt: bool = True,
     ):
-
         origin_grid_path = self.get_grid_path(grid_id)
         if not origin_grid_path:
             raise FileNotFoundError(f"Grid with id {grid_id} does not exist.")
@@ -222,6 +225,12 @@ class LocalGwrDb(PathManagerMixin):
             conf = HOCONConverter.to_hocon(conf)
             with open(os.path.join(target_conf_path, file), "w") as f:
                 f.write(conf)
+
+        # temporary
+        if copy_slack_volt:
+            slack_v_path = origin_grid_path.joinpath("slack_volt.csv")
+            if slack_v_path.exists():
+                shutil.copy(slack_v_path, target_grid_path)
 
     def read_gwr_most_recent(self, grid_id) -> GridWithResults:
         """Read most recent GridWithResults."""
@@ -454,6 +463,9 @@ class LocalGwrDb(PathManagerMixin):
             shutil.copytree(results_path, destination_dir)
 
     def create_grid_id(self, grid_id: str) -> str:
+        match = self.match_grid_id(grid_id)
+        if match:
+            grid_id = match[0]
         grids = self.list_grids(grid_id)
         if grids:
             max_version = 1
