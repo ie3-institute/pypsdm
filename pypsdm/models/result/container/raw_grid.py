@@ -125,6 +125,7 @@ class RawGridResultContainer(ContainerMixin):
                 grid_container.raw_grid.nodes if grid_container else None,
                 filter_start,
                 filter_end,
+                must_exist=False,
             )
             transformers_2_w_future = executor.submit(
                 Transformers2WResult.from_csv,
@@ -135,6 +136,7 @@ class RawGridResultContainer(ContainerMixin):
                 grid_container.raw_grid.transformers_2_w if grid_container else None,
                 filter_start,
                 filter_end,
+                must_exist=False,
             )
             lines_future = executor.submit(
                 LinesResult.from_csv,
@@ -145,6 +147,7 @@ class RawGridResultContainer(ContainerMixin):
                 grid_container.raw_grid.lines if grid_container else None,
                 filter_start,
                 filter_end,
+                must_exist=False,
             )
             switches_future = executor.submit(
                 SwitchesResult.from_csv,
@@ -154,6 +157,7 @@ class RawGridResultContainer(ContainerMixin):
                 grid_container.raw_grid.switches if grid_container else None,
                 filter_start,
                 filter_end,
+                must_exist=False,
             )
 
             nodes = nodes_future.result()

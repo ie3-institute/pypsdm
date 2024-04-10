@@ -8,7 +8,6 @@ from typing import Dict, Generic, Optional, Self, Type, TypeVar, Union
 
 from loguru import logger
 from pandas import DataFrame
-from pandas.core.groupby.generic import DataFrameGroupBy
 
 from pypsdm.errors import ComparisonError
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
@@ -256,16 +255,23 @@ class ResultDict(Generic[T], ABC):
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
     ) -> ResultDictType:
         check_filter(filter_start, filter_end)
-        grpd_df = ResultDict.get_grpd_df(
-            entity_type,
-            simulation_data_path,
-            delimiter,
-        )
-        if not grpd_df:
-            logger.debug("There are no " + str(cls))
+
+        file_name = entity_type.get_csv_result_file_name()
+        path = get_file_path(simulation_data_path, file_name)
+        if path.exists():
+            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, delimiter)
+        else:
+            if must_exist:
+                raise FileNotFoundError(f"File {path} does not exist")
+            else:
+                return cls.create_empty(entity_type)
+
+        if len(grpd_df) == 0:
             return cls.create_empty(entity_type)
+
         if simulation_end is None:
             simulation_end = to_date_time(grpd_df["time"].max().max())
         entities = dict(
@@ -286,7 +292,7 @@ class ResultDict(Generic[T], ABC):
         return (
             res
             if not filter_start
-            else res.filter_for_time_interval(filter_start, filter_end)
+            else res.filter_for_time_interval(filter_start, filter_end)  # type: ignore
         )
 
     @classmethod
@@ -313,25 +319,6 @@ class ResultDict(Generic[T], ABC):
         return entity_type.get_result_type().build(
             entity_type, input_model, data, simulation_end, name=name
         )
-
-    @staticmethod
-    def get_grpd_df(
-        entity_type: EntitiesEnum,
-        simulation_data_path: str,
-        delimiter: str | None = None,
-    ) -> Optional[DataFrameGroupBy]:
-        file_name = entity_type.get_csv_result_file_name()
-        path = get_file_path(simulation_data_path, file_name)
-
-        if not path.exists():
-            logger.info(
-                "No results built for {} since {} does not exist".format(
-                    file_name, str(path)
-                )
-            )
-            return None
-
-        return csv_to_grpd_df(file_name, simulation_data_path, delimiter)
 
     @staticmethod
     def safe_get_path(entity_type: EntitiesEnum, data_path: str) -> Optional[Path]:

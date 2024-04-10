@@ -342,35 +342,41 @@ class Entities(ABC):
         return replace(to_copy, **changes)
 
     @classmethod
-    def from_csv(cls: Type[Self], path: str, delimiter: str | None = None) -> Self:
+    def from_csv(
+        cls: Type[Self],
+        path: str,
+        delimiter: str | None = None,
+        must_exist: bool = True,
+    ) -> Self:
         """
         Reads the entity data from a csv file.
 
         Args:
             path: The path to the csv file.
             delimiter: The delimiter of the csv file.
+            must_exist: Wether or not exception is thrown if file does not exist.
 
         Returns:
            The corresponding entities object.
         """
-        return cls._from_csv(path, cls.get_enum(), delimiter)
+        return cls._from_csv(path, cls.get_enum(), delimiter, must_exist)
 
     @classmethod
     def _from_csv(
-        cls: Type[Self], path: str, entity: EntitiesEnum, delimiter: str | None = None
+        cls: Type[Self],
+        path: str,
+        entity: EntitiesEnum,
+        delimiter: str | None = None,
+        must_exist: bool = True,
     ) -> Self:
         file_path = utils.get_file_path(path, entity.get_csv_input_file_name())
         if os.path.exists(file_path):
             return cls(Entities._data_from_csv(entity, path, delimiter))
         else:
-            logger.debug(
-                "There is no file named: "
-                + str(file_path)
-                + ". No "
-                + entity.value
-                + " entities are loaded."
-            )
-            return cls.create_empty()
+            if must_exist:
+                raise FileNotFoundError(f"File {file_path} does not exist.")
+            else:
+                return cls.create_empty()
 
     @classmethod
     def _data_from_csv(

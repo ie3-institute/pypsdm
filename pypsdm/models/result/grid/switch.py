@@ -35,7 +35,6 @@ class SwitchesResult(ResultDict):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
-    @property
     def closed(self) -> DataFrame:
         if not self.entities:
             return pd.DataFrame()
@@ -56,6 +55,7 @@ class SwitchesResult(ResultDict):
         input_entities: Optional[Entities] = None,
         filter_start: Optional[datetime] = None,
         filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
     ) -> ResultDictType:
         return super().from_csv(
             RawGridElementsEnum.SWITCH,
@@ -65,4 +65,5 @@ class SwitchesResult(ResultDict):
             input_entities,
             filter_start,
             filter_end,
+            must_exist=must_exist,
         )
