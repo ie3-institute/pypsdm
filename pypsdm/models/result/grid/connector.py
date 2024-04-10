@@ -85,7 +85,6 @@ class ConnectorsResult(ResultDict):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
-    @property
     def i_a_ang(self) -> DataFrame:
         return pd.concat(
             [
@@ -95,7 +94,6 @@ class ConnectorsResult(ResultDict):
             axis=1,
         )
 
-    @property
     def i_a_mag(self) -> DataFrame:
         return pd.concat(
             [
@@ -105,7 +103,6 @@ class ConnectorsResult(ResultDict):
             axis=1,
         )
 
-    @property
     def i_b_ang(self) -> DataFrame:
         return pd.concat(
             [
@@ -115,7 +112,6 @@ class ConnectorsResult(ResultDict):
             axis=1,
         )
 
-    @property
     def i_b_mag(self) -> DataFrame:
         return pd.concat(
             [

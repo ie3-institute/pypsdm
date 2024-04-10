@@ -19,6 +19,11 @@ def input_path():
 
 
 @pytest.fixture(scope="session")
+def input_path_sg():
+    return os.path.join(ROOT_DIR, "tests", "resources", "simple_grid", "input")
+
+
+@pytest.fixture(scope="session")
 def result_path():
     return os.path.join(ROOT_DIR, "tests", "resources", "vn_simona", "results")
 

@@ -27,5 +27,5 @@ def test_from_csv(result_path):
     switches = SwitchesResult.from_csv(result_path)
     assert len(switches) == 1
     closed = switches.closed
-    assert len(closed.columns) == 1
-    assert not closed.iloc[0][closed.columns[0]]
+    assert len(closed().columns) == 1
+    assert not closed().iloc[0][closed().columns[0]]

@@ -160,6 +160,8 @@ def _add_node_trace(
         return (
             node_data["id"]
             + "<br>"
+            + node_data.name
+            + "<br>"
             + "<br>".join(
                 [
                     f"{key}={value}"

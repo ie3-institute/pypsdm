@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import pandas as pd
 
+from pypsdm.models.input.connector.lines import Lines
 from pypsdm.models.result.grid.connector import ConnectorResult, ConnectorsResult
-
-if TYPE_CHECKING:
-    from pypsdm.models.input.connector.lines import Lines
 
 
 @dataclass(frozen=True)

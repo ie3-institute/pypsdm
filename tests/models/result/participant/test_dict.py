@@ -65,3 +65,10 @@ def test_to_csv(res_dict: PQResultDict, tmp_path):
         ",",
     )
     assert res_dict.compare(res_dict_b) is None
+
+
+def test_filter_for_time_interval_empty():
+    empty_evs = PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE)
+    dt = datetime(2024, 1, 1)
+    filt = empty_evs.filter_by_date_time(dt)
+    assert len(filt) == 0

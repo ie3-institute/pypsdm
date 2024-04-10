@@ -1,8 +1,7 @@
 import os
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
-import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import Engine, create_engine, text
 from sqlmodel import Session, select
