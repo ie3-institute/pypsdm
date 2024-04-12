@@ -91,6 +91,48 @@ class SystemParticipantsEnum(EntitiesEnum):
             SystemParticipantsEnum.STORAGE,
         }
 
+    def get_dict_type(self):
+        from pypsdm.models.result.participant.pq_dict import (
+            EmsResult,
+            EvcsResult,
+            EvsResult,
+            FixedFeedInsResult,
+            HpsResult,
+            LoadsResult,
+            PvsResult,
+            StoragesResult,
+        )
+        from pypsdm.models.result.participant.flex_options import (
+            FlexOptionsResult,
+        )
+        from pypsdm.models.primary_data import PrimaryData
+
+        match self:
+            case SystemParticipantsEnum.ELECTRIC_VEHICLE:
+                return EvsResult
+            case SystemParticipantsEnum.EV_CHARGING_STATION:
+                return EvcsResult
+            case SystemParticipantsEnum.FIXED_FEED_IN:
+                return FixedFeedInsResult
+            case SystemParticipantsEnum.LOAD:
+                return LoadsResult
+            case SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
+                return PvsResult
+            case SystemParticipantsEnum.WIND_ENERGY_CONVERTER:
+                return EvcsResult
+            case SystemParticipantsEnum.STORAGE:
+                return StoragesResult
+            case SystemParticipantsEnum.ENERGY_MANAGEMENT:
+                return EmsResult
+            case SystemParticipantsEnum.HEAT_PUMP:
+                return HpsResult
+            case SystemParticipantsEnum.FLEX_OPTIONS:
+                return FlexOptionsResult
+            case SystemParticipantsEnum.PRIMARY_DATA:
+                return PrimaryData
+            case sp:
+                raise NotImplementedError(f"No dict type for {sp}")
+
 
 class RawGridElementsEnum(EntitiesEnum):
     NODE = "node"
