@@ -1,13 +1,15 @@
 from dataclasses import dataclass
-from typing import Dict
+from datetime import datetime
+from typing import Dict, Optional, Self, Type
 
 import pandas as pd
 from pandas import DataFrame, Series
 
 from pypsdm.errors import ComparisonError
 from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.input.entity import Entities
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
-from pypsdm.models.result.participant.dict import ResultDict
+from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
 from pypsdm.models.result.power import PQResult, PQWithSocResult
 
 
@@ -135,7 +137,299 @@ class PQWithSocResultDict(PQResultDict):
         if not self.entities:
             return PQWithSocResult.create_empty(self.entity_type, "", "")
         capacity_participant = []
-        for participant_uuid, res in self.entities.items():
+        for participanth_uuid, res in self.entities.items():
             capacity = inputs.get(participant_uuid)[inputs.capacity_attribute()]
             capacity_participant.append((capacity, res))
         return PQWithSocResult.sum_with_soc(capacity_participant)
+
+
+@dataclass(frozen=True)
+class EmsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.ENERGY_MANAGEMENT, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def create_empty(cls: type[Self]) -> Self:
+        return super().create_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.ENERGY_MANAGEMENT,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class LoadsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.LOAD, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.LOAD,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class FixedFeedInsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.FIXED_FEED_IN, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.FIXED_FEED_IN,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class PvsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class WecsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.WIND_ENERGY_CONVERTER, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class StoragesResult(PQWithSocResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.STORAGE, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.STORAGE,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class EvcsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.EV_CHARGING_STATION, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.EV_CHARGING_STATION,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class EvsResult(PQWithSocResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.ELECTRIC_VEHICLE, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.ELECTRIC_VEHICLE,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
+
+
+@dataclass(frozen=True)
+class HpsResult(PQResultDict):
+
+    def __init__(self, data):
+        super().__init__(SystemParticipantsEnum.HEAT_PUMP, data)
+
+    def __eq__(self, other: object) -> bool:
+        return super().__eq__(other)
+
+    @classmethod
+    def from_csv(  # type: ignore
+        cls: Type[ResultDictType],
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: Optional[datetime] = None,
+        input_entities: Optional[Entities] = None,
+        filter_start: Optional[datetime] = None,
+        filter_end: Optional[datetime] = None,
+        must_exist: bool = True,
+    ) -> ResultDictType:
+        return super().from_csv(
+            SystemParticipantsEnum.HEAT_PUMP,
+            simulation_data_path,
+            delimiter,
+            simulation_end,
+            input_entities,
+            filter_start,
+            filter_end,
+            must_exist,
+        )
