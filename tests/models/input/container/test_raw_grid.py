@@ -12,8 +12,8 @@ def raw_grid(input_path_sg) -> RawGridContainer:
 
 
 def test_raw_grid_container(raw_grid):
-    assert len(raw_grid.lines) == 291
-    assert len(raw_grid.nodes) == 299
+    assert len(raw_grid.lines) == 3
+    assert len(raw_grid.nodes) == 5
 
 
 def test_build_networkx_graph(raw_grid):
