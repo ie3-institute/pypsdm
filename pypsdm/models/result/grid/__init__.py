@@ -1,15 +1,16 @@
-from .connector import ConnectorResult, ConnectorsResult
-from .extended_node import ExtendedNodeResult, ExtendedNodesResult
-from .node import NodeResult, NodesResult
+from .connector import ConnectorCurrent, ConnectorCurrentDict
+from .line import LinesResult
+from .node import NodesResult
+from .switch import SwitchesResult, SwitchResult
 from .transformer import Transformer2WResult, Transformers2WResult
 
 __all__ = [
-    "ConnectorResult",
-    "ConnectorsResult",
-    "ExtendedNodeResult",
-    "ExtendedNodesResult",
-    "NodeResult",
+    "ConnectorCurrent",
+    "ConnectorCurrentDict",
     "NodesResult",
     "Transformer2WResult",
     "Transformers2WResult",
+    "LinesResult",
+    "SwitchResult",
+    "SwitchesResult",
 ]

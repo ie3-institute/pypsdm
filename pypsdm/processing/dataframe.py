@@ -3,6 +3,33 @@ from datetime import datetime
 import pandas as pd
 from pandas import DataFrame
 
+from pypsdm.processing.numba import add_2d_array
+
+
+def add_df(a: pd.DataFrame, b: pd.DataFrame):
+    """
+    Adds two dataframes with different indices in an event discrete manner.
+    """
+    if not a.columns.equals(b.columns):
+        raise ValueError("DataFrames have different columns")
+
+    if len(a) == 0:
+        return b
+    if len(b) == 0:
+        return a
+
+    b = b.reindex(columns=a.columns)
+    if not a.index.is_monotonic_increasing:
+        a.sort_index(inplace=True)
+    if not b.index.is_monotonic_increasing:
+        b.sort_index(inplace=True)
+
+    index = a.index.union(b.index)
+    values = add_2d_array(
+        index.to_numpy(), a.index.to_numpy(), b.index.to_numpy(), a.values, b.values  # type: ignore
+    )
+    return pd.DataFrame(values, index=index, columns=a.columns)  # type: ignore
+
 
 def divide_positive_negative(df: DataFrame):
     positive = df.copy()
@@ -10,10 +37,6 @@ def divide_positive_negative(df: DataFrame):
     negative = df.copy()
     negative[negative > 0] = 0
     return positive, negative
-
-
-def join_dataframes(dfs: list[DataFrame]):
-    return pd.concat(dfs)
 
 
 def filter_data_for_time_interval(

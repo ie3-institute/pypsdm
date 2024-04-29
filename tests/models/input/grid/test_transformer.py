@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from pypsdm import Transformers2W
+from pypsdm.models.input.connector.transformer import Transformers2W
 
 
 def test_to_csv(input_path, tmp_path):

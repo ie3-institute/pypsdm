@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
+)
 from pypsdm.models.result.power import PQResult
 from pypsdm.plots.common.utils import (
     FIGSIZE,
@@ -40,7 +42,7 @@ def plot_full_load_hours(res: PQResult, device_power_kw, period="M", title=None)
     return fig, ax
 
 
-def plot_load_and_generation(participant_res: ParticipantsResultContainer):
+def plot_load_and_generation(participant_res: SystemParticipantsResultContainer):
     lg_dict = participant_res.load_and_generation_energies()
     keys = []
     load = []

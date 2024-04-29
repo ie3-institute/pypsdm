@@ -132,7 +132,7 @@ class RawGridContainer(ContainerMixin):
         )
 
     @classmethod
-    def create_empty(cls):
+    def empty(cls):
         return cls(
             nodes=Nodes.create_empty(),
             lines=Lines.create_empty(),

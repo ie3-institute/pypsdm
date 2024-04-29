@@ -1,74 +1,68 @@
-from datetime import datetime
-
 import pandas as pd
-from pytest import fixture
 
-from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.result.participant.pq_dict import PQResultDict
-from pypsdm.models.result.power import PQResult
-
-
-def create_sample_data(
-    start_date: datetime, periods: int, freq: str = "h"
-) -> pd.DataFrame:
-    date_range = pd.date_range(start=start_date, periods=periods, freq=freq)
-    data = {
-        "p": pd.Series(range(periods), index=date_range),
-        "q": pd.Series(range(periods, periods * 2), index=date_range),
-    }
-    data = pd.DataFrame(data)
-    data.index.name = "time"
-    return data
+from pypsdm.models.result.participant.dict import LoadsResult
+from pypsdm.models.ts.base import TIME_COLUMN_NAME, EntityKey
+from pypsdm.models.ts.types import ComplexPower
 
 
-@fixture
-def res_dict():
-    # def create_res_dict():
-    start = datetime(2023, 1, 1)
-    periods = 5
-    data = create_sample_data(start, periods)
-    a = PQResult(SystemParticipantsEnum.LOAD, "test-res-a", "test-res-a", data)
-    b = PQResult(SystemParticipantsEnum.LOAD, "test-res-a", "test-res-a", data * 2)
-    return PQResultDict(SystemParticipantsEnum.LOAD, {"a": a, "b": b})
-
-
-def test_add(res_dict):
-    start = datetime(2023, 1, 1)
-    periods = 5
-    data = create_sample_data(start, periods)
-    c = PQResult(SystemParticipantsEnum.LOAD, "test-res-c", "test-res-c", data)
-    res_dict_b = PQResultDict(SystemParticipantsEnum.LOAD, {"c": c})
-    res_dict_add = res_dict + res_dict_b
-    assert len(res_dict_add) == 3
-    assert list(res_dict_add.entities.keys()) == ["a", "b", "c"]
-    assert id(res_dict_add.entities["a"]) == id(res_dict.entities["a"])
-
-    # test with key already in dict
-    res_dict_c = res_dict.subset(["b"])
-    res_dict_add = res_dict + res_dict_c
-    assert len(res_dict_add) == 2
-    assert list(res_dict_add.entities.keys()) == ["a", "b"]
-
-
-def test_sub(res_dict):
-    res_dict_b = res_dict.subset(["b"])
-    sub = res_dict - res_dict_b
-    assert len(sub) == 1
-    assert list(sub.entities.keys()) == ["a"]
-
-
-def test_to_csv(res_dict: PQResultDict, tmp_path):
-    res_dict.to_csv(tmp_path)
-    res_dict_b = PQResultDict.from_csv(
-        SystemParticipantsEnum.LOAD,
-        tmp_path,
-        ",",
+def get_power_data():
+    data = pd.DataFrame(
+        {
+            TIME_COLUMN_NAME: [
+                "2021-01-01",
+                "2021-01-02",
+                "2021-01-03",
+                "2021-01-04",
+            ],
+            "p": [0.0, 1.0, -2.0, 3.0],
+            "q": [0.0, -1.0, 2.0, 3.0],
+        },
     )
-    assert res_dict.compare(res_dict_b) is None
+    return ComplexPower(data)
 
 
-def test_filter_for_time_interval_empty():
-    empty_evs = PQResultDict.create_empty(SystemParticipantsEnum.ELECTRIC_VEHICLE)
-    dt = datetime(2024, 1, 1)
-    filt = empty_evs.filter_by_date_time(dt)
-    assert len(filt) == 0
+def get_loads_dict():
+    dct = {
+        EntityKey("a"): get_power_data(),
+        EntityKey("b"): get_power_data(),
+        EntityKey("c"): get_power_data(),
+    }
+    return LoadsResult(dct)
+
+
+def test_init():
+    loads = get_loads_dict()
+    assert len(loads) == 3
+    assert loads.keys() == {EntityKey("a"), EntityKey("b"), EntityKey("c")}
+
+
+def test_from_csv(tmp_path):
+    data_str = """
+time,p,q,uuid,input_model
+2021-01-01 00:00:00,0.0,0.0,a,a
+2021-01-02 00:00:00,1.0,-1.0,a,a
+2021-01-03 00:00:00,-2.0,2.0,a,a
+2021-01-04 00:00:00,3.0,3.0,a,a
+2021-01-01 00:00:00,0.0,0.0,b,b
+2021-01-02 00:00:00,1.0,-1.0,b,b
+2021-01-03 00:00:00,-2.0,2.0,b,b
+2021-01-04 00:00:00,3.0,3.0,b,b
+2021-01-01 00:00:00,0.0,0.0,c,c
+2021-01-02 00:00:00,1.0,-1.0,c,c
+2021-01-03 00:00:00,-2.0,2.0,c,c
+2021-01-04 00:00:00,3.0,3.0,c,c
+"""
+    file_path = tmp_path / "load_res.csv"
+    with open(file_path, "w") as f:
+        f.write(data_str)
+    loads = LoadsResult.from_csv(tmp_path)
+    assert set(loads.keys()) == {EntityKey("a"), EntityKey("b"), EntityKey("c")}
+    assert loads.keys() == {EntityKey("a"), EntityKey("b"), EntityKey("c")}
+    assert set(loads["a"].data.columns) == {"p", "q"}
+
+
+def test_to_csv(tmp_path):
+    loads = get_loads_dict()
+    loads.to_csv(tmp_path)
+    loads_b = LoadsResult.from_csv(tmp_path)
+    assert loads == loads_b

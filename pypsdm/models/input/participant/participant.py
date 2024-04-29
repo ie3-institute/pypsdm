@@ -25,8 +25,8 @@ class SystemParticipants(Entities, ABC):
             self.data.insert(self.data.columns.get_loc("node") + 1, "node_id", None)
         self.data["node_id"] = self.node.map(index_to_id)
 
-    @staticmethod
-    def attributes():
+    @classmethod
+    def attributes(cls):
         return Entities.attributes() + ["node", "q_characteristics"]
 
 

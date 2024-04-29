@@ -163,7 +163,6 @@ class Entities(ABC):
         """
         Returns: The nodes to which the entities are connected.
         """
-        pass
 
     def get(self, uuid: str) -> Series:
         """
@@ -466,7 +465,6 @@ class Entities(ABC):
         """
         Returns the corresponding entity enum value.
         """
-        pass
 
     @classmethod
     def attributes(cls) -> list[str]:

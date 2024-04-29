@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.participant.participant import SystemParticipants
 
 
@@ -11,7 +11,7 @@ class Loads(SystemParticipants):
         return super().__eq__(other)
 
     @staticmethod
-    def get_enum() -> SystemParticipantsEnum:
+    def get_enum() -> EntitiesEnum:
         return SystemParticipantsEnum.LOAD
 
     @property

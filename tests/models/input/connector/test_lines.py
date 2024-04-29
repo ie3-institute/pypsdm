@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pypsdm import Lines
+from pypsdm.models.input.connector.lines import Lines
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.processing.dataframe import compare_dfs
 

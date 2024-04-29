@@ -7,10 +7,13 @@ from matplotlib.axes import Axes
 
 from pypsdm.models.gwr import GridWithResults
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
+)
 from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
-from pypsdm.models.result.participant.pq_dict import PQResultDict, PQWithSocResultDict
+from pypsdm.models.result.participant.pq_dict import PQWithSocResultDict
 from pypsdm.models.result.power import PQResult, PQWithSocResult
+from pypsdm.models.ts.types import ComplexPowerDict
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     BLUE,
@@ -185,11 +188,11 @@ def plot_comparison(
 
 
 def plot_em(
-    em_participant_results: ParticipantsResultContainer,
+    em_participant_results: SystemParticipantsResultContainer,
     resolution: str,
     hourly_mean: bool = False,
 ):
-    em_uuid = list(em_participant_results.ems.entities.keys())[0]
+    em_uuid = list(em_participant_results.ems.data.keys())[0]
 
     title = f"Household: {em_uuid}"
 
@@ -210,7 +213,7 @@ def plot_em(
 
 
 def plot_aggregated_load_and_generation(
-    participants: Union[ParticipantsResultContainer, list[PQResult]],
+    participants: Union[SystemParticipantsResultContainer, list[PQResult]],
     resolution: str,
     title: str = "Aggregated Load and Generation",
     hourly_mean: bool = False,
@@ -258,7 +261,7 @@ def plot_aggregated_load_and_generation(
 
 
 def plot_all_participants(
-    participants: Union[ParticipantsResultContainer, list[PQResult]],
+    participants: Union[SystemParticipantsResultContainer, list[PQResult]],
     title: str,
     resolution: str,
     hourly_mean: bool,
@@ -297,7 +300,7 @@ def plot_all_participants(
 
 
 def _get_pq_results_from_union(
-    participants: Union[ParticipantsResultContainer, list[PQResult]]
+    participants: Union[SystemParticipantsResultContainer, list[PQResult]]
 ) -> list[PQResult]:
     return (
         participants
@@ -314,7 +317,7 @@ def _get_pq_results_from_union(
 
 def ax_plot_participants(
     ax: Axes,
-    participants: Union[ParticipantsResultContainer, list[PQResult]],
+    participants: Union[SystemParticipantsResultContainer, list[PQResult]],
     resolution: str,
     hourly_mean: bool = False,
     stack=False,
@@ -362,7 +365,7 @@ def ax_plot_stacked_pq(
 
         if load.p.sum() > 0:
             load_sum = PQResult(
-                res.entity_type, "", "", PQResult.sum([load, residual_load]).data
+                res.entity_type, "", "", PQResult.sum([load, residual_load]).ts
             )
             plot_partial(
                 res=load_sum,
@@ -376,7 +379,7 @@ def ax_plot_stacked_pq(
                 res.entity_type,
                 "",
                 "",
-                PQResult.sum([generation, residual_generation]).data,
+                PQResult.sum([generation, residual_generation]).ts,
             )
             plot_partial(
                 res=generation_sum,
@@ -390,14 +393,14 @@ def ax_plot_stacked_pq(
 
 
 def plot_participants_sum(
-    res: PQResultDict,
+    res: ComplexPowerDict,
     title: str,
     resolution: str,
     hourly_mean: bool = False,
     fill_from_index: bool = True,
     **kwargs,
 ):
-    if not isinstance(res, PQResultDict):
+    if not isinstance(res, ComplexPowerDict):
         raise TypeError(
             "Data must be of type ParticipantsResult but is {}".format(type(res))
         )

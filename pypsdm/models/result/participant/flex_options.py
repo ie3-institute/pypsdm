@@ -1,36 +1,33 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from datetime import datetime
+from functools import reduce
+from typing import List, Self, Sequence
 
 import pandas as pd
 from pandas import DataFrame, Series
 
 from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.result.entity import ResultEntities
-from pypsdm.models.result.participant.dict import ResultDict
-from pypsdm.models.result.power import PQResult
-from pypsdm.processing.series import add_series, hourly_mean_resample
+from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+from pypsdm.models.ts.base import EntityKey, TimeSeries, TimeSeriesDict
+from pypsdm.models.ts.types import ComplexPower
+from pypsdm.processing.dataframe import add_df
+from pypsdm.processing.series import hourly_mean_resample
 
 
-@dataclass(frozen=True)
-class FlexOptionResult(ResultEntities):
+@dataclass
+class FlexOption(TimeSeries):
+
+    def __init__(self, data: pd.DataFrame, end: datetime | None = None):
+        super().__init__(data, end)
+
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
-    def __add__(self, other: "FlexOptionResult"):
-        p_ref_sum = add_series(self.p_ref(), other.p_ref(), "p_ref")
-        p_min_sum = add_series(self.p_min(), other.p_min(), "p_min")
-        p_max_sum = add_series(self.p_max(), other.p_max(), "p_max")
-        summed_data = p_ref_sum.to_frame().join([p_min_sum, p_max_sum])
-        return FlexOptionResult(
-            self.entity_type,
-            "FlexResult - Sum",
-            "FlexResult - Sum",
-            summed_data,
+    def __add__(self, other: "FlexOption"):
+        data = add_df(self.data, other.data)
+        return FlexOption(
+            data,
         )
-
-    @staticmethod
-    def attributes() -> List[str]:
-        return ["p_max", "p_min", "p_ref"]
 
     def p_max(self):
         return self.data["p_max"]
@@ -41,54 +38,51 @@ class FlexOptionResult(ResultEntities):
     def p_ref(self):
         return self.data["p_ref"]
 
-    def p_max_as_pq(self, sp_type: SystemParticipantsEnum) -> PQResult:
-        return self._p_to_pq_res(sp_type, self.p_max())
+    def p_max_as_power(self) -> ComplexPower:
+        return self._p_to_pq_res(self.p_max())
 
-    def p_ref_as_pq(self, sp_type: SystemParticipantsEnum) -> PQResult:
-        return self._p_to_pq_res(sp_type, self.p_ref())
+    def p_ref_as_power(self) -> ComplexPower:
+        return self._p_to_pq_res(self.p_ref())
 
-    def p_min_as_pq(self, sp_type: SystemParticipantsEnum):
-        return self._p_to_pq_res(sp_type, self.p_min())
+    def p_min_as_pq(self) -> ComplexPower:
+        return self._p_to_pq_res(self.p_min())
 
-    def _p_to_pq_res(
-        self, sp_type: SystemParticipantsEnum, p_series: Series
-    ) -> PQResult:
+    def _p_to_pq_res(self, p_series: Series) -> ComplexPower:
         data = p_series.rename("p").to_frame()
         data["q"] = 0
-        return PQResult(sp_type, "flex-signal", "flex-signal", data)
+        return ComplexPower(data)
 
     def hourly_resample(self):
         updated_data = self.data.apply(lambda x: hourly_mean_resample(x))
-        return FlexOptionResult(
-            self.entity_type, self.input_model, self.name, updated_data
-        )
+        return FlexOption(updated_data)  # type: ignore
 
-    def add_series(self, series: Series) -> "FlexOptionResult":
-        updated_data = self.data.apply(
-            lambda p_flex: add_series(p_flex, series, p_flex.name), axis=0
-        )
-        return FlexOptionResult(
-            self.entity_type, self.input_model, self.name, updated_data
-        )
+    @staticmethod
+    def attributes() -> List[str]:
+        return ["p_max", "p_min", "p_ref"]
+
+    @classmethod
+    # TODO: find a way for parallel calculation
+    def sum(cls, results: Sequence[Self]) -> "FlexOption":
+        if len(results) == 0:
+            return cls.empty()
+        if len(results) == 1:
+            return results[0]
+        return reduce(lambda a, b: a + b, results)
 
 
-@dataclass(frozen=True)
-class FlexOptionsResult(ResultDict):
-    entities: Dict[str, FlexOptionResult]
+class FlexOptionsDict(TimeSeriesDict[EntityKey, FlexOption], EntitiesResultDictMixin):
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
     def to_df(self) -> DataFrame:
         return pd.concat(
-            [f.data for f in self.entities.values()],
-            keys=self.entities.keys(),
+            [f.data for f in self.values()],
+            keys=self.keys(),
             axis=1,
         ).ffill()
 
-    def to_multi_index_df(
-        self, participants_res  # type hinting leads to circular import
-    ) -> DataFrame:
+    def to_multi_index_df(self, participants_res) -> DataFrame:
         flex_midfs = {}
         for res in participants_res.to_list():
             uuids = res.participants.keys()
@@ -98,11 +92,15 @@ class FlexOptionsResult(ResultDict):
                 participant_uuids = []
                 [
                     (participant_uuids.append(uuid), flex_dfs.append(flex.data))
-                    for uuid, flex in flex_res.entities.items()
+                    for uuid, flex in flex_res.items()
                 ]
                 flex_midf = pd.concat(flex_dfs, keys=participant_uuids, axis=1)
                 flex_midfs[res.entity_type.value] = flex_midf
         return pd.concat(flex_midfs.values(), keys=(flex_midfs.keys()), axis=1).ffill()
 
-    def sum(self) -> FlexOptionResult:
-        return FlexOptionResult.sum(list(self.entities.values()))
+    def sum(self) -> FlexOption:
+        return FlexOption.sum(list(self.values()))
+
+    @classmethod
+    def entity_type(cls):
+        return SystemParticipantsEnum.FLEX_OPTIONS

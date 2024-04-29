@@ -3,6 +3,8 @@ from typing import Tuple
 import pandas as pd
 from pandas import DataFrame, Series
 
+from pypsdm.processing.numba import add_array
+
 
 def duration_weighted_series(series: Series):
     series.sort_index(inplace=True)
@@ -24,18 +26,22 @@ def weighted_series_sum(weighted_series: DataFrame) -> float:
 
 def duration_weighted_sum(series: Series) -> float:
     weighted_series = duration_weighted_series(series)
-
     return weighted_series_sum(weighted_series)
 
 
-def add_series(this: Series, that: Series, name: str) -> Series:
-    # todo: Is there a more performant implementation?
+def add_series(a: pd.Series, b: pd.Series, name: str | None = None):
+    if not a.index.is_monotonic_increasing:
+        a.sort_index(inplace=True)
+    if not b.index.is_monotonic_increasing:
+        b.sort_index(inplace=True)
+    index = a.index.union(b.index)
+    values = add_array(
+        index.to_numpy(), a.index.to_numpy(), b.index.to_numpy(), a.values, b.values  # type: ignore
+    )
     return (
-        this.to_frame()
-        .join(that.rename("other"), how="outer")
-        .fillna(method="ffill")
-        .sum(axis=1)
-        .rename(name)
+        pd.Series(values, index=index)
+        if name is None
+        else pd.Series(values, index=index, name=name)
     )
 
 
@@ -51,7 +57,10 @@ def hourly_mean_resample(series: Series) -> Series:
     return series.resample("60s").ffill().resample("1h").mean()
 
 
-def load_and_generation(p_ts: Series) -> Tuple[float, float]:
+def pos_and_neg_area(p_ts: Series) -> Tuple[float, float]:
+    """
+    Calculate the positive and negative area under the curve of a time series.
+    """
     weighted_series = duration_weighted_series(p_ts)
     load_filter = weighted_series["values"] > 0
     weighted_load = weighted_series[load_filter]

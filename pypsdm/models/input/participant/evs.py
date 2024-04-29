@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.participant.mixins import SpTypeMixin
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 
@@ -11,7 +11,7 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
         return super().__eq__(other)
 
     @staticmethod
-    def get_enum() -> SystemParticipantsEnum:
+    def get_enum() -> EntitiesEnum:
         return SystemParticipantsEnum.ELECTRIC_VEHICLE
 
     @staticmethod

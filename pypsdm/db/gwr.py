@@ -11,8 +11,8 @@ from pyhocon import ConfigFactory, ConfigTree, HOCONConverter
 
 from pypsdm.db.utils import PathManagerMixin
 from pypsdm.models.gwr import GridWithResults
-from pypsdm.models.input import GridContainer
-from pypsdm.models.result import GridResultContainer
+from pypsdm.models.input.container.grid import GridContainer
+from pypsdm.models.result.container.grid import GridResultContainer
 
 # Grid id naming strategy
 # [grid id]-v[version number]

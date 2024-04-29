@@ -1,31 +1,99 @@
-import pytest
+import uuid
 
+import pandas as pd
+
+from pypsdm.errors import ComparisonError
 from pypsdm.models.enums import TimeSeriesEnum
-from pypsdm.models.primary_data import PrimaryData
+from pypsdm.models.primary_data import PrimaryData, TimeSeriesKey
+from pypsdm.models.ts.base import TIME_COLUMN_NAME
+from pypsdm.models.ts.types import ComplexPower, ComplexPowerDict
 
 
-@pytest.fixture
-def primary_data(input_path):
-    return PrimaryData.from_csv(input_path)
+def get_sample_data(q: bool = True, h: bool = False):
+    data = pd.DataFrame(
+        {
+            TIME_COLUMN_NAME: [
+                "2021-01-01",
+                "2021-01-02",
+                "2021-01-03",
+                "2021-01-04",
+            ],
+            "p": [0.0, 1.0, -2.0, 3.0],
+        },
+    )
+    if q:
+        data["q"] = [0.0, -1.0, 2.0, 3.0]
+    else:
+        data["q"] = [0.0, 0.0, 0.0, 0.0]
+    if h:
+        data["h"] = [0.0, -1.0, 2.0, 3.0]
+    return ComplexPower(data)
 
 
-def test_reading_of_primary_data(primary_data):
-    its_p = "f2bb6e55-01d0-42ce-a62a-ef51857776ca"
-    its_pq = "8c04e94e-76b0-4369-a55c-f5e1117fb83e"
-
-    assert its_p in primary_data.time_series
-    assert its_pq in primary_data.time_series
-
-    assert primary_data[its_p].entity_type == TimeSeriesEnum.P_TIME_SERIES
-    assert primary_data[its_pq].entity_type == TimeSeriesEnum.PQ_TIME_SERIES
-
-    participant_pd = primary_data["9abe950d-362e-4efe-b686-500f84d8f368"]
-    assert len(participant_pd.data) == 1
-    assert participant_pd.data["p"][0] == 3.999998968803
+def get_power_dict():
+    dct = {
+        TimeSeriesKey("a", TimeSeriesEnum.PQ_TIME_SERIES): get_sample_data(),
+        TimeSeriesKey("b", TimeSeriesEnum.P_TIME_SERIES): get_sample_data(q=False),
+        TimeSeriesKey("c", TimeSeriesEnum.PQH_TIME_SERIES): get_sample_data(h=True),
+    }
+    return ComplexPowerDict(dct)
 
 
-def test_to_csv(primary_data: PrimaryData, tmpdir):
-    tmpdir = str(tmpdir)
-    primary_data.to_csv(tmpdir)
-    pd_read = PrimaryData.from_csv(tmpdir)
-    primary_data.compare(pd_read)
+def get_primary_data():
+    ts = get_power_dict()
+    participant_mapping = {
+        "p_a": "a",
+        "p_b": "b",
+        "p_c": "c",
+    }
+    return PrimaryData(ts, participant_mapping)
+
+
+def test_key():
+    dct = get_power_dict()
+    key = TimeSeriesKey("a", TimeSeriesEnum.PQ_TIME_SERIES)
+    assert key in dct
+    key = TimeSeriesKey("a", None)
+    assert key in dct
+
+
+def test_getitem():
+    pd = get_primary_data()
+    assert pd["a"] == pd[TimeSeriesKey("a", TimeSeriesEnum.PQ_TIME_SERIES)]
+    assert pd["p_a"] == pd["a"]
+
+
+def test_filter_by_participants():
+    pd = get_primary_data()
+    res = pd.filter_by_participants(["p_a", "p_b"])
+    assert len(res) == 2
+    assert "a" in res
+    assert "b" in res
+    assert "c" not in res
+
+
+def test_compare():
+    pd = get_primary_data()
+    pd2 = get_primary_data()
+    pd.compare(pd2)
+    pd2.time_series[TimeSeriesKey("a", TimeSeriesEnum.P_TIME_SERIES)] = get_sample_data(
+        q=False
+    )
+    try:
+        pd.compare(pd2)
+        assert False
+    except ComparisonError:
+        assert True
+
+
+def test_to_csv(tmp_path):
+    pd = get_primary_data()
+    uuid_ts = {}
+    for key, ts in pd.time_series.items():
+        ts_uuid = uuid.uuid4()
+        key = TimeSeriesKey(str(ts_uuid), key.ts_type)
+        uuid_ts[key] = ts
+    pd.time_series = ComplexPowerDict(uuid_ts)
+    pd.to_csv(tmp_path)
+    pd2 = PrimaryData.from_csv(tmp_path)
+    assert pd == pd2

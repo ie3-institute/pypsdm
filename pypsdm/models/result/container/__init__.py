@@ -1,4 +1,9 @@
-from .grid import GridContainer, GridResultContainer
-from .participants import ParticipantsResultContainer
+from .grid import GridResultContainer
+from .participants import SystemParticipantsResultContainer
+from .raw_grid import RawGridResultContainer
 
-__all__ = ["GridContainer", "GridResultContainer", "ParticipantsResultContainer"]
+__all__ = [
+    "GridResultContainer",
+    "SystemParticipantsResultContainer",
+    "RawGridResultContainer",
+]

@@ -3,9 +3,11 @@ from functools import partial
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.participant.flex_options import FlexOptionResult
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
+)
+from pypsdm.models.result.participant.flex_options import FlexOption
 from pypsdm.models.result.power import PQResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
@@ -20,7 +22,7 @@ from pypsdm.plots.results.power_plot import ax_plot_active_power
 
 
 def plot_all_participants_flex_range(
-    participants_res_container: ParticipantsResultContainer,
+    participants_res_container: SystemParticipantsResultContainer,
     resolution: str,
     title: str = "Participants Flex Range",
     hourly_mean: bool = False,
@@ -63,7 +65,7 @@ def plot_all_participants_flex_range(
 
 
 def plot_flex_range(
-    flex_option: FlexOptionResult,
+    flex_option: FlexOption,
     title: str,
     resolution: str,
     hourly_mean: bool,
@@ -80,7 +82,7 @@ def plot_flex_range(
 
 def ax_plot_flex_range(
     ax: Axes,
-    flex_option: FlexOptionResult,
+    flex_option: FlexOption,
     resolution: str,
     hourly_mean: bool,
     actual_res: PQResult | None = None,
@@ -89,7 +91,7 @@ def ax_plot_flex_range(
     plot_func = partial(
         ax_plot_time_series,
         ax=ax,
-        type=SystemParticipantsEnum.FLEX_OPTIONS,
+        type=EntitiesEnum.FLEX_OPTIONS,
         resolution=resolution,
         hourly_mean=hourly_mean,
     )

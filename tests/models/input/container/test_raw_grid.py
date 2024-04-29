@@ -29,7 +29,7 @@ def test_build_networkx_graph(gwr: GridWithResults):
 
 
 def test_create_empty():
-    empty_container = RawGridContainer.create_empty()
+    empty_container = RawGridContainer.empty()
     if empty_container:
         raise AssertionError("Empty container should be falsy")
 

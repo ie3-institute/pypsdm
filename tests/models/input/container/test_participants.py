@@ -32,6 +32,6 @@ def test_empty_participants(participants):
 
 
 def test_create_empty():
-    empty_participants = SystemParticipantsContainer.create_empty()
+    empty_participants = SystemParticipantsContainer.empty()
     if empty_participants:
         raise AssertionError("Empty participants should be falsy")

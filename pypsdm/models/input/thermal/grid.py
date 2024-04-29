@@ -24,5 +24,5 @@ class ThermalGridContainer(ContainerMixin):
         return cls(busses, houses)
 
     @classmethod
-    def create_empty(cls):
+    def empty(cls):
         return cls(ThermalBus.create_empty(), ThermalHouse.create_empty())

@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 from pypsdm.models.gwr import GridWithResults
-from pypsdm.models.result.grid.connector import ConnectorResult
+from pypsdm.models.result.grid.connector import ConnectorCurrent
 from pypsdm.models.result.grid.transformer import Transformer2WResult
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
@@ -133,7 +133,7 @@ def ax_plot_transformer_utilization(
 
 
 def plot_connector_current(
-    res: ConnectorResult,
+    res: ConnectorCurrent,
     side: str,
     resolution: str,
     title: Optional[str] = None,
@@ -164,7 +164,7 @@ def plot_connector_current(
 
 def ax_plot_connector_current(
     ax: Axes,
-    res: ConnectorResult,
+    res: ConnectorCurrent,
     side: str,
     resolution: str,
     fill_from_index: bool = False,
@@ -195,7 +195,7 @@ def ax_plot_connector_current(
 
 def ax_plot_connector_angle(
     ax: Axes,
-    res: ConnectorResult,
+    res: ConnectorCurrent,
     side: str,
     resolution: str,
     fill_from_index: bool = False,
@@ -223,7 +223,7 @@ def ax_plot_connector_angle(
     )
 
 
-def get_connector_current(side: str, res: ConnectorResult):
+def get_connector_current(side: str, res: ConnectorCurrent):
     if side == "a":
         return res.i_a_mag
     elif side == "b":
@@ -232,7 +232,7 @@ def get_connector_current(side: str, res: ConnectorResult):
         raise ValueError('Side should be either "a" for node a or "b" for node b')
 
 
-def get_connector_angle(side: str, res: ConnectorResult):
+def get_connector_angle(side: str, res: ConnectorCurrent):
     if side == "a":
         return res.i_a_ang
     elif side == "b":

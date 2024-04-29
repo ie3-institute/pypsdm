@@ -1,18 +1,23 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Type
 
-import pandas as pd
 from pandas import DataFrame
 
 from pypsdm.models.enums import RawGridElementsEnum
-from pypsdm.models.input.entity import Entities
-from pypsdm.models.result.entity import ResultEntities
-from pypsdm.models.result.participant.dict import ResultDict, ResultDictType
+from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+from pypsdm.models.ts.base import (
+    EntityKey,
+    TimeSeries,
+    TimeSeriesDict,
+    TimeSeriesDictMixin,
+)
 
 
-@dataclass(frozen=True)
-class SwitchResult(ResultEntities):
+@dataclass
+class SwitchResult(TimeSeries):
+    def __init__(self, data: DataFrame, end: datetime | None = None):
+        super().__init__(data, end)
+
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
@@ -28,42 +33,17 @@ class SwitchResult(ResultEntities):
         return ["closed"]
 
 
-@dataclass(frozen=True)
-class SwitchesResult(ResultDict):
-    entities: dict[str, SwitchResult]
-
+class SwitchesResult(
+    TimeSeriesDict[EntityKey, SwitchResult],
+    TimeSeriesDictMixin,
+    EntitiesResultDictMixin,
+):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
     def closed(self) -> DataFrame:
-        if not self.entities:
-            return pd.DataFrame()
-        return pd.concat(
-            [
-                switch_res.closed.rename(switch_res.input_model)
-                for switch_res in self.entities.values()
-            ],
-            axis=1,
-        )
+        return self.attr_df("closed")
 
     @classmethod
-    def from_csv(
-        cls: Type[ResultDictType],
-        simulation_data_path: str,
-        delimiter: str | None = None,
-        simulation_end: Optional[datetime] = None,
-        input_entities: Optional[Entities] = None,
-        filter_start: Optional[datetime] = None,
-        filter_end: Optional[datetime] = None,
-        must_exist: bool = True,
-    ) -> ResultDictType:
-        return super().from_csv(
-            RawGridElementsEnum.SWITCH,
-            simulation_data_path,
-            delimiter,
-            simulation_end,
-            input_entities,
-            filter_start,
-            filter_end,
-            must_exist=must_exist,
-        )
+    def entity_type(cls) -> RawGridElementsEnum:
+        return RawGridElementsEnum.SWITCH
