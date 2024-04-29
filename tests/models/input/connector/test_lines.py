@@ -79,6 +79,11 @@ def test_to_csv(lines: Lines, tmp_path):
     compare_dfs(lines.data, lines2.data)
 
 
+@pytest.fixture(scope="module")
+def simple_grid(input_path_sg) -> GridContainer:
+    return GridContainer.from_csv(input_path_sg)
+
+
 def test_gij(simple_grid: GridContainer):
     gij = simple_grid.lines.gij()
 
