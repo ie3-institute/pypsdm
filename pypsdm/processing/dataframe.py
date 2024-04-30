@@ -24,9 +24,16 @@ def add_df(a: pd.DataFrame, b: pd.DataFrame):
     if not b.index.is_monotonic_increasing:
         b.sort_index(inplace=True)
 
+    a = a.astype({col: "float64" for col in a.select_dtypes(include="int").columns})
+    b = b.astype({col: "float64" for col in b.select_dtypes(include="int").columns})
+
     index = a.index.union(b.index)
     values = add_2d_array(
-        index.to_numpy(), a.index.to_numpy(), b.index.to_numpy(), a.values, b.values  # type: ignore
+        index.to_numpy(),
+        a.index.to_numpy(),
+        b.index.to_numpy(),
+        a.values,
+        b.values,  # type: ignore
     )
     return pd.DataFrame(values, index=index, columns=a.columns)  # type: ignore
 

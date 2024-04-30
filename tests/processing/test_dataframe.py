@@ -20,7 +20,7 @@ def test_divide_positive_negative():
 
 def test_add_df():
     a = pd.DataFrame(index=[1, 3, 5], data={"a": [1, 2, 3], "b": [1, 2, 3]})
-    b = pd.DataFrame(index=[2, 3], data={"a": [4, 5], "b": [4, 5]})
+    b = pd.DataFrame(index=[2, 3], data={"a": [4.0, 5.0], "b": [4.0, 5.0]})
     res = add_df(a, b)
 
     expected = pd.DataFrame(

@@ -31,7 +31,6 @@ def add_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarr
         return a
 
     while i < len(idx):
-
         if j >= len_a:
             while k < len_b:
                 res[i] = a[j - 1] + b[k]
@@ -65,7 +64,7 @@ def add_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarr
 
 
 @jit
-def add_2d_array(idx, idx_a, idx_b, a: ndarray, b: ndarray):
+def add_2d_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarray):
     """
     Adds two multi column time series with different indices in an event discrete manner.
     The state of a system stays constant until a new event occurs. The resulting time
@@ -94,7 +93,6 @@ def add_2d_array(idx, idx_a, idx_b, a: ndarray, b: ndarray):
         return a
 
     while i < len(idx):
-
         if j >= len_a:
             while k < len_b:
                 for col in range(cols):
