@@ -205,7 +205,7 @@ class GridWithResults(ContainerMixin):
         lv_voltage = voltage_levels.index[0]
 
         Y = self.raw_grid.admittance_matrix(uuid_to_idx)
-        v_complex = self.nodes_res.v_complex(lv_voltage)  # type: ignore
+        v_complex = self.nodes_res.v_complex(lv_voltage, favor_ids=False)  # type: ignore
         v_complex = v_complex.reindex(columns=uuid_order)
         i = v_complex @ Y
         i.columns = v_complex.columns

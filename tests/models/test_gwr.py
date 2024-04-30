@@ -83,5 +83,5 @@ def test_build_extended_nodes_result(gwr):
         if len(expected.p) == 0:
             assert math.isclose(actual.p.sum(), 0, rel_tol=1e-8)
             continue
-        p_delta = expected.p - actual.p
+        p_delta = (expected.p - actual.p).abs()
         assert (p_delta < 1e-8).all(), f"Unexpected deviation for {uuid}"
