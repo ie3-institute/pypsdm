@@ -64,7 +64,7 @@ def add_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarr
     return res
 
 
-# @jit
+@jit
 def add_2d_array(idx, idx_a, idx_b, a: ndarray, b: ndarray):
     """
     Adds two multi column time series with different indices in an event discrete manner.
