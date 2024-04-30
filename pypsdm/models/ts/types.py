@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from functools import reduce
 from typing import List, Self, Sequence, Union
 
@@ -63,7 +62,11 @@ class ComplexPowerDict(TimeSeriesDict[K, ComplexPower], ComplexPowerDictMixin):
     def sum(self) -> ComplexPower:
         return ComplexPower.sum(list(self.values()))
 
+    def load_and_generation(self) -> Tuple[float, float]:
+        return self.sum().load_and_generation_energy()
 
+
+@ComplexPower.register
 class ComplexPowerWithSoc(TimeSeries, ComplexPowerMixin, SocMixin):
     def as_complex_power(self) -> ComplexPower:
         return ComplexPower(self.data.drop(columns=["soc"]))
@@ -101,6 +104,7 @@ class ComplexPowerWithSoc(TimeSeries, ComplexPowerMixin, SocMixin):
         return ["p", "q", "soc"]
 
 
+@ComplexPowerDict.register
 class ComplexPowerWithSocDict(
     TimeSeriesDict[K, ComplexPowerWithSoc], ComplexPowerDictMixin, SocDictMixin
 ):
@@ -137,7 +141,7 @@ class ComplexVoltageDict(TimeSeriesDict[K, ComplexVoltage], ComplexVoltageDictMi
     pass
 
 
-@dataclass
+@ComplexVoltage.register
 class ComplexVoltagePower(ComplexVoltage, ComplexPower):
     def __init__(self, data):
         super().__init__(data)
@@ -155,6 +159,7 @@ class ComplexVoltagePower(ComplexVoltage, ComplexPower):
         return ComplexPower(self.data[ComplexPower.attributes()])
 
 
+@ComplexVoltageDict.register
 class ComplexVoltagePowerDict(
     TimeSeriesDict[K, ComplexVoltagePower],
     ComplexVoltageDictMixin,
@@ -165,6 +170,3 @@ class ComplexVoltagePowerDict(
 
     def complex_power_sum(self) -> ComplexPower:
         return ComplexPower.sum(list(self.values()))
-
-    def load_and_generation(self):
-        return self.complex_power_sum().load_and_generation_energy()

@@ -3,6 +3,7 @@ from typing import Union
 
 from networkx import Graph
 
+from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.connector.lines import Lines
 from pypsdm.models.input.connector.switches import Switches
 from pypsdm.models.input.connector.transformer import Transformers2W
@@ -65,6 +66,19 @@ class RawGridContainer(ContainerMixin):
         if as_graphs:
             return [graph.subgraph(branch).copy() for branch in branches]
         return branches
+
+    def get_with_enum(self, enum: RawGridElementsEnum):
+        match enum:
+            case RawGridElementsEnum.NODE:
+                return self.nodes
+            case RawGridElementsEnum.LINE:
+                return self.lines
+            case RawGridElementsEnum.TRANSFORMER_2_W:
+                return self.transformers_2_w
+            case RawGridElementsEnum.SWITCH:
+                return self.switches
+            case _:
+                raise ValueError(f"Unknown enum {enum}")
 
     def build_networkx_graph(self, include_transformer: bool = False) -> Graph:
         graph = Graph()

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from pypsdm.models.ts.base import K, TimeSeries, TimeSeriesDict
+from pypsdm.models.ts.base import K, TimeSeries, TimeSeriesDict, TimeSeriesDictMixin
 from pypsdm.models.ts.types import ComplexCurrent, ComplexVoltage
 
 
@@ -109,7 +109,7 @@ class ConnectorCurrent(TimeSeries):
         return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag"]
 
 
-class ConnectorCurrentDict(TimeSeriesDict[K, ConnectorCurrent]):
+class ConnectorCurrentDict(TimeSeriesDict[K, ConnectorCurrent], TimeSeriesDictMixin):
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)

@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from pypsdm.models.enums import (
+    EntitiesEnum,
+    RawGridElementsEnum,
+    SystemParticipantsEnum,
+)
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.input.container.raw_grid import RawGridContainer
@@ -123,6 +128,13 @@ class GridContainer(ContainerMixin):
                 nodal_data[sp_id] = data_str
             data[node_uuid] = nodal_data
         return data
+
+    def get_with_enum(self, enum: EntitiesEnum):
+        if isinstance(enum, RawGridElementsEnum):
+            return self.raw_grid.get_with_enum(enum)
+        if isinstance(enum, SystemParticipantsEnum):
+            return self.participants.get_with_enum(enum)
+        raise ValueError(f"Unretrievable enum {enum}")
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridContainer(

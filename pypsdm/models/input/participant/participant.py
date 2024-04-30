@@ -35,6 +35,7 @@ class SystemParticipantsWithCapacity(SystemParticipants):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
+    @property
     def capacity(self):
         return self.data[self.capacity_attribute()]
 

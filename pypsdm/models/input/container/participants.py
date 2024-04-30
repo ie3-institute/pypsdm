@@ -80,7 +80,7 @@ class SystemParticipantsContainer(ContainerMixin):
             hps,
         )
 
-    def get_participants(self, sp_type: EntitiesEnum):
+    def get_with_enum(self, sp_type: EntitiesEnum):
         if sp_type == SystemParticipantsEnum.ENERGY_MANAGEMENT:
             return self.ems
         elif sp_type == SystemParticipantsEnum.LOAD:

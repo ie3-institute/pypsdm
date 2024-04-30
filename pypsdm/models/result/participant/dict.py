@@ -69,7 +69,7 @@ class EntitiesResultDictMixin:
             name = None
             if input_entities:
                 if key in input_entities:  # type: ignore
-                    name = input_entities[key].name  # type: ignore
+                    name = input_entities[key].id  # type: ignore
                 else:
                     logger.warning("Entity {} not in input entities".format(key))
             entity_key = EntityKey(key, name)  # type: ignore
@@ -125,7 +125,7 @@ class EntitiesResultDictMixin:
     ) -> "EntitiesResultDictMixin" | Tuple[Exception, EntitiesEnum]:
         try:
             if grid_container:
-                input_entities = grid_container.participants.get_participants(entity)
+                input_entities = grid_container.get_with_enum(entity)
             else:
                 input_entities = None
             dict_type = entity.get_result_dict_type()

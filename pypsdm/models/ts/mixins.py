@@ -1,3 +1,4 @@
+from abc import ABC
 from numbers import Real
 from typing import Tuple
 
@@ -13,7 +14,11 @@ from pypsdm.processing.series import (
 )
 
 
-class ActivePowerMixin:
+class AttributeMixin(ABC):
+    pass
+
+
+class ActivePowerMixin(AttributeMixin):
     @property
     def p(self):
         return self.data["p"]  # type: ignore
@@ -75,7 +80,7 @@ class ActivePowerDictMixin(TimeSeriesDictMixin):
         return sum
 
 
-class ReactivePowerMixin:
+class ReactivePowerMixin(AttributeMixin):
     @property
     def q(self):
         return self.data["q"]  # type: ignore
@@ -113,7 +118,7 @@ class ComplexPowerDictMixin(ActivePowerDictMixin, ReactivePowerDictMixin):
         return self.p(ffill, favor_ids) + 1j * self.q(ffill, favor_ids)
 
 
-class SocMixin:
+class SocMixin(AttributeMixin):
     @property
     def soc(self):
         return self.data["soc"]  # type: ignore
@@ -125,7 +130,7 @@ class SocDictMixin(TimeSeriesDictMixin):
         return self.attr_df("soc", ffill, favor_ids)
 
 
-class CurrentAngleMixin:
+class CurrentAngleMixin(AttributeMixin):
 
     @property
     def i_ang(self):
@@ -138,7 +143,7 @@ class CurrentAngleDictMixin(TimeSeriesDictMixin):
         return self.attr_df("i_ang", ffill, favor_ids)
 
 
-class CurrentMagnitudeMixin:
+class CurrentMagnitudeMixin(AttributeMixin):
 
     @property
     def i_mag(self):
@@ -163,13 +168,13 @@ class ComplexCurrentDictMixin(CurrentMagnitudeDictMixin, CurrentAngleDictMixin):
         return self.attr_df("i_complex", False, favor_ids)
 
 
-class VoltageMagnitudeMixin:
+class VoltageMagnitudeMixin(AttributeMixin):
     @property
     def v_mag(self):
         return self.data["v_mag"]  # type: ignore
 
 
-class VoltageAngleMixin:
+class VoltageAngleMixin(AttributeMixin):
     @property
     def v_ang(self):
         return self.data["v_ang"]  # type: ignore

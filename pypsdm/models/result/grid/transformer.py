@@ -24,7 +24,7 @@ class Transformer2WResult(ConnectorCurrent):
     def tap_pos(self) -> Series:
         return self.data["tap_pos"]
 
-    def calc_apparent_power_gwr(
+    def apparent_power(
         self,
         uuid: str | EntityKey,
         gwr: GridWithResults,
@@ -41,25 +41,25 @@ class Transformer2WResult(ConnectorCurrent):
             node_res, voltage_level_kv=v_rated, node=node_side  # type: ignore
         )
 
-    def calc_active_power_gwr(
+    def active_power(
         self,
         uuid: str | EntityKey,
         gwr: GridWithResults,
         side: Literal["hv", "lv"] = "hv",
     ):
-        s = self.calc_apparent_power_gwr(uuid, gwr, side)
+        s = self.apparent_power(uuid, gwr, side)
         return s.apply(lambda x: np.real(x)).rename("p")
 
-    def calc_reactive_power_gwr(
+    def reactive_power(
         self,
         uuid: str | EntityKey,
         gwr: GridWithResults,
         side: Literal["hv", "lv"] = "hv",
     ):
-        s = self.calc_apparent_power_gwr(uuid, gwr, side)
+        s = self.apparent_power(uuid, gwr, side)
         return s.apply(lambda x: np.imag(x)).rename("q")
 
-    def calc_transformer_utilisation(
+    def utilisation(
         self,
         uuid: str | EntityKey,
         gwr: GridWithResults,
@@ -68,10 +68,7 @@ class Transformer2WResult(ConnectorCurrent):
         uuid = uuid if isinstance(uuid, str) else uuid.uuid
         transformer = gwr.grid.raw_grid.transformers_2_w.subset(uuid)
         s_rated = transformer.s_rated.to_list()[0]
-        return (
-            self.calc_apparent_power_gwr(uuid, gwr, side).apply(lambda x: np.abs(x))
-            / s_rated
-        )
+        return self.apparent_power(uuid, gwr, side).apply(lambda x: np.abs(x)) / s_rated
 
     def to_complex_power(
         self,
@@ -79,8 +76,8 @@ class Transformer2WResult(ConnectorCurrent):
         gwr: GridWithResults,
         side: Literal["hv", "lv"] = "hv",
     ):
-        p = self.calc_active_power_gwr(uuid, gwr, side)
-        q = self.calc_reactive_power_gwr(uuid, gwr, side)
+        p = self.active_power(uuid, gwr, side)
+        q = self.reactive_power(uuid, gwr, side)
         data = pd.concat([p, q], axis=1)
         return ComplexPower(data)
 

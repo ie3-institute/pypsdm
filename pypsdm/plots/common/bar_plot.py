@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
+from pypsdm.models.enums import EntitiesEnum
 from pypsdm.models.result.container.participants import (
     SystemParticipantsResultContainer,
 )
-from pypsdm.models.result.power import PQResult
+from pypsdm.models.ts.types import ComplexPower
 from pypsdm.plots.common.utils import (
     FIGSIZE,
     FIGSIZE_WIDE,
@@ -18,14 +19,22 @@ from pypsdm.plots.common.utils import (
 sns.set_style("whitegrid")
 
 
-def plot_full_load_hours(res: PQResult, device_power_kw, period="M", title=None):
+def plot_full_load_hours(
+    res: ComplexPower,
+    device_power_kw,
+    entity_type: None | EntitiesEnum = None,
+    period="M",
+    title=None,
+):
+    """
+    Plots full load hours of the system in each period (e.g. Y, M, D for year, month, day).
+    """
     if not title:
-        name = res.name if res.name else res.input_model
-        title = f"Full load hours: {name}"
+        title = "Full load hours"
 
     full_load_hours = res.full_load_hours(device_power_kw, period=period)
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
-    _, color = get_label_and_color(res.entity_type)
+    _, color = get_label_and_color(entity_type)
     ax.bar([x for x in range(len(full_load_hours))], full_load_hours, color=color)
 
     # Set x-tick labels
@@ -43,6 +52,9 @@ def plot_full_load_hours(res: PQResult, device_power_kw, period="M", title=None)
 
 
 def plot_load_and_generation(participant_res: SystemParticipantsResultContainer):
+    """
+    Plots the energy consumption and generation of each participant type.
+    """
     lg_dict = participant_res.load_and_generation_energies()
     keys = []
     load = []
@@ -63,7 +75,6 @@ def plot_load_and_generation(participant_res: SystemParticipantsResultContainer)
         align="center",
         color=PV_COLOR,
         edgecolor=PV_COLOR,
-        alpha=0.7,
         zorder=10,
     )
     axs[0].set_title("Generation", fontsize=TITLE_FONT_SIZE, pad=15)
@@ -77,9 +88,7 @@ def plot_load_and_generation(participant_res: SystemParticipantsResultContainer)
         FuncFormatter(lambda x, p: format(int(x), ","))
     )
 
-    bars_load = axs[1].barh(
-        keys, load, align="center", color=LOAD_COLOR, alpha=0.7, zorder=10
-    )
+    bars_load = axs[1].barh(keys, load, align="center", color=LOAD_COLOR, zorder=10)
     axs[1].bar_label(
         bars_load, padding=4, labels=[f"{x:,.0f}" for x in bars_load.datavalues]
     )

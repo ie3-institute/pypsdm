@@ -1,3 +1,5 @@
+from typing import Literal
+
 from loguru import logger
 from matplotlib.axes import Axes
 from pandas import Series
@@ -15,18 +17,21 @@ from pypsdm.plots.common.utils import (
 def ax_plot_time_series(
     ax: Axes,
     res: Series,
-    entity_type: EntitiesEnum,
-    resolution: str,
+    entity_type: EntitiesEnum | None = None,
     hourly_mean: bool = False,
     fill_from_index=False,
     fill_between=None,
     set_x_label: bool = True,
+    resolution: Literal["d", "w", "m", "y"] | None = None,
     **kwargs,
 ):
     args = get_label_and_color_dict(entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
     if set_x_label:
-        set_date_format_and_label(ax, resolution)
+        if resolution is None:
+            set_date_format_and_label(ax, res.index)  # type: ignore
+        else:
+            set_date_format_and_label(ax, resolution)
     try:
         res = plot_resample(res, hourly_mean)
     except TypeError as e:

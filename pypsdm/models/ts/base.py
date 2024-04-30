@@ -1,8 +1,9 @@
 import copy
+from abc import ABC
 from collections import UserDict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Self, Tuple, Type, TypeVar, Union
+from typing import Any, Iterable, Self, Tuple, Type, TypeVar, Union
 
 import pandas as pd
 from loguru import logger
@@ -213,6 +214,10 @@ class EntityKey:
     def __hash__(self) -> int:
         return hash(self.uuid)
 
+    @property
+    def id(self) -> str:
+        return self.name if self.name else self.uuid
+
 
 class TimeSeriesDict(UserDict[K, V]):
     def __init__(self, data: dict[K, V]):
@@ -221,8 +226,30 @@ class TimeSeriesDict(UserDict[K, V]):
                 raise ValueError(f"Expected TimeSeries object, got {type(ts)}")
         super().__init__(data)
 
+    def __getitem__(self, key: Any) -> V:
+        try:
+            return super().__getitem__(key)
+        except KeyError as e:
+            res = None
+            for k in self.keys():
+                if isinstance(k, EntityKey) and k.name == key:
+                    if res is not None:
+                        raise ValueError(
+                            f"Can't retrieve {key} from entity keys as it is ambiguous"
+                        )
+                    res = self[k]
+            if res is not None:
+                return res
+            raise e
+
     def __contains__(self, key: object) -> bool:
         return self.get(key) is not None  # type: ignore
+
+    def get_with_key(self, key: K | str) -> tuple[K, V]:
+        for k, v in self.items():
+            if k == key:
+                return k, v
+        raise KeyError(f"Key {key} not found in TimeSeriesDict")
 
     def subset(self, keys: Iterable[K]) -> Self:
         """
@@ -340,7 +367,7 @@ class TimeSeriesDict(UserDict[K, V]):
         return str(key)
 
 
-class TimeSeriesDictMixin:
+class TimeSeriesDictMixin(ABC):
     def attr_df(
         self, attr_name: str, ffill=True, favor_ids: bool = True, *args, **kwargs
     ) -> DataFrame:

@@ -3,8 +3,8 @@ from matplotlib import gridspec
 
 from pypsdm.models.gwr import GridWithResults
 from pypsdm.plots.common.utils import FIGSIZE
-from pypsdm.plots.results.power_plot import ax_plot_nodal_ps_violin
-from pypsdm.plots.results.voltage_plot import ax_plot_v_mags_violin
+from pypsdm.plots.results.power import ax_plot_nodal_ps_violin
+from pypsdm.plots.results.voltage import ax_plot_v_mags_violin
 
 
 def voltage_power_along_branches_violin(gwr: GridWithResults):
