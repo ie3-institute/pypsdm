@@ -148,8 +148,9 @@ def ax_plot_nodal_ps_violin(
     """
 
     if nodes:
-        # get v_mag in listed sequence
-        p = nodes_res.subset(nodes).p().reindex(columns=nodes)
+        p = nodes_res.subset(nodes).p(favor_ids=False).reindex(columns=nodes)
+        uuid_id_map = {k.uuid: k.id for k in nodes_res.keys()}
+        p.columns = [uuid_id_map[col] for col in p.columns]
     else:
         p = nodes_res.p()
 
@@ -339,7 +340,7 @@ def plot_all_participants(
 
 
 def _get_pq_results_from_union(
-    participants: Union[SystemParticipantsResultContainer, list[ComplexPower]]
+    participants: Union[SystemParticipantsResultContainer, list[ComplexPower]],
 ) -> list[ComplexPower]:
     return (
         participants
