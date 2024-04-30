@@ -1,73 +1,118 @@
-import datetime
-import math
-
-import pytest
+import pandas as pd
 
 from pypsdm.models.enums import SystemParticipantsEnum
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.processing.series import duration_weighted_sum
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
+)
+from pypsdm.models.ts.base import TIME_COLUMN_NAME, EntityKey
+from pypsdm.models.ts.types import ComplexPower, ComplexPowerWithSoc
 
 
-@pytest.fixture
-def participants_results(gwr) -> ParticipantsResultContainer:
-    return gwr.results.participants
-
-
-def test_energy(participants_results):
-    energy_dict = participants_results.energies()
-    assert len(energy_dict) == 7
-
-
-def compare_duration_weighted_sum(a, b):
-    a_res = duration_weighted_sum(a)
-    b_res = duration_weighted_sum(b)
-    assert math.isclose(a_res, b_res, rel_tol=1e-6)
-
-
-def test_participants_p(participants_results):
-    participants_p = participants_results.p
-    assert SystemParticipantsEnum.LOAD.value in participants_p
-    loads_p = participants_p[SystemParticipantsEnum.LOAD.value]
-    compare_duration_weighted_sum(loads_p, participants_results.loads.p_sum())
-    assert SystemParticipantsEnum.WIND_ENERGY_CONVERTER.value in participants_p
-    wecs_p = participants_p[SystemParticipantsEnum.WIND_ENERGY_CONVERTER.value]
-    compare_duration_weighted_sum(wecs_p, participants_results.wecs.p_sum())
-    assert SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value in participants_p
-    pvs_p = participants_p[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value]
-    compare_duration_weighted_sum(pvs_p, participants_results.pvs.p_sum())
-
-
-def test_participants_p_sum(participants_results):
-    p_sum = participants_results.p_sum()
-    dt = datetime.datetime(year=2011, month=1, day=1, hour=14)
-    assert math.isclose(
-        p_sum[dt].sum(), sum([177.89953, -0.4, -0.8, -1.01849]), rel_tol=1e-5
+def get_power_data(with_soc=False):
+    data = pd.DataFrame(
+        {
+            TIME_COLUMN_NAME: [
+                "2021-01-01",
+                "2021-01-02",
+                "2021-01-03",
+                "2021-01-04",
+            ],
+            "p": [0.0, 1.0, -2.0, 3.0],
+            "q": [0.0, -1.0, 2.0, 3.0],
+        },
     )
+    if with_soc:
+        data["soc"] = [0.0, 0.1, 0.2, 0.3]
+        return ComplexPowerWithSoc(data)
+    return ComplexPower(data)
 
 
-def test_participants_q(participants_results):
-    participants_q = participants_results.q
-    assert SystemParticipantsEnum.LOAD.value in participants_q
-    loads_q = participants_q[SystemParticipantsEnum.LOAD.value]
-    compare_duration_weighted_sum(loads_q, participants_results.loads.q_sum())
-    assert SystemParticipantsEnum.WIND_ENERGY_CONVERTER.value in participants_q
-    wecs_q = participants_q[SystemParticipantsEnum.WIND_ENERGY_CONVERTER.value]
-    compare_duration_weighted_sum(wecs_q, participants_results.wecs.q_sum())
-    assert SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value in participants_q
-    pvs_q = participants_q[SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT.value]
-    compare_duration_weighted_sum(pvs_q, participants_results.pvs.q_sum())
+def get_entities_dict(with_soc=False):
+    dct = {
+        EntityKey("a"): get_power_data(with_soc),
+        EntityKey("b"): get_power_data(with_soc),
+        EntityKey("c"): get_power_data(with_soc),
+    }
+    return dct
 
 
-def test_create_empty():
-    empty = ParticipantsResultContainer.create_empty()
-    # len(empty)
-    if empty:
-        raise AssertionError("Empty ParticipantsResult should be falsy")
+def get_container() -> SystemParticipantsResultContainer:
+    dcts = {}
+    for key in SystemParticipantsResultContainer.entity_keys():
+        dict_type = key.get_result_dict_type()
+        dcts[key] = dict_type(get_entities_dict(key.has_soc()))
+    return SystemParticipantsResultContainer(dcts)
 
 
-def test_participants_to_csv(participants_results, tmp_path, simulation_end):
-    participants_results.to_csv(tmp_path)
-    participants_results_b = ParticipantsResultContainer.from_csv(
-        tmp_path, simulation_end
+def test_from_csv(tmp_path):
+    data_str = """
+time,p,q,uuid,input_model
+2021-01-01 00:00:00,0.0,0.0,a,a
+2021-01-02 00:00:00,1.0,-1.0,a,a
+2021-01-03 00:00:00,-2.0,2.0,a,a
+2021-01-04 00:00:00,3.0,3.0,a,a
+2021-01-01 00:00:00,0.0,0.0,b,b
+2021-01-02 00:00:00,1.0,-1.0,b,b
+2021-01-03 00:00:00,-2.0,2.0,b,b
+2021-01-04 00:00:00,3.0,3.0,b,b
+2021-01-01 00:00:00,0.0,0.0,c,c
+2021-01-02 00:0:00,1.0,-1.0,c,c
+2021-01-03 00:00:00,-2.0,2.0,c,c
+2021-01-04 00:00:00,3.0,3.0,c,c
+"""
+    participants = (
+        SystemParticipantsResultContainer({}).to_dict(include_empty=True).keys()
     )
-    participants_results.compare(participants_results_b)
+    for participant in participants:
+        file_path = tmp_path / participant.get_csv_result_file_name()
+        with open(file_path, "w") as f:
+            f.write(data_str)
+
+    res = SystemParticipantsResultContainer.from_csv(tmp_path)
+    res_dict = res.to_dict()
+    for _, val in res_dict.items():
+        assert set(val.data.keys()) == {EntityKey("a"), EntityKey("b"), EntityKey("c")}
+        for ts in val.values():
+            assert ts.data.shape == (4, 2)
+    assert set(res_dict.keys()) == set(participants)
+
+
+def test_to_csv(tmp_path):
+    a = get_container()
+    a.to_csv(tmp_path)
+    b = SystemParticipantsResultContainer.from_csv(tmp_path)
+    assert a == b
+
+
+def test_participants_p():
+    participants = get_container()
+    participants_p = participants.p()
+    names = {
+        e.value
+        for e in participants.entity_keys()
+        if not e == SystemParticipantsEnum.FLEX_OPTIONS
+    }
+    assert set(participants_p.columns) == names
+
+
+def test_participants_q():
+    participants = get_container()
+    participants_p = participants.q()
+    names = {
+        e.value
+        for e in participants.entity_keys()
+        if not e == SystemParticipantsEnum.FLEX_OPTIONS
+    }
+    assert set(participants_p.columns) == names
+
+
+def test_participants_p_sum():
+    participants = get_container()
+    p_sum = participants.p_sum()
+    assert p_sum.shape == (4,)
+
+
+def test_participants_q_sum():
+    participants = get_container()
+    q_sum = participants.q_sum()
+    assert q_sum.shape == (4,)

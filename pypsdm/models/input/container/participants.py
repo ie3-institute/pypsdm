@@ -3,7 +3,7 @@ from typing import Union
 
 import pandas as pd
 
-from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.node import Nodes
 from pypsdm.models.input.participant.bm import BiomassPlants
@@ -80,7 +80,7 @@ class SystemParticipantsContainer(ContainerMixin):
             hps,
         )
 
-    def get_participants(self, sp_type: SystemParticipantsEnum):
+    def get_with_enum(self, sp_type: EntitiesEnum):
         if sp_type == SystemParticipantsEnum.ENERGY_MANAGEMENT:
             return self.ems
         elif sp_type == SystemParticipantsEnum.LOAD:
@@ -204,7 +204,7 @@ class SystemParticipantsContainer(ContainerMixin):
         )
 
     @classmethod
-    def create_empty(cls):
+    def empty(cls):
         return cls(
             EnergyManagementSystems.create_empty(),
             Loads.create_empty(),

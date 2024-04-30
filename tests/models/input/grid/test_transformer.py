@@ -1,8 +1,9 @@
 import math
 
 import numpy as np
+import pytest
 
-from pypsdm import Transformers2W
+from pypsdm.models.input.connector.transformer import Transformers2W
 
 
 def test_to_csv(input_path, tmp_path):
@@ -12,40 +13,45 @@ def test_to_csv(input_path, tmp_path):
     transformer.compare(transformer_b)
 
 
-def test_gij(simple_grid):
-    gij = simple_grid.transformers_2_w.gij()
+@pytest.fixture(scope="module")
+def trafo(input_path_sg):
+    return Transformers2W.from_csv(input_path_sg)
+
+
+def test_gij(trafo: Transformers2W):
+    gij = trafo.gij()
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
     assert math.isclose(gij[uuid], 30.416517485868557 / nom_imp)
 
 
-def test_bij(simple_grid):
-    bij = simple_grid.transformers_2_w.bij()
+def test_bij(trafo: Transformers2W):
+    bij = trafo.bij()
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
     assert math.isclose(bij[uuid], -100.49779444407964 / nom_imp)
 
 
-def test_g0(simple_grid):
-    g0 = simple_grid.transformers_2_w.g0()
+def test_g0(trafo: Transformers2W):
+    g0 = trafo.g0()
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
     assert math.isclose(g0[uuid], 0.011000000000000001 / nom_imp)
 
 
-def test_b0(simple_grid):
-    b0 = simple_grid.transformers_2_w.b0()
+def test_b0(trafo: Transformers2W):
+    b0 = trafo.b0()
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
     assert math.isclose(b0[uuid], 9.726348184198494 * 1e-5 / nom_imp)
 
 
-def test_yij(simple_grid):
-    yij = simple_grid.transformers_2_w.yij()
+def test_yij(trafo: Transformers2W):
+    yij = trafo.yij()
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
@@ -53,9 +59,9 @@ def test_yij(simple_grid):
     assert math.isclose(yij[uuid].imag, -100.49779444407964 / nom_imp)
 
 
-def test_y0(simple_grid):
-    y0_high = simple_grid.transformers_2_w.y0("high")
-    y0_low = simple_grid.transformers_2_w.y0("low")
+def test_y0(trafo: Transformers2W):
+    y0_high = trafo.y0("high")
+    y0_low = trafo.y0("low")
     uuid = "4ac7f0bd-2ea9-4510-9e71-0da40886d9d3"
     # SIMONA pu result
     nom_imp = 0.266666666666666
@@ -66,7 +72,7 @@ def test_y0(simple_grid):
     assert math.isclose(y0_low[uuid].imag, 4.86317409209924 * 1e-5 / nom_imp)
 
 
-def test_admittance_matrix(simple_grid):
+def test_admittance_matrix(trafo: Transformers2W):
     uuid_idx = {
         "b7a5be0d-2662-41b2-99c6-3b8121a75e9e": 2,
         "df97c0d1-379b-417a-a473-8e7fe37da99d": 1,
@@ -75,7 +81,7 @@ def test_admittance_matrix(simple_grid):
         "6a4547a8-630b-46e4-8144-9cd649e67c07": 4,
     }
 
-    Y = simple_grid.transformers_2_w.admittance_matrix(uuid_idx)
+    Y = trafo.admittance_matrix(uuid_idx)
 
     # SIMONA pu result
     nom_imp = 0.266666666666666

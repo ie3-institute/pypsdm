@@ -4,9 +4,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from pypsdm.models.enums import (
+    EntitiesEnum,
+    RawGridElementsEnum,
+    SystemParticipantsEnum,
+)
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.input.container.raw_grid import RawGridContainer
+from pypsdm.models.ts.types import ComplexPower
 
 if TYPE_CHECKING:
     from pypsdm.models.primary_data import PrimaryData
@@ -95,8 +101,6 @@ class GridContainer(ContainerMixin):
         return grid if include_empty else [g for g in grid if g]
 
     def get_nodal_primary_data(self):
-        from pypsdm.models.result.power import PQResult
-
         time_series = []
         nodal_primary_data = dict()
         for node, participants_container in self.node_participants_map.items():
@@ -105,7 +109,7 @@ class GridContainer(ContainerMixin):
                 participants_uuids
             )
             time_series.extend(node_primary_data)
-            node_primary_data_agg = PQResult.sum(node_primary_data)
+            node_primary_data_agg = ComplexPower.sum(node_primary_data)
             nodal_primary_data[node] = node_primary_data_agg
         return nodal_primary_data
 
@@ -124,6 +128,13 @@ class GridContainer(ContainerMixin):
                 nodal_data[sp_id] = data_str
             data[node_uuid] = nodal_data
         return data
+
+    def get_with_enum(self, enum: EntitiesEnum):
+        if isinstance(enum, RawGridElementsEnum):
+            return self.raw_grid.get_with_enum(enum)
+        if isinstance(enum, SystemParticipantsEnum):
+            return self.participants.get_with_enum(enum)
+        raise ValueError(f"Unretrievable enum {enum}")
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridContainer(
@@ -179,12 +190,12 @@ class GridContainer(ContainerMixin):
         return cls(raw_grid, participants, primary_data, node_participants_map)
 
     @classmethod
-    def create_empty(cls):
+    def empty(cls):
         from pypsdm.models.primary_data import PrimaryData
 
         return cls(
-            raw_grid=RawGridContainer.create_empty(),
-            participants=SystemParticipantsContainer.create_empty(),
+            raw_grid=RawGridContainer.empty(),
+            participants=SystemParticipantsContainer.empty(),
             primary_data=PrimaryData.create_empty(),
             node_participants_map=dict(),
         )

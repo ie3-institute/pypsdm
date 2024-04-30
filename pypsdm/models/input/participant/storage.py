@@ -1,6 +1,6 @@
 from pandas import Series
 
-from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.participant.mixins import SpTypeMixin
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 
@@ -10,7 +10,7 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
         return SystemParticipantsWithCapacity.__eq__(self, other)
 
     @staticmethod
-    def get_enum() -> SystemParticipantsEnum:
+    def get_enum() -> EntitiesEnum:
         return SystemParticipantsEnum.STORAGE
 
     @staticmethod

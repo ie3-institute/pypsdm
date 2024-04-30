@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,12 +8,19 @@ import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from pypsdm.models.result.grid.extended_node import ExtendedNodesResult
-from pypsdm.models.result.grid.node import NodeResult, NodesResult
+from pypsdm.models.enums import RawGridElementsEnum
+from pypsdm.models.ts.base import EntityKey
+from pypsdm.models.ts.mixins import ComplexVoltageDictMixin
+from pypsdm.models.ts.types import (
+    ComplexVoltage,
+    ComplexVoltageDict,
+    ComplexVoltagePowerDict,
+)
 from pypsdm.plots.common.line_plot import ax_plot_time_series
 from pypsdm.plots.common.utils import (
     FIGSIZE,
     LABEL_PAD,
+    Resolution,
     set_subplot_title,
     set_suptitle,
     set_title,
@@ -23,7 +30,7 @@ from pypsdm.plots.common.utils import (
 
 
 def plot_all_v_mag_branch_violin(
-    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes_res: ComplexVoltageDictMixin,
     branches: list[list[str]],
     title: str | None = None,
     **kwargs,
@@ -57,7 +64,7 @@ def plot_all_v_mag_branch_violin(
 
 
 def plot_v_mags_violin(
-    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes_res: ComplexVoltageDict,
     nodes: list[str] | None = None,
     title: str | None = None,
     **kwargs,
@@ -83,7 +90,7 @@ def plot_v_mags_violin(
 
 def ax_plot_v_mags_violin(
     ax: Axes,
-    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes_res: ComplexVoltageDict,
     nodes: Optional[list[str]],  # branches can be found by GridContainer.get_branches()
     **kwargs,
 ):
@@ -98,7 +105,9 @@ def ax_plot_v_mags_violin(
 
     if nodes:
         # get v_mag in listed sequence
-        v_mag = nodes_res.subset(nodes).v_mag().reindex(columns=nodes)
+        v_mag = nodes_res.subset(nodes).v_mag(favor_ids=False).reindex(columns=nodes)
+        uuid_id_map = {k.uuid: k.id for k in nodes_res.keys()}
+        v_mag.columns = [uuid_id_map[col] for col in v_mag.columns]
     else:
         v_mag = nodes_res.v_mag()
 
@@ -109,15 +118,14 @@ def ax_plot_v_mags_violin(
     ax.violinplot(data, **kwargs)
 
     # set labels
-    uuid_to_id = nodes_res.uuid_to_id_map()
-    x_labels = v_mag.columns.map(lambda uuid: uuid_to_id[uuid])
+    x_labels = v_mag.columns
     set_xlabels_rotated(ax, list(x_labels), ha="right")
     set_ylabel(ax, "Voltage magnitude in pu")
     _ = ax.set_xticklabels(x_labels, rotation=45, ha="right")
 
 
 def plot_v_mag_branch(
-    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes_res: ComplexVoltageDict,
     branch: list[str],  # branches can be found by GridContainer.get_branches()
     time: datetime,
     in_kw: bool = False,
@@ -142,7 +150,7 @@ def plot_v_mag_branch(
 
 def ax_plot_v_mag_branch(
     ax: Axes,
-    nodes_res: Union[NodesResult, ExtendedNodesResult],
+    nodes_res: ComplexVoltageDict,
     branch: list[str],
     time: datetime,
     fig: Optional[Figure] = None,  # used to plot colorbar
@@ -160,7 +168,7 @@ def ax_plot_v_mag_branch(
         in_kw: if True, power is plotted in kW instead of MW
     """
 
-    with_power = isinstance(nodes_res, ExtendedNodesResult)
+    with_power = isinstance(nodes_res, ComplexVoltagePowerDict)
 
     v_mags = []
     x_ticks = []
@@ -198,24 +206,29 @@ def ax_plot_v_mag_branch(
 
 
 def plot_v_mag(
-    res: NodeResult,
-    resolution: str,
+    res: ComplexVoltage,
+    name: EntityKey | str | None = None,
     title: Optional[str] = None,
     fill_from_index: bool = False,
     fill_between=None,
     set_x_label=True,
+    resolution: Resolution | None = None,
     **kwargs,
 ):
     if title is None:
-        title = f"Voltage Magnitude at Node: {res.name}"
+        if name:
+            name = name if isinstance(name, str) else name.id
+            title = f"Voltage Magnitude at Node: {name}"
+        else:
+            title = "Voltage Magnitude"
     fig, ax = plt.subplots(figsize=FIGSIZE)
     ax_plot_node_v_mag(
         ax,
         res,
-        resolution,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
         set_x_label=set_x_label,
+        resolution=resolution,
         **kwargs,
     )
     set_title(ax, title)
@@ -223,26 +236,31 @@ def plot_v_mag(
 
 
 def plot_v_ang(
-    res: NodeResult,
-    resolution: str,
+    res: ComplexVoltage,
+    name: EntityKey | str | None = None,
     title: Optional[str] = None,
     hourly_mean: bool = False,
     fill_from_index: bool = False,
     fill_between=None,
     set_x_label=True,
+    resolution: Resolution | None = None,
     **kwargs,
 ):
     if title is None:
-        title = f"Voltage Angle at Node: {res.name}"
+        if name:
+            name = name if isinstance(name, str) else name.id
+            title = f"Voltage Magnitude at Node: {name}"
+        else:
+            title = "Voltage Magnitude"
     fig, ax = plt.subplots(figsize=FIGSIZE)
     ax_plot_node_v_ang(
         ax,
         res,
-        resolution,
         hourly_mean=hourly_mean,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
         set_x_label=set_x_label,
+        resolution=resolution,
         **kwargs,
     )
     set_title(ax, title)
@@ -251,11 +269,11 @@ def plot_v_ang(
 
 def ax_plot_node_v_mag(
     ax: Axes,
-    res: NodeResult,
-    resolution: str,
+    res: ComplexVoltage,
     fill_from_index: bool = False,
     fill_between=None,
     set_x_label=True,
+    resolution: Resolution | None = None,
     **kwargs,
 ):
     if len(res.v_mag) == 0:
@@ -264,11 +282,11 @@ def ax_plot_node_v_mag(
     ax = ax_plot_time_series(
         ax,
         res.v_mag,
-        res.entity_type,
-        resolution,
+        entity_type=RawGridElementsEnum.NODE,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
         set_x_label=set_x_label,
+        resolution=resolution,
         **kwargs,
     )
     ax.set_ylabel("Voltage Magnitude in p.u.")
@@ -276,11 +294,11 @@ def ax_plot_node_v_mag(
 
 def ax_plot_node_v_ang(
     ax: Axes,
-    res: NodeResult,
-    resolution: str,
+    res: ComplexVoltage,
     fill_from_index: bool = False,
     fill_between=None,
     set_x_label=True,
+    resolution: Resolution | None = None,
     **kwargs,
 ):
     if len(res.v_ang) == 0:
@@ -289,11 +307,11 @@ def ax_plot_node_v_ang(
     ax = ax_plot_time_series(
         ax,
         res.v_ang,
-        res.entity_type,
-        resolution,
+        entity_type=RawGridElementsEnum.NODE,
         fill_from_index=fill_from_index,
         fill_between=fill_between,
         set_x_label=set_x_label,
+        resolution=resolution,
         **kwargs,
     )
     ax.set_ylabel("Voltage Angle in deg")

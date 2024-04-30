@@ -20,6 +20,7 @@ from pypsdm.models.enums import (
     RawGridElementsEnum,
     SystemParticipantsEnum,
 )
+from pypsdm.models.ts.base import EntityKey
 from pypsdm.processing.dataframe import compare_dfs
 
 if TYPE_CHECKING:
@@ -163,7 +164,6 @@ class Entities(ABC):
         """
         Returns: The nodes to which the entities are connected.
         """
-        pass
 
     def get(self, uuid: str) -> Series:
         """
@@ -179,7 +179,7 @@ class Entities(ABC):
 
     def subset(
         self: EntityType,
-        uuids: Union[list[str], Series, set[str], str],
+        uuids,
         intersection: bool = False,
     ) -> EntityType:
         """
@@ -193,11 +193,11 @@ class Entities(ABC):
         Returns:
             A new instance with the subset of entities.
         """
-        if isinstance(uuids, str):
+        if isinstance(uuids, str | EntityKey):
             uuids = [uuids]
         if intersection:
-            intersection = list(set(self.uuid) & set(uuids))
-            return type(self)(self.data.loc[intersection])
+            keys = list(set(self.uuid) & set(uuids))
+            return type(self)(self.data.loc[keys])
         if isinstance(uuids, set):
             uuids = list(uuids)
         try:
@@ -466,7 +466,6 @@ class Entities(ABC):
         """
         Returns the corresponding entity enum value.
         """
-        pass
 
     @classmethod
     def attributes(cls) -> list[str]:

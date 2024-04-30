@@ -11,11 +11,10 @@ from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.result.container.grid import GridResultContainer
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
-from pypsdm.models.result.grid.extended_node import (
-    ExtendedNodeResult,
-    ExtendedNodesResult,
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
 )
+from pypsdm.models.ts.types import ComplexVoltagePower, ComplexVoltagePowerDict
 
 
 @dataclass(frozen=True)
@@ -178,7 +177,7 @@ class GridWithResults(ContainerMixin):
 
     def em_results(
         self,
-    ) -> list[Tuple[SystemParticipantsContainer, ParticipantsResultContainer]]:
+    ) -> list[Tuple[SystemParticipantsContainer, SystemParticipantsResultContainer]]:
         uuid_to_connected_asset = self.ems.uuid_to_connected_assets()
         return [
             (
@@ -188,7 +187,7 @@ class GridWithResults(ContainerMixin):
             for (em_uuid, connected_assets) in uuid_to_connected_asset.items()
         ]
 
-    def build_extended_nodes_result(self) -> ExtendedNodesResult:
+    def build_extended_nodes_result(self) -> ComplexVoltagePowerDict:
         """
         Builds extended nodes result by calculation the complex power using the grids
         admittance matrix and the complex nodal voltages.
@@ -206,7 +205,7 @@ class GridWithResults(ContainerMixin):
         lv_voltage = voltage_levels.index[0]
 
         Y = self.raw_grid.admittance_matrix(uuid_to_idx)
-        v_complex = self.nodes_res.v_complex(lv_voltage)  # type: ignore
+        v_complex = self.nodes_res.v_complex(lv_voltage, favor_ids=False)  # type: ignore
         v_complex = v_complex.reindex(columns=uuid_order)
         i = v_complex @ Y
         i.columns = v_complex.columns
@@ -222,18 +221,13 @@ class GridWithResults(ContainerMixin):
             ext_node_res_data = node_res.data.copy()
             ext_node_res_data["p"] = node_p
             ext_node_res_data["q"] = node_q
-            ext_node_res = ExtendedNodeResult(
-                entity_type=node_res.entity_type,
-                input_model=node_res.input_model,
-                name=node_res.name,
-                data=ext_node_res_data,
+            ext_node_res = ComplexVoltagePower(
+                ext_node_res_data,
             )
             ext_nodes_results[uuid] = ext_node_res
-        ext_nodes_results = ExtendedNodesResult(
-            entity_type=nodes_res.entity_type,
-            entities=ext_nodes_results,
+        return ComplexVoltagePowerDict(
+            ext_nodes_results,
         )
-        return ext_nodes_results
 
     def find_participant_result_pair(self, uuid: str):
         return self.grid.participants.find_participant(
@@ -245,10 +239,8 @@ class GridWithResults(ContainerMixin):
             self.grid.filter_by_date_time(time), self.results.filter_by_date_time(time)
         )
 
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        return GridWithResults(
-            self.grid, self.results.filter_for_time_interval(start, end)
-        )
+    def interval(self, start: datetime, end: datetime):
+        return GridWithResults(self.grid, self.results.interval(start, end))
 
     def to_csv(
         self,
@@ -313,10 +305,12 @@ class GridWithResults(ContainerMixin):
         )
 
     @classmethod
-    def create_empty(cls):
-        return GridWithResults(
-            GridContainer.create_empty(), GridResultContainer.create_empty()
-        )
+    def entity_keys(cls):
+        return set()
+
+    @classmethod
+    def empty(cls):
+        return GridWithResults(GridContainer.empty(), GridResultContainer.empty())
 
     @staticmethod
     def _calc_pq(uuid, nodal_result: GridResultContainer):

@@ -136,7 +136,8 @@ class Lines(HasTypeMixin, Connector):
             Y[j, i] -= yij
 
         _ = lines_data.apply(
-            lambda line: add_line_to_admittance_matrix(line, Y, uuid_to_idx), axis=1  # type: ignore
+            lambda line: add_line_to_admittance_matrix(line, Y, uuid_to_idx),
+            axis=1,  # type: ignore
         )
         return Y
 

@@ -8,8 +8,8 @@ from pypsdm.models.enums import (
     SystemParticipantsEnum,
 )
 from pypsdm.models.result.grid.node import NodeResult, NodesResult
-from pypsdm.models.result.participant.pq_dict import PQResultDict
 from pypsdm.models.result.power import PQResult
+from pypsdm.models.ts.types import ComplexPowerDict
 
 # These are just some early quite specific conversions. Additional ones will be added as needed.
 
@@ -21,7 +21,7 @@ def pp_load_to_participants_result(
     psdm_load_file: str,  # psdm load csv input
     start: datetime,  # start of the time series simulation
     resolution: timedelta,  # resolution of the time series simulation
-) -> PQResultDict:
+) -> ComplexPowerDict:
     return _pp_to_psdm_result(
         entity_type=SystemParticipantsEnum.LOAD,
         pp_net_file=pp_net_file,
@@ -34,7 +34,7 @@ def pp_load_to_participants_result(
         start=start,
         resolution=resolution,
         res_entity_class=PQResult,
-        res_dict_class=PQResultDict,
+        res_dict_class=ComplexPowerDict,
     )
 
 
@@ -45,7 +45,7 @@ def pp_node_to_nodes_result(
     psdm_node_file: str,  # psdm node csv input
     start: datetime,  # start of the time series simulation
     resolution: timedelta,  # resolution of the time series simulation
-) -> PQResultDict:
+) -> ComplexPowerDict:
     return _pp_to_psdm_result(
         entity_type=RawGridElementsEnum.NODE,
         pp_net_file=pp_net_file,

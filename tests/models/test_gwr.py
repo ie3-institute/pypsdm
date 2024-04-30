@@ -1,6 +1,5 @@
 import copy
 import math
-import os
 from datetime import datetime
 
 import pytest
@@ -8,25 +7,31 @@ import pytest
 from pypsdm.models.gwr import GridWithResults
 
 
+@pytest.fixture(scope="module")
+def gwr(input_path_sb, result_path_sb) -> GridWithResults:
+    return GridWithResults.from_csv(input_path_sb, result_path_sb)
+
+
 @pytest.fixture
 def node_uuid():
-    return "401f37f8-6f2c-4564-bc78-6736cb9cbf8d"
+    return "32145578-706b-47e5-86ae-217d9a41867c"
 
 
-def test_nodal_result(gwr, node_uuid):
+def test_nodal_result(gwr: GridWithResults, node_uuid):
     nodal_res = gwr.nodal_result(node_uuid)
     assert len(nodal_res.nodes) == 1
     assert len(nodal_res.nodes)
-    assert node_uuid in nodal_res.nodes.entities
-    assert len(nodal_res.participants.wecs) == 1
+    assert node_uuid in nodal_res.nodes
     assert len(nodal_res.participants.loads) == 1
-    assert len(nodal_res.participants.pvs) == 0
+    assert len(nodal_res.participants.fixed_feed_ins) == 1
 
 
-def test_nodal_results(gwr, node_uuid):
+def test_nodal_results(gwr: GridWithResults, node_uuid: str):
     nodal_results = gwr.nodal_results()
     assert len(nodal_results) == len(gwr.grid.raw_grid.nodes)
-    assert nodal_results[node_uuid] == gwr.nodal_result(node_uuid)
+    a = nodal_results[node_uuid]
+    b = gwr.nodal_result(node_uuid)
+    assert a == b
 
 
 def test_nodal_energies(gwr, node_uuid):
@@ -35,11 +40,11 @@ def test_nodal_energies(gwr, node_uuid):
 
 
 def test_filter_by_date_time(gwr):
-    dt = datetime(year=2011, month=1, day=1, hour=13, minute=30)
+    dt = datetime(year=2016, month=1, day=2, hour=13, minute=30)
     filtered = gwr.filter_by_date_time(dt)
     assert isinstance(filtered, GridWithResults)
-    assert len(list(filtered.grid.primary_data.time_series.entities.values())[0]) == 1
-    assert len(filtered.results.participants.pvs.results()[0]) == 1
+    assert len(filtered.loads_res.p()) == 1
+    assert len(filtered.loads_res.q()) == 1
 
 
 def test_compare(gwr: GridWithResults):
@@ -48,7 +53,7 @@ def test_compare(gwr: GridWithResults):
 
 
 def test_create_empty():
-    empty = GridWithResults.create_empty()
+    empty = GridWithResults.empty()
     if empty:
         raise AssertionError("Empty GridWithResults should be falsy")
 
@@ -63,10 +68,7 @@ def test_to_csv(gwr: GridWithResults, tmp_path):
     assert gwr == gwr_b
 
 
-def test_build_extended_nodes_result(resources_path):
-    sb_input = os.path.join(resources_path, "simbench", "input")
-    sb_results = os.path.join(resources_path, "simbench", "results")
-    gwr = GridWithResults.from_csv(sb_input, sb_results)
+def test_build_extended_nodes_result(gwr):
     ext_nodes_res = gwr.build_extended_nodes_result()
     assert len(ext_nodes_res) == len(gwr.nodes_res)
 
@@ -75,10 +77,11 @@ def test_build_extended_nodes_result(resources_path):
         excluded = gwr.transformers_2_w.node.to_list()
         if uuid in excluded:
             continue
+
         expected = gwr.nodal_result(uuid).participants.sum().data.shift(1).iloc[1::]
         actual = ext_nodes_res[uuid].data.iloc[1::]
         if len(expected.p) == 0:
             assert math.isclose(actual.p.sum(), 0, rel_tol=1e-8)
             continue
-        p_delta = expected.p - actual.p
+        p_delta = (expected.p - actual.p).abs()
         assert (p_delta < 1e-8).all(), f"Unexpected deviation for {uuid}"

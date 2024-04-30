@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pypsdm import Lines
+from pypsdm.models.input.connector.lines import Lines
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.processing.dataframe import compare_dfs
 
@@ -77,6 +77,11 @@ def test_to_csv(lines: Lines, tmp_path):
     lines2 = Lines.from_csv(path)
     # todo this needs to be tested for other participants
     compare_dfs(lines.data, lines2.data)
+
+
+@pytest.fixture(scope="module")
+def simple_grid(input_path_sg) -> GridContainer:
+    return GridContainer.from_csv(input_path_sg)
 
 
 def test_gij(simple_grid: GridContainer):

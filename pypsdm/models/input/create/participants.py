@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pandas as pd
 
-from pypsdm.models.enums import ElectricCurrentType, SystemParticipantsEnum
+from pypsdm.models.enums import ElectricCurrentType, EntitiesEnum
 from pypsdm.models.input.create.utils import create_data
 from pypsdm.models.input.participant import evcs
 from pypsdm.models.input.participant.em import EnergyManagementSystems
@@ -200,7 +200,7 @@ def create_ev_charging_stations(data_dict):
         create_data(
             data_dict,
             create_ev_charging_stations_data,
-            entity_preprocessing=SystemParticipantsEnum.EV_CHARGING_STATION,
+            entity_preprocessing=EntitiesEnum.EV_CHARGING_STATION,
         )
     )
 

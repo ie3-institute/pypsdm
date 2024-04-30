@@ -1,5 +1,11 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import TypeVar
+from typing import TYPE_CHECKING, Type, TypeVar
+
+if TYPE_CHECKING:
+    from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+    from pypsdm.models.ts.base import TimeSeries
 
 
 class EntitiesEnum(Enum):
@@ -31,27 +37,30 @@ class EntitiesEnum(Enum):
     def get_plot_name(self):
         return self.value.replace("_", " ").title()
 
-    def get_result_type(self):
+    def get_result_type(self) -> type[TimeSeries]:
         # locally to avoid circular imports
-        from pypsdm.models.result.grid.line import LineResult
-        from pypsdm.models.result.grid.node import NodeResult
+        from pypsdm.models.result.grid.connector import ConnectorCurrent
         from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
-        from pypsdm.models.result.power import PQResult, PQWithSocResult
+        from pypsdm.models.ts.types import (
+            ComplexPower,
+            ComplexPowerWithSoc,
+            ComplexVoltage,
+        )
 
         if isinstance(self, SystemParticipantsEnum):
             if self.has_soc():
-                return PQWithSocResult
+                return ComplexPowerWithSoc
             else:
-                return PQResult
+                return ComplexPower
         elif isinstance(self, RawGridElementsEnum):
             match self:
                 case RawGridElementsEnum.NODE:
-                    return NodeResult
+                    return ComplexVoltage
                 case RawGridElementsEnum.TRANSFORMER_2_W:
                     return Transformer2WResult
                 case RawGridElementsEnum.LINE:
-                    return LineResult
+                    return ConnectorCurrent
                 case RawGridElementsEnum.SWITCH:
                     return SwitchResult
                 case _:
@@ -60,6 +69,56 @@ class EntitiesEnum(Enum):
                     )
         else:
             raise ValueError(f"Entity type {self} not supported!")
+
+    def get_result_dict_type(self) -> Type["EntitiesResultDictMixin"]:
+        from pypsdm.models.result.grid.line import LinesResult
+        from pypsdm.models.result.grid.node import NodesResult
+        from pypsdm.models.result.grid.switch import SwitchesResult
+        from pypsdm.models.result.grid.transformer import Transformers2WResult
+        from pypsdm.models.result.participant.dict import (
+            EmsResult,
+            EvcsResult,
+            EvsResult,
+            FixedFeedInsResult,
+            HpsResult,
+            LoadsResult,
+            PvsResult,
+            StoragesResult,
+            WecsResult,
+        )
+        from pypsdm.models.result.participant.flex_options import FlexOptionsDict
+
+        match self:
+            case RawGridElementsEnum.NODE:
+                return NodesResult
+            case RawGridElementsEnum.LINE:
+                return LinesResult
+            case RawGridElementsEnum.TRANSFORMER_2_W:
+                return Transformers2WResult
+            case RawGridElementsEnum.SWITCH:
+                return SwitchesResult
+            case SystemParticipantsEnum.ELECTRIC_VEHICLE:
+                return EvsResult
+            case SystemParticipantsEnum.EV_CHARGING_STATION:
+                return EvcsResult
+            case SystemParticipantsEnum.FIXED_FEED_IN:
+                return FixedFeedInsResult
+            case SystemParticipantsEnum.LOAD:
+                return LoadsResult
+            case SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT:
+                return PvsResult
+            case SystemParticipantsEnum.WIND_ENERGY_CONVERTER:
+                return WecsResult
+            case SystemParticipantsEnum.STORAGE:
+                return StoragesResult
+            case SystemParticipantsEnum.ENERGY_MANAGEMENT:
+                return EmsResult
+            case SystemParticipantsEnum.HEAT_PUMP:
+                return HpsResult
+            case SystemParticipantsEnum.FLEX_OPTIONS:
+                return FlexOptionsDict
+            case sp:
+                raise NotImplementedError(f"No result dict type for {sp}")
 
 
 EntityEnumType = TypeVar("EntityEnumType", bound=EntitiesEnum)
@@ -83,7 +142,7 @@ class SystemParticipantsEnum(EntitiesEnum):
 
     @staticmethod
     def values():
-        return [participant for participant in SystemParticipantsEnum]
+        return [participant for participant in EntitiesEnum]
 
     def has_soc(self):
         return self in {

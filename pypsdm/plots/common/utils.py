@@ -1,6 +1,7 @@
 import os.path
-from typing import Dict, NewType, Sequence, Tuple
+from typing import Dict, Literal, NewType, Sequence, Tuple
 
+import pandas as pd
 import seaborn as sns
 from matplotlib import dates as mdates
 from matplotlib.axes import Axes
@@ -48,7 +49,7 @@ FLEX_MIN = GREEN
 FLEX_REF = YELLOW
 
 
-def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
+def get_label_and_color(sp_type: EntitiesEnum | None) -> Tuple[str, RGB]:
     match sp_type:
         case RawGridElementsEnum.NODE:
             return "Node", NODE_COLOR
@@ -75,12 +76,12 @@ def get_label_and_color(sp_type: EntitiesEnum) -> Tuple[str, RGB]:
         case SystemParticipantsEnum.PRIMARY_DATA:
             return "Primary Data", LOAD_COLOR
         case _:
-            return sp_type.value, UNKNOWN_COLOR
+            return "", BLUE
 
 
-def get_label_and_color_dict(sp_type: EntitiesEnum):
+def get_label_and_color_dict(sp_type: EntitiesEnum | None):
     label, color = get_label_and_color(sp_type)
-    return {"label": label, "color": color}
+    return {"label": label, "color": color} if label else {"color": color}
 
 
 # === FIGURE DEFAULTS ===
@@ -102,6 +103,8 @@ LABEL_PAD = 10
 
 FILL_ALPHA = 0.2
 
+Resolution = Literal["d", "w", "m", "y"]
+
 
 def save_fig(figure: Figure, path: str, file_name: str, format="svg"):
     figure.savefig(os.path.join(path, file_name), bbox_inches="tight", format=format)
@@ -116,8 +119,10 @@ def plot_resample(res: Series, hourly_mean: bool):
     )
 
 
-def set_date_format_and_label(ax: Axes, resolution: str):
+def set_date_format_and_label(ax: Axes, resolution: str | pd.DatetimeIndex):
     possible_resolutions = set(["d", "w", "m", "y"])
+    if isinstance(resolution, pd.DatetimeIndex):
+        resolution = determine_resolution(resolution)
     if resolution not in possible_resolutions:
         raise ValueError(
             f"Invalid resolution: '{resolution}' (possible: {possible_resolutions}"
@@ -133,6 +138,19 @@ def set_date_format_and_label(ax: Axes, resolution: str):
         ax.get_xaxis().set_major_locator(locator)
     ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter(date_format))
+
+
+def determine_resolution(ts_index: pd.DatetimeIndex) -> str:
+    total_days = (ts_index.max() - ts_index.min()).days
+
+    if total_days <= 1:
+        return "d"
+    elif total_days <= 7:
+        return "w"
+    elif total_days <= 30:
+        return "m"
+    else:
+        return "y"
 
 
 def _date_format_and_x_label(resolution: str) -> Tuple[str, str]:

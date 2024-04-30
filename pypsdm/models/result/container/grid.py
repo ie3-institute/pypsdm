@@ -1,19 +1,25 @@
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from pypsdm.io.utils import check_filter
-from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ContainerMixin
-from pypsdm.models.result.container.participants import ParticipantsResultContainer
+from pypsdm.models.result.container.participants import (
+    SystemParticipantsResultContainer,
+)
 from pypsdm.models.result.container.raw_grid import RawGridResultContainer
+
+if TYPE_CHECKING:
+    from pypsdm.models.input.container.grid import GridContainer
 
 
 @dataclass(frozen=True)
 class GridResultContainer(ContainerMixin):
     raw_grid: RawGridResultContainer
-    participants: ParticipantsResultContainer
+    participants: SystemParticipantsResultContainer
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
@@ -75,22 +81,22 @@ class GridResultContainer(ContainerMixin):
         return self.participants.flex
 
     def __len__(self):
-        return +len(self.raw_grid) + len(self.participants)
+        return len(self.raw_grid) + len(self.participants)
 
-    # TODO: implement slicing
-    def __getitem__(self, slice_val):
-        raise NotImplementedError
+    def __getitem__(self, slice_val: slice) -> "GridResultContainer":
+        if not isinstance(slice_val, slice):
+            raise ValueError("Only datetime slicing is supported!")
+        start, stop, _ = slice_val.start, slice_val.stop, slice_val.step
+        if not (isinstance(start, datetime) and isinstance(stop, datetime)):
+            raise ValueError("Only datetime slicing is supported")
+        return self.interval(start, stop)
 
     def to_list(self, include_empty: bool = False) -> list:
         res = [
-            self.nodes,
             self.raw_grid,
             self.participants,
         ]
         return res if include_empty else [r for r in res if r]
-
-    def uuids(self) -> set[str]:
-        return set(self.nodes.entities.keys())
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         return GridResultContainer(
@@ -98,10 +104,10 @@ class GridResultContainer(ContainerMixin):
             self.participants.filter_by_date_time(time),
         )
 
-    def filter_for_time_interval(self, start: datetime, end: datetime):
+    def interval(self, start: datetime, end: datetime):
         return GridResultContainer(
-            self.raw_grid.filter_for_time_interval(start, end),
-            self.participants.filter_for_time_interval(start, end),
+            self.raw_grid.interval(start, end),
+            self.participants.interval(start, end),
         )
 
     def concat(self, other: "GridResultContainer", deep: bool = True, keep="last"):
@@ -154,16 +160,13 @@ class GridResultContainer(ContainerMixin):
         )
 
         if simulation_end is None:
-            if len(raw_grid.nodes) == 0:
-                raise ValueError(
-                    f"No node simulation results found in '{simulation_data_path}'. Can not determine simulation end time. Please provide it manually."
-                )
-            sample_res = raw_grid.nodes[list(raw_grid.nodes.keys())[0]]
-            simulation_end = sample_res.data.index.max()
+            if not len(raw_grid.nodes) == 0:
+                sample_res = raw_grid.nodes[list(raw_grid.nodes.keys())[0]]
+                simulation_end = sample_res.data.index.max()  # type: ignore
 
-        participants = ParticipantsResultContainer.from_csv(
+        participants = SystemParticipantsResultContainer.from_csv(
             simulation_data_path,
-            simulation_end,  # type: ignore
+            simulation_end,
             grid_container=grid_container,
             filter_start=filter_start,
             filter_end=filter_end,
@@ -173,8 +176,8 @@ class GridResultContainer(ContainerMixin):
         return cls(raw_grid, participants)
 
     @classmethod
-    def create_empty(cls):
+    def empty(cls):
         return cls(
-            raw_grid=RawGridResultContainer.create_empty(),
-            participants=ParticipantsResultContainer.create_empty(),
+            raw_grid=RawGridResultContainer.empty(),
+            participants=SystemParticipantsResultContainer.empty(),
         )

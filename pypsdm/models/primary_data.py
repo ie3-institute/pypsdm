@@ -16,24 +16,32 @@ from pandas import Series
 from pypsdm.errors import ComparisonError
 from pypsdm.io import utils
 from pypsdm.io.utils import df_to_csv, to_date_time
-from pypsdm.models.enums import SystemParticipantsEnum, TimeSeriesEnum
-from pypsdm.models.result.participant.pq_dict import PQResultDict
-from pypsdm.models.result.power import PQResult
+from pypsdm.models.enums import TimeSeriesEnum
+from pypsdm.models.ts.types import ComplexPower, ComplexPowerDict
+
+
+@dataclass(frozen=True)
+class TimeSeriesKey:
+    ts_uuid: str
+    ts_type: TimeSeriesEnum | None
+
+    def __eq__(self, other):
+        return self.ts_uuid == other.ts_uuid
+
+    def __hash__(self):
+        return hash(self.ts_uuid)
 
 
 @dataclass
 class PrimaryData:
     # ts_uuid -> ts
-    time_series: "PQResultDict"
+    time_series: ComplexPowerDict[TimeSeriesKey]
     # participant_uuid -> ts_uuid
     participant_mapping: dict[str, str]
 
     def __init__(
-        self, time_series: "PQResultDict", participant_mapping: dict[str, str]
+        self, time_series: "ComplexPowerDict", participant_mapping: dict[str, str]
     ):
-        for ts in time_series.values():
-            if not isinstance(ts.entity_type, TimeSeriesEnum):
-                raise ValueError("Time series must be of type TimeSeriesEnum")
         self.time_series = time_series
         self.participant_mapping = participant_mapping
 
@@ -50,27 +58,25 @@ class PrimaryData:
     def __contains__(self, uuid):
         return uuid in self.time_series or uuid in self.participant_mapping
 
-    def __getitem__(self, get):
+    def __getitem__(self, get: str | TimeSeriesKey) -> ComplexPower:
         match get:
             case str():
+                get_key = TimeSeriesKey(get, None)
                 if get in self.participant_mapping:
-                    return self.time_series[self.participant_mapping[get]]
-                elif get in self.time_series:
-                    return self.time_series[get]
+                    ts_uuid = self.participant_mapping[get]
+                    key = TimeSeriesKey(ts_uuid, None)
+                    return self.time_series[key]
+                elif get_key in self.time_series:
+                    return self.time_series[get_key]
                 else:
                     raise KeyError(
                         f"{get} neither a valid time series nor a participant uuid."
                     )
-            case slice():
-                start, stop, step = get.start, get.stop, get.step
-                if step is not None:
-                    logger.warning("Step is not supported for slicing. Ignoring it.")
-                if not (isinstance(start, datetime) and isinstance(stop, datetime)):
-                    raise ValueError("Only datetime slicing is supported")
-                return self.filter_for_time_interval(start, stop)
+            case TimeSeriesKey():
+                return self.time_series[get]
             case _:
                 raise ValueError(
-                    "Only get by uuid or datetime slice for filtering is supported."
+                    "Only str uuid of either time series or participant or TimeSeriesKey of time series are allowed as key for PrimaryData."
                 )
 
     def p(self, ffill=True):
@@ -85,10 +91,10 @@ class PrimaryData:
     def q_sum(self):
         return self.time_series.q_sum()
 
-    def sum(self) -> PQResult:
+    def sum(self) -> ComplexPower:
         return self.time_series.sum()
 
-    def get_for_participants(self, participants) -> list[PQResult]:
+    def get_for_participants(self, participants) -> list[ComplexPower]:
         time_series = []
         for participant in participants:
             ts = self.get_for_participant(participant)
@@ -103,7 +109,7 @@ class PrimaryData:
             participants = [p for p in participants if p in self.participant_mapping]
         try:
             pm = {p: self.participant_mapping[p] for p in participants}
-            ts = {ts_uuid: self.time_series[ts_uuid] for ts_uuid in pm.values()}
+            ts = ComplexPowerDict({ts_uuid: self[ts_uuid] for ts_uuid in pm.values()})  # type: ignore
             return PrimaryData(ts, pm)
         except KeyError as e:
             missing_key = e.args[0]
@@ -111,24 +117,19 @@ class PrimaryData:
                 f"Participant with uuid: {missing_key} has no associated primary data."
             ) from e
 
-    def get_for_participant(self, participant: str) -> PQResult | None:
+    def get_for_participant(self, participant: str) -> ComplexPower | None:
         ts_uuid = self.participant_mapping.get(participant)
         if ts_uuid:
-            return self.time_series.entities[ts_uuid]
+            return self[ts_uuid]  # type: ignore
         else:
             return None
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
-        """
-        Filters the result by the given datetime or list of datetimes.
-        :param time: the time or list of times to filter by
-        :return: a new result containing only the given time or times
-        """
         ts = self.time_series.filter_by_date_time(time)
         return PrimaryData(ts, self.participant_mapping)
 
-    def filter_for_time_interval(self, start: datetime, end: datetime):
-        ts = self.time_series.filter_for_time_interval(start, end)
+    def interval(self, start: datetime, end: datetime):
+        ts = self.time_series.interval(start, end)
         return PrimaryData(ts, self.participant_mapping)
 
     def to_csv(self, path: str, mkdirs=False, delimiter=","):
@@ -136,17 +137,14 @@ class PrimaryData:
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             futures = [
-                executor.submit(write_ts, pq)
-                for pq in list(self.time_series.entities.values())
+                executor.submit(write_ts, ts, key)
+                for key, ts in list(self.time_series.items())
             ]
 
             for future in concurrent.futures.as_completed(futures):
                 maybe_exception = future.result()
                 if isinstance(maybe_exception, Exception):
                     raise maybe_exception
-
-        for pq in list(self.time_series.entities.values()):
-            self._write_ts_df(path, mkdirs, delimiter, pq)
 
         # write mapping data
         index = [str(uuid.uuid4()) for _ in range(len(self.participant_mapping))]
@@ -168,15 +166,19 @@ class PrimaryData:
 
     @staticmethod
     def _write_ts_df(
-        path: str, mkdirs: bool, delimiter: str, ts: PQResult
+        path: str,
+        mkdirs: bool,
+        delimiter: str,
+        ts: ComplexPower,
+        key: TimeSeriesKey,
     ) -> None | Exception:
         try:
             data = copy.deepcopy(ts.data)
-            if not isinstance(ts.entity_type, TimeSeriesEnum):
+            if not isinstance(key.ts_type, TimeSeriesEnum):
                 raise ValueError(
-                    f"Expected entity type to be TypeSeriesEnum but is {ts.entity_type}. Can not determine file name."
+                    f"Expected entity type to be TypeSeriesEnum but is {key.ts_type}. Can not determine file name."
                 )
-            ts_name = ts.entity_type.get_csv_input_file_name(ts.input_model)
+            ts_name = key.ts_type.get_csv_input_file_name(key.ts_uuid)
             data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
             data["time"] = data.index
             data.set_index("uuid", inplace=True)
@@ -229,7 +231,7 @@ class PrimaryData:
 
     @classmethod
     def from_csv(cls, path: str | Path, delimiter: str | None = None):
-        from pypsdm.models.result.participant.pq_dict import PQResultDict
+        from pypsdm.models.ts.types import ComplexPowerDict
 
         # get all files that start with "its_"
         path = Path(path).resolve()
@@ -253,19 +255,18 @@ class PrimaryData:
             # TODO: Only parallel reading if a lot of ts files
             with concurrent.futures.ProcessPoolExecutor() as executor:
                 time_series = executor.map(pa_read_time_series, ts_files)
-                for ts in time_series:
-                    time_series_dict[ts.name] = ts
+                for ts_key, ts in time_series:
+                    time_series_dict[ts_key] = ts
 
-            time_series = PQResultDict(
-                SystemParticipantsEnum.PRIMARY_DATA, time_series_dict
-            )
+            time_series = ComplexPowerDict(time_series_dict)
 
             return PrimaryData(time_series, participant_mapping)
 
         else:
             logger.debug(f"No primary data in path {path}")
             return PrimaryData(
-                PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
+                ComplexPowerDict.empty(),
+                dict(),
             )
 
     @staticmethod
@@ -287,7 +288,7 @@ class PrimaryData:
             data = data.set_index("time", drop=True)
             if "q" not in data.columns:
                 data["q"] = 0
-            return PQResult(TimeSeriesEnum(ts_type), ts_uuid, ts_uuid, data)
+            return TimeSeriesKey(ts_uuid, TimeSeriesEnum(ts_type)), ComplexPower(data)
 
         else:
             raise IOError(
@@ -296,6 +297,4 @@ class PrimaryData:
 
     @classmethod
     def create_empty(cls):
-        return cls(
-            PQResultDict.create_empty(SystemParticipantsEnum.PRIMARY_DATA), dict()
-        )
+        return cls(ComplexPowerDict.empty(), dict())

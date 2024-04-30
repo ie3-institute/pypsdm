@@ -83,8 +83,8 @@ def to_date_time(zoned_date_time: str) -> datetime:
         day = int(zoned_date_time[8:10])
         hour = int(zoned_date_time[11:13])
         minute = int(zoned_date_time[14:16])
-    except IndexError:
-        raise IOError(f"Could not parse time stamp: {zoned_date_time}")
+    except Exception:
+        return pd.to_datetime(zoned_date_time)
     return datetime(year=year, month=month, day=day, hour=hour, minute=minute)
 
 

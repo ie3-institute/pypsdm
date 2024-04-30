@@ -1,11 +1,23 @@
+from __future__ import annotations
+
+import concurrent.futures
 import copy
+import os
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from typing import Self
+from datetime import datetime
+from functools import partial
+from typing import TYPE_CHECKING, Self, Tuple
 
 from loguru import logger
 
 from pypsdm.errors import ComparisonError
+from pypsdm.io.utils import check_filter
+from pypsdm.models.enums import EntitiesEnum
+
+if TYPE_CHECKING:
+    from pypsdm.models.input.container.grid import GridContainer
+    from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
 
 
 class ContainerMixin(ABC):
@@ -28,7 +40,7 @@ class ContainerMixin(ABC):
 
     @classmethod
     @abstractmethod
-    def create_empty(cls) -> Self:
+    def empty(cls) -> Self:
         pass
 
     def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):
@@ -89,3 +101,58 @@ class ContainerMixin(ABC):
             raise ComparisonError(
                 f"Comparison of {type(self)} failed.", differences=errors
             )
+
+
+class ResultContainerMixin(ContainerMixin):
+    @classmethod
+    @abstractmethod
+    def entity_keys(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def entities_from_csv(
+        cls,
+        simulation_data_path: str,
+        simulation_end: datetime | None = None,
+        grid_container: GridContainer | None = None,
+        delimiter: str | None = None,
+        filter_start: datetime | None = None,
+        filter_end: datetime | None = None,
+    ) -> dict[EntitiesEnum, EntitiesResultDictMixin]:
+        from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+
+        res_files = [
+            f for f in os.listdir(simulation_data_path) if f.endswith("_res.csv")
+        ]
+        if len(res_files) == 0:
+            raise FileNotFoundError(
+                f"No simulation results found in '{simulation_data_path}'."
+            )
+
+        entity_values = cls.entity_keys()
+
+        check_filter(filter_start, filter_end)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            # warning: Breakpoints in the underlying method might not work when started from ipynb
+            pa_from_csv_for_participant = partial(
+                EntitiesResultDictMixin.from_csv_for_entity,
+                simulation_data_path,
+                simulation_end,
+                grid_container,
+                delimiter=delimiter,
+            )
+            participant_results = executor.map(
+                pa_from_csv_for_participant,
+                entity_values,
+            )
+            participant_result_map = {}
+            for participant_result in participant_results:
+                if isinstance(participant_result, Tuple):
+                    e, participant = participant_result
+                    raise IOError(
+                        f"Error reading participant result for: {participant}"
+                    ) from e
+                participant_result_map[participant_result.entity_type()] = (
+                    participant_result
+                )
+        return participant_result_map

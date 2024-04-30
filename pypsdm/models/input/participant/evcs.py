@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from string import Template
 
-from pypsdm.models.enums import SystemParticipantsEnum
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.participant.participant import SystemParticipants
 
 
@@ -12,7 +12,7 @@ class EvChargingStations(SystemParticipants):
         return super().__eq__(other)
 
     @staticmethod
-    def get_enum() -> SystemParticipantsEnum:
+    def get_enum() -> EntitiesEnum:
         return SystemParticipantsEnum.EV_CHARGING_STATION
 
     @property
