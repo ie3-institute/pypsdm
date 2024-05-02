@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import pandas as pd
 
+from pypsdm.db.weather.models import WeatherValue
 from pypsdm.models.ts.base import TIME_COLUMN_NAME, EntityKey
 from pypsdm.models.ts.types import (
     ComplexPower,
@@ -8,6 +11,8 @@ from pypsdm.models.ts.types import (
     ComplexVoltage,
     ComplexVoltageDict,
     ComplexVoltagePower,
+    CoordinateWeather,
+    WeatherDict,
 )
 
 
@@ -178,3 +183,55 @@ def test_voltage_power():
     vp = get_voltage_power_data()
     v = vp.as_complex_voltage()
     pd.testing.assert_series_equal(vp.v_mag, v.v_mag)
+
+
+def test_weather_from_value_list():
+    weather_value1 = WeatherValue(
+        time=datetime(2021, 1, 1, 0, 0),
+        coordinate_id=1,
+        aswdifd_s=1,
+        aswdir_s=2,
+        t2m=3,
+        u131m=4,
+        v131m=5,
+    )
+    weather_value2 = WeatherValue(
+        time=datetime(2021, 1, 1, 2, 0),
+        coordinate_id=1,
+        aswdifd_s=6,
+        aswdir_s=7,
+        t2m=8,
+        u131m=9,
+        v131m=10,
+    )
+
+    values = [weather_value1, weather_value2]
+    df = CoordinateWeather.df_from_value_list(values)
+    expected_cols = set(CoordinateWeather.attributes())
+    expected_cols.add("coordinate_id")
+    assert set(df.columns) == expected_cols
+    assert set(df.index) == set([weather_value1.time, weather_value2.time])
+
+    weather_value2.coordinate_id = 2
+    dct = WeatherDict.from_value_list(values)
+    assert set(dct.keys()) == set([1, 2])
+
+
+def test_weather_add_mult():
+    data = pd.DataFrame(
+        {
+            "diffuse_irradiance": [1, 2, 3],
+            "direct_irradiance": [4, 5, 6],
+            "temperature": [7, 8, 9],
+            "wind_velocity_u": [10, 11, 12],
+            "wind_velocity_v": [13, 14, 15],
+        },
+        index=pd.date_range("2021-01-01", periods=3, freq="H"),
+    )
+    data.index.name = TIME_COLUMN_NAME
+    weather = CoordinateWeather(data)
+    weather2 = CoordinateWeather(data)
+    res = weather + weather2
+    pd.testing.assert_frame_equal(res.data, data * 2, check_dtype=False)
+    res = weather + CoordinateWeather.empty()
+    pd.testing.assert_frame_equal(res.data, data, check_dtype=False)

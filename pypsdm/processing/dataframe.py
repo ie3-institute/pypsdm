@@ -11,7 +11,10 @@ def add_df(a: pd.DataFrame, b: pd.DataFrame):
     Adds two dataframes with different indices in an event discrete manner.
     """
     if not a.columns.equals(b.columns):
-        raise ValueError("DataFrames have different columns")
+        diff = set(a.columns).symmetric_difference(set(b.columns))
+        raise ValueError(
+            f"DataFrames have different columns: {diff} not in both DataFrames."
+        )
 
     if len(a) == 0:
         return b

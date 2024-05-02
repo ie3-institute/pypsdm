@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Specific `Line(s)Result` and line utilisation calculation [#176](https://github.com/ie3-institute/pypsdm/issues/176)
 - Big refactoring of result types to extract more generic time series [#192](https://github.com/ie3-institute/pypsdm/pull/192)
 - Result types do not contain uuid and optional name anymore, but time series dicts now have Entity key that contain the information [#192](https://github.com/ie3-institute/pypsdm/pull/192)
+- Add WeatherDict data types and retrieval of weighted nodal weather [#193](https://github.com/ie3-institute/pypsdm/issues/193)
 
 ### Changed
 

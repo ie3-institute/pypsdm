@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from functools import reduce
-from typing import List, Self, Sequence, Union
+from typing import TYPE_CHECKING, List, Self, Sequence, Union
+
+from pandas import DataFrame
 
 from pypsdm.models.ts.base import K, TimeSeries, TimeSeriesDict
 from pypsdm.models.ts.mixins import (
@@ -10,9 +14,14 @@ from pypsdm.models.ts.mixins import (
     ComplexVoltageMixin,
     SocDictMixin,
     SocMixin,
+    WeatherDataDictMixin,
+    WeatherDataMixin,
 )
 from pypsdm.processing.dataframe import add_df
 from pypsdm.processing.series import Tuple, add_series
+
+if TYPE_CHECKING:
+    from pypsdm.db.weather.models import WeatherValue
 
 
 class ComplexPower(TimeSeries, ComplexPowerMixin):
@@ -170,3 +179,55 @@ class ComplexVoltagePowerDict(
 
     def complex_power_sum(self) -> ComplexPower:
         return ComplexPower.sum(list(self.values()))
+
+
+class CoordinateWeather(TimeSeries, WeatherDataMixin):
+
+    def __add__(self, other) -> Self:
+        return self.__class__(add_df(self.data, other.data))
+
+    def __mul__(self, other: float | int) -> Self:
+        return self.__class__(self.data * other)
+
+    __rmul__ = __mul__
+
+    @classmethod
+    def from_value_list(cls, values: list[WeatherValue]):
+        df = cls.df_from_value_list(values)
+        if df["coordinate_id"].nunique() > 1:
+            raise ValueError("Multiple coordinate ids in weather data")
+        df.drop(columns=["coordinate_id"], inplace=True)
+        return cls(df)
+
+    @staticmethod
+    def df_from_value_list(values: list[WeatherValue]):
+        from pypsdm.db.weather.models import WeatherValue
+
+        value_dicts = [value.model_dump() for value in values]
+        df = DataFrame(value_dicts, columns=WeatherValue.__table__.columns.keys())
+        df.rename(columns=WeatherValue.name_mapping(), inplace=True)
+        df.set_index("time", inplace=True, drop=True)
+        return df
+
+    @staticmethod
+    def attributes() -> List[str]:
+        return [
+            "diffuse_irradiance",
+            "direct_irradiance",
+            "temperature",
+            "wind_velocity_u",
+            "wind_velocity_v",
+        ]
+
+
+class WeatherDict(TimeSeriesDict[int, CoordinateWeather], WeatherDataDictMixin):
+
+    @classmethod
+    def from_value_list(cls, values: list[WeatherValue]):
+        df = CoordinateWeather.df_from_value_list(values)
+        grps = df.groupby("coordinate_id")
+        dct = {}
+        for coord_id, grp in grps:
+            grp = grp.drop(columns=["coordinate_id"])
+            dct[coord_id] = CoordinateWeather(grp)
+        return cls(dct)
