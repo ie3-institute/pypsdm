@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 
 
 class EntitiesResultDictMixin:
+    def uuids(self) -> set[str]:
+        return {key.uuid for key in self.keys()}  # type: ignore
 
     @classmethod
     @abstractmethod
@@ -142,7 +144,6 @@ class EntitiesResultDictMixin:
 
 
 class EmsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
@@ -167,7 +168,6 @@ class EmsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
 
 
 class LoadsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
@@ -192,7 +192,6 @@ class LoadsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
 
 
 class FixedFeedInsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
@@ -217,7 +216,6 @@ class FixedFeedInsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
 
 
 class PvsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
@@ -242,7 +240,6 @@ class PvsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
 
 
 class WecsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
@@ -267,7 +264,6 @@ class WecsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
 
 
 class StoragesResult(ComplexPowerWithSocDict[EntityKey], EntitiesResultDictMixin):
-
     def __init__(self, data: dict[EntityKey, ComplexPowerWithSoc]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
