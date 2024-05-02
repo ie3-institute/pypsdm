@@ -47,6 +47,7 @@ class WeatherValue(SQLModel, table=True):
     def name_mapping():
         return {
             "time": "time",
+            "coordinate_id": "coordinate_id",
             "aswdifd_s": "diffuse_irradiance",
             "aswdir_s": "direct_irradiance",
             "t2m": "temperature",
@@ -56,7 +57,7 @@ class WeatherValue(SQLModel, table=True):
 
 
 class Coordinate(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int = Field(primary_key=True)
     coordinate: str = Field()
 
     def __eq__(self, other):
@@ -86,3 +87,8 @@ class Coordinate(SQLModel, table=True):
     @property
     def x(self) -> float:
         return self.point.x
+
+    @staticmethod
+    def from_xy(id, x, y):
+        wkb = Point(x, y).wkb_hex
+        return Coordinate(id=id, coordinate=wkb)

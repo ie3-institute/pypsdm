@@ -68,7 +68,7 @@ class WeatherProxy:
         self,
         x: float,
         y: float,
-        n: int,
+        n: int,  # amount of closest coordinates to return
         schema_name="public",
         table_name="coordinate",
         id_column="id",
@@ -125,74 +125,3 @@ def create_engine_from_params(
     return create_engine(
         f"postgresql://{username}:{password}@{host}:{port}/{database}", echo=echo
     )
-
-
-def weighted_interpolation_coordinates(
-    target: tuple[float, float],
-    nearest_coords: list[tuple[Coordinate, float]],
-) -> list[tuple[Coordinate, float]]:
-    """
-    Given a list of nearest surrounding cordinates with respect to a target coordinate,
-    find the nearest coordinate in each quadrant and weigh them by their distance to
-    the target.
-
-    Requires at least one coordinate in each quadrant (meaing top left, top right,
-    bottom left, bottom right).
-
-    Args:
-        target (tuple[float, float]): Target coordinate (x (longitude), y (latitude))
-        nearest_coords (list[tuple[Coordinate, float]]): List of nearest coordinates
-            with their distances to the target
-    """
-
-    x, y = target
-
-    # Check if the queried coordinate is surrounded in each quadrant
-    quadrants: list[tuple[Coordinate | None, float]] = [
-        (None, float("inf")) for _ in range(4)
-    ]  # [Q1, Q2, Q3, Q4]
-    for point, distance in nearest_coords:
-
-        if point.x < x and point.y > y:
-            if quadrants[0][0]:
-                if distance < quadrants[0][1]:
-                    quadrants[0] = (point, distance)
-            else:
-                quadrants[0] = (point, distance)
-
-        if point.x > x and point.y > y:
-            if quadrants[1][0]:
-                if distance < quadrants[1][1]:
-                    quadrants[1] = (point, distance)
-            else:
-                quadrants[1] = (point, distance)
-
-        if point.x < x and point.y < y:
-            if quadrants[2][0]:
-                if distance < quadrants[2][1]:
-                    quadrants[2] = (point, distance)
-            else:
-                quadrants[2] = (point, distance)
-
-        if point.x > x and point.y < y:
-            if quadrants[3][0]:
-                if distance < quadrants[3][1]:
-                    quadrants[3] = (point, distance)
-            else:
-                quadrants[3] = (point, distance)
-
-    acc_dist = 0
-    for q in quadrants:
-        if q[0]:
-            acc_dist += q[1]
-        else:
-            raise ValueError("Not all quadrants are filled")
-
-    n = len(quadrants)
-    weighted_coordinates = []
-    for q in quadrants:
-        if q[0]:
-            weight = (1 - (q[1] / acc_dist)) / (n - 1)
-            weighted_coordinates.append((q[0], weight))
-
-    return weighted_coordinates

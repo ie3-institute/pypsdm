@@ -1,7 +1,7 @@
 import math
 
 from pypsdm.db.weather.models import Coordinate
-from pypsdm.db.weather.proxy import weighted_interpolation_coordinates
+from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 
 
 def test_weighted_interpolation_coordinates():

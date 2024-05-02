@@ -210,3 +210,44 @@ class ComplexVoltageDictMixin(VoltageMagnitudeDictMixin, VoltageAngleDictMixin):
     ) -> DataFrame:
         # ffill not supported for complex numbers
         return self.attr_df("v_complex", False, favor_ids, v_rated)
+
+
+class WeatherDataMixin(AttributeMixin):
+
+    @property
+    def diffuse_irradiance(self):
+        return self.data["diffuse_irradiance"]  # type: ignore
+
+    @property
+    def direct_irradiance(self):
+        return self.data["direct_irradiance"]  # type: ignore
+
+    @property
+    def temperature(self):
+        return self.data["temperature"]  # type: ignore
+
+    @property
+    def wind_velocity_u(self):
+        return self.data["wind_velocity_u"]  # type: ignore
+
+    @property
+    def wind_velocity_v(self):
+        return self.data["wind_velocity_v"]  # type: ignore
+
+
+class WeatherDataDictMixin(TimeSeriesDictMixin):
+
+    def diffuse_irradiance(self, ffill=True, favor_ids=True) -> DataFrame:
+        return self.attr_df("diffuse_irradiance", ffill, favor_ids)
+
+    def direct_irradiance(self, ffill=True, favor_ids=True) -> DataFrame:
+        return self.attr_df("direct_irradiance", ffill, favor_ids)
+
+    def temperature(self, ffill=True, favor_ids=True) -> DataFrame:
+        return self.attr_df("temperature", ffill, favor_ids)
+
+    def wind_velocity_u(self, ffill=True, favor_ids=True) -> DataFrame:
+        return self.attr_df("wind_velocity_u", ffill, favor_ids)
+
+    def wind_velocity_v(self, ffill=True, favor_ids=True) -> DataFrame:
+        return self.attr_df("wind_velocity_v", ffill, favor_ids)
