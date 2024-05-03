@@ -116,7 +116,12 @@ def create_engine_from_env(echo=False) -> Engine:
     port = os.getenv("WEATHER_DB_PORT")
     database = os.getenv("WEATHER_DB_NAME")
     DATABASE_URL = f"postgresql://{username}:{password}@{host}:{port}/{database}"
-    return create_engine(DATABASE_URL, echo=echo)
+    try:
+        return create_engine(DATABASE_URL, echo=echo)
+    except Exception as e:
+        raise ValueError(
+            f"Failed to create engine with database url: {DATABASE_URL}"
+        ) from e
 
 
 def create_engine_from_params(
