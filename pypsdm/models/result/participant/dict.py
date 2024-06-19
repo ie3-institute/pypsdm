@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from datetime import datetime
 from typing import TYPE_CHECKING, Self, Tuple, Type
 
@@ -12,7 +12,7 @@ from loguru import logger
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
 from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.entity import Entities
-from pypsdm.models.ts.base import EntityKey, TimeSeries
+from pypsdm.models.ts.base import EntityKey, SubGridKey, TimeSeries
 from pypsdm.models.ts.types import (
     ComplexPower,
     ComplexPowerDict,
@@ -24,9 +24,7 @@ if TYPE_CHECKING:
     from pypsdm.models.input.container.grid import GridContainer
 
 
-class EntitiesResultDictMixin:
-    def uuids(self) -> set[str]:
-        return {key.uuid for key in self.keys()}  # type: ignore
+class ResultDictMixin:
 
     @classmethod
     @abstractmethod
@@ -48,12 +46,147 @@ class EntitiesResultDictMixin:
         filter_end: datetime | None = None,
         must_exist: bool = True,
     ) -> Self:
+        raise NotImplementedError
+
+    @abstractmethod
+    def to_csv(
+            self,
+            path: str,
+            delimiter=",",
+            mkdirs=False,
+            resample_rate: str | None = None,
+    ):
+        return NotImplemented
+
+    @staticmethod
+    def from_csv_for_entity(
+        simulation_data_path: str,
+        simulation_end: datetime | None,
+        grid_container: GridContainer | None,
+        entity: EntitiesEnum,
+        delimiter: str | None = None,
+    ) -> "ResultDictMixin" | Tuple[Exception, EntitiesEnum]:
+        try:
+            if grid_container:
+                input_entities = grid_container.get_with_enum(entity)
+            else:
+                input_entities = None
+            dict_type = entity.get_result_dict_type()
+            return dict_type.from_csv(
+                simulation_data_path,
+                delimiter=delimiter,
+                simulation_end=simulation_end,
+                input_entities=input_entities,
+                must_exist=False,
+            )
+
+        except Exception as e:
+            return e, entity
+
+
+class SubgridResultDictMixin(ResultDictMixin):
+    def subgrids(self) -> set[int]:
+        return {key.subgrid for key in self.keys()}  # type: ignore
+
+    @classmethod
+    def from_csv(
+            cls,
+            simulation_data_path: str,
+            delimiter: str | None = None,
+            simulation_end: datetime | None = None,
+            input_entities: Entities | None = None,
+            filter_start: datetime | None = None,
+            filter_end: datetime | None = None,
+            must_exist: bool = True,
+    ) -> Self:
         check_filter(filter_start, filter_end)
 
         file_name = cls.entity_type().get_csv_result_file_name()
         path = get_file_path(simulation_data_path, file_name)
         if path.exists():
-            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, delimiter)
+            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, "subgrid", delimiter)
+        else:
+            if must_exist:
+                raise FileNotFoundError(f"File {path} does not exist")
+            else:
+                return cls.empty()  # type: ignore
+
+        if len(grpd_df) == 0:
+            return cls.empty()  # type: ignore
+
+        if simulation_end is None:
+            simulation_end = to_date_time(grpd_df["time"].max().max())  # type: ignore
+
+        ts_dict = {}
+        for key, grp in grpd_df:
+            result_key = None
+
+            if isinstance(key, int):
+                result_key = SubGridKey(key, None)
+            else:
+                logger.warning("Entity {} is not a subgrid result.".format(key))
+
+            ts = cls.result_type()(grp, simulation_end)
+            ts_dict[result_key] = ts
+
+        res = cls(ts_dict)
+        return (
+            res
+            if not filter_start
+            else res.filter_for_time_interval(filter_start, filter_end)  # type: ignore
+        )
+
+    def to_csv(
+            self,
+            path: str,
+            delimiter=",",
+            mkdirs=False,
+            resample_rate: str | None = None,
+    ):
+        if mkdirs:
+            os.makedirs(path, exist_ok=True)
+
+        file_name = self.entity_type().get_csv_result_file_name()
+
+        def prepare_data(data: pd.DataFrame, subgrid: int):
+            data = data.copy()
+            data = (
+                data.resample("60s").ffill().resample(resample_rate).mean()
+                if resample_rate
+                else data
+            )
+            data.index.name = "time"
+            return data
+
+        dfs = [
+            prepare_data(participant.data, entity_key.subgrid)
+            for entity_key, participant in self.items()  # type: ignore
+        ]
+        df = pd.concat(dfs)
+        df.to_csv(os.path.join(path, file_name), sep=delimiter, index=True)
+
+
+class EntitiesResultDictMixin(ResultDictMixin):
+    def uuids(self) -> set[str]:
+        return {key.uuid for key in self.keys()}  # type: ignore
+
+    @classmethod
+    def from_csv(
+        cls,
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: datetime | None = None,
+        input_entities: Entities | None = None,
+        filter_start: datetime | None = None,
+        filter_end: datetime | None = None,
+        must_exist: bool = True,
+    ) -> Self:
+        check_filter(filter_start, filter_end)
+
+        file_name = cls.entity_type().get_csv_result_file_name()
+        path = get_file_path(simulation_data_path, file_name)
+        if path.exists():
+            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, "input_model", delimiter)
         else:
             if must_exist:
                 raise FileNotFoundError(f"File {path} does not exist")
@@ -87,11 +220,11 @@ class EntitiesResultDictMixin:
         )
 
     def to_csv(
-        self,
-        path: str,
-        delimiter=",",
-        mkdirs=False,
-        resample_rate: str | None = None,
+            self,
+            path: str,
+            delimiter=",",
+            mkdirs=False,
+            resample_rate: str | None = None,
     ):
         if mkdirs:
             os.makedirs(path, exist_ok=True)
@@ -116,31 +249,6 @@ class EntitiesResultDictMixin:
         ]
         df = pd.concat(dfs)
         df.to_csv(os.path.join(path, file_name), sep=delimiter, index=True)
-
-    @staticmethod
-    def from_csv_for_entity(
-        simulation_data_path: str,
-        simulation_end: datetime | None,
-        grid_container: GridContainer | None,
-        entity: EntitiesEnum,
-        delimiter: str | None = None,
-    ) -> "EntitiesResultDictMixin" | Tuple[Exception, EntitiesEnum]:
-        try:
-            if grid_container:
-                input_entities = grid_container.get_with_enum(entity)
-            else:
-                input_entities = None
-            dict_type = entity.get_result_dict_type()
-            return dict_type.from_csv(
-                simulation_data_path,
-                delimiter=delimiter,
-                simulation_end=simulation_end,
-                input_entities=input_entities,
-                must_exist=False,
-            )
-
-        except Exception as e:
-            return (e, entity)
 
 
 class EmsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):

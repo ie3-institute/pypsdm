@@ -9,6 +9,7 @@ from pypsdm.models.result.grid.line import LinesResult
 from pypsdm.models.result.grid.node import NodesResult
 from pypsdm.models.result.grid.switch import SwitchesResult
 from pypsdm.models.result.grid.transformer import Transformers2WResult
+from pypsdm.models.result.grid.congestions import CongestionsResult
 from pypsdm.models.ts.base import EntityKey
 
 
@@ -18,6 +19,7 @@ class RawGridResultContainer(ResultContainerMixin):
     lines: LinesResult
     transformers_2w: Transformers2WResult
     switches: SwitchesResult
+    congestions: CongestionsResult
 
     def __init__(self, dct):
         def get_or_empty(key: RawGridElementsEnum, dict_type):
@@ -36,6 +38,7 @@ class RawGridResultContainer(ResultContainerMixin):
             RawGridElementsEnum.TRANSFORMER_2_W, Transformers2WResult
         )
         self.switches = get_or_empty(RawGridElementsEnum.SWITCH, SwitchesResult)
+        self.congestions = get_or_empty(RawGridElementsEnum.SUBGRID, CongestionsResult)
 
     def __len__(self):
         return sum(len(v) for v in self.to_dict().values())
@@ -54,6 +57,7 @@ class RawGridResultContainer(ResultContainerMixin):
             RawGridElementsEnum.LINE: self.lines,
             RawGridElementsEnum.TRANSFORMER_2_W: self.transformers_2w,
             RawGridElementsEnum.SWITCH: self.switches,
+            RawGridElementsEnum.SUBGRID: self.congestions
         }
         if not include_empty:
             res = {k: v for k, v in res.items() if v}
