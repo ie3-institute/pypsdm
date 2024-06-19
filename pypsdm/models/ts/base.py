@@ -1,5 +1,5 @@
 import copy
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import UserDict
 from dataclasses import dataclass
 from datetime import datetime
@@ -200,7 +200,14 @@ class TimeSeries:
 
 
 @dataclass(frozen=True)
-class EntityKey:
+class ResultKey:
+    @abstractmethod
+    def id(self):
+        return NotImplemented
+
+
+@dataclass(frozen=True)
+class EntityKey(ResultKey):
     uuid: str
     name: str | None = None
 
@@ -217,6 +224,26 @@ class EntityKey:
     @property
     def id(self) -> str:
         return self.name if self.name else self.uuid
+
+
+@dataclass(frozen=True)
+class SubGridKey(ResultKey):
+    subgrid: int
+    name: str | None = None
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, SubGridKey):
+            return self.subgrid == other.subgrid
+        if isinstance(other, int):
+            return self.subgrid == other
+        return False
+
+    def __hash__(self) -> int:
+        return hash(self.subgrid)
+
+    @property
+    def id(self) -> str:
+        return self.name if self.name else self.subgrid
 
 
 class TimeSeriesDict(UserDict[K, V]):

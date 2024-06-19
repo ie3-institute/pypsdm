@@ -4,7 +4,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Type, TypeVar
 
 if TYPE_CHECKING:
-    from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+    from pypsdm.models.result.participant.dict import ResultDictMixin
     from pypsdm.models.ts.base import TimeSeries
 
 
@@ -28,7 +28,10 @@ class EntitiesEnum(Enum):
         return self.value + "_input.csv"
 
     def get_csv_result_file_name(self):
-        return self.value + "_res.csv"
+        if self.value == "subgrid":
+            return "congestion_res.csv"
+        else:
+            return self.value + "_res.csv"
 
     def get_type_file_name(self):
         assert self.has_type() is True
@@ -42,6 +45,7 @@ class EntitiesEnum(Enum):
         from pypsdm.models.result.grid.connector import ConnectorCurrent
         from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
+        from pypsdm.models.result.grid.congestions import CongestionResult
         from pypsdm.models.ts.types import (
             ComplexPower,
             ComplexPowerWithSoc,
@@ -63,6 +67,8 @@ class EntitiesEnum(Enum):
                     return ConnectorCurrent
                 case RawGridElementsEnum.SWITCH:
                     return SwitchResult
+                case RawGridElementsEnum.SUBGRID:
+                    return CongestionResult
                 case _:
                     raise NotImplementedError(
                         f"Result type {self} not implemented yet!"
@@ -70,11 +76,12 @@ class EntitiesEnum(Enum):
         else:
             raise ValueError(f"Entity type {self} not supported!")
 
-    def get_result_dict_type(self) -> Type["EntitiesResultDictMixin"]:
+    def get_result_dict_type(self) -> Type["ResultDictMixin"]:
         from pypsdm.models.result.grid.line import LinesResult
         from pypsdm.models.result.grid.node import NodesResult
         from pypsdm.models.result.grid.switch import SwitchesResult
         from pypsdm.models.result.grid.transformer import Transformers2WResult
+        from pypsdm.models.result.grid.congestions import CongestionsResult
         from pypsdm.models.result.participant.dict import (
             EmsResult,
             EvcsResult,
@@ -97,6 +104,8 @@ class EntitiesEnum(Enum):
                 return Transformers2WResult
             case RawGridElementsEnum.SWITCH:
                 return SwitchesResult
+            case RawGridElementsEnum.SUBGRID:
+                return CongestionsResult
             case SystemParticipantsEnum.ELECTRIC_VEHICLE:
                 return EvsResult
             case SystemParticipantsEnum.EV_CHARGING_STATION:
@@ -158,6 +167,7 @@ class RawGridElementsEnum(EntitiesEnum):
     TRANSFROMER_3_W = "transformer_3_w"
     SWITCH = "switch"
     MEASUREMENT_UNIT = "measurement_unit"
+    SUBGRID = "subgrid"
 
 
 class ThermalGridElementsEnum(EntitiesEnum):

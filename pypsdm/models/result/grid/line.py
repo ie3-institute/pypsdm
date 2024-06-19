@@ -23,7 +23,7 @@ class LinesResult(ConnectorCurrentDict[EntityKey], EntitiesResultDictMixin):
         i_max = lines.i_max
         data = pd.DataFrame(
             {
-                line_uuid: line.utilisation(i_max[line_uuid.uuid], side)
+                line_uuid.uuid: line.utilisation(i_max[line_uuid.uuid], side)
                 for line_uuid, line in self.items()
             }
         ).sort_index()
