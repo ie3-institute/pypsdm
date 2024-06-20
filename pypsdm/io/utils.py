@@ -89,7 +89,7 @@ def to_date_time(zoned_date_time: str) -> datetime:
 
 
 def csv_to_grpd_df(
-        file_name: str, simulation_data_path: str, by: str, delimiter: str | None = None
+    file_name: str, simulation_data_path: str, by: str, delimiter: str | None = None
 ) -> DataFrameGroupBy:
     """
     Reads in a PSDM csv results file cleans it up and groups it by input_archive model.

@@ -23,9 +23,22 @@ v_max,v_min,line,subgrid,time,transformer,voltage
         f.write(data_str)
 
     congestions = CongestionsResult.from_csv(tmp_path)
-    assert set(congestions.keys()) == {SubGridKey(1), SubGridKey(2), SubGridKey(3), SubGridKey(4), SubGridKey(5)}
+    assert set(congestions.keys()) == {
+        SubGridKey(1),
+        SubGridKey(2),
+        SubGridKey(3),
+        SubGridKey(4),
+        SubGridKey(5),
+    }
     print(set(congestions[1].data.columns))
-    assert set(congestions[1].data.columns) == {"v_max", "transformer", "voltage", "subgrid", "v_min", "line"}
+    assert set(congestions[1].data.columns) == {
+        "v_max",
+        "transformer",
+        "voltage",
+        "subgrid",
+        "v_min",
+        "line",
+    }
 
 
 def test_to_csv(tmp_path):
@@ -48,7 +61,9 @@ def test_to_csv(tmp_path):
             data[attr] = [False, False, False, False]
         return data
 
-    res_dict = {SubGridKey(s): CongestionResult(get_congestion_data(s)) for s in [1, 2, 3]}
+    res_dict = {
+        SubGridKey(s): CongestionResult(get_congestion_data(s)) for s in [1, 2, 3]
+    }
 
     congestions = CongestionsResult(res_dict)
 

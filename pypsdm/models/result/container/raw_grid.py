@@ -57,7 +57,7 @@ class RawGridResultContainer(ResultContainerMixin):
             RawGridElementsEnum.LINE: self.lines,
             RawGridElementsEnum.TRANSFORMER_2_W: self.transformers_2w,
             RawGridElementsEnum.SWITCH: self.switches,
-            RawGridElementsEnum.SUBGRID: self.congestions
+            RawGridElementsEnum.SUBGRID: self.congestions,
         }
         if not include_empty:
             res = {k: v for k, v in res.items() if v}

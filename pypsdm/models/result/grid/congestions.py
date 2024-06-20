@@ -9,7 +9,7 @@ from pypsdm.models.ts.base import (
     SubGridKey,
     TimeSeries,
     TimeSeriesDict,
-    TimeSeriesDictMixin
+    TimeSeriesDictMixin,
 )
 
 
@@ -56,7 +56,7 @@ class CongestionResult(TimeSeries):
 class CongestionsResult(
     TimeSeriesDict[SubGridKey, CongestionResult],
     TimeSeriesDictMixin,
-    SubgridResultDictMixin
+    SubgridResultDictMixin,
 ):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)

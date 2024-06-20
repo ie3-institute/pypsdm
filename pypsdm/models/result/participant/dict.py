@@ -50,11 +50,11 @@ class ResultDictMixin:
 
     @abstractmethod
     def to_csv(
-            self,
-            path: str,
-            delimiter=",",
-            mkdirs=False,
-            resample_rate: str | None = None,
+        self,
+        path: str,
+        delimiter=",",
+        mkdirs=False,
+        resample_rate: str | None = None,
     ):
         return NotImplemented
 
@@ -90,21 +90,23 @@ class SubgridResultDictMixin(ResultDictMixin):
 
     @classmethod
     def from_csv(
-            cls,
-            simulation_data_path: str,
-            delimiter: str | None = None,
-            simulation_end: datetime | None = None,
-            input_entities: Entities | None = None,
-            filter_start: datetime | None = None,
-            filter_end: datetime | None = None,
-            must_exist: bool = True,
+        cls,
+        simulation_data_path: str,
+        delimiter: str | None = None,
+        simulation_end: datetime | None = None,
+        input_entities: Entities | None = None,
+        filter_start: datetime | None = None,
+        filter_end: datetime | None = None,
+        must_exist: bool = True,
     ) -> Self:
         check_filter(filter_start, filter_end)
 
         file_name = cls.entity_type().get_csv_result_file_name()
         path = get_file_path(simulation_data_path, file_name)
         if path.exists():
-            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, "subgrid", delimiter)
+            grpd_df = csv_to_grpd_df(
+                file_name, simulation_data_path, "subgrid", delimiter
+            )
         else:
             if must_exist:
                 raise FileNotFoundError(f"File {path} does not exist")
@@ -137,11 +139,11 @@ class SubgridResultDictMixin(ResultDictMixin):
         )
 
     def to_csv(
-            self,
-            path: str,
-            delimiter=",",
-            mkdirs=False,
-            resample_rate: str | None = None,
+        self,
+        path: str,
+        delimiter=",",
+        mkdirs=False,
+        resample_rate: str | None = None,
     ):
         if mkdirs:
             os.makedirs(path, exist_ok=True)
@@ -186,7 +188,9 @@ class EntitiesResultDictMixin(ResultDictMixin):
         file_name = cls.entity_type().get_csv_result_file_name()
         path = get_file_path(simulation_data_path, file_name)
         if path.exists():
-            grpd_df = csv_to_grpd_df(file_name, simulation_data_path, "input_model", delimiter)
+            grpd_df = csv_to_grpd_df(
+                file_name, simulation_data_path, "input_model", delimiter
+            )
         else:
             if must_exist:
                 raise FileNotFoundError(f"File {path} does not exist")
@@ -220,11 +224,11 @@ class EntitiesResultDictMixin(ResultDictMixin):
         )
 
     def to_csv(
-            self,
-            path: str,
-            delimiter=",",
-            mkdirs=False,
-            resample_rate: str | None = None,
+        self,
+        path: str,
+        delimiter=",",
+        mkdirs=False,
+        resample_rate: str | None = None,
     ):
         if mkdirs:
             os.makedirs(path, exist_ok=True)

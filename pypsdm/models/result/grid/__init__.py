@@ -14,5 +14,5 @@ __all__ = [
     "LinesResult",
     "SwitchResult",
     "SwitchesResult",
-    "CongestionsResult"
+    "CongestionsResult",
 ]
