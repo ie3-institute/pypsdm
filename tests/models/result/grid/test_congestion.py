@@ -55,4 +55,3 @@ def test_to_csv(tmp_path):
     congestions.to_csv(tmp_path)
     congestions2 = CongestionsResult.from_csv(tmp_path)
     assert congestions == congestions2
-

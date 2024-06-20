@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Self, Tuple, Type
 
