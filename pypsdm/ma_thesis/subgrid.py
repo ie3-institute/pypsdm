@@ -2,6 +2,7 @@ from pandas import DataFrame
 
 from pypsdm import GridResultContainer, GridContainer, GridWithResults
 
+
 class SubGrid:
     nr: int
     name: str

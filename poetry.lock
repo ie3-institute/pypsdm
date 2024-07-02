@@ -613,24 +613,6 @@ files = [
 ]
 
 [[package]]
-name = "deepdiff"
-version = "7.0.1"
-description = "Deep Difference and Search of any Python object/data. Recreate objects by adding adding deltas to each other."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "deepdiff-7.0.1-py3-none-any.whl", hash = "sha256:447760081918216aa4fd4ca78a4b6a848b81307b2ea94c810255334b759e1dc3"},
-    {file = "deepdiff-7.0.1.tar.gz", hash = "sha256:260c16f052d4badbf60351b4f77e8390bee03a0b516246f6839bc813fb429ddf"},
-]
-
-[package.dependencies]
-ordered-set = ">=4.1.0,<4.2.0"
-
-[package.extras]
-cli = ["click (==8.1.7)", "pyyaml (==6.0.1)"]
-optimize = ["orjson"]
-
-[[package]]
 name = "defusedxml"
 version = "0.7.1"
 description = "XML bomb protection for Python stdlib modules"
@@ -2056,20 +2038,6 @@ files = [
 et-xmlfile = "*"
 
 [[package]]
-name = "ordered-set"
-version = "4.1.0"
-description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8"},
-    {file = "ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"},
-]
-
-[package.extras]
-dev = ["black", "mypy", "pytest"]
-
-[[package]]
 name = "overrides"
 version = "7.7.0"
 description = "A decorator to automatically detect mismatch when overriding a method."
@@ -2090,35 +2058,6 @@ files = [
     {file = "packaging-24.0-py3-none-any.whl", hash = "sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5"},
     {file = "packaging-24.0.tar.gz", hash = "sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"},
 ]
-
-[[package]]
-name = "pandapower"
-version = "2.14.6"
-description = "An easy to use open source tool for power system modeling, analysis and optimization with a high degree of automation."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pandapower-2.14.6.zip", hash = "sha256:454f03d3c8d77e570d3136fc8ae65a787fea384d6bf7c7c705ba143ed2b448d1"},
-]
-
-[package.dependencies]
-deepdiff = "*"
-networkx = ">=2.5"
-numpy = "*"
-packaging = "*"
-pandas = ">=1.0"
-scipy = "*"
-tqdm = "*"
-
-[package.extras]
-all = ["cryptography", "geojson", "geopandas", "igraph", "matplotlib", "matpowercaseframes", "numba (>=0.25)", "numpydoc", "openpyxl", "ortools", "plotly (>=3.1.1)", "power-grid-model-io", "psycopg2", "pytest (>=8.1,<9.0)", "pytest-xdist", "sphinx", "sphinx_rtd_theme", "xlsxwriter"]
-converter = ["matpowercaseframes"]
-docs = ["numpydoc", "sphinx", "sphinx_rtd_theme"]
-fileio = ["cryptography", "geopandas", "openpyxl", "psycopg2", "xlsxwriter"]
-performance = ["lightsim2grid", "numba", "ortools"]
-pgm = ["power-grid-model-io"]
-plotting = ["geojson", "geopandas", "igraph", "matplotlib", "plotly"]
-test = ["pytest", "pytest-xdist"]
 
 [[package]]
 name = "pandas"
@@ -3346,29 +3285,6 @@ docs = ["matplotlib", "numpydoc (==1.1.*)", "sphinx", "sphinx-book-theme", "sphi
 test = ["pytest", "pytest-cov"]
 
 [[package]]
-name = "simbench"
-version = "1.5.3"
-description = "Electrical Power System Benchmark Models."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "simbench-1.5.3-py3-none-any.whl", hash = "sha256:4728e7d5894e34715436f4e73b6bb479045f37df97188f835330af6c5982b260"},
-    {file = "simbench-1.5.3.tar.gz", hash = "sha256:518db08a9a72180de4ce0668715f7cf796dc50a1b5a973b0b6ff0bbaf938e8a8"},
-]
-
-[package.dependencies]
-pandapower = ">=2.12.1"
-
-[package.extras]
-all = ["geojson", "geopandas", "igraph", "lightsim2grid (>=0.8.1)", "matplotlib", "nbmake", "numba (>=0.25)", "ortools", "plotly (>=3.1.1)", "pytest (>=8.1,<9.0)", "pytest-xdist"]
-docs = ["numpydoc", "sphinx", "sphinx-pyproject", "sphinx-rtd-theme"]
-fileio = ["geopandas"]
-performance = ["lightsim2grid (>=0.8.1)", "numba (>=0.25)", "ortools"]
-plotting = ["geojson", "geopandas", "igraph", "matplotlib", "plotly (>=3.1.1)"]
-test = ["nbmake", "pytest (>=8.1,<9.0)", "pytest-xdist"]
-tutorials = ["matplotlib"]
-
-[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -3607,26 +3523,6 @@ files = [
 ]
 
 [[package]]
-name = "tqdm"
-version = "4.66.4"
-description = "Fast, Extensible Progress Meter"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "tqdm-4.66.4-py3-none-any.whl", hash = "sha256:b75ca56b413b030bc3f00af51fd2c1a1a5eac6a0c1cca83cbb37a5c52abce644"},
-    {file = "tqdm-4.66.4.tar.gz", hash = "sha256:e4d936c9de8727928f3be6079590e97d9abfe8d39a590be678eb5919ffc186bb"},
-]
-
-[package.dependencies]
-colorama = {version = "*", markers = "platform_system == \"Windows\""}
-
-[package.extras]
-dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
-notebook = ["ipywidgets (>=6)"]
-slack = ["slack-sdk"]
-telegram = ["requests"]
-
-[[package]]
 name = "traitlets"
 version = "5.14.2"
 description = "Traitlets Python configuration system"
@@ -3806,4 +3702,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.11, <3.12"
-content-hash = "f2662ac50c70de471d57e7987858b4567d6d723298cae7157d28afdd4d16d09c"
+content-hash = "3a675113af310fd8f8729e6b511f0ca78f89bc5470a8114640e93ca3b0b1dc60"

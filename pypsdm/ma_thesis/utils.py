@@ -12,7 +12,7 @@ def get_base_path():
 
 
 def plot_output_folder():
-    return join(get_base_path(), "plot")
+    return join(get_base_path(), "plots")
 
 
 def get_result(result_folder_name, result_name, delimiter: str = ",") -> str:
