@@ -6,11 +6,12 @@ from pandas import Series
 from shapely.geometry import LineString
 
 from pypsdm.models.input.container.grid import GridContainer
-from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
+from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex, PURPLE
 
 
 def grid_plot(
     grid: GridContainer,
+    background: str = "open-street-map",
     node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
     line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
@@ -74,13 +75,15 @@ def grid_plot(
     fig.update_layout(
         # mapbox = {"zoom"=10},
         showlegend=False,
-        mapbox_style="open-street-map",
+        mapbox_style=background,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         mapbox=dict(
             center=dict(lat=center_lat, lon=center_lon),
             zoom=zoom,  # Adjust the zoom level as per the calculated heuristic
-            style="open-street-map",
+            style=background,
         ),
+        width=1920,
+        height=1080
     )
 
     return fig
@@ -171,7 +174,7 @@ def _add_node_trace(
         )
 
     def _node_trace(data, color):
-        text = data.apply(lambda node_data: to_hover_text(node_data), axis=1).to_list()
+        text = data.apply(lambda node_data: to_hover_text(node_data), axis=1)
 
         fig.add_trace(
             go.Scattermapbox(

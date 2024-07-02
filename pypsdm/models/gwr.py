@@ -107,6 +107,10 @@ class GridWithResults(ContainerMixin):
         return self.raw_grid_res.switches
 
     @property
+    def congestions_res(self):
+        return self.results.raw_grid.congestions
+
+    @property
     def participants_res(self):
         return self.results.participants
 

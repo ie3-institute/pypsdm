@@ -3,6 +3,7 @@ from .line import LinesResult
 from .node import NodesResult
 from .switch import SwitchesResult, SwitchResult
 from .transformer import Transformer2WResult, Transformers2WResult
+from .congestions import CongestionResult, CongestionsResult
 
 __all__ = [
     "ConnectorCurrent",
@@ -13,4 +14,5 @@ __all__ = [
     "LinesResult",
     "SwitchResult",
     "SwitchesResult",
+    "CongestionsResult"
 ]

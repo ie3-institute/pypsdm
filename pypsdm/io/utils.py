@@ -48,10 +48,10 @@ def get_file_path(path: str | Path, file_name: str):
 
 
 def read_csv(
-    path: str | Path,
-    file_name: str,
-    delimiter: str | None = None,
-    index_col: Optional[str] = None,
+        path: str | Path,
+        file_name: str,
+        delimiter: str | None = None,
+        index_col: Optional[str] = None,
 ) -> DataFrame:
     full_path = get_file_path(path, file_name)
     if not full_path.exists():
@@ -89,7 +89,7 @@ def to_date_time(zoned_date_time: str) -> datetime:
 
 
 def csv_to_grpd_df(
-    file_name: str, simulation_data_path: str, delimiter: str | None = None
+        file_name: str, simulation_data_path: str, by: str, delimiter: str | None = None
 ) -> DataFrameGroupBy:
     """
     Reads in a PSDM csv results file cleans it up and groups it by input_archive model.
@@ -97,6 +97,7 @@ def csv_to_grpd_df(
     Args:
         file_name: name of the file to read
         simulation_data_path: base directory of the result data
+        by: the column to group by
         delimiter: the csv delimiter
 
     Returns:
@@ -106,7 +107,7 @@ def csv_to_grpd_df(
 
     if "uuid" in data.columns:
         data = data.drop(columns=["uuid"])
-    return data.groupby(by="input_model")
+    return data.groupby(by=by)
 
 
 def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime]):
@@ -119,13 +120,13 @@ def check_filter(filter_start: Optional[datetime], filter_end: Optional[datetime
 
 
 def df_to_csv(
-    df: DataFrame,
-    path: Union[str, Path],
-    file_name: str,
-    mkdirs=False,
-    delimiter: str = ",",
-    index_label="uuid",
-    datetime_pattern=DateTimePattern.UTC_TIME_PATTERN,
+        df: DataFrame,
+        path: Union[str, Path],
+        file_name: str,
+        mkdirs=False,
+        delimiter: str = ",",
+        index_label="uuid",
+        datetime_pattern=DateTimePattern.UTC_TIME_PATTERN,
 ):
     df = df.copy(deep=True)
     if isinstance(path, Path):
