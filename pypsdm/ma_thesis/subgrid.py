@@ -32,13 +32,16 @@ class SubGridInfo:
     node_res: DataFrame
     node_min_max: DataFrame
     line_utilisation: DataFrame
+    line_max: DataFrame
+    transformer_max: DataFrame
 
     def __init__(self, sub_grid: SubGrid, results: GridResultContainer):
         from pypsdm.ma_thesis.analyse import analyse_nodes, analyse_lines
 
         self.sub_grid = sub_grid
         self.node_res, self.node_min_max = analyse_nodes(sub_grid.name, sub_grid.grid, results.nodes)
-        self.line_utilisation = analyse_lines(sub_grid.grid, results.lines)
+        self.line_utilisation, self.line_max = analyse_lines(sub_grid.name, sub_grid.grid, results.lines)
+
 
     def get_transformers(self) -> list[str]:
         return self.sub_grid.grid.transformers_2_w.data.index.to_list()

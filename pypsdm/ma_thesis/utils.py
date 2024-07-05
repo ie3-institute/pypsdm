@@ -1,6 +1,6 @@
 from os.path import join
 
-from pandas import Series
+from pandas import Series, DataFrame, Timedelta
 
 from definitions import ROOT_DIR
 from pypsdm import GridContainer, GridWithResults, GridResultContainer
@@ -15,6 +15,10 @@ def plot_output_folder():
     return join(get_base_path(), "plots")
 
 
+def get_output_path(result_base_name: str, filename: str):
+    return join(get_base_path(), "plots", result_base_name, filename)
+
+
 def get_result(result_folder_name, result_name, delimiter: str = ",") -> str:
     path = join(get_base_path(), "results", result_folder_name, result_name, "rawOutputData")
     return GridResultContainer.from_csv(path, delimiter=delimiter)
@@ -24,14 +28,14 @@ def read_scenarios(
         grid_name: str,
         result_folder_name: str,
         result_base_name: str,
+        result_suffix: str,
         grid_delimiter: str = ",",
         result_delimiter: str = ",",
 ) -> (GridContainer, dict[str, GridResultContainer]):
-    result_names = [result_base_name + "-" + str(nr) for nr in range(0, 3, 1)]
-
     grid_path = join(get_base_path(), "grids", grid_name)
-
     grid = GridContainer.from_csv(path=grid_path, delimiter=grid_delimiter)
+    
+    result_names = [result_base_name + "-" + str(nr) + "-" + result_suffix for nr in range(0, 3, 1)]
     results = {result_name: get_result(result_folder_name, result_name, result_delimiter) for result_name in
                result_names}
 
@@ -70,3 +74,12 @@ def get_subgrid_with_version(subgrid: int, subgrids: dict[str, dict[int, SubGrid
 
 def sort(dictionary: dict):
     return dict(sorted(dictionary.items()))
+
+
+def hours_index(df: DataFrame):
+    copy = df.copy()
+    new_index = [str(i) for i, _ in enumerate(copy.index.to_list())]
+
+    copy.index = new_index
+    return copy
+
