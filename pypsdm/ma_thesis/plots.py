@@ -18,7 +18,7 @@ def plot_voltage_with_congestion(
         subgrid: SubGridInfo,
         result: GridResultContainer,
         dotted: Union[float | list[float]] = None,
-        width: int = 8,
+        width: int = 12,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -29,7 +29,7 @@ def plot_voltage_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Spannung in pu", fontsize=11)
-    format_x_axis(axes[1], "time in h", len(subgrid.node_min_max.index) - 1, 12)
+    format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
@@ -41,7 +41,7 @@ def plot_line_utilization_with_congestion(
         subgrid: SubGridInfo,
         result: GridResultContainer,
         dotted: float = 100.0,
-        width: int = 8,
+        width: int = 12,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -52,7 +52,7 @@ def plot_line_utilization_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Auslastung in %", fontsize=11)
-    format_x_axis(axes[1], "time in h", len(subgrid.node_min_max.index) - 1, 12)
+    format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
@@ -65,7 +65,7 @@ def plot_transformer_utilization_with_congestion(
         transformer_uuids: list[str],
         gwr: GridWithResults,
         dotted: float = 100.0,
-        width: int = 8,
+        width: int = 12,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -78,7 +78,7 @@ def plot_transformer_utilization_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Auslastung in %", fontsize=11)
-    format_x_axis(axes[1], "time in h", len(subgrid.node_min_max.index) - 1, 12)
+    format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
@@ -93,7 +93,7 @@ def plot_voltage_with_tapping(
         transformer_uuids: list[str],
         results: GridResultContainer,
         dotted: Union[float | list[float]] = None,
-        width: int = 8,
+        width: int = 12,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -102,7 +102,8 @@ def plot_voltage_with_tapping(
     ax_plot_tapping(axes[1], transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w)
 
     axes[0].set_ylabel("Spannung in pu", fontsize=11)
-    format_x_axis(axes[1], "time in h", length, 12)
+    axes[1].set_ylabel("Stufung", fontsize=11)
+    format_x_axis(axes[1], length)
 
     return fig
 
@@ -113,7 +114,7 @@ def create_fig(
         nrows: int = 2,
         ncolumns: int = 1,
         sharex: bool = True,
-        width: int = 8,
+        width: int = 12,
         height: int = 4
 ):
     fig, axes = plt.subplots(nrows, ncolumns, figsize=(width, height), sharex=sharex)
@@ -123,17 +124,23 @@ def create_fig(
 
 def format_x_axis(
     ax: Axes,
-    label: str,
     lim: int,
-    step: int,
+    step: int = 6,
     fontsize: int = 11,
 ):
-    xticks = [i for i in range(0, lim, step)]
+    if lim <= 168:
+        xticks = [i for i in range(0, lim, step)]
+        xticklabel = xticks
+        label = "Zeit in Stunden"
+    else:
+        xticks = [i for i in range(0, lim, 24*7*3)]
+        xticklabel = [i * 3 for i, _ in enumerate(xticks)]
+        label = "Zeit in Wochen"
 
     ax.set_xlim(0, lim)
     ax.set_xticks(xticks)
     ax.tick_params(axis='x', which='minor', bottom=False)
-    ax.set_xticklabels(xticks)
+    ax.set_xticklabels(xticklabel)
     ax.set_xlabel(label, fontsize=fontsize)
 
 
