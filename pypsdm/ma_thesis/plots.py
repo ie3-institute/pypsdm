@@ -18,7 +18,7 @@ def plot_voltage_with_congestion(
         subgrid: SubGridInfo,
         result: GridResultContainer,
         dotted: Union[float | list[float]] = None,
-        width: int = 12,
+        width: int = 8,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -41,7 +41,7 @@ def plot_line_utilization_with_congestion(
         subgrid: SubGridInfo,
         result: GridResultContainer,
         dotted: float = 100.0,
-        width: int = 12,
+        width: int = 8,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -65,7 +65,7 @@ def plot_transformer_utilization_with_congestion(
         transformer_uuids: list[str],
         gwr: GridWithResults,
         dotted: float = 100.0,
-        width: int = 12,
+        width: int = 8,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -93,7 +93,7 @@ def plot_voltage_with_tapping(
         transformer_uuids: list[str],
         results: GridResultContainer,
         dotted: Union[float | list[float]] = None,
-        width: int = 12,
+        width: int = 8,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
@@ -114,7 +114,7 @@ def create_fig(
         nrows: int = 2,
         ncolumns: int = 1,
         sharex: bool = True,
-        width: int = 12,
+        width: int = 8,
         height: int = 4
 ):
     fig, axes = plt.subplots(nrows, ncolumns, figsize=(width, height), sharex=sharex)
