@@ -1,6 +1,7 @@
 from typing import Union
 
 from matplotlib import pyplot as plt
+from pandas import DataFrame
 
 from pypsdm import GridWithResults, Transformers2W, GridResultContainer, NodesResult, GridContainer
 from pypsdm.ma_thesis import get_nodes, get_lines
@@ -29,11 +30,25 @@ def plot_voltage_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Spannung in pu", fontsize=11)
+    format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
 
+    return fig
+
+
+def plot_voltage_congestion(
+        subgrid: SubGridInfo,
+        result: GridResultContainer,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    congestions = hours_index(result.congestions[subgrid.sub_grid.nr].voltage) * 1
+    lim = len(subgrid.node_min_max.index) - 1
+    ax_plot_congestion(axes, congestions, lim)
     return fig
 
 
@@ -52,11 +67,25 @@ def plot_line_utilization_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Auslastung in %", fontsize=11)
+    format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
 
+    return fig
+
+
+def plot_line_congestion(
+        subgrid: SubGridInfo,
+        result: GridResultContainer,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    congestions = hours_index(result.congestions[subgrid.sub_grid.nr].line) * 1
+    lim = len(subgrid.node_min_max.index) - 1
+    ax_plot_congestion(axes, congestions, lim)
     return fig
 
 
@@ -78,11 +107,25 @@ def plot_transformer_utilization_with_congestion(
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
     axes[0].set_ylabel("Auslastung in %", fontsize=11)
+    format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
     axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
     axes[1].set_ylabel("Engpass?", fontsize=11)
 
+    return fig
+
+
+def plot_transformer_congestion(
+        subgrid: SubGridInfo,
+        gwr: GridWithResults,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    congestions = hours_index(gwr.results.congestions[subgrid.sub_grid.nr].transformer) * 1
+    lim = len(subgrid.node_min_max.index) - 1
+    ax_plot_congestion(axes, congestions, lim)
     return fig
 
 
@@ -103,8 +146,74 @@ def plot_voltage_with_tapping(
 
     axes[0].set_ylabel("Spannung in pu", fontsize=11)
     axes[1].set_ylabel("Stufung", fontsize=11)
+    format_x_axis(axes[0], length)
     format_x_axis(axes[1], length)
 
+    return fig
+
+
+def plot_tapping(
+        subgrid: SubGrid,
+        transformer_uuids: list[str],
+        results: GridResultContainer,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    length = ax_plot_tapping(axes, transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w)
+
+    axes.set_ylabel("Stufung", fontsize=11)
+    format_x_axis(axes, length)
+    return fig
+
+
+# results
+
+def plot_voltage(
+        subgrid: SubGridInfo,
+        dotted: Union[float | list[float]] = None,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    hours_index(subgrid.node_min_max).plot(ax=axes)
+    ax_added_dotted(axes, dotted)
+
+    axes.set_ylabel("Spannung in pu", fontsize=11)
+    format_x_axis(axes, len(subgrid.node_min_max.index) - 1)
+    return fig
+
+
+def plot_line_utilization(
+        subgrid: SubGridInfo,
+        dotted: float = 100.0,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    hours_index(subgrid.line_max * 100).plot(ax=axes)
+    ax_added_dotted(axes, dotted)
+
+    axes.set_ylabel("Auslastung in %", fontsize=11)
+    format_x_axis(axes, len(subgrid.node_min_max.index) - 1)
+    return fig
+
+
+def plot_transformer_utilization(
+        transformer_uuids: list[str],
+        gwr: GridWithResults,
+        dotted: float = 100.0,
+        width: int = 8,
+        height: int = 2
+):
+    fig, axes = create_fig(nrows=1, width=width, height=height)
+    transformer_max = analyse_transformers2w(transformer_uuids, gwr)
+
+    hours_index(transformer_max * 100).plot(ax=axes)
+    ax_added_dotted(axes, dotted)
+
+    axes.set_ylabel("Auslastung in %", fontsize=11)
+    format_x_axis(axes, len(transformer_max.index) - 1)
     return fig
 
 
@@ -125,7 +234,7 @@ def create_fig(
 def format_x_axis(
     ax: Axes,
     lim: int,
-    step: int = 6,
+    step: int = 12,
     fontsize: int = 11,
 ):
     if lim <= 168:
@@ -169,6 +278,19 @@ def ax_added_dotted(
             [axes.axhline(dot, color="red", linestyle="--") for dot in dotted]
 
 
+def ax_plot_congestion(
+        axes: Axes,
+        congestions: DataFrame,
+        lim: int
+):
+    congestions.plot(ax=axes, drawstyle="steps-post")
+
+    format_x_axis(axes, lim)
+    axes.set_yticks([0, 1])
+    axes.set_yticklabels(["nein", "ja"], fontsize=11)
+    axes.set_ylabel("Engpass?", fontsize=11)
+
+
 def ax_plot_tapping(
         axes: Axes,
         uuids: list[str],
@@ -178,6 +300,14 @@ def ax_plot_tapping(
     tap_pos = pd.concat({transformers[uuid].id: result[uuid].data["tap_pos"] for uuid in uuids}, axis=1)
     hours_index(tap_pos).plot(ax=axes, drawstyle="steps-post")
 
+    values = tap_pos[transformers[uuids[0]].id].drop_duplicates()
+    if len(values) == 1:
+        value = values[0]
+        ticks = [value-1, value, value+1]
+        axes.set_yticks(ticks)
+        axes.set_yticklabels(ticks)
+
+    return len(tap_pos.index) - 1
 
 # other
 

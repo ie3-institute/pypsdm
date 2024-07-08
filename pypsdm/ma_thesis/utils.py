@@ -29,14 +29,13 @@ def read_scenarios(
         result_folder_name: str,
         result_base_name: str,
         scenarios: list[str],
-        result_suffix: str,
         grid_delimiter: str = ",",
         result_delimiter: str = ",",
 ) -> (GridContainer, dict[str, GridResultContainer]):
     grid_path = join(get_base_path(), "grids", grid_name)
     grid = GridContainer.from_csv(path=grid_path, delimiter=grid_delimiter)
     
-    result_names = [result_base_name + "-" + str(nr) + "-" + result_suffix for nr in scenarios]
+    result_names = [result_base_name + "-" + str(nr) for nr in scenarios]
     results = {result_name: get_result(result_folder_name, result_name, result_delimiter) for result_name in
                result_names}
 
