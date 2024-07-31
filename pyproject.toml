@@ -27,6 +27,7 @@ pyhocon = "^0.3.60"
 psycopg2 = "^2.9.9"
 numba = "^0.59.1"
 
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
 flake8 = "^6.0.0"

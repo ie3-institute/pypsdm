@@ -17,7 +17,7 @@ from pypsdm.models.enums import EntitiesEnum
 
 if TYPE_CHECKING:
     from pypsdm.models.input.container.grid import GridContainer
-    from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+    from pypsdm.models.result.participant.dict import ResultDictMixin
 
 
 class ContainerMixin(ABC):
@@ -118,8 +118,8 @@ class ResultContainerMixin(ContainerMixin):
         delimiter: str | None = None,
         filter_start: datetime | None = None,
         filter_end: datetime | None = None,
-    ) -> dict[EntitiesEnum, EntitiesResultDictMixin]:
-        from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
+    ) -> dict[EntitiesEnum, ResultDictMixin]:
+        from pypsdm.models.result.participant.dict import ResultDictMixin
 
         res_files = [
             f for f in os.listdir(simulation_data_path) if f.endswith("_res.csv")
@@ -135,7 +135,7 @@ class ResultContainerMixin(ContainerMixin):
         with concurrent.futures.ProcessPoolExecutor() as executor:
             # warning: Breakpoints in the underlying method might not work when started from ipynb
             pa_from_csv_for_participant = partial(
-                EntitiesResultDictMixin.from_csv_for_entity,
+                ResultDictMixin.from_csv_for_entity,
                 simulation_data_path,
                 simulation_end,
                 grid_container,
