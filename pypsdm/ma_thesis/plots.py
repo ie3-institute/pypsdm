@@ -12,6 +12,7 @@ from pypsdm.models.result.container.raw_grid import Transformers2WResult
 from pypsdm.plots.common.utils import *
 from pypsdm.plots.grid import grid_plot
 
+fontsize = 12
 
 # Detection
 
@@ -26,17 +27,17 @@ def plot_voltage_with_congestion(
     congestions = hours_index(result.congestions[subgrid.sub_grid.nr].voltage) * 1
 
     hours_index(subgrid.node_min_max).plot(ax=axes[0])
-    ax_added_dotted(axes[0], dotted)
+    ax_add_dotted(axes[0], dotted)
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
-    axes[0].set_ylabel("Spannung in pu", fontsize=11)
+    axes[0].set_ylabel("Spannung in pu", fontsize=fontsize)
     format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
-    axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
-    axes[1].set_ylabel("Engpass?", fontsize=11)
+    axes[1].set_yticklabels(["nein", "ja"], fontsize=fontsize)
+    axes[1].set_ylabel("Engpass?", fontsize=fontsize)
 
-    return fig
+    return fig, axes[0], axes[1]
 
 
 def plot_voltage_congestion(
@@ -63,17 +64,17 @@ def plot_line_utilization_with_congestion(
     congestions = hours_index(result.congestions[subgrid.sub_grid.nr].line) * 1
 
     hours_index(subgrid.line_max * 100).plot(ax=axes[0])
-    ax_added_dotted(axes[0], dotted)
+    ax_add_dotted(axes[0], dotted)
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
-    axes[0].set_ylabel("Auslastung in %", fontsize=11)
+    axes[0].set_ylabel("Auslastung in %", fontsize=fontsize)
     format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
-    axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
-    axes[1].set_ylabel("Engpass?", fontsize=11)
+    axes[1].set_yticklabels(["nein", "ja"], fontsize=fontsize)
+    axes[1].set_ylabel("Engpass?", fontsize=fontsize)
 
-    return fig
+    return fig, axes[0], axes[1]
 
 
 def plot_line_congestion(
@@ -103,17 +104,17 @@ def plot_transformer_utilization_with_congestion(
     transformer_max = analyse_transformers2w(transformer_uuids, gwr)
 
     hours_index(transformer_max * 100).plot(ax=axes[0])
-    ax_added_dotted(axes[0], dotted)
+    ax_add_dotted(axes[0], dotted)
     congestions.plot(ax=axes[1], drawstyle="steps-post")
 
-    axes[0].set_ylabel("Auslastung in %", fontsize=11)
+    axes[0].set_ylabel("Auslastung in %", fontsize=fontsize)
     format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
     axes[1].set_yticks([0, 1])
-    axes[1].set_yticklabels(["nein", "ja"], fontsize=11)
-    axes[1].set_ylabel("Engpass?", fontsize=11)
+    axes[1].set_yticklabels(["nein", "ja"], fontsize=fontsize)
+    axes[1].set_ylabel("Engpass?", fontsize=fontsize)
 
-    return fig
+    return fig, axes[0], axes[1]
 
 
 def plot_transformer_congestion(
@@ -136,33 +137,35 @@ def plot_voltage_with_tapping(
         transformer_uuids: list[str],
         results: GridResultContainer,
         dotted: Union[float | list[float]] = None,
+        tap_dotted: list[int, int] = None,
         width: int = 8,
         height: int = 4
 ):
     fig, axes = create_fig(width=width, height=height)
 
-    length = ax_plot_both_voltages(axes[0], subgrid, results.nodes, dotted)
-    ax_plot_tapping(axes[1], transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w)
+    ax_plot_tapping(axes[0], transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w, tap_dotted)
+    length = ax_plot_both_voltages(axes[1], subgrid, results.nodes, dotted)
 
-    axes[0].set_ylabel("Spannung in pu", fontsize=11)
-    axes[1].set_ylabel("Stufung", fontsize=11)
+    axes[0].set_ylabel("Stufe", fontsize=fontsize)
+    axes[1].set_ylabel("Spannung in pu", fontsize=fontsize)
     format_x_axis(axes[0], length)
     format_x_axis(axes[1], length)
 
-    return fig
+    return fig, axes[0], axes[1]
 
 
 def plot_tapping(
         subgrid: SubGrid,
         transformer_uuids: list[str],
         results: GridResultContainer,
+        tap_dotted: list[int, int] = None,
         width: int = 8,
         height: int = 2
 ):
     fig, axes = create_fig(nrows=1, width=width, height=height)
-    length = ax_plot_tapping(axes, transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w)
+    length = ax_plot_tapping(axes, transformer_uuids, subgrid.grid.transformers_2_w, results.transformers_2w, tap_dotted)
 
-    axes.set_ylabel("Stufung", fontsize=11)
+    axes.set_ylabel("Stufung", fontsize=fontsize)
     format_x_axis(axes, length)
     return fig
 
@@ -177,9 +180,9 @@ def plot_voltage(
 ):
     fig, axes = create_fig(nrows=1, width=width, height=height)
     hours_index(subgrid.node_min_max).plot(ax=axes)
-    ax_added_dotted(axes, dotted)
+    ax_add_dotted(axes, dotted)
 
-    axes.set_ylabel("Spannung in pu", fontsize=11)
+    axes.set_ylabel("Spannung in pu", fontsize=fontsize)
     format_x_axis(axes, len(subgrid.node_min_max.index) - 1)
     return fig
 
@@ -192,9 +195,9 @@ def plot_line_utilization(
 ):
     fig, axes = create_fig(nrows=1, width=width, height=height)
     hours_index(subgrid.line_max * 100).plot(ax=axes)
-    ax_added_dotted(axes, dotted)
+    ax_add_dotted(axes, dotted)
 
-    axes.set_ylabel("Auslastung in %", fontsize=11)
+    axes.set_ylabel("Auslastung in %", fontsize=fontsize)
     format_x_axis(axes, len(subgrid.node_min_max.index) - 1)
     return fig
 
@@ -210,9 +213,9 @@ def plot_transformer_utilization(
     transformer_max = analyse_transformers2w(transformer_uuids, gwr)
 
     hours_index(transformer_max * 100).plot(ax=axes)
-    ax_added_dotted(axes, dotted)
+    ax_add_dotted(axes, dotted)
 
-    axes.set_ylabel("Auslastung in %", fontsize=11)
+    axes.set_ylabel("Auslastung in %", fontsize=fontsize)
     format_x_axis(axes, len(transformer_max.index) - 1)
     return fig
 
@@ -226,8 +229,7 @@ def create_fig(
         width: int = 8,
         height: int = 4
 ):
-    fig, axes = plt.subplots(nrows, ncolumns, figsize=(width, height), sharex=sharex)
-    # fig.tight_layout()
+    fig, axes = plt.subplots(nrows, ncolumns, figsize=(width, height), sharex=sharex, tight_layout=True)    
     return fig, axes
 
 
@@ -235,11 +237,10 @@ def format_x_axis(
     ax: Axes,
     lim: int,
     step: int = 12,
-    fontsize: int = 11,
 ):
     if lim <= 168:
         xticks = [i for i in range(0, lim, step)]
-        xticklabel = xticks
+        xticklabel = [x + 1 for x in xticks]
         label = "Zeit in Stunden"
     else:
         xticks = [i for i in range(0, lim, 24*7*3)]
@@ -262,12 +263,12 @@ def ax_plot_both_voltages(
     _, node_min_max_res = analyse_nodes(subgrid.name, subgrid.grid, results)
 
     hours_index(node_min_max_res).plot(ax=axes)
-    ax_added_dotted(axes, dotted)
+    ax_add_dotted(axes, dotted)
 
     return len(node_min_max_res.index) - 1
 
 
-def ax_added_dotted(
+def ax_add_dotted(
         axes: Axes,
         dotted: Union[float | list[float]] = None
 ):
@@ -276,6 +277,11 @@ def ax_added_dotted(
             axes.axhline(dotted, color="red", linestyle="--")
         else:
             [axes.axhline(dot, color="red", linestyle="--") for dot in dotted]
+
+
+def ax_add_vlines(axes: Axes, values: list[float] = None):
+    if values:
+        [axes.axvline(x, color="purple", linestyle="--") for x in values]
 
 
 def ax_plot_congestion(
@@ -287,25 +293,28 @@ def ax_plot_congestion(
 
     format_x_axis(axes, lim)
     axes.set_yticks([0, 1])
-    axes.set_yticklabels(["nein", "ja"], fontsize=11)
-    axes.set_ylabel("Engpass?", fontsize=11)
+    axes.set_yticklabels(["nein", "ja"], fontsize=fontsize)
+    axes.set_ylabel("Engpass?", fontsize=fontsize)
 
 
 def ax_plot_tapping(
         axes: Axes,
         uuids: list[str],
         transformers: Transformers2W,
-        result: Transformers2WResult
+        result: Transformers2WResult,
+        tap_dotted: list[int, int] = None
 ):
     tap_pos = pd.concat({transformers[uuid].id: result[uuid].data["tap_pos"] for uuid in uuids}, axis=1)
     hours_index(tap_pos).plot(ax=axes, drawstyle="steps-post")
 
     values = tap_pos[transformers[uuids[0]].id].drop_duplicates()
-    if len(values) == 1:
+    if len(values) == 1 and not tap_dotted:
         value = values[0]
         ticks = [value-1, value, value+1]
         axes.set_yticks(ticks)
         axes.set_yticklabels(ticks)
+    else:
+        ax_add_dotted(axes, tap_dotted)
 
     return len(tap_pos.index) - 1
 
@@ -325,8 +334,8 @@ def plot_voltages_with_scenario(
     get_max_voltages(subgrid.grid, node_res).plot(ax=axes[0])
     get_min_voltages(subgrid.grid, node_res).plot(ax=axes[1])
 
-    ax_added_dotted(axes[0], upper_limit)
-    ax_added_dotted(axes[1], lower_limit)
+    ax_add_dotted(axes[0], upper_limit)
+    ax_add_dotted(axes[1], lower_limit)
 
     return fig
 
@@ -350,8 +359,8 @@ def plot_voltages_with_tapping(
     subgrid2.node_min_max.plot(ax=axes[1])
     tap_pos.plot(ax=axes[2])
 
-    ax_added_dotted(axes[0], dotted)
-    ax_added_dotted(axes[1], dotted)
+    ax_add_dotted(axes[0], dotted)
+    ax_add_dotted(axes[1], dotted)
 
     return fig
 
@@ -371,7 +380,7 @@ def plot_subgrid_with_versions(
     for i, key in enumerate(subgrids):
         subgrids[key].node_min_max.plot(ax=axes[i])
 
-        ax_added_dotted(axes[i], dotted)
+        ax_add_dotted(axes[i], dotted)
         axes[i].set_title(key)
 
     return fig
@@ -390,13 +399,13 @@ def plot_voltage_subgrids(
         for i, subgrid in enumerate(subgrids.values()):
             subgrid.node_min_max.plot(ax=axes[i])
 
-            ax_added_dotted(axes[i], dotted)
+            ax_add_dotted(axes[i], dotted)
 
     else:
         values = [subgrid.node_min_max for subgrid in subgrids.values()]
         fig, axes = pd.concat(values, axis=1).plot()
 
-        ax_added_dotted(axes, dotted)
+        ax_add_dotted(axes, dotted)
 
     return fig
 
