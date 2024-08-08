@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from pypsdm.plots.common.utils import RGB
 from pypsdm.models.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
@@ -13,6 +14,7 @@ from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.input.container.raw_grid import RawGridContainer
 from pypsdm.models.ts.types import ComplexPower
+from pypsdm.plots.grid import grid_plot
 
 if TYPE_CHECKING:
     from pypsdm.models.primary_data import PrimaryData
@@ -158,6 +160,14 @@ class GridContainer(ContainerMixin):
             primary_data=primary_data,
             node_participants_map=node_participants_map,
         )
+
+    def plot_grid(
+        self,
+        node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        highlight_disconnected: Optional[bool] = False,
+    ):
+        return grid_plot(self, node_highlights, line_highlights, highlight_disconnected)
 
     def to_csv(
         self,

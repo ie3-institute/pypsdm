@@ -281,7 +281,7 @@ class PrimaryData:
         match = re.match(pattern, ts_file)
         if match:
             ts_type, ts_uuid = match.groups()
-            data = utils.read_csv(dir_path, ts_file, delimiter, index_col="uuid")
+            data = utils.read_csv(dir_path, ts_file, delimiter)
             data["time"] = data["time"].apply(
                 lambda date_string: to_date_time(date_string)
             )

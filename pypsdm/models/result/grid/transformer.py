@@ -7,10 +7,13 @@ import pandas as pd
 from pandas import Series
 
 from pypsdm.models.enums import EntitiesEnum, RawGridElementsEnum
-from pypsdm.models.result.grid.connector import ConnectorCurrent
+from pypsdm.models.result.grid.connector import (
+    BaseCurrentDict,
+    ConnectorCurrent,
+)
 from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
-from pypsdm.models.ts.base import EntityKey, K, TimeSeriesDict
-from pypsdm.models.ts.types import ComplexPower
+from pypsdm.models.ts.base import EntityKey, K
+from pypsdm.models.ts.types import ComplexPower, ComplexPowerDict
 
 if TYPE_CHECKING:
     from pypsdm.models.gwr import GridWithResults
@@ -95,12 +98,91 @@ class Transformer2WResult(ConnectorCurrent):
             raise ValueError('Side has to be either "hv" or "lv"')
 
 
+class Transformer2WCurrentDict(BaseCurrentDict[K, Transformer2WResult]):
+    pass
+
+
 class Transformers2WResult(
-    TimeSeriesDict[K, Transformer2WResult], EntitiesResultDictMixin
+    Transformer2WCurrentDict[EntityKey], EntitiesResultDictMixin
 ):
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
+
+    def apparent_power(
+        self,
+        gwr: GridWithResults,
+        side: Literal["hv", "lv"] = "hv",
+    ):
+        if not self.values():
+            return pd.DataFrame()
+        data = pd.DataFrame(
+            {
+                key.uuid: transformer.apparent_power(key, gwr, side)
+                for key, transformer in self.items()
+            }
+        ).sort_index()
+
+        return data
+
+    def active_power(
+        self,
+        gwr: GridWithResults,
+        side: Literal["hv", "lv"] = "hv",
+    ):
+        if not self.values():
+            return pd.DataFrame()
+        data = pd.DataFrame(
+            {
+                key.uuid: transformer.active_power(key, gwr, side)
+                for key, transformer in self.items()
+            }
+        ).sort_index()
+
+        return data
+
+    def reactive_power(
+        self,
+        gwr: GridWithResults,
+        side: Literal["hv", "lv"] = "hv",
+    ):
+        if not self.values():
+            return pd.DataFrame()
+        data = pd.DataFrame(
+            {
+                key.uuid: transformer.reactive_power(key, gwr, side)
+                for key, transformer in self.items()
+            }
+        ).sort_index()
+
+        return data
+
+    def utilisation(
+        self,
+        gwr: GridWithResults,
+        side: Literal["hv", "lv"] = "hv",
+    ):
+        if not self.values():
+            return pd.DataFrame()
+        data = pd.DataFrame(
+            {
+                key.uuid: transformer.utilisation(key, gwr, side)
+                for key, transformer in self.items()
+            }
+        ).sort_index()
+
+        return data
+
+    def to_complex_power_dict(
+        self,
+        gwr: GridWithResults,
+        side: Literal["hv", "lv"] = "hv",
+    ) -> ComplexPowerDict[EntityKey]:
+        data = {
+            key: transformer.to_complex_power(key, gwr, side)
+            for key, transformer in self.items()
+        }
+        return ComplexPowerDict(data)
 
     @classmethod
     def entity_type(cls) -> EntitiesEnum:

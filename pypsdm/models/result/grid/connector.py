@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Literal
+from typing import List, Literal, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -109,8 +109,10 @@ class ConnectorCurrent(TimeSeries):
         return ["i_a_ang", "i_a_mag", "i_b_ang", "i_b_mag"]
 
 
-class ConnectorCurrentDict(TimeSeriesDict[K, ConnectorCurrent], TimeSeriesDictMixin):
+ConnectorCurrentType = TypeVar("ConnectorCurrentType", bound="ConnectorCurrent")
 
+
+class BaseCurrentDict(TimeSeriesDict[K, ConnectorCurrentType], TimeSeriesDictMixin):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
@@ -125,3 +127,7 @@ class ConnectorCurrentDict(TimeSeriesDict[K, ConnectorCurrent], TimeSeriesDictMi
 
     def i_b_mag(self, ffill: bool = True, favor_ids: bool = True) -> DataFrame:
         return self.attr_df("i_b_mag", ffill=ffill, favor_ids=favor_ids)
+
+
+class ConnectorCurrentDict(BaseCurrentDict[K, ConnectorCurrent]):
+    pass

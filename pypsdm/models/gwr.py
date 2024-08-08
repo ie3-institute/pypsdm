@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Tuple, Union
+from pypsdm.plots.common.utils import RGB
 
 import numpy as np
 import pandas as pd
@@ -241,6 +242,14 @@ class GridWithResults(ContainerMixin):
 
     def interval(self, start: datetime, end: datetime):
         return GridWithResults(self.grid, self.results.interval(start, end))
+
+    def plot_grid(
+        self,
+        node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        highlight_disconnected: Optional[bool] = False,
+    ):
+        return self.grid.plot(node_highlights, line_highlights, highlight_disconnected)
 
     def to_csv(
         self,
