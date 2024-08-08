@@ -32,6 +32,10 @@ class GridWithResults(ContainerMixin):
         return self.grid.raw_grid
 
     @property
+    def primary_data(self):
+        return self.grid.primary_data
+
+    @property
     def nodes(self):
         return self.grid.nodes
 
@@ -322,9 +326,9 @@ class GridWithResults(ContainerMixin):
         return GridWithResults(GridContainer.empty(), GridResultContainer.empty())
 
     @staticmethod
-    def _calc_pq(uuid, nodal_result: GridResultContainer):
+    def _calc_complex_power(uuid, nodal_result: GridResultContainer):
         """
         NOTE: Utility function for parallel processing of building ExtendedNodesResult
         """
-        pq = nodal_result.participants.sum()
-        return uuid, pq
+        complex_power = nodal_result.participants.sum()
+        return uuid, complex_power
