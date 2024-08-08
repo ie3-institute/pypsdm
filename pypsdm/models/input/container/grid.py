@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from pypsdm.plots.common.utils import RGB
 from pypsdm.models.enums import (
     EntitiesEnum,
     RawGridElementsEnum,
@@ -14,6 +13,7 @@ from pypsdm.models.input.container.mixins import ContainerMixin
 from pypsdm.models.input.container.participants import SystemParticipantsContainer
 from pypsdm.models.input.container.raw_grid import RawGridContainer
 from pypsdm.models.ts.types import ComplexPower
+from pypsdm.plots.common.utils import RGB
 from pypsdm.plots.grid import grid_plot
 
 if TYPE_CHECKING:

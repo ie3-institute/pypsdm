@@ -7,10 +7,7 @@ import pandas as pd
 from pandas import Series
 
 from pypsdm.models.enums import EntitiesEnum, RawGridElementsEnum
-from pypsdm.models.result.grid.connector import (
-    BaseCurrentDict,
-    ConnectorCurrent,
-)
+from pypsdm.models.result.grid.connector import BaseCurrentDict, ConnectorCurrent
 from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
 from pypsdm.models.ts.base import EntityKey, K
 from pypsdm.models.ts.types import ComplexPower, ComplexPowerDict

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -8,6 +9,7 @@ from shapely.geometry import LineString
 
 if TYPE_CHECKING:
     from pypsdm.models.input.container.grid import GridContainer
+
 from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
 

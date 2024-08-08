@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Tuple, Union
-from pypsdm.plots.common.utils import RGB
 
 import numpy as np
 import pandas as pd
@@ -16,6 +15,7 @@ from pypsdm.models.result.container.participants import (
     SystemParticipantsResultContainer,
 )
 from pypsdm.models.ts.types import ComplexVoltagePower, ComplexVoltagePowerDict
+from pypsdm.plots.common.utils import RGB
 
 
 @dataclass(frozen=True)
