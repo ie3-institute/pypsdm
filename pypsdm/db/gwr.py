@@ -288,7 +288,6 @@ class LocalGwrDb(PathManagerMixin):
     def read_results(self, res_id: str):
         """Read results from res_id."""
         return GridResultContainer.from_csv(
-            res_id,
             str(self.results_path.joinpath(res_id)),
         )
 

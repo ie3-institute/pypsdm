@@ -39,15 +39,15 @@ class FlexOption(TimeSeries):
         return self.data["p_ref"]
 
     def p_max_as_power(self) -> ComplexPower:
-        return self._p_to_pq_res(self.p_max())
+        return self._p_to_complex_power(self.p_max())
 
     def p_ref_as_power(self) -> ComplexPower:
-        return self._p_to_pq_res(self.p_ref())
+        return self._p_to_complex_power(self.p_ref())
 
     def p_min_as_pq(self) -> ComplexPower:
-        return self._p_to_pq_res(self.p_min())
+        return self._p_to_complex_power(self.p_min())
 
-    def _p_to_pq_res(self, p_series: Series) -> ComplexPower:
+    def _p_to_complex_power(self, p_series: Series) -> ComplexPower:
         data = p_series.rename("p").to_frame()
         data["q"] = 0
         return ComplexPower(data)

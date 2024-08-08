@@ -49,10 +49,10 @@ def plot_apparent_power_components(
 ):
     """
     Plots apparent power components (magnitude, active, reactive, angle) for a given
-    pq result.
+    complex power.
 
     Args
-        pq: ComplexPower
+        power: ComplexPower
         resolution: Resolution of the plot
         title: Optional title of the plot
     """
@@ -256,9 +256,9 @@ def plot_aggregated_load_and_generation(
 ):
     if with_residual:
         fig, axs = plt.subplots(2, 1, figsize=(10, 5), sharex=True, sharey=True)
-        pq_results = _get_pq_results_from_union(participants)
+        complex_powers = _get_complex_power_from_union(participants)
         all_load, all_generation = zip(
-            *[pq_result.divide_load_generation() for pq_result in pq_results]
+            *[cp.divide_load_generation() for cp in complex_powers]
         )
         agg_load = ComplexPower.sum(all_load)
         agg_generation = ComplexPower.sum(all_generation)
@@ -339,7 +339,7 @@ def plot_all_participants(
     return fig, axs
 
 
-def _get_pq_results_from_union(
+def _get_complex_power_from_union(
     participants: Union[SystemParticipantsResultContainer, list[ComplexPower]],
 ) -> list[ComplexPower]:
     return (
@@ -363,12 +363,12 @@ def ax_plot_participants(
     resolution: Resolution | None = None,
     **kwargs,
 ):
-    pq_results = _get_pq_results_from_union(participants)
+    complex_powers = _get_complex_power_from_union(participants)
     if stack:
-        plot_kwargs = [kwargs for _ in range(len(pq_results))]
-        ax_plot_stacked_pq(
+        plot_kwargs = [kwargs for _ in range(len(complex_powers))]
+        ax_plot_stacked_power(
             ax,
-            pq_results,
+            complex_powers,
             hourly_mean=hourly_mean,
             resolution=resolution,
             plot_kwargs=plot_kwargs,
@@ -376,14 +376,18 @@ def ax_plot_participants(
     else:
         [
             ax_plot_active_power(
-                ax, pq_result, hourly_mean=hourly_mean, resolution=resolution, **kwargs
+                ax,
+                complex_power,
+                hourly_mean=hourly_mean,
+                resolution=resolution,
+                **kwargs,
             )
-            for pq_result in pq_results
+            for complex_power in complex_powers
         ]
     legend_with_distinct_labels(ax)
 
 
-def ax_plot_stacked_pq(
+def ax_plot_stacked_power(
     ax: Axes,
     results: list[ComplexPower],
     hourly_mean: bool = False,

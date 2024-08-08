@@ -179,16 +179,13 @@ class PrimaryData:
                     f"Expected entity type to be TypeSeriesEnum but is {key.ts_type}. Can not determine file name."
                 )
             ts_name = key.ts_type.get_csv_input_file_name(key.ts_uuid)
-            data["uuid"] = [str(uuid.uuid4()) for _ in range(len(ts))]
-            data["time"] = data.index
-            data.set_index("uuid", inplace=True)
             df_to_csv(
                 data,
                 path,
                 ts_name,
                 mkdirs=mkdirs,
                 delimiter=delimiter,
-                index_label="uuid",
+                index_label="time",
             )
             return None
         except Exception as e:
@@ -281,7 +278,7 @@ class PrimaryData:
         match = re.match(pattern, ts_file)
         if match:
             ts_type, ts_uuid = match.groups()
-            data = utils.read_csv(dir_path, ts_file, delimiter, index_col="uuid")
+            data = utils.read_csv(dir_path, ts_file, delimiter)
             data["time"] = data["time"].apply(
                 lambda date_string: to_date_time(date_string)
             )
