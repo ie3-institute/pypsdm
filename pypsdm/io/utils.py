@@ -125,7 +125,7 @@ def df_to_csv(
     mkdirs=False,
     delimiter: str = ",",
     index_label="uuid",
-    datetime_pattern=DateTimePattern.UTC_TIME_PATTERN,
+    datetime_pattern=DateTimePattern.UTC_TIME_PATTERN_EXTENDED,
 ):
     df = df.copy(deep=True)
     if isinstance(path, Path):
