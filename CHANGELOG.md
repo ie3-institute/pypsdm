@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
 - Added `Transformers2WResult` dictionary support [#217](https://github.com/ie3-institute/pypsdm/pull/217)
+- `PrimaryData` time series are now protected, introduced `add_time_series` method [#218](https://github.com/ie3-institute/pypsdm/pull/218)
 
 ### Changed
 
