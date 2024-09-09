@@ -3,6 +3,7 @@ from pypsdm.models.input.create.utils import create_data
 from uuid import uuid4
 import pandas as pd
 
+
 def create_nodes(data_dict):
     return Nodes(create_data(data_dict, create_nodes_data))
 
@@ -73,4 +74,3 @@ def create_lines_data(
             "parallel_devices": parallel_devices,
         }
     ).rename(uuid)
-
