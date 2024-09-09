@@ -15,6 +15,7 @@ from pypsdm.models.result.container.participants import (
     SystemParticipantsResultContainer,
 )
 from pypsdm.models.ts.types import ComplexVoltagePower, ComplexVoltagePowerDict
+from pypsdm.plots.common.utils import RGB
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,10 @@ class GridWithResults(ContainerMixin):
     @property
     def raw_grid(self):
         return self.grid.raw_grid
+
+    @property
+    def primary_data(self):
+        return self.grid.primary_data
 
     @property
     def nodes(self):
@@ -242,6 +247,14 @@ class GridWithResults(ContainerMixin):
     def interval(self, start: datetime, end: datetime):
         return GridWithResults(self.grid, self.results.interval(start, end))
 
+    def plot_grid(
+        self,
+        node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+        highlight_disconnected: Optional[bool] = False,
+    ):
+        return self.grid.plot(node_highlights, line_highlights, highlight_disconnected)
+
     def to_csv(
         self,
         grid_path: str,
@@ -313,9 +326,9 @@ class GridWithResults(ContainerMixin):
         return GridWithResults(GridContainer.empty(), GridResultContainer.empty())
 
     @staticmethod
-    def _calc_pq(uuid, nodal_result: GridResultContainer):
+    def _calc_complex_power(uuid, nodal_result: GridResultContainer):
         """
         NOTE: Utility function for parallel processing of building ExtendedNodesResult
         """
-        pq = nodal_result.participants.sum()
-        return uuid, pq
+        complex_power = nodal_result.participants.sum()
+        return uuid, complex_power

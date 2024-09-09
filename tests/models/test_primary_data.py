@@ -76,8 +76,8 @@ def test_compare():
     pd = get_primary_data()
     pd2 = get_primary_data()
     pd.compare(pd2)
-    pd2.time_series[TimeSeriesKey("a", TimeSeriesEnum.P_TIME_SERIES)] = get_sample_data(
-        q=False
+    pd2._time_series[TimeSeriesKey("a", TimeSeriesEnum.P_TIME_SERIES)] = (
+        get_sample_data(q=False)
     )
     try:
         pd.compare(pd2)
@@ -89,11 +89,11 @@ def test_compare():
 def test_to_csv(tmp_path):
     pd = get_primary_data()
     uuid_ts = {}
-    for key, ts in pd.time_series.items():
+    for key, ts in pd._time_series.items():
         ts_uuid = uuid.uuid4()
         key = TimeSeriesKey(str(ts_uuid), key.ts_type)
         uuid_ts[key] = ts
-    pd.time_series = ComplexPowerDict(uuid_ts)
+    pd._time_series = ComplexPowerDict(uuid_ts)
     pd.to_csv(tmp_path)
     pd2 = PrimaryData.from_csv(tmp_path)
     assert pd == pd2

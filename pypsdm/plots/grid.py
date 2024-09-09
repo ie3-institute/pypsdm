@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import json
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import plotly.graph_objs as go
 from pandas import Series
 from shapely.geometry import LineString
 
-from pypsdm.models.input.container.grid import GridContainer
+if TYPE_CHECKING:
+    from pypsdm.models.input.container.grid import GridContainer
+
 from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
 
