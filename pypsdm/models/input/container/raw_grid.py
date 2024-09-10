@@ -111,7 +111,7 @@ class RawGridContainer(ContainerMixin):
         lines_admittance = self.lines.admittance_matrix(uuid_to_idx)
         transformers_admittance = self.transformers_2_w.admittance_matrix(uuid_to_idx)
         return lines_admittance + transformers_admittance
-        
+
     def find_slack_downstream(self) -> str:
         """
         Find the downstream node of the slack node, which is the node on the transformer's

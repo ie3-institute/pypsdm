@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from networkx import Graph
+
 import networkx as nx
+from networkx import Graph
+
 from pypsdm.models.input.utils import find_slack_downstream
 
 if TYPE_CHECKING:
