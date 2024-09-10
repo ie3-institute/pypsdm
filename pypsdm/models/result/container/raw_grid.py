@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Optional, Self, Union
 
 from pypsdm.models.enums import RawGridElementsEnum
@@ -112,7 +113,7 @@ class RawGridResultContainer(ResultContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        simulation_data_path: str,
+        simulation_data_path: str | Path,
         simulation_end: Optional[datetime] = None,
         grid_container: Optional[GridContainer] = None,
         delimiter: Optional[str] = None,

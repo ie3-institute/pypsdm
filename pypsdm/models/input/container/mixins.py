@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import replace
 from datetime import datetime
 from functools import partial
+from pathlib import Path
 from typing import TYPE_CHECKING, Self, Tuple
 
 from loguru import logger
@@ -112,7 +113,7 @@ class ResultContainerMixin(ContainerMixin):
     @classmethod
     def entities_from_csv(
         cls,
-        simulation_data_path: str,
+        simulation_data_path: str | Path,
         simulation_end: datetime | None = None,
         grid_container: GridContainer | None = None,
         delimiter: str | None = None,

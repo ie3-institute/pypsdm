@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Iterable, Optional, Self, Tuple, Union
 
 import pandas as pd
@@ -204,7 +205,7 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        simulation_data_path: str,
+        simulation_data_path: str | Path,
         simulation_end: Optional[datetime] = None,
         grid_container: Optional[GridContainer] = None,
         delimiter: Optional[str] = None,
