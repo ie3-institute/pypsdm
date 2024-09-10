@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -274,8 +275,8 @@ class GridWithResults(ContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        grid_path: str,
-        result_path: str,
+        grid_path: str | Path,
+        result_path: str | Path,
         grid_delimiter: str | None = None,
         result_delimiter: str | None = None,
         primary_data_delimiter: Optional[str] = None,

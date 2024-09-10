@@ -9,19 +9,19 @@ from pypsdm.processing.numba import add_array
 def duration_weighted_series(series: Series):
     series.sort_index(inplace=True)
     values = series[:-1].reset_index(drop=True)
-    time = (
+    duration = (
         (series.index[1::] - series.index[:-1])
         .to_series()
         .apply(lambda x: x.total_seconds() / 3600)
         .reset_index(drop=True)
     )
-    return pd.concat([values.rename("values"), time.rename("time")], axis=1)
+    return pd.concat([values.rename("values"), duration.rename("duration")], axis=1)
 
 
 def weighted_series_sum(weighted_series: DataFrame) -> float:
     if len(weighted_series) == 0:
         return 0.0
-    return (weighted_series["values"] * weighted_series["time"]).sum()
+    return (weighted_series["values"] * weighted_series["duration"]).sum()
 
 
 def duration_weighted_sum(series: Series) -> float:

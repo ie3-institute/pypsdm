@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
 from pypsdm.io.utils import check_filter
@@ -133,7 +134,7 @@ class GridResultContainer(ContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        simulation_data_path: str,
+        simulation_data_path: str | Path,
         delimiter: str | None = None,
         simulation_end: Optional[datetime] = None,
         grid_container: Optional[GridContainer] = None,
