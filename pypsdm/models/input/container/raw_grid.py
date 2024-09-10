@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Union
 
 from networkx import Graph
 
+from pypsdm.graph import find_branches
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.connector.lines import Lines
 from pypsdm.models.input.connector.switches import Switches
@@ -61,7 +63,7 @@ class RawGridContainer(ContainerMixin):
             raise ValueError("Did not find a slack node!")
         slack_connected_node = slack_connected_node.pop()
         graph = self.build_networkx_graph()
-        branches = self._find_branches(graph, slack_connected_node)
+        branches = find_branches(graph, slack_connected_node)
         branches = [[slack_connected_node] + branch for branch in branches]
         if as_graphs:
             return [graph.subgraph(branch).copy() for branch in branches]
@@ -109,31 +111,41 @@ class RawGridContainer(ContainerMixin):
         lines_admittance = self.lines.admittance_matrix(uuid_to_idx)
         transformers_admittance = self.transformers_2_w.admittance_matrix(uuid_to_idx)
         return lines_admittance + transformers_admittance
+        
+    def find_slack_downstream(self) -> str:
+        """
+        Find the downstream node of the slack node, which is the node on the transformer's
+        lower voltage side.
+        """
+        from pypsdm import Transformers2W
 
-    @staticmethod
-    def _find_branches(G: Graph, start_node):
-        visited = set()
-        visited.add(start_node)
-        branches = []
-
-        def dfs(node, path):
-            visited.add(node)
-            path.append(node)
-
-            for neighbor in G.neighbors(node):
-                if neighbor not in visited:
-                    dfs(neighbor, path)
-
-        for neighbor in G.neighbors(start_node):
-            if neighbor not in visited:
-                path = []
-                dfs(neighbor, path)
-                branches.append(path)
-
-        return branches
+        slack_node = self.nodes.get_slack_nodes()
+        if len(slack_node.data) != 1:
+            raise ValueError("Currently only implemented for singular slack nodes.")
+        transformers = self.transformers_2_w
+        slack_transformers = Transformers2W(
+            transformers.data[
+                (transformers.node_a.isin(slack_node.uuid.to_list()))
+                | (transformers.node_b.isin(slack_node.uuid.to_list()))
+            ]
+        )
+        slack_connected_node = (
+            set(slack_transformers.node_a)
+            .union(slack_transformers.node_b)
+            .difference(slack_node.uuid)
+        )
+        if len(slack_connected_node) > 1:
+            raise ValueError(
+                "There are multiple nodes connected to the slack node via a transformer."
+            )
+        elif len(slack_connected_node) == 0:
+            raise ValueError("Did not find a slack node!")
+        return slack_connected_node.pop()
 
     @classmethod
-    def from_csv(cls, path: str, delimiter: str | None = None) -> "RawGridContainer":
+    def from_csv(
+        cls, path: str | Path, delimiter: str | None = None
+    ) -> "RawGridContainer":
         nodes = Nodes.from_csv(path, delimiter)
         lines = Lines.from_csv(path, delimiter, must_exist=False)
         transformers_2_w = Transformers2W.from_csv(path, delimiter, must_exist=False)
