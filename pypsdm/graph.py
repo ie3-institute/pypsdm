@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 import networkx as nx
 from networkx import Graph
 
-from pypsdm.models.input.utils import find_slack_downstream
-
 if TYPE_CHECKING:
     from pypsdm import RawGridContainer
 
@@ -36,7 +34,7 @@ def find_branches(G: Graph, start_node):
 def find_n_hop_closest_in_slack_direction(
     uuid: str, n: int, raw_grid: RawGridContainer, candidates: set[str] | None = None
 ):
-    slack_ds = find_slack_downstream(raw_grid)
+    slack_ds = raw_grid.find_slack_downstream()
     G = raw_grid.build_networkx_graph()
     if candidates is None:
         candidates = set(raw_grid.nodes.uuid)
