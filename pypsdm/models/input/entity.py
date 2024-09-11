@@ -344,7 +344,7 @@ class Entities(ABC):
     @classmethod
     def from_csv(
         cls: Type[Self],
-        path: str,
+        path: str | Path,
         delimiter: str | None = None,
         must_exist: bool = True,
     ) -> Self:
@@ -364,7 +364,7 @@ class Entities(ABC):
     @classmethod
     def _from_csv(
         cls: Type[Self],
-        path: str,
+        path: str | Path,
         entity: EntitiesEnum,
         delimiter: str | None = None,
         must_exist: bool = True,

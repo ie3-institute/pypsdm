@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Union
 
 import pandas as pd
@@ -151,7 +152,7 @@ class SystemParticipantsContainer(ContainerMixin):
 
     @staticmethod
     def from_csv(
-        path: str, delimiter: str | None = None
+        path: str | Path, delimiter: str | None = None
     ) -> "SystemParticipantsContainer":
         loads = Loads.from_csv(path, delimiter, must_exist=False)
         fixed_feed_ins = FixedFeedIns.from_csv(path, delimiter, must_exist=False)

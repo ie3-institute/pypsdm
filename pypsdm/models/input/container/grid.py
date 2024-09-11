@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from pypsdm.models.enums import (
@@ -171,7 +172,7 @@ class GridContainer(ContainerMixin):
 
     def to_csv(
         self,
-        path: str,
+        path: str | Path,
         include_primary_data: bool = True,
         mkdirs: bool = False,
         delimiter: str = ",",
@@ -185,7 +186,7 @@ class GridContainer(ContainerMixin):
     @classmethod
     def from_csv(
         cls,
-        path: str,
+        path: str | Path,
         delimiter: str | None = None,
         primary_data_delimiter: Optional[str] = None,
     ):

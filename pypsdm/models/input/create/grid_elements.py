@@ -1,7 +1,9 @@
-from pypsdm.models.input import Nodes, Lines, Transformers2W
-from pypsdm.models.input.create.utils import create_data
 from uuid import uuid4
+
 import pandas as pd
+
+from pypsdm.models.input import Lines, Nodes, Transformers2W
+from pypsdm.models.input.create.utils import create_data
 
 
 def create_nodes(data_dict):

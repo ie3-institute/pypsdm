@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Added `Transformers2WResult` dictionary support [#217](https://github.com/ie3-institute/pypsdm/pull/217)
 - `PrimaryData` time series are now protected, introduced `add_time_series` method [#218](https://github.com/ie3-institute/pypsdm/pull/218)
 - Added method to create nodes and lines [#223](https://github.com/ie3-institute/pypsdm/pull/223)
+- Added graph traversal functionality [#224](https://github.com/ie3-institute/pypsdm/pull/224)
 - Added method to create two winding transformer [#227](https://github.com/ie3-institute/pypsdm/pull/227)
 
 ### Changed
