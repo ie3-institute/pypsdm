@@ -51,7 +51,12 @@ def create_lines_data(
     length,
     node_a,
     node_b,
-    type,
+    b,
+    g,
+    i_max,
+    r,
+    v_rated,
+    x,
     olm_characteristic="olm:{(0.0,1.0)}",
     uuid=None,
     operates_from=None,
@@ -68,7 +73,12 @@ def create_lines_data(
             "length": length,
             "node_a": node_a,
             "node_b": node_b,
-            "type": type,
+            "b": b,
+            "g": g,
+            "i_max": i_max,
+            "r": r,
+            "v_rated": v_rated,
+            "x": x,
             "olm_characteristic": olm_characteristic,
             "operates_from": operates_from,
             "operates_until": operates_until,
@@ -77,38 +87,8 @@ def create_lines_data(
         }
     ).rename(uuid)
 
-
-def create_line_types(data_dict):
-    return Lines(create_data(data_dict, create_line_types_data))
-
-
-def create_line_types_data(
-    id,
-    b,
-    g,
-    i_max,
-    r,
-    v_rated,
-    x,
-    uuid=None,
-):
-    if not uuid:
-        uuid = str(uuid4())
-    return pd.Series(
-        {
-            "id": id,
-            "b": b,
-            "g": g,
-            "i_max": i_max,
-            "r": r,
-            "v_rated": v_rated,
-            "x": x,
-        }
-    ).rename(uuid)
-
 def create_2w_transformers(data_dict):
     return Transformers2W(create_data(data_dict, create_2w_transformer_data))
-
 
 def create_2w_transformer_data(
     auto_tap,
@@ -116,7 +96,19 @@ def create_2w_transformer_data(
     node_a,
     node_b,
     tap_pos,
-    type,
+    tap_max,
+    tap_min,
+    tap_neutr,
+    tap_side,
+    v_rated_a,
+    v_rated_b,
+    d_phi,
+    d_v,
+    r_sc,
+    x_sc,
+    g_m,
+    b_m,
+    s_rated,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -132,7 +124,19 @@ def create_2w_transformer_data(
             "node_a": node_a,
             "node_b": node_b,
             "tap_pos": tap_pos,
-            "type": type,
+            'tap_max': tap_max,
+            'tap_min': tap_min,
+            'tap_neutr': tap_neutr,
+            'tap_side': tap_side,
+            'v_rated_a': v_rated_a,
+            'v_rated_b': v_rated_b,
+            'd_phi': d_phi,
+            'd_v': d_v,
+            'r_sc': r_sc,
+            'x_sc': x_sc,
+            'g_m': g_m,
+            'b_m': b_m,
+            's_rated': s_rated,
             "operates_from": operates_from,
             "operates_until": operates_until,
             "operator": operator,
