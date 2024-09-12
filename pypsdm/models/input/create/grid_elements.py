@@ -87,8 +87,10 @@ def create_lines_data(
         }
     ).rename(uuid)
 
+
 def create_2w_transformers(data_dict):
     return Transformers2W(create_data(data_dict, create_2w_transformer_data))
+
 
 def create_2w_transformer_data(
     auto_tap,
