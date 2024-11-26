@@ -165,6 +165,11 @@ class ThermalGridElementsEnum(EntitiesEnum):
     THERMAL_GRID = "thermal_grid"
     THERMAL_HOUSE = "thermal_house"
 
+class MappingEnum(EntitiesEnum):
+    ExtEntity = "ext_entity"
+
+    def get_csv_input_file_name(self):
+        return f"{self.value}_mapping.csv"
 
 class TimeSeriesEnum(EntitiesEnum):
     P_TIME_SERIES = "its_p"
