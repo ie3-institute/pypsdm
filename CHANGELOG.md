@@ -39,6 +39,7 @@ All notable changes to this project will be documented in this file.
 - Renamed `EnhancedNodeResult` and `EnhancedNodesResult` to `ExtendedNoderesult` and `ExtendedNodesresult` [#155](https://github.com/ie3-institute/pypsdm/pull/155)
 - Data models from `pypsdm.models.*` can now be imported from the root module `pypsdm` [#159](https://github.com/ie3-institute/pypsdm/pull/159)
 - All previous `ResultDict` and `ExtendedNodesResult` properties are now functions instead of properties
+- Add `s_ratedDC` to parameter for creation of `ElectricVehicles` [#236](https://github.com/ie3-institute/pypsdm/issues/236)
 
 ### Removed
 

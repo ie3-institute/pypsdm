@@ -3,7 +3,8 @@ from uuid import uuid4
 
 import pandas as pd
 
-from pypsdm.models.enums import ElectricCurrentType, EntitiesEnum
+from pypsdm import SystemParticipantsEnum
+from pypsdm.models.enums import ElectricCurrentType
 from pypsdm.models.input.create.utils import create_data
 from pypsdm.models.input.participant import evcs
 from pypsdm.models.input.participant.em import EnergyManagementSystems
@@ -156,6 +157,7 @@ def create_electric_vehicles_data(
     id,
     node,
     s_rated,
+    s_ratedDC,
     e_storage,
     e_cons,
     q_characteristics=None,
@@ -188,6 +190,7 @@ def create_electric_vehicles_data(
             "capex": capex,
             "opex": opex,
             "s_rated": s_rated,
+            "s_rated_dc": s_ratedDC,
             "cos_phi_rated": cos_phi_rated,
             "e_storage": e_storage,
             "e_cons": e_cons,
@@ -200,7 +203,7 @@ def create_ev_charging_stations(data_dict):
         create_data(
             data_dict,
             create_ev_charging_stations_data,
-            entity_preprocessing=EntitiesEnum.EV_CHARGING_STATION,
+            entity_preprocessing=SystemParticipantsEnum.EV_CHARGING_STATION,
         )
     )
 
