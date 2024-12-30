@@ -186,7 +186,7 @@ def ax_plot_v_mag_branch(
 
         if with_power:
             p_s.append(res.p.iloc[0])  # type: ignore
-        x_ticks.append(node_res.name)  # type: ignore
+        x_ticks.append(node)
 
     ax.plot(x_ticks, v_mags)
     ax.set_xticks(np.arange(len(x_ticks)))  # xtick locations
