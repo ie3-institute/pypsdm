@@ -17,7 +17,6 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 ### Fixed
- - Fixed node identifier for plot of voltage over a branch [#240](https://github.com/ie3-institute/pypsdm/issue/240) 
 
 ## [0.0.3]
 
