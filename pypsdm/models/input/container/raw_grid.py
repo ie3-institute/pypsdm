@@ -64,7 +64,6 @@ class RawGridContainer(ContainerMixin):
         slack_connected_node = slack_connected_node.pop()
         graph = self.build_networkx_graph()
         branches = find_branches(graph, slack_connected_node)
-        branches = [[slack_connected_node] + branch for branch in branches]
         if as_graphs:
             return [graph.subgraph(branch).copy() for branch in branches]
         return branches
