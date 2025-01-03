@@ -110,6 +110,8 @@ def ax_plot_v_mags_violin(
         v_mag.columns = [uuid_id_map[col] for col in v_mag.columns]
     else:
         v_mag = nodes_res.v_mag()
+    # drop duplicate columns, keep first
+    v_mag = v_mag.T.drop_duplicates().T
 
     data = []
     for col in v_mag.columns:
