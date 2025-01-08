@@ -1,4 +1,4 @@
-uuid,id,parentEm,control_strategy,operates_from,operates_until,operator
+uuid,id,parent_em,control_strategy,operates_from,operates_until,operator
 db1a151e-8e52-4b4d-8600-0fcd827d3e77,EMS_NS_02,,PRIORITIZED,,,
 d9571711-9cf7-4bad-bc15-c1879841892f,EMS_NS_03,,PRIORITIZED,,,
 e4c3c9a7-6c4e-4908-b537-3247f59eff1c,EMS_NS_04,,PRIORITIZED,,,
