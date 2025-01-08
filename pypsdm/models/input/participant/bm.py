@@ -44,7 +44,7 @@ class BiomassPlants(SpTypeMixin, SystemParticipants):
             "market_reaction",
             "cost_controlled",
             "feed_in_tariff",
-            "em"
+            "em",
         ]
 
     @staticmethod
