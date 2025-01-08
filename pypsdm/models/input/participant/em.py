@@ -17,9 +17,13 @@ class EnergyManagementSystems(SystemParticipants):
     def control_strategy(self):
         return self.data["control_strategy"]
 
+    @property
+    def parent_em(self):
+        return self.data["parent_em"]
 
     @staticmethod
     def attributes():
         return SystemParticipants.attributes() + [
             "control_strategy",
+            "parent_em",
         ]
