@@ -14,19 +14,12 @@ class EnergyManagementSystems(SystemParticipants):
         return SystemParticipantsEnum.ENERGY_MANAGEMENT
 
     @property
-    def connected_assets(self):
-        return self.data["connected_assets"]
-
-    @property
     def control_strategy(self):
         return self.data["control_strategy"]
 
-    def uuid_to_connected_assets(self):
-        return self.connected_assets.to_dict()
 
     @staticmethod
     def attributes():
         return SystemParticipants.attributes() + [
-            "connected_assets",
             "control_strategy",
         ]

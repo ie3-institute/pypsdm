@@ -269,10 +269,7 @@ class Entities(ABC):
             return
 
         data = self.data.copy()
-        if isinstance(self, EnergyManagementSystems):
-            data["connected_assets"] = self.connected_assets.apply(
-                lambda x: f"{' '.join(x)}"
-            )
+
         if isinstance(self, HasTypeMixin):
             HasTypeMixin.to_csv(self, path, mkdirs, delimiter)
         else:
@@ -437,10 +434,6 @@ class Entities(ABC):
 
             # for system participants
             # -----------------------
-            case SystemParticipantsEnum.ENERGY_MANAGEMENT:
-                data["connected_assets"] = data["connected_assets"].apply(
-                    lambda x: x.split(" ")
-                )
             case SystemParticipantsEnum.EV_CHARGING_STATION:
                 from pypsdm.models.input.participant.charging import (
                     parse_evcs_type_info,
