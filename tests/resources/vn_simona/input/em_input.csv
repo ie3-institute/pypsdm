@@ -1,2 +1,2 @@
-uuid,connected_assets,control_strategy,id,node,operates_from,operates_until,operator,q_characteristics
-6fc12c35-f118-4c33-aecf-9f77e7639939,06a14909-366e-4e94-a593-1016e1455b30 35b25f11-434b-49c8-acba-797a986f52b4,test_em_1,,,,"cosPhiFixed:{(0.00,0.90)}"
+uuid,control_strategy,id,parentEm,operates_from,operates_until,operator
+6fc12c35-f118-4c33-aecf-9f77e7639939,PRIORITIZED,test_em_1,,,,
