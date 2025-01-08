@@ -30,6 +30,10 @@ class WindEnergyConverters(SpTypeMixin, SystemParticipants):
     def hub_height(self):
         return self.data["hub_height"]
 
+    @property
+    def em(self):
+        return self.data["em"]
+
     @staticmethod
     def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + ["market_reaction"]

@@ -35,6 +35,10 @@ class EvChargingStations(SystemParticipants):
     def cos_phi_rated(self):
         return self.data["cos_phi_rated"]
 
+    @property
+    def em(self):
+        return self.data["em"]
+
     def get_public_evcs(self):
         return self.data[
             self.location_type.isin(
@@ -53,6 +57,7 @@ class EvChargingStations(SystemParticipants):
             "type",
             "v2g_support",
             "cos_phi_rated",
+            "em",
         ]
 
     @staticmethod
