@@ -325,8 +325,8 @@ class Entities(ABC):
     ) -> EntityType:
         """
         Creates a copy of the current Entities instance.
-        By default does a deep copy of all data and replaces the given changes.
-        When deep is false, only the references to the data of the non-changed attribtues are copied.
+        By default, does a deep copy of all data and replaces the given changes.
+        When deep is false, only the references to the data of the non-changed attributes are copied.
 
         Args:
             deep: Whether to do a deep copy of the data.
@@ -351,7 +351,7 @@ class Entities(ABC):
         Args:
             path: The path to the csv file.
             delimiter: The delimiter of the csv file.
-            must_exist: Wether or not exception is thrown if file does not exist.
+            must_exist: Whether exception is thrown if file does not exist.
 
         Returns:
            The corresponding entities object.

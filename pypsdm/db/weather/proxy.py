@@ -16,7 +16,7 @@ class WeatherProxy:
 
     def __init__(self, engine: Engine | None = None, echo=False):
         """
-        When no engine is passed, it looks for system wide or .env based environment
+        When no engine is passed, it looks for system-wide or .env based environment
         variables.
 
         Expected environment variables:

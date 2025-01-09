@@ -104,7 +104,7 @@ def plot_all_nodal_ps_branch_violin(
     for i, branch in enumerate(branches):
         ax = axes[i] if len(branches) > 1 else axes
         ax_plot_nodal_ps_violin(ax, nodes_res, branch, **kwargs)  # type: ignore
-        set_subplot_title(ax, f"Nodal Actice Power Along Branch {i+1}")
+        set_subplot_title(ax, f"Nodal Active Power Along Branch {i+1}")
     plt.tight_layout()
 
     return fig, axes
@@ -711,15 +711,15 @@ def plot_sorted_annual_load_duration(
     args = get_label_and_color_dict(entity_type)
     kwargs = add_to_kwargs_if_not_exist(kwargs, args)
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    annual_duartion_series = res.annual_duration_series()
-    plt.plot(annual_duartion_series, **kwargs)
+    annual_duration_series = res.annual_duration_series()
+    plt.plot(annual_duration_series, **kwargs)
     set_title(ax, f"{kwargs['label']} Annual Load Duration Curve")
     ax.set_xlabel("Duration in hours")
     ax.set_ylabel("Rated power")
     if fill_from_index:
         ax.fill_between(
-            annual_duartion_series.index,
-            annual_duartion_series,
+            annual_duration_series.index,
+            annual_duration_series,
             alpha=FILL_ALPHA,
             color=kwargs["color"],
         )
