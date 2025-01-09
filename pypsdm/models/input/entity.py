@@ -262,7 +262,6 @@ class Entities(ABC):
     def to_csv(self, path: str, mkdirs=False, delimiter: str = ","):
         # local import to avoid circular imports
         from pypsdm.models.input.mixins import HasTypeMixin
-        from pypsdm.models.input.participant.em import EnergyManagementSystems
 
         # Don't write empty entities
         if not self:
