@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Added method to create two winding transformer [#227](https://github.com/ie3-institute/pypsdm/pull/227)
 
 ### Changed
+- Adapt to recent PSDM changes with regard to energy management systems [#164](https://github.com/ie3-institute/pypsdm/issue/164)
 
 ### Removed
 
