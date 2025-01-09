@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 
 from pypsdm.io.utils import df_to_csv
+from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.enums import EntitiesEnum
 
 
@@ -60,6 +61,9 @@ class HasTypeMixin(ABC):
     @classmethod
     def attributes(cls, include_type_attrs: bool = True) -> list[str]:
         entity_attributes = cls.entity_attributes()
+        if  cls.get_enum() == SystemParticipantsEnum.ELECTRIC_VEHICLE:
+            entity_attributes.remove("em")
+
         return (
             entity_attributes + cls.type_attributes()
             if include_type_attrs
