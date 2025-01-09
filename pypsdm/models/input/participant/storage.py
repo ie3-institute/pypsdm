@@ -41,10 +41,6 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
     def life_cycle(self) -> Series:
         return self.data["life_cycle"]
 
-    @property
-    def em(self):
-        return self.data["em"]
-
     @classmethod
     def entity_attributes(cls) -> list[str]:
         return SystemParticipantsWithCapacity.attributes()

@@ -34,17 +34,12 @@ class BiomassPlants(SpTypeMixin, SystemParticipants):
     def eta_conv(self):
         return self.data["eta_conv"]
 
-    @property
-    def em(self):
-        return self.data["em"]
-
     @staticmethod
     def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + [
             "market_reaction",
             "cost_controlled",
             "feed_in_tariff",
-            "em",
         ]
 
     @staticmethod

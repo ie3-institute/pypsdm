@@ -22,10 +22,6 @@ class HeatPumps(SpTypeMixin, SystemParticipants):
     def p_thermal(self):
         return self.data["p_thermal"]
 
-    @property
-    def em(self):
-        return self.data["em"]
-
     @staticmethod
     def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + ["thermal_bus"]

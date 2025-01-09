@@ -34,10 +34,6 @@ class Loads(SystemParticipants):
     def cos_phi_rated(self):
         return self.data["cos_phi_rated"]
 
-    @property
-    def em(self):
-        return self.data["em"]
-
     @staticmethod
     def attributes() -> List[str]:
         return SystemParticipants.attributes() + [
@@ -46,5 +42,4 @@ class Loads(SystemParticipants):
             "e_cons_annual",
             "s_rated",
             "cos_phi_rated",
-            "em",
         ]
