@@ -1,4 +1,4 @@
-uuid,id,operates_from,operates_until,operator,node,q_characteristics,thermal_bus,type,em
-441801d9-983a-4eb1-9e9c-9008ca7d9ba0,HP_NS_02,,,,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"cosPhiFixed:{(0.0, 0.9)}",f974062a-a736-464f-8585-2673104527d8,392f183f-7d9b-48aa-8ba9-a1fb34db7592,db1a151e-8e52-4b4d-8600-0fcd827d3e77
-75f6fb29-f932-4016-a579-f1eafbed5375,HP_NS_03,,,,1dcddd06-f41a-405b-9686-7f7942852196,"cosPhiFixed:{(0.0, 0.9)}",921fed18-91fc-4188-85d2-765e5473d3fc,cd06b2d7-bfb3-41d0-a878-a02dfbae9b4a,d9571711-9cf7-4bad-bc15-c1879841892f
-a42bed52-d85e-4b5f-aa03-12c3a6073ed4,HP_NS_04,,,,e3c3c6a3-c383-4dbb-9b3f-a14125615386,"cosPhiFixed:{(0.0, 0.9)}",ca466226-cd32-4b30-b7ee-734983e34d35,df09ca44-6b61-4679-82e3-afd76168adc1,e4c3c9a7-6c4e-4908-b537-3247f59eff1c
+uuid,id,operates_from,operates_until,operator,node,q_characteristics,em,thermal_bus,type
+441801d9-983a-4eb1-9e9c-9008ca7d9ba0,HP_NS_02,,,,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,"cosPhiFixed:{(0.0, 0.9)}",db1a151e-8e52-4b4d-8600-0fcd827d3e77,f974062a-a736-464f-8585-2673104527d8,392f183f-7d9b-48aa-8ba9-a1fb34db7592
+75f6fb29-f932-4016-a579-f1eafbed5375,HP_NS_03,,,,1dcddd06-f41a-405b-9686-7f7942852196,"cosPhiFixed:{(0.0, 0.9)}",d9571711-9cf7-4bad-bc15-c1879841892f,921fed18-91fc-4188-85d2-765e5473d3fc,cd06b2d7-bfb3-41d0-a878-a02dfbae9b4a
+a42bed52-d85e-4b5f-aa03-12c3a6073ed4,HP_NS_04,,,,e3c3c6a3-c383-4dbb-9b3f-a14125615386,"cosPhiFixed:{(0.0, 0.9)}",e4c3c9a7-6c4e-4908-b537-3247f59eff1c,ca466226-cd32-4b30-b7ee-734983e34d35,df09ca44-6b61-4679-82e3-afd76168adc1
