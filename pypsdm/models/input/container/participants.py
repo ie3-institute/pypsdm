@@ -64,12 +64,11 @@ class SystemParticipantsContainer(ContainerMixin):
         biomass_plants = self.biomass_plants.filter_by_nodes(node_uuids)
         wecs = self.wecs.filter_by_nodes(node_uuids)
         storages = self.storages.filter_by_nodes(node_uuids)
-        ems = self.ems.filter_by_nodes(node_uuids)
         evs = self.evs.filter_by_nodes(node_uuids)
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
         return SystemParticipantsContainer(
-            ems,
+            EnergyManagementSystems.create_empty(),
             loads,
             fixed_feed_ins,
             pvs,

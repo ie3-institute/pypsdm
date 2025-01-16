@@ -27,7 +27,7 @@ class SystemParticipants(Entities, ABC):
 
     @classmethod
     def attributes(cls):
-        return Entities.attributes() + ["node", "q_characteristics"]
+        return Entities.attributes() + ["node", "q_characteristics", "em"]
 
 
 @dataclass(frozen=True)
