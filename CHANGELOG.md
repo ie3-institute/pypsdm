@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
  - Fixed node identifier for plot of voltage over a branch [#240](https://github.com/ie3-institute/pypsdm/issue/240)
+ - Fixed flex option results not being handled [#247](https://github.com/ie3-institute/pypsdm/issues/247)
 
 ## [0.0.3]
 

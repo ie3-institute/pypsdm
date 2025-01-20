@@ -47,10 +47,13 @@ class EntitiesEnum(Enum):
             ComplexPowerWithSoc,
             ComplexVoltage,
         )
+        from pypsdm import FlexOption
 
         if isinstance(self, SystemParticipantsEnum):
             if self.has_soc():
                 return ComplexPowerWithSoc
+            elif self is SystemParticipantsEnum.FLEX_OPTIONS:
+                return FlexOption
             else:
                 return ComplexPower
         elif isinstance(self, RawGridElementsEnum):

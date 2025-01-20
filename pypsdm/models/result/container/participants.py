@@ -38,11 +38,11 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
     hps: HpsResult
     flex: FlexOptionsDict
 
-    def __init__(self, dct: dict[EntitiesEnum, ComplexPowerDict]):
+    def __init__(self, dct: dict[EntitiesEnum, TimeSeriesDict]):
         def get_or_empty(key: EntitiesEnum, dict_type):
             value = dct.get(key, dict_type.empty())
             if not isinstance(value, dict_type):
-                raise ValueError(f"Expected {dict_type} but got {dict_type(value)}")
+                raise ValueError(f"Expected {dict_type} but got {type(value)}")
             return value
 
         self.ems = get_or_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT, EmsResult)  # type: ignore
