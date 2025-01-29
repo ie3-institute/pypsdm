@@ -14,11 +14,13 @@ All notable changes to this project will be documented in this file.
 Allow execution with python 3.12 [#229](https://github.com/ie3-institute/pypsdm/issues/229) 
 
 ### Changed
+- Add `s_ratedDC` to parameter for creation of `ElectricVehicles` [#236](https://github.com/ie3-institute/pypsdm/issues/236)
 
 ### Removed
 
 ### Fixed
  - Fixed node identifier for plot of voltage over a branch [#240](https://github.com/ie3-institute/pypsdm/issue/240)
+ - Fixed slack node identification if slack is not directly connected to a transformer [#238](https://github.com/ie3-institute/pypsdm/issue/238) 
 
 ## [0.0.3]
 
@@ -41,7 +43,6 @@ Allow execution with python 3.12 [#229](https://github.com/ie3-institute/pypsdm/
 - Renamed `EnhancedNodeResult` and `EnhancedNodesResult` to `ExtendedNoderesult` and `ExtendedNodesresult` [#155](https://github.com/ie3-institute/pypsdm/pull/155)
 - Data models from `pypsdm.models.*` can now be imported from the root module `pypsdm` [#159](https://github.com/ie3-institute/pypsdm/pull/159)
 - All previous `ResultDict` and `ExtendedNodesResult` properties are now functions instead of properties
-- Add `s_ratedDC` to parameter for creation of `ElectricVehicles` [#236](https://github.com/ie3-institute/pypsdm/issues/236)
 
 ### Removed
 
