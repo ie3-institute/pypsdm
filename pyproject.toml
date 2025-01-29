@@ -20,7 +20,7 @@ openpyxl = "^3.1.2"
 python-dotenv = "^1.0.0"                              # Can probably be removed in the future
 shapely = "^2.0.1"
 networkx = "^3.1"
-black = { extras = ["jupyter"], version = "~24.1.1" }
+black = { extras = ["jupyter"], version = "~25.1.0" }
 loguru = "^0.7.2"
 sqlmodel = "^0.0.14"
 pyhocon = "^0.3.60"
