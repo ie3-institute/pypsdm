@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Added method to create nodes and lines [#223](https://github.com/ie3-institute/pypsdm/pull/223)
 - Added graph traversal functionality [#224](https://github.com/ie3-institute/pypsdm/pull/224)
 - Added method to create two winding transformer [#227](https://github.com/ie3-institute/pypsdm/pull/227)
+Allow execution with python 3.12 [#229](https://github.com/ie3-institute/pypsdm/issues/229) 
 
 ### Changed
 
