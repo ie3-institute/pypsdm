@@ -8,9 +8,6 @@ from pypsdm.models.input.entity import Entities
 
 @dataclass(frozen=True)
 class EnergyManagementSystems(Entities):
-    @property
-    def node(self) -> Series:
-        pass
 
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
