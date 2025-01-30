@@ -21,6 +21,7 @@ Allow execution with python 3.12 [#229](https://github.com/ie3-institute/pypsdm/
 ### Fixed
  - Fixed node identifier for plot of voltage over a branch [#240](https://github.com/ie3-institute/pypsdm/issue/240)
  - Fixed slack node identification if slack is not directly connected to a transformer [#238](https://github.com/ie3-institute/pypsdm/issue/238) 
+ - Fixed dependabot tag [#261](https://github.com/ie3-institute/pypsdm/issues/261)
 
 ## [0.0.3]
 
