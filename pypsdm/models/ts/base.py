@@ -242,9 +242,6 @@ class TimeSeriesDict(UserDict[K, V]):
                 return res
             raise e
 
-    def __contains__(self, key: object) -> bool:
-        return self.get(key) is not None  # type: ignore
-
     def get_with_key(self, key: K | str) -> tuple[K, V]:
         for k, v in self.items():
             if k == key:
