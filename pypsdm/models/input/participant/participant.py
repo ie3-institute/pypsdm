@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from pandas import Series
+
 from pypsdm.models.input.entity import Entities
 from pypsdm.models.input.node import Nodes
 
@@ -11,7 +13,10 @@ class SystemParticipants(Entities, ABC):
         return super().__eq__(other)
 
     @property
-    def node(self):
+    def node(self) -> Series:
+        """
+        Returns: The nodes to which the entities are connected.
+        """
         return self.data["node"]
 
     @property
@@ -25,8 +30,8 @@ class SystemParticipants(Entities, ABC):
             self.data.insert(self.data.columns.get_loc("node") + 1, "node_id", None)
         self.data["node_id"] = self.node.map(index_to_id)
 
-    @classmethod
-    def attributes(cls):
+    @staticmethod
+    def attributes():
         return Entities.attributes() + ["node", "q_characteristics", "em"]
 
 

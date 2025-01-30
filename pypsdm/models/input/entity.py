@@ -158,13 +158,6 @@ class Entities(ABC):
         """
         return self.data["operator"]
 
-    @property
-    @abstractmethod
-    def node(self) -> Series:
-        """
-        Returns: The nodes to which the entities are connected.
-        """
-
     def get(self, uuid: str) -> Series:
         """
         Returns the entity information of the entitiy with the given uuid.
@@ -459,8 +452,8 @@ class Entities(ABC):
         Returns the corresponding entity enum value.
         """
 
-    @classmethod
-    def attributes(cls) -> list[str]:
+    @staticmethod
+    def attributes() -> list[str]:
         """
         Method that should hold all attributes field (transformed to snake_case and case-sensitive)
         of the corresponding PSDM entity
