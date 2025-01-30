@@ -354,7 +354,7 @@ def create_energy_management_systems_data(
     id,
     node,
     control_strategy,
-    parent_em= None,
+    parent_em=None,
     q_characteristics=None,
     uuid=None,
     operates_from=None,
