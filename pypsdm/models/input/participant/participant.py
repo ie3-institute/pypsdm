@@ -20,6 +20,13 @@ class SystemParticipants(Entities, ABC):
         return self.data["node"]
 
     @property
+    def em(self) -> Series:
+        """
+        Returns: The ems to which the entities are connected.
+        """
+        return self.data["em"]
+
+    @property
     def q_characteristic(self):
         return self.data["q_characteristic"]
 
