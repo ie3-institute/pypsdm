@@ -24,7 +24,11 @@ class SystemParticipants(Entities, ABC):
         """
         Returns: The ems to which the entities are connected.
         """
-        return self.data["em"]
+        # EM column might not be present
+        if "em" in self.data:
+            return self.data["em"]
+        else:
+            return Series()
 
     @property
     def q_characteristic(self):
