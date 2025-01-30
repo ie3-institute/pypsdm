@@ -25,7 +25,7 @@ loguru = "^0.7.2"
 sqlmodel = "^0.0.22"
 pyhocon = "^0.3.60"
 psycopg2 = "^2.9.9"
-numba = "^0.59.1"
+numba = "^0.61.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
