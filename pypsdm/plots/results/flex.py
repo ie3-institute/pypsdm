@@ -74,7 +74,7 @@ def plot_all_participants_flex_range(
 def plot_flex_range(
     flex_option: FlexOption,
     title: str,
-    hourly_mean: bool,
+    hourly_mean: bool = False,
     actual_res: ComplexPower | None = None,
     resolution: Resolution | None = None,
 ):

@@ -112,10 +112,9 @@ def save_fig(figure: Figure, path: str, file_name: str, format="svg"):
 
 def plot_resample(res: Series, hourly_mean: bool):
     return (
-        res.resample("60S").ffill()
+        res.resample("60s").ffill()
         if not hourly_mean
-        # todo: check the resample 60s
-        else hourly_mean_resample(res).resample("60S").ffill()
+        else hourly_mean_resample(res).resample("60s").ffill()
     )
 
 

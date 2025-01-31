@@ -38,11 +38,11 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
     hps: HpsResult
     flex: FlexOptionsDict
 
-    def __init__(self, dct: dict[EntitiesEnum, ComplexPowerDict]):
+    def __init__(self, dct: dict[EntitiesEnum, TimeSeriesDict]):
         def get_or_empty(key: EntitiesEnum, dict_type):
             value = dct.get(key, dict_type.empty())
             if not isinstance(value, dict_type):
-                raise ValueError(f"Expected {dict_type} but got {dict_type(value)}")
+                raise ValueError(f"Expected {dict_type} but got {type(value)}")
             return value
 
         self.ems = get_or_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT, EmsResult)  # type: ignore
@@ -83,14 +83,14 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
     def p(self) -> DataFrame:
         p_series = {
             participants.entity_type().value: participants.p_sum()  # type: ignore
-            for participants in self.to_list(include_flex=False)
+            for participants in self.participants_to_list()
         }
         return pd.DataFrame(p_series).sort_index().ffill().fillna(0)
 
     def q(self) -> DataFrame:
         q_series = {
             participants.entity_type().value: participants.q_sum()  # type: ignore
-            for participants in self.to_list(include_flex=False)
+            for participants in self.participants_to_list()
         }
         return pd.DataFrame(q_series).sort_index().ffill().fillna(0)
 
@@ -109,7 +109,7 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
         return self.to_dict().get(sp_type)
 
     def find_participant_result(self, uuid: str):
-        for participants_res in self.to_list(include_flex=False):
+        for participants_res in self.to_list():
             if uuid in participants_res:
                 return participants_res.get(uuid)
         return ValueError(f"No participant result with uuid: {uuid}")
@@ -117,23 +117,23 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
     def energies(self) -> dict[SystemParticipantsEnum, float]:
         return {
             sp_type: res.energy()
-            for sp_type, res in self.to_dict(include_empty=False).items()
+            for sp_type, res in self.participants_to_dict(include_empty=False).items()
             if sp_type != SystemParticipantsEnum.FLEX_OPTIONS
         }
 
     def load_and_generation_energies(self) -> dict[EntitiesEnum, Tuple[float, float]]:
         return {
             sp_type: res.load_and_generation()
-            for sp_type, res in self.to_dict(include_empty=False).items()
+            for sp_type, res in self.participants_to_dict(include_empty=False).items()
         }
 
     def sum(self) -> ComplexPower:
         participant_res = []
-        for participant in self.to_list(include_em=False, include_flex=False):
+        for participant in self.participants_to_list(include_em=False):
             participant_res.append(participant.sum())
         return ComplexPower.sum(participant_res)
 
-    def to_dict(
+    def participants_to_dict(
         self, include_empty: bool = False
     ) -> dict[SystemParticipantsEnum, ComplexPowerDict]:
         dct = {
@@ -146,20 +146,38 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
             SystemParticipantsEnum.EV_CHARGING_STATION: self.evcs,
             SystemParticipantsEnum.ELECTRIC_VEHICLE: self.evs,
             SystemParticipantsEnum.HEAT_PUMP: self.hps,
-            SystemParticipantsEnum.FLEX_OPTIONS: self.flex,
         }
         if not include_empty:
             dct = {k: v for k, v in dct.items() if len(v) > 0}
         return dct
 
-    def to_list(
-        self, include_em: bool = True, include_flex=True, include_empty=True
+    def participants_to_list(
+        self, include_em: bool = True, include_empty=True
     ) -> list[ComplexPowerDict]:  # type: ignore
+        dct = self.participants_to_dict(include_empty)
+        if not include_em:
+            del dct[SystemParticipantsEnum.ENERGY_MANAGEMENT]
+        return list(dct.values())
+
+    def to_dict(
+        self, include_empty: bool = False
+    ) -> dict[SystemParticipantsEnum, TimeSeriesDict]:
+        dct: dict[SystemParticipantsEnum, TimeSeriesDict] = self.participants_to_dict(
+            include_empty=True
+        )
+
+        dct[SystemParticipantsEnum.FLEX_OPTIONS] = self.flex
+
+        if not include_empty:
+            dct = {k: v for k, v in dct.items() if len(v) > 0}
+        return dct
+
+    def to_list(
+        self, include_em: bool = True, include_empty=True
+    ) -> list[TimeSeriesDict]:  # type: ignore
         dct = self.to_dict(include_empty)
         if not include_em:
             del dct[SystemParticipantsEnum.ENERGY_MANAGEMENT]
-        if not include_flex:
-            del dct[SystemParticipantsEnum.FLEX_OPTIONS]
         return list(dct.values())
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
@@ -199,7 +217,7 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
         )
 
     def to_csv(self, path: str, delimiter: str = ",", mkdirs=False):
-        for participant in self.to_list(include_empty=False, include_flex=True):
+        for participant in self.to_list(include_empty=False):
             participant.to_csv(path, delimiter, mkdirs=mkdirs)
 
     @classmethod
