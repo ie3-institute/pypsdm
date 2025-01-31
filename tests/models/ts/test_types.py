@@ -99,8 +99,8 @@ def test_add_with_soc():
 
     s_b.data["soc"] = s_b.data["soc"] * 1 / 2
     res = s.add_with_soc(10, s_b, 10)
-    expectd_soc = (s.soc + s_b.soc) * 1 / 2
-    pd.testing.assert_series_equal(res.soc, expectd_soc)
+    expected_soc = (s.soc + s_b.soc) * 1 / 2
+    pd.testing.assert_series_equal(res.soc, expected_soc)
 
 
 def test_p():

@@ -72,11 +72,11 @@ def weighted_interpolation_coordinates(
     nearest_coords: list[tuple[Coordinate, float]],
 ) -> list[tuple[Coordinate, float]]:
     """
-    Given a list of nearest surrounding cordinates with respect to a target coordinate,
+    Given a list of nearest surrounding coordinates with respect to a target coordinate,
     find the nearest coordinate in each quadrant and weigh them by their distance to
     the target.
 
-    Requires at least one coordinate in each quadrant (meaing top left, top right,
+    Requires at least one coordinate in each quadrant (meaning top left, top right,
     bottom left, bottom right).
 
     Note that the nearest coordinates can be found with the find n closest functionality
