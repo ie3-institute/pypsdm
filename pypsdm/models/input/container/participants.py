@@ -72,6 +72,20 @@ class SystemParticipantsContainer(ContainerMixin):
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
 
+        em_uuids = pd.concat(
+            [
+                loads.em,
+                fixed_feed_ins.em,
+                pvs.em,
+                biomass_plants.em,
+                wecs.em,
+                storages.em,
+                evcs.em,
+                hps.em,
+            ]
+        )
+        ems = EnergyManagementSystems(self.ems.data[self.ems.data.index.isin(em_uuids)])
+
         return SystemParticipantsContainer(
             EnergyManagementSystems.create_empty(),
             loads,
