@@ -59,9 +59,13 @@ class RawGridContainer(ContainerMixin):
             raise ValueError(
                 "There are multiple nodes connected to the slack node via a transformer."
             )
-        elif len(slack_connected_node) == 0:
+        elif len(slack_connected_node) == 0 and len(slack_node.uuid) == 0:
             raise ValueError("Did not find a slack node!")
-        slack_connected_node = slack_connected_node.pop()
+        elif len(slack_connected_node) == 0 and len(slack_node.uuid) > 0:
+            # No transformers connected, use the slack node itself
+            slack_connected_node = slack_node.uuid[0]
+        else:
+            slack_connected_node = slack_connected_node.pop()
         graph = self.build_networkx_graph()
         branches = find_branches(graph, slack_connected_node)
         if as_graphs:
