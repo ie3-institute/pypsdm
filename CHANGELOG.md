@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Added graph traversal functionality [#224](https://github.com/ie3-institute/pypsdm/pull/224)
 - Added method to create two winding transformer [#227](https://github.com/ie3-institute/pypsdm/pull/227)
 - Allow execution with python 3.12 [#229](https://github.com/ie3-institute/pypsdm/issues/229) 
+- Added ECDF plot example to plotting notebook [#263](https://github.com/ie3-institute/pypsdm/issues/263)
 
 ### Changed
 - Add `s_ratedDC` to parameter for creation of `ElectricVehicles` [#236](https://github.com/ie3-institute/pypsdm/issues/236)
