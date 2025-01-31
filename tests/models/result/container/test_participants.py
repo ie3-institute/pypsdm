@@ -1,5 +1,6 @@
 import pandas as pd
 
+from pypsdm import FlexOption
 from pypsdm.models.enums import SystemParticipantsEnum
 from pypsdm.models.result.container.participants import (
     SystemParticipantsResultContainer,
@@ -27,11 +28,33 @@ def get_power_data(with_soc=False):
     return ComplexPower(data)
 
 
-def get_entities_dict(with_soc=False):
+def get_flex_data():
+    data = pd.DataFrame(
+        {
+            TIME_COLUMN_NAME: [
+                "2021-01-01",
+                "2021-01-02",
+                "2021-01-03",
+                "2021-01-04",
+            ],
+            "p_min": [0.0, -1.0, 1.0, 2.0],
+            "p_max": [0.0, 0.0, 2.0, 3.0],
+            "q_ref": [0.0, 1.0, 2.0, 3.0],
+        },
+    )
+    return FlexOption(data)
+
+
+def get_entities_dict(key):
+    if key == SystemParticipantsEnum.FLEX_OPTIONS:
+        data = get_flex_data()
+    else:
+        data = get_power_data(with_soc=key.has_soc())
+
     dct = {
-        EntityKey("a"): get_power_data(with_soc),
-        EntityKey("b"): get_power_data(with_soc),
-        EntityKey("c"): get_power_data(with_soc),
+        EntityKey("a"): data.copy(),
+        EntityKey("b"): data.copy(),
+        EntityKey("c"): data.copy(),
     }
     return dct
 
@@ -40,7 +63,7 @@ def get_container() -> SystemParticipantsResultContainer:
     dcts = {}
     for key in SystemParticipantsResultContainer.entity_keys():
         dict_type = key.get_result_dict_type()
-        dcts[key] = dict_type(get_entities_dict(key.has_soc()))
+        dcts[key] = dict_type(get_entities_dict(key))
     return SystemParticipantsResultContainer(dcts)
 
 
