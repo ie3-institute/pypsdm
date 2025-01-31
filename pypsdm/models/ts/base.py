@@ -242,9 +242,6 @@ class TimeSeriesDict(UserDict[K, V]):
                 return res
             raise e
 
-    def __contains__(self, key: object) -> bool:
-        return self.get(key) is not None  # type: ignore
-
     def get_with_key(self, key: K | str) -> tuple[K, V]:
         for k, v in self.items():
             if k == key:
@@ -333,7 +330,7 @@ class TimeSeriesDict(UserDict[K, V]):
 
         NOTE: This only makes sense if the time series indexes are continuous. Given
         that we deal with discrete event data that means that the last state of self
-        is valid until the first state of other. Which would probably not be what
+        is valid until the first state of the other. Which would probably not be what
         you want in case the results are separated by a year.
 
         Args:

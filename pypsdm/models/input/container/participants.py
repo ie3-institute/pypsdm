@@ -3,9 +3,11 @@ from pathlib import Path
 from typing import Union
 
 import pandas as pd
+from pandas import Series
 
 from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.container.mixins import ContainerMixin
+from pypsdm.models.input.entity import Entities
 from pypsdm.models.input.node import Nodes
 from pypsdm.models.input.participant.bm import BiomassPlants
 from pypsdm.models.input.participant.em import EnergyManagementSystems
@@ -32,7 +34,7 @@ class SystemParticipantsContainer(ContainerMixin):
     evcs: EvChargingStations
     hps: HeatPumps
 
-    def to_list(self, include_empty=False):
+    def to_list(self, include_empty=False) -> list[Entities]:
         participants = [
             self.ems,
             self.loads,
@@ -57,17 +59,33 @@ class SystemParticipantsContainer(ContainerMixin):
         uuids = nodes.uuid if isinstance(nodes, Nodes) else nodes
         return {uuid: self.filter_by_nodes(uuid) for uuid in uuids}
 
-    def filter_by_nodes(self, node_uuids: str | list[str]):
+    def filter_by_nodes(
+        self, node_uuids: str | list[str]
+    ) -> "SystemParticipantsContainer":
         loads = self.loads.filter_by_nodes(node_uuids)
         fixed_feed_ins = self.fixed_feed_ins.filter_by_nodes(node_uuids)
         pvs = self.pvs.filter_by_nodes(node_uuids)
         biomass_plants = self.biomass_plants.filter_by_nodes(node_uuids)
         wecs = self.wecs.filter_by_nodes(node_uuids)
         storages = self.storages.filter_by_nodes(node_uuids)
-        ems = self.ems.filter_by_nodes(node_uuids)
         evs = self.evs.filter_by_nodes(node_uuids)
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
+
+        em_uuids = pd.concat(
+            [
+                loads.em,
+                fixed_feed_ins.em,
+                pvs.em,
+                biomass_plants.em,
+                wecs.em,
+                storages.em,
+                evcs.em,
+                hps.em,
+            ]
+        )
+        ems = EnergyManagementSystems(self.ems.data[self.ems.data.index.isin(em_uuids)])
+
         return SystemParticipantsContainer(
             ems,
             loads,
@@ -81,7 +99,7 @@ class SystemParticipantsContainer(ContainerMixin):
             hps,
         )
 
-    def get_with_enum(self, sp_type: EntitiesEnum):
+    def get_with_enum(self, sp_type: EntitiesEnum) -> Entities | None:
         if sp_type == SystemParticipantsEnum.ENERGY_MANAGEMENT:
             return self.ems
         elif sp_type == SystemParticipantsEnum.LOAD:
@@ -105,7 +123,7 @@ class SystemParticipantsContainer(ContainerMixin):
         else:
             return None
 
-    def find_participant(self, uuid: str):
+    def find_participant(self, uuid: str) -> Series:
         if uuid in self.loads:
             return self.loads.get(uuid)
         elif uuid in self.fixed_feed_ins:

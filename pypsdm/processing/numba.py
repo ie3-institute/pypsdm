@@ -66,7 +66,7 @@ def add_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarr
 @jit
 def add_2d_array(idx: ndarray, idx_a: ndarray, idx_b: ndarray, a: ndarray, b: ndarray):
     """
-    Adds two multi column time series with different indices in an event discrete manner.
+    Adds two multi-column time series with different indices in an event discrete manner.
     The state of a system stays constant until a new event occurs. The resulting time
     series index is a union of the indices of the input time series.
 
