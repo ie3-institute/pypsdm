@@ -315,7 +315,7 @@ def create_loads_data(
     s_rated,
     e_cons_annual,
     load_profile,
-    dsm=True,
+    dsm=False,
     q_characteristics=None,
     cos_phi_rated=0.9,
     uuid=None,
