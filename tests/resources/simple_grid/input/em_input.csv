@@ -1,4 +1,4 @@
-uuid,id,node,connected_assets,control_strategy,q_characteristics,operates_from,operates_until,operator
-db1a151e-8e52-4b4d-8600-0fcd827d3e77,EMS_NS_02,b7a5be0d-2662-41b2-99c6-3b8121a75e9e,17f1d194-ec99-47a3-875d-11ca1cb1bcba 35b25f11-434b-49c8-acba-797a986f52b4 76b12e7b-1a31-4feb-b205-845fe147d0f0 08367f08-772e-4bc2-b38a-bf8575c8ed62 441801d9-983a-4eb1-9e9c-9008ca7d9ba0,self_optimization,"cosPhiFixed:{(0.0, 0.9)}",,,
-d9571711-9cf7-4bad-bc15-c1879841892f,EMS_NS_03,1dcddd06-f41a-405b-9686-7f7942852196,bbceb88d-234f-469f-910e-66df52e82839 d4f0ff3a-a44d-4ec9-9f23-a435acd8fbc9 4711d5af-62d2-476b-93cd-4523c8d28c2b 4602fd48-b8be-41f2-8514-6e119309f409 75f6fb29-f932-4016-a579-f1eafbed5375,self_optimization,"cosPhiFixed:{(0.0, 0.9)}",,,
-e4c3c9a7-6c4e-4908-b537-3247f59eff1c,EMS_NS_04,e3c3c6a3-c383-4dbb-9b3f-a14125615386,ae7b4014-06d7-4930-8584-6f442d00bdb7 718ac721-c577-4341-b1d0-f7545d56fa2d 542feabd-0324-499a-8717-c30f1b406ba9 432d69a8-e8eb-4db0-93ec-3abe61194472 a42bed52-d85e-4b5f-aa03-12c3a6073ed4,self_optimization,"cosPhiFixed:{(0.0, 0.9)}",,,
+uuid,id,parent_em,control_strategy,operates_from,operates_until,operator
+db1a151e-8e52-4b4d-8600-0fcd827d3e77,EMS_NS_02,,PRIORITIZED,,,
+d9571711-9cf7-4bad-bc15-c1879841892f,EMS_NS_03,,PRIORITIZED,,,
+e4c3c9a7-6c4e-4908-b537-3247f59eff1c,EMS_NS_04,,PRIORITIZED,,,

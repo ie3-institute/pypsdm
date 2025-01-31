@@ -58,7 +58,7 @@ class ContainerMixin(ABC):
     ) -> Self:
         """
         Creates a copy of the current container instance.
-        By default does a deep copy of all data and replaces the given changes.
+        By default, does a deep copy of all data and replaces the given changes.
         When deep is false, only the references to the data of the non-changed
         attribtues are copied.
 
