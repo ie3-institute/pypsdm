@@ -87,7 +87,7 @@ class SystemParticipantsContainer(ContainerMixin):
         ems = EnergyManagementSystems(self.ems.data[self.ems.data.index.isin(em_uuids)])
 
         return SystemParticipantsContainer(
-            EnergyManagementSystems.create_empty(),
+            ems,
             loads,
             fixed_feed_ins,
             pvs,
