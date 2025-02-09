@@ -352,7 +352,6 @@ def create_loads(data_dict):
 
 def create_energy_management_systems_data(
     id,
-    node,
     control_strategy,
     parent_em=None,
     q_characteristics=None,
@@ -368,7 +367,6 @@ def create_energy_management_systems_data(
     return pd.Series(
         {
             "id": id,
-            "node": node,
             "control_strategy": control_strategy,
             "parent_em": parent_em,
             "q_characteristics": q_characteristics,
