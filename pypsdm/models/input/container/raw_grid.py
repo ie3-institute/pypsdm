@@ -82,6 +82,8 @@ class RawGridContainer(ContainerMixin):
                 return self.transformers_2_w
             case RawGridElementsEnum.SWITCH:
                 return self.switches
+            case RawGridElementsEnum.SUBGRID:
+                return None
             case _:
                 raise ValueError(f"Unknown enum {enum}")
 
