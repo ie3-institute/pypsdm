@@ -12,7 +12,7 @@ from loguru import logger
 from pypsdm.io.utils import check_filter, csv_to_grpd_df, get_file_path, to_date_time
 from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
 from pypsdm.models.input.entity import Entities
-from pypsdm.models.ts.base import EntityKey, TimeSeries
+from pypsdm.models.ts.base import EntityKey, TimeSeries, TimeSeriesDict
 from pypsdm.models.ts.types import (
     ComplexPower,
     ComplexPowerDict,
@@ -330,7 +330,7 @@ class HpsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
         return SystemParticipantsEnum.HEAT_PUMP
 
 
-class FlexResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
+class FlexResult(TimeSeriesDict[EntityKey], EntitiesResultDictMixin):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 

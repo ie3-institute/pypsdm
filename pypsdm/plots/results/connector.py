@@ -101,7 +101,7 @@ def ax_plot_transformer_s(
     resolution: Resolution | None = None,
     **kwargs,
 ):
-    if len(res.i_a_mag) == 0:
+    if len(res.data) == 0:
         raise ValueError("Transformer current time series is empty. No data to plot")
 
     rated_power = res.apparent_power(trafo_key, gwr, side).apply(lambda x: np.real(x))

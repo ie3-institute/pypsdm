@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
  - Fixed node identifier for plot of voltage over a branch [#240](https://github.com/ie3-institute/pypsdm/issue/240)
  - Fixed slack node identification if slack is not directly connected to a transformer [#238](https://github.com/ie3-institute/pypsdm/issue/238) 
  - Fixed dependabot tag [#261](https://github.com/ie3-institute/pypsdm/issues/261)
+ - Fixed flex option results not being handled [#247](https://github.com/ie3-institute/pypsdm/issues/247)
 
 ## [0.0.3]
 

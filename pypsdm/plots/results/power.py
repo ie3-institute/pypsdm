@@ -298,7 +298,7 @@ def plot_aggregated_load_and_generation(
 def plot_all_participants(
     participants: Union[SystemParticipantsResultContainer, list[ComplexPower]],
     title: str,
-    hourly_mean: bool,
+    hourly_mean: bool = False,
     stack=False,
     with_residual=False,
     resolution: Resolution | None = None,
@@ -347,9 +347,7 @@ def _get_complex_power_from_union(
         if isinstance(participants, list)
         else [
             participant.sum()
-            for participant in participants.to_list(
-                include_em=False, include_flex=False
-            )
+            for participant in participants.participants_to_list(include_em=False)
             if participant
         ]
     )

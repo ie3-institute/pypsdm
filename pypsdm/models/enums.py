@@ -39,6 +39,7 @@ class EntitiesEnum(Enum):
 
     def get_result_type(self) -> type[TimeSeries]:
         # locally to avoid circular imports
+        from pypsdm import FlexOption
         from pypsdm.models.result.grid.connector import ConnectorCurrent
         from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
@@ -51,6 +52,8 @@ class EntitiesEnum(Enum):
         if isinstance(self, SystemParticipantsEnum):
             if self.has_soc():
                 return ComplexPowerWithSoc
+            elif self is SystemParticipantsEnum.FLEX_OPTIONS:
+                return FlexOption
             else:
                 return ComplexPower
         elif isinstance(self, RawGridElementsEnum):
