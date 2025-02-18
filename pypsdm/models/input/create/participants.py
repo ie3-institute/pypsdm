@@ -220,7 +220,7 @@ def create_ev_charging_stations_data(
     v2g_support=False,
     charging_points=1,
     electric_current_type=ElectricCurrentType.AC,
-    cos_phi=0.9,
+    cos_phi=1.0,
     type_id=None,
     q_characteristics=None,
     uuid=None,
