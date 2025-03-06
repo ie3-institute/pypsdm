@@ -39,6 +39,8 @@ def create_thermal_house_data(
     target_temperature=20,
     upper_temperature_limit=22,
     lower_temperature_limit=18,
+    housing_type="house",
+    number_inhabitants=2.0,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -58,6 +60,8 @@ def create_thermal_house_data(
             "target_temperature": target_temperature,
             "upper_temperature_limit": upper_temperature_limit,
             "lower_temperature_limit": lower_temperature_limit,
+            "housing_type": housing_type,
+            "number_inhabitants": number_inhabitants,
         }
     ).rename(uuid)
 
