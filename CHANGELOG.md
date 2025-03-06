@@ -18,7 +18,8 @@ All notable changes to this project will be documented in this file.
 - Add `s_ratedDC` to parameter for creation of `ElectricVehicles` [#236](https://github.com/ie3-institute/pypsdm/issues/236)
 - Adapt to recent PSDM changes with regard to energy management systems [#164](https://github.com/ie3-institute/pypsdm/issue/164)
 - Removed node from create method of energy management systems [#267](https://github.com/ie3-institute/pypsdm/issue/267)
-- Changed default value for `cos_Phi` of create method of `ElectricVehicleChargingStations` to 1.0 [#272](https://github.com/ie3-institute/pypsdm/issue/272) 
+- Changed default value for `cos_Phi` of create method of `ElectricVehicleChargingStations` to 1.0 [#272](https://github.com/ie3-institute/pypsdm/issue/272)
+- Adapt to recent PSDM Version 6.0.0 [#278](https://github.com/ie3-institute/pypsdm/issue/278)
 
 ### Removed
 
