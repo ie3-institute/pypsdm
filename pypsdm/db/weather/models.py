@@ -16,7 +16,7 @@ class WeatherValue(SQLModel, table=True):
     Represents the ICON weather model.
     """
 
-    time: Optional[datetime] = Field(primary_key=True)
+    time: datetime = Field(primary_key=True)
     coordinate_id: Optional[int] = Field(
         primary_key=True, default=None, foreign_key="coordinate.id"
     )
