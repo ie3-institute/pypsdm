@@ -22,7 +22,7 @@ shapely = "^2.0.7"
 networkx = "^3.1"
 black = { extras = ["jupyter"], version = "~25.1.0" }
 loguru = "^0.7.2"
-sqlmodel = "^0.0.22"
+sqlmodel = "^0.0.24"
 pyhocon = "^0.3.60"
 psycopg2 = "^2.9.9"
 numba = "^0.61.0"
@@ -30,7 +30,7 @@ geoalchemy2 = "^0.17.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
-flake8 = "^7.1.1"
+flake8 = "^7.1.2"
 flake8-black = "^0.3.6"
 flake8-isort = "^6.0.0"
 pre-commit = "~=4.1.0"
