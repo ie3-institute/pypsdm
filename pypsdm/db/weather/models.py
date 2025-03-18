@@ -90,26 +90,16 @@ class Coordinate(SQLModel, table=True):
         return loads(wkb_bytes)
 
     @property
-    def latitude(self, session) -> Optional[float]:
-        """Get latitude value using PostGIS functions."""
-        if self.coordinate is not None and session is not None:
-            from sqlalchemy import func
-
-            return session.scalar(func.ST_Y(func.ST_GeogFromWKB(self.coordinate)))
-        return None
+    def latitude(self) -> float:
+        return self.point.y
 
     @property
     def y(self) -> float:
         return self.point.y
 
     @property
-    def longitude(self, session) -> Optional[float]:
-        """Get longitude value using PostGIS functions."""
-        if self.coordinate is not None and session is not None:
-            from sqlalchemy import func
-
-            return session.scalar(func.ST_X(func.ST_GeogFromWKB(self.coordinate)))
-        return None
+    def longitude(self) -> float:
+        return self.point.x
 
     @property
     def x(self) -> float:
