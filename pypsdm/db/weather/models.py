@@ -2,8 +2,12 @@ import binascii
 from datetime import datetime
 from typing import Optional
 
+from geoalchemy2 import Geography
+from geoalchemy2.elements import WKBElement
+from pydantic import ConfigDict
 from shapely import Point
 from shapely.wkb import loads
+from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
 
 
@@ -57,11 +61,24 @@ class WeatherValue(SQLModel, table=True):
 
 
 class Coordinate(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    coordinate: str = Field()
+    """Represents a geographical coordinate."""
+
+    # Allow arbitrary types in model configuration
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    id: int = Field(default=None, primary_key=True)
+
+    # Use WKBElement type with the Geography column
+    coordinate: WKBElement = Field(
+        sa_column=Column(
+            Geography(geometry_type="POINT", srid=4326, spatial_index=False)
+        )
+    )
 
     def __eq__(self, other):
-        return self.id == other.id
+        if isinstance(other, Coordinate):
+            return self.coordinate == other.coordinate
+        return NotImplemented
 
     def __hash__(self):
         return hash(self.id)
@@ -73,16 +90,26 @@ class Coordinate(SQLModel, table=True):
         return loads(wkb_bytes)
 
     @property
-    def latitude(self) -> float:
-        return self.point.y
+    def latitude(self, session) -> Optional[float]:
+        """Get latitude value using PostGIS functions."""
+        if self.coordinate is not None and session is not None:
+            from sqlalchemy import func
+
+            return session.scalar(func.ST_Y(func.ST_GeogFromWKB(self.coordinate)))
+        return None
 
     @property
     def y(self) -> float:
         return self.point.y
 
     @property
-    def longitude(self) -> float:
-        return self.point.x
+    def longitude(self, session) -> Optional[float]:
+        """Get longitude value using PostGIS functions."""
+        if self.coordinate is not None and session is not None:
+            from sqlalchemy import func
+
+            return session.scalar(func.ST_X(func.ST_GeogFromWKB(self.coordinate)))
+        return None
 
     @property
     def x(self) -> float:

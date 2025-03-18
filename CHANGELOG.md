@@ -19,7 +19,8 @@ All notable changes to this project will be documented in this file.
 - Adapt to recent PSDM changes with regard to energy management systems [#164](https://github.com/ie3-institute/pypsdm/issue/164)
 - Removed node from create method of energy management systems [#267](https://github.com/ie3-institute/pypsdm/issue/267)
 - Changed default value for `cos_Phi` of create method of `ElectricVehicleChargingStations` to 1.0 [#272](https://github.com/ie3-institute/pypsdm/issue/272) 
-- Fix `create_grid` notebook to PSDM changes with respect to Em [#281](https://github.com/ie3-institute/pypsdm/issues/281) 
+- Fix `create_grid` notebook to PSDM changes with respect to Em [#281](https://github.com/ie3-institute/pypsdm/issues/281)
+- Adapt Coordinate type to use WKBElement Geography [#287](https://github.com/ie3-institute/pypsdm/issues/287)
 
 ### Removed
 
