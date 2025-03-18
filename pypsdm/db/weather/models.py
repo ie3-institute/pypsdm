@@ -23,23 +23,23 @@ class WeatherValue(SQLModel, table=True):
     wind_velocity_v: float = Field(alias="v131m")
 
     @property
-    def diffuse_irradiance(self):
+    def get_diffuse_irradiance(self):
         return self.diffuse_irradiance
 
     @property
-    def direct_irradiance(self):
+    def get_direct_irradiance(self):
         return self.direct_irradiance
 
     @property
-    def temperature(self):
+    def get_temperature(self):
         return self.temperature - 273.15
 
     @property
-    def wind_velocity_u(self):
+    def get_wind_velocity_u(self):
         return self.wind_velocity_u
 
     @property
-    def wind_velocity_v(self):
+    def get_wind_velocity_v(self):
         return self.wind_velocity_v
 
     @staticmethod
