@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Removed node from create method of energy management systems [#267](https://github.com/ie3-institute/pypsdm/issue/267)
 - Changed default value for `cos_Phi` of create method of `ElectricVehicleChargingStations` to 1.0 [#272](https://github.com/ie3-institute/pypsdm/issue/272) 
 - Fix `create_grid` notebook to PSDM changes with respect to Em [#281](https://github.com/ie3-institute/pypsdm/issues/281) 
+- Use aliases in SqlModel [#290](https://github.com/ie3-institute/pypsdm/issues/290) 
 
 ### Removed
 

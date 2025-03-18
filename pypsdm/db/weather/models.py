@@ -12,36 +12,35 @@ class WeatherValue(SQLModel, table=True):
     Represents the ICON weather model.
     """
 
-    time: Optional[datetime] = Field(primary_key=True)
+    time: datetime = Field(default=None, primary_key=True)
     coordinate_id: Optional[int] = Field(
         primary_key=True, default=None, foreign_key="coordinate.id"
     )
-    aswdifd_s: float = Field()
-    aswdir_s: float = Field()
-    t2m: float = Field()
-    u131m: float = Field()
-    v131m: float = Field()
+    radiation_diffuse: float = Field(alias="aswdifd_s")
+    radiation_direct: float = Field(alias="aswdir_s")
+    temperature_2m: float = Field(alias="t2m")
+    wind_u_vector_100m: float = Field(alias="u131m")
+    wind_v_vector_100m: float = Field(alias="v131m")
 
-    # aliases in SQLModel seem to be broken
     @property
     def diffuse_irradiance(self):
-        return self.aswdifd_s
+        return self.radiation_diffuse
 
     @property
     def direct_irradiance(self):
-        return self.aswdir_s
+        return self.radiation_direct
 
     @property
     def temperature(self):
-        return self.t2m - 273.15
+        return self.temperature_2m - 273.15
 
     @property
     def wind_velocity_u(self):
-        return self.u131m
+        return self.wind_u_vector_100m
 
     @property
     def wind_velocity_v(self):
-        return self.v131m
+        return self.wind_v_vector_100m
 
     @staticmethod
     def name_mapping():
@@ -64,7 +63,7 @@ class Coordinate(SQLModel, table=True):
         return self.id == other.id
 
     def __hash__(self):
-        return hash(self.id)
+        return hash(str(self.coordinate))
 
     @property
     def point(self) -> Point:
