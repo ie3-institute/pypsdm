@@ -300,7 +300,7 @@ def create_heat_pumps_data(
             "s_rated": s_rated,
             "cos_phi_rated": cos_phi_rated,
             "p_thermal": p_thermal,
-            "em=": em,
+            "em": em,
         }
     ).rename(uuid)
 
