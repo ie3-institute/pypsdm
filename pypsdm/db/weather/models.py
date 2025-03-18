@@ -16,31 +16,31 @@ class WeatherValue(SQLModel, table=True):
     coordinate_id: Optional[int] = Field(
         primary_key=True, default=None, foreign_key="coordinate.id"
     )
-    radiation_diffuse: float = Field(alias="aswdifd_s")
-    radiation_direct: float = Field(alias="aswdir_s")
-    temperature_2m: float = Field(alias="t2m")
-    wind_u_vector_100m: float = Field(alias="u131m")
-    wind_v_vector_100m: float = Field(alias="v131m")
+    diffuse_irradiance: float = Field(alias="aswdifd_s")
+    direct_irradiance: float = Field(alias="aswdir_s")
+    temperature: float = Field(alias="t2m")
+    wind_velocity_u: float = Field(alias="u131m")
+    wind_velocity_v: float = Field(alias="v131m")
 
     @property
     def diffuse_irradiance(self):
-        return self.radiation_diffuse
+        return self.diffuse_irradiance
 
     @property
     def direct_irradiance(self):
-        return self.radiation_direct
+        return self.direct_irradiance
 
     @property
     def temperature(self):
-        return self.temperature_2m - 273.15
+        return self.temperature - 273.15
 
     @property
     def wind_velocity_u(self):
-        return self.wind_u_vector_100m
+        return self.wind_velocity_u
 
     @property
     def wind_velocity_v(self):
-        return self.wind_v_vector_100m
+        return self.wind_velocity_v
 
     @staticmethod
     def name_mapping():
@@ -63,7 +63,7 @@ class Coordinate(SQLModel, table=True):
         return self.id == other.id
 
     def __hash__(self):
-        return hash(str(self.coordinate))
+        return hash(self.id)
 
     @property
     def point(self) -> Point:
