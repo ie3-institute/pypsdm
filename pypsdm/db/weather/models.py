@@ -16,31 +16,31 @@ class WeatherValue(SQLModel, table=True):
     coordinate_id: Optional[int] = Field(
         primary_key=True, default=None, foreign_key="coordinate.id"
     )
-    diffuse_irradiance: float = Field(alias="aswdifd_s")
-    direct_irradiance: float = Field(alias="aswdir_s")
-    temperature: float = Field(alias="t2m")
-    wind_velocity_u: float = Field(alias="u131m")
-    wind_velocity_v: float = Field(alias="v131m")
+    dif_irradiance: float = Field(alias="aswdifd_s")
+    dir_irradiance: float = Field(alias="aswdir_s")
+    temp: float = Field(alias="t2m")
+    wind_u: float = Field(alias="u131m")
+    wind_v: float = Field(alias="v131m")
 
     @property
     def diffuse_irradiance(self):
-        return self.diffuse_irradiance
+        return self.dif_irradiance
 
     @property
     def direct_irradiance(self):
-        return self.direct_irradiance
+        return self.dir_irradiance
 
     @property
     def temperature(self):
-        return self.temperature - 273.15
+        return self.temp - 273.15
 
     @property
     def wind_velocity_u(self):
-        return self.wind_velocity_u
+        return self.wind_u
 
     @property
     def wind_velocity_v(self):
-        return self.wind_velocity_v
+        return self.wind_v
 
     @staticmethod
     def name_mapping():
