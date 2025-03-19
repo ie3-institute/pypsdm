@@ -93,7 +93,14 @@ jobs:
       #----------------------------------------------
       #    run test suite
       #----------------------------------------------
-      - name: Run tests
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
         run: |
-          source $VENV
+          source .venv/bin/activate
+          pytest tests/
+
+      - name: Run tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          source .venv/Scripts/activate
           pytest tests/
