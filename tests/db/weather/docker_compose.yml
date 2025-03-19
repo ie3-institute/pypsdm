@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=test_weather
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
@@ -17,3 +17,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  pgdata:
