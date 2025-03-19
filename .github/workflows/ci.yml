@@ -37,18 +37,20 @@ jobs:
   test:
     needs: linting
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ "ubuntu-latest", "windows-latest" ]
         python-version: [ "3.12"]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
-      # Checkout with fetch-depth: 0 to ensure all history is available
+      #----------------------------------------------
+      #       check-out repo and set-up python
+      #----------------------------------------------
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: Set up python ${{ matrix.python-version }}
         id: setup-python
         uses: actions/setup-python@v4
@@ -70,8 +72,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: v2-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
+          key: v1-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
@@ -80,31 +84,17 @@ jobs:
       #----------------------------------------------
       - name: Install library
         run: poetry install --no-interaction
-
-      # Docker setup for Windows
-      - name: Set up Docker on Windows
-        if: runner.os == 'Windows'
-        uses: docker/setup-buildx-action@v2
-
-      # Verify Docker is running on Windows
-      - name: Verify Docker is running (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
+      #----------------------------------------------
+      #    run test suite
+      #----------------------------------------------
+      - name: Run tests (Ubuntu - all tests)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          docker info || echo "Docker not running"
-          docker run --rm hello-world || echo "Docker test failed"
+          source $VENV
+          pytest tests/
 
-      # Run tests based on OS
-      - name: Run tests (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
+      - name: Run tests (Windows - skip Docker tests)
+        if: matrix.os == 'windows-latest'
         run: |
-          source .venv/bin/activate
-          pytest tests/ -v
-
-      - name: Run tests (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          source .venv/Scripts/activate
-          pytest tests/ -v
+          source $VENV
+          pytest tests/ -m "not docker_required"
