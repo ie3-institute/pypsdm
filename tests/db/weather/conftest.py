@@ -50,7 +50,7 @@ def docker_postgres():
     # Wait for the database to be ready
     time.sleep(5)
 
-    yield f"postgresql://postgres:postgres@localhost:5433/test_db"
+    yield "postgresql://postgres:postgres@localhost:5433/test_db"
 
     # Cleanup
     subprocess.run(["docker", "rm", "-f", container_name], check=True)

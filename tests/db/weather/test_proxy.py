@@ -1,25 +1,7 @@
 import math
 
-from conftest import db_session
-from shapely.wkb import loads
-
 from pypsdm.db.weather.models import Coordinate
 from pypsdm.db.weather.utils import weighted_interpolation_coordinates
-
-
-def validate_wkb(wkb_element):
-    """Validate that the given WKBElement represents a valid geometry."""
-    try:
-        # Extract the raw byte data from WKBElement
-        wkb_bytes = wkb_element.data  # Assuming 'data' returns bytes
-        # Attempt to load the WKB bytes as a Shapely geometry
-        geom = loads(wkb_bytes)
-        # Return True if the geometry is valid
-        return geom.is_valid
-    except Exception as e:
-        # Print an error message if validation fails
-        print(f"Invalid WKB: {wkb_element}, Error: {e}")
-        return False
 
 
 def test_weighted_interpolation_coordinates(db_session):
@@ -58,18 +40,6 @@ def test_weighted_interpolation_coordinates(db_session):
             coordinate="0101000020E610000000000000008027400000000000C04A40",
         ),
     ]
-
-    #   test = validate_wkb(coordinates[0].coordinate)
-
-    #   for coord in coordinates:
-    #      if not validate_wkb(coord.coordinate):  # Pass the bytes directly.
-    #           raise ValueError(f"Invalid WKB for coordinate ID {coord.id}")
-
-    # print("test")
-    # for coord in coordinates:
-    #    print(coord)
-    #    db_session.add(coord)
-    # db_session.commit()
 
     db_session.add_all(coordinates)
     db_session.commit()
