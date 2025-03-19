@@ -85,7 +85,7 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       #----------------------------------------------
-      #    run test suite conditionally based on OS
+      # Run tests conditionally based on OS
       #----------------------------------------------
       - name: Run tests on Ubuntu with Docker
         if: matrix.os == 'ubuntu-latest'
@@ -97,12 +97,4 @@ jobs:
       - name: Run tests without Docker on Windows
         if: matrix.os == 'windows-latest'
         run: |
-          source $VENV
-          pytest -m "not docker_required" tests/
-      #----------------------------------------------
-      #    Cleanup step after running tests on Ubuntu
-      #----------------------------------------------
-      - name: Cleanup Docker containers and images
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          docker-compose down --volumes --remove-orphans || true
+          pytest tests/
