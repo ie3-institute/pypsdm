@@ -89,10 +89,5 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            source $VENV
-            pytest tests/ -m "not docker_required"
-          else
-            source $VENV
-            pytest tests/
-          fi
+          source $VENV
+          pytest tests/

@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import time
 
@@ -8,6 +9,8 @@ from sqlmodel import Session, SQLModel, create_engine
 
 
 @pytest.fixture(scope="session")
+@pytest.mark.skipif(platform.system() == "Windows",
+                    reason="Docker tests skipped on Windows")
 def docker_postgres():
     """Start a PostgreSQL container for testing."""
     container_name = "test_postgres_container"

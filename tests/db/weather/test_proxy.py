@@ -1,4 +1,5 @@
 import math
+import platform
 
 import pytest
 
@@ -7,6 +8,8 @@ from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 
 
 @pytest.mark.docker_required
+@pytest.mark.skipif(platform.system() == "Windows",
+                    reason="Docker tests skipped on Windows")
 def test_weighted_interpolation_coordinates(db_session):
     """Test weighted interpolation of coordinates."""
     coordinates = [
