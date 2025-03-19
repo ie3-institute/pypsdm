@@ -1,11 +1,12 @@
 from datetime import datetime
 
+import pytest
 from sqlmodel import select
 
 from pypsdm.db.weather.models import Coordinate, WeatherValue
 
 
-# Test cases
+@pytest.mark.docker_required
 def test_create_coordinate(db_session):
     """Test creating a coordinate."""
     coordinates = []
@@ -27,6 +28,7 @@ def test_create_coordinate(db_session):
     assert missing_coordinate is None
 
 
+@pytest.mark.docker_required
 def test_create_weather_value(db_session):
     """Test creating a weather value."""
     # First create a coordinate
