@@ -7,7 +7,6 @@ from sqlmodel import select
 from pypsdm.db.weather.models import Coordinate, WeatherValue
 
 
-@pytest.mark.docker_required
 @pytest.mark.skipif(
     platform.system() == "Windows", reason="Docker tests skipped on Windows"
 )
