@@ -1,4 +1,3 @@
-import platform
 from datetime import datetime
 
 import pytest
@@ -7,9 +6,7 @@ from sqlmodel import select
 from pypsdm.db.weather.models import Coordinate, WeatherValue
 
 
-@pytest.mark.skipif(
-    platform.system() == "Windows", reason="Docker tests skipped on Windows"
-)
+@pytest.mark.docker_required
 def test_create_coordinate(db_session):
     """Test creating a coordinate."""
     coordinates = []
