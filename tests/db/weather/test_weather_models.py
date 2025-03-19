@@ -8,8 +8,9 @@ from pypsdm.db.weather.models import Coordinate, WeatherValue
 
 
 @pytest.mark.docker_required
-@pytest.mark.skipif(platform.system() == "Windows",
-                    reason="Docker tests skipped on Windows")
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Docker tests skipped on Windows"
+)
 def test_create_coordinate(db_session):
     """Test creating a coordinate."""
     coordinates = []
