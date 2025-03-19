@@ -2,7 +2,7 @@ from pypsdm.db.weather.models import Coordinate
 from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 
 
-def test_weighted_interpolation_coordinates():
+def test_weighted_interpolation_coordinates2():
     target = (0, 0)
 
     coord1 = Coordinate.from_xy(id=1, x=1, y=1)
