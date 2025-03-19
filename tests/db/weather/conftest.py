@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import time
 
@@ -7,7 +8,9 @@ from sqlalchemy import text
 from sqlmodel import Session, SQLModel, create_engine
 
 
-@pytest.fixture(scope="session")
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Docker tests skipped on Windows"
+)
 def docker_postgres():
     """Start a PostgreSQL container for testing."""
     container_name = "test_postgres_container"
@@ -56,6 +59,9 @@ def docker_postgres():
     subprocess.run(["docker", "rm", "-f", container_name], check=True)
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Docker tests skipped on Windows"
+)
 @pytest.fixture(scope="session")
 def db_engine(docker_postgres):
     """Create a database engine connected to the Docker PostgreSQL instance."""
@@ -93,6 +99,9 @@ def db_engine(docker_postgres):
     return engine
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Docker tests skipped on Windows"
+)
 @pytest.fixture
 def db_session(db_engine):
     """Create a new database session for a test."""
@@ -101,6 +110,9 @@ def db_session(db_engine):
         session.rollback()  # Rollback after each test
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Docker tests skipped on Windows"
+)
 @pytest.fixture(scope="function", autouse=True)
 def reset_db(db_engine):
     SQLModel.metadata.drop_all(db_engine)
