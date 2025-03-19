@@ -84,18 +84,28 @@ class Coordinate(SQLModel, table=True):
         return hash(self.id)
 
     @property
-    def point(self) -> Point:
-        wkb_str = self.coordinate
-        wkb_bytes = binascii.unhexlify(wkb_str)
-        return loads(wkb_bytes)
+    def longitude(self) -> Optional[float]:
+        """Extract longitude (x) from the coordinate."""
+        if self.coordinate is None:
+            return None
+        if isinstance(self.coordinate, str) and self.coordinate.startswith("POINT"):
+            parts = self.coordinate.replace("POINT(", "").replace(")", "").split()
+            return float(parts[0])
+        session = object_session(self)
+        if session is not None:
+            return session.scalar(func.ST_X(self.coordinate))
 
     @property
-    def latitude(self) -> float:
-        return self.point.y
-
-    @property
-    def y(self) -> float:
-        return self.point.y
+    def latitude(self) -> Optional[float]:
+        """Extract latitude (y) from the coordinate."""
+        if self.coordinate is None:
+            return None
+        if isinstance(self.coordinate, str) and self.coordinate.startswith("POINT"):
+            parts = self.coordinate.replace("POINT(", "").replace(")", "").split()
+            return float(parts[1])
+        session = object_session(self)
+        if session is not None:
+            return session.scalar(func.ST_Y(self.coordinate))
 
     @property
     def longitude(self) -> float:
