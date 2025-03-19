@@ -8,6 +8,7 @@ from sqlalchemy import text
 from sqlmodel import Session, SQLModel, create_engine
 
 
+@pytest.fixture(scope="session")
 @pytest.mark.skipif(
     platform.system() == "Windows", reason="Docker tests skipped on Windows"
 )
