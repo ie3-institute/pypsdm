@@ -11,7 +11,7 @@ from sqlmodel import Session, SQLModel, create_engine
 @pytest.mark.docker_required
 def docker_postgres():
     """Start a PostgreSQL container for testing."""
-    container_name = "test_postgres_container"
+    container_name = "test_weather"
 
     # Check if the container already exists
     check_cmd = [
@@ -40,7 +40,7 @@ def docker_postgres():
         "-e",
         "POSTGRES_PASSWORD=postgres",
         "-e",
-        "POSTGRES_DB=test_db",
+        "POSTGRES_DB=test_weather",
         "-p",
         "5433:5432",
         "-d",
@@ -51,7 +51,7 @@ def docker_postgres():
     # Wait for the database to be ready
     time.sleep(5)
 
-    yield "postgresql://postgres:postgres@localhost:5433/test_db"
+    yield "postgresql://postgres:postgres@localhost:5433/test_weather"
 
     # Cleanup
     subprocess.run(["docker", "rm", "-f", container_name], check=True)
