@@ -1,13 +1,13 @@
+import binascii
 from datetime import datetime
 from typing import Optional
 
-from geoalchemy2 import Geography
-from geoalchemy2.elements import WKBElement
-from pydantic import ConfigDict
-from shapely.geometry import Point
+from geoalchemy2 import Geometry, WKBElement
+from shapely import Point
+from shapely.geometry.base import BaseGeometry
 from shapely.wkb import loads
-from sqlalchemy import Column, func
-from sqlalchemy.orm import object_session
+from shapely.wkb import dumps
+from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
 
 
@@ -62,88 +62,56 @@ class WeatherValue(SQLModel, table=True):
 
 class Coordinate(SQLModel, table=True):
     """Represents a geographical coordinate."""
-
-    # Allow arbitrary types in model configuration
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     id: int = Field(default=None, primary_key=True)
 
-    # Use WKBElement type with the Geography column
-    coordinate: WKBElement = Field(
-        sa_column=Column(
-            Geography(geometry_type="POINT", srid=4326, spatial_index=False)
-        )
+    # Use Geometry for storing WKB data (binary format)
+    coordinate: bytes = Field(
+        sa_column=Column(Geometry(geometry_type="POINT", srid=4326))
     )
 
+    def __init__(self, id: int, coordinate: bytes):
+        self.id = id
+        self.coordinate = coordinate
+
     def __eq__(self, other):
-        if isinstance(other, Coordinate):
-            return self.coordinate == other.coordinate
-        return NotImplemented
+        return self.id == other.id if isinstance(other, Coordinate) else NotImplemented
 
     def __hash__(self):
         return hash(self.id)
 
-    def _is_valid_wkb_hex(self, hex_str):
-        """Check if the string is a valid WKB hex representation."""
-        try:
-            # Check if it's valid hex first
-            if not all(c in "0123456789ABCDEFabcdef" for c in hex_str):
-                return False
+    @property
+    def point(self) -> BaseGeometry:
+        if isinstance(self.coordinate, WKBElement):
+            wkb_str = str(self.coordinate)
+            coordinate = bytes.fromhex(wkb_str)
+        else:
+            coordinate = self.coordinate
+        return loads(coordinate)
 
-            # Try to convert hex to bytes and validate as geometry using Shapely
-            wkb_bytes = bytes.fromhex(hex_str)
-            geom = loads(wkb_bytes)
-            return geom.is_valid
-
-        except Exception as e:
-            print(f"Invalid WKB: {hex_str}, Error: {e}")
-            return False
 
     @property
-    def longitude(self) -> Optional[float]:
-        """Extract longitude (x) from the coordinate."""
-        if self.coordinate is None:
-            return None
-        if isinstance(self.coordinate, str) and self.coordinate.startswith("POINT"):
-            parts = self.coordinate.replace("POINT(", "").replace(")", "").split()
-            return float(parts[0])
-        session = object_session(self)
-        if session is not None:
-            return session.scalar(func.ST_X(self.coordinate))
-
-    @property
-    def latitude(self) -> Optional[float]:
-        """Extract latitude (y) from the coordinate."""
-        if self.coordinate is None:
-            return None
-        if isinstance(self.coordinate, str) and self.coordinate.startswith("POINT"):
-            parts = self.coordinate.replace("POINT(", "").replace(")", "").split()
-            return float(parts[1])
-        session = object_session(self)
-        if session is not None:
-            return session.scalar(func.ST_Y(self.coordinate))
+    def latitude(self) -> float:
+        return self.point.y
 
     @property
     def y(self) -> float:
-        return self.latitude
+        return self.point.y
+
+    @property
+    def longitude(self) -> float:
+        return self.point.x
 
     @property
     def x(self) -> float:
-        return self.longitude
-
-    @property
-    def point(self) -> Point:
-        """Return Shapely Point object."""
-        return Point(self.longitude, self.latitude)
+        return self.point.x
 
     @staticmethod
-    def from_xy(id: int, x: float, y: float) -> "Coordinate":
-        """Create a Coordinate object from x (longitude) and y (latitude) values."""
-        wkt = f"POINT({x} {y})"
-        return Coordinate(id=id, coordinate=wkt)
+    def from_xy(id: int, x: float, y: float) -> 'Coordinate':
+        point = Point(x, y)
+        wkb_data = dumps(point)
+        return Coordinate(id=id, coordinate=wkb_data)
 
     @staticmethod
-    def from_wkb_hex(id: int, coordinate: str) -> "Coordinate":
-        wkb_bytes = bytes.fromhex(coordinate)
-        geom = loads(wkb_bytes)
-        return Coordinate.from_xy(id=id, x=geom.x, y=geom.y)
+    def from_hex(id: int, wkb_hex: str) -> 'Coordinate':
+        bytes = binascii.unhexlify(wkb_hex)
+        return Coordinate(id=id, coordinate=bytes)
