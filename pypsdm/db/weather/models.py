@@ -5,8 +5,7 @@ from typing import Optional
 from geoalchemy2 import Geometry, WKBElement
 from shapely import Point
 from shapely.geometry.base import BaseGeometry
-from shapely.wkb import loads
-from shapely.wkb import dumps
+from shapely.wkb import dumps, loads
 from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
 
@@ -62,6 +61,7 @@ class WeatherValue(SQLModel, table=True):
 
 class Coordinate(SQLModel, table=True):
     """Represents a geographical coordinate."""
+
     id: int = Field(default=None, primary_key=True)
 
     # Use Geometry for storing WKB data (binary format)
@@ -88,7 +88,6 @@ class Coordinate(SQLModel, table=True):
             coordinate = self.coordinate
         return loads(coordinate)
 
-
     @property
     def latitude(self) -> float:
         return self.point.y
@@ -106,12 +105,12 @@ class Coordinate(SQLModel, table=True):
         return self.point.x
 
     @staticmethod
-    def from_xy(id: int, x: float, y: float) -> 'Coordinate':
+    def from_xy(id: int, x: float, y: float) -> "Coordinate":
         point = Point(x, y)
         wkb_data = dumps(point)
         return Coordinate(id=id, coordinate=wkb_data)
 
     @staticmethod
-    def from_hex(id: int, wkb_hex: str) -> 'Coordinate':
+    def from_hex(id: int, wkb_hex: str) -> "Coordinate":
         bytes = binascii.unhexlify(wkb_hex)
         return Coordinate(id=id, coordinate=bytes)

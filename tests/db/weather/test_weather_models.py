@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import pytest
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 
-from pypsdm.db.weather.models import WeatherValue, Coordinate
+from pypsdm.db.weather.models import Coordinate, WeatherValue
 
 
 @pytest.mark.docker_required
@@ -14,13 +14,15 @@ def test_create_coordinate(db_session):
     coord_2 = Coordinate.from_xy(2, 7.46, 51.5)
     coordinates: list[Coordinate] = coordinates + [coord_1, coord_2]
 
-    query = text("""
+    query = text(
+        """
         INSERT INTO coordinate (id, coordinate)
         VALUES (:id, ST_SetSRID(ST_GeomFromWKB(:geom), 4326));
-    """)
+    """
+    )
 
     for coord in coordinates:
-        db_session.execute(query, {'id': coord.id, 'geom': coord.coordinate})
+        db_session.execute(query, {"id": coord.id, "geom": coord.coordinate})
     db_session.commit()
 
     first_coordinate: Coordinate = db_session.get(Coordinate, 1)
@@ -43,12 +45,14 @@ def test_create_weather_value(db_session):
     """Test creating a weather value."""
     berlin = Coordinate.from_xy(id=1, x=13.405, y=52.52)
 
-    query = text("""
+    query = text(
+        """
         INSERT INTO coordinate (id, coordinate)
         VALUES (:id, ST_SetSRID(ST_GeomFromWKB(:geom), 4326));
-    """)
+    """
+    )
 
-    db_session.execute(query, {'id': berlin.id, 'geom': berlin.coordinate})
+    db_session.execute(query, {"id": berlin.id, "geom": berlin.coordinate})
     db_session.commit()
 
     now = datetime.now()
