@@ -2,8 +2,11 @@ import binascii
 from datetime import datetime
 from typing import Optional
 
+from geoalchemy2 import Geometry, WKBElement
 from shapely import Point
-from shapely.wkb import loads
+from shapely.geometry.base import BaseGeometry
+from shapely.wkb import dumps, loads
+from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
 
 
@@ -12,7 +15,7 @@ class WeatherValue(SQLModel, table=True):
     Represents the ICON weather model.
     """
 
-    time: Optional[datetime] = Field(primary_key=True)
+    time: datetime = Field(primary_key=True)
     coordinate_id: Optional[int] = Field(
         primary_key=True, default=None, foreign_key="coordinate.id"
     )
@@ -57,20 +60,33 @@ class WeatherValue(SQLModel, table=True):
 
 
 class Coordinate(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    coordinate: str = Field()
+    """Represents a geographical coordinate."""
+
+    id: int = Field(default=None, primary_key=True)
+
+    # Use Geometry for storing WKB data (binary format)
+    coordinate: bytes = Field(
+        sa_column=Column(Geometry(geometry_type="POINT", srid=4326))
+    )
+
+    def __init__(self, id: int, coordinate: bytes):
+        self.id = id
+        self.coordinate = coordinate
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id == other.id if isinstance(other, Coordinate) else NotImplemented
 
     def __hash__(self):
         return hash(self.id)
 
     @property
-    def point(self) -> Point:
-        wkb_str = self.coordinate
-        wkb_bytes = binascii.unhexlify(wkb_str)
-        return loads(wkb_bytes)
+    def point(self) -> BaseGeometry:
+        if isinstance(self.coordinate, WKBElement):
+            wkb_str = str(self.coordinate)
+            coordinate = bytes.fromhex(wkb_str)
+        else:
+            coordinate = self.coordinate
+        return loads(coordinate)
 
     @property
     def latitude(self) -> float:
@@ -89,6 +105,12 @@ class Coordinate(SQLModel, table=True):
         return self.point.x
 
     @staticmethod
-    def from_xy(id, x, y):
-        wkb = Point(x, y).wkb_hex
-        return Coordinate(id=id, coordinate=wkb)
+    def from_xy(id: int, x: float, y: float) -> "Coordinate":
+        point = Point(x, y)
+        wkb_data = dumps(point)
+        return Coordinate(id=id, coordinate=wkb_data)
+
+    @staticmethod
+    def from_hex(id: int, wkb_hex: str) -> "Coordinate":
+        bytes = binascii.unhexlify(wkb_hex)
+        return Coordinate(id=id, coordinate=bytes)
