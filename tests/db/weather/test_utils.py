@@ -1,10 +1,7 @@
-import pytest
-
 from pypsdm.db.weather.models import Coordinate
 from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 
 
-@pytest.mark.docker_required
 def test_weighted_interpolation_coordinates():
     target = (0, 0)
 
