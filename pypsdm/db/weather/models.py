@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any, ClassVar, Dict
 
 from shapely import Point
 from shapely.wkb import loads
@@ -57,18 +56,11 @@ class WeatherValue(SQLModel, table=True):
 class Coordinate(SQLModel, table=True):
     """Represents a geographical coordinate."""
 
-    model_config: ClassVar[Dict[str, Any]] = {"arbitrary_types_allowed": True}
-
     id: int = Field(default=None, primary_key=True)
     coordinate: bytes = Column(LargeBinary)
 
-    def __init__(self, id: int, coordinate: bytes, **data: Any):
-        super().__init__(**data)
-        self.id = id
-        self.coordinate = coordinate
-
     def __eq__(self, other):
-        return self.id == other.id if isinstance(other, Coordinate) else NotImplemented
+        return self.id == other.id
 
     def __hash__(self):
         return hash(self.id)
