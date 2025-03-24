@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, ClassVar, Dict
 
 from shapely import Point
-from shapely.wkb import dumps, loads
+from shapely.wkb import loads
 from sqlalchemy import Column, LargeBinary
 from sqlmodel import Field, SQLModel
 
@@ -101,6 +101,5 @@ class Coordinate(SQLModel, table=True):
 
     @staticmethod
     def from_xy(id: int, x: float, y: float) -> "Coordinate":
-        point = Point(x, y)
-        wkb_data = dumps(point)
-        return Coordinate(id=id, coordinate=wkb_data)
+        wkb = Point(x, y).wkb
+        return Coordinate(id=id, coordinate=wkb)
