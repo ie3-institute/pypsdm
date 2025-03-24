@@ -10,58 +10,58 @@ from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 def test_weighted_interpolation_coordinates():
     nearest_coordinates = [
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=13890,
-                wkb_hex="0101000020E610000000000000008026400000000000E04A40",
+                coordinate="0101000020E610000000000000008026400000000000E04A40",
             ),
             15336.967985536437,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=13891,
-                wkb_hex="0101000020E610000000000000000027400000000000E04A40",
+                coordinate="0101000020E610000000000000000027400000000000E04A40",
             ),
             15741.508288878984,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=14079,
-                wkb_hex="0101000020E610000000000000008026400000000000C04A40",
+                coordinate="0101000020E610000000000000008026400000000000C04A40",
             ),
             16606.405396805483,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=14080,
-                wkb_hex="0101000020E610000000000000000027400000000000C04A40",
+                coordinate="0101000020E610000000000000000027400000000000C04A40",
             ),
             16982.92952636213,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=13889,
-                wkb_hex="0101000020E610000000000000000026400000000000E04A40",
+                coordinate="0101000020E610000000000000000026400000000000E04A40",
             ),
             27650.80452994915,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=13892,
-                wkb_hex="0101000020E610000000000000008027400000000000E04A40",
+                coordinate="0101000020E610000000000000008027400000000000E04A40",
             ),
             28324.62399357631,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=14078,
-                wkb_hex="0101000020E610000000000000000026400000000000C04A40",
+                coordinate="0101000020E610000000000000000026400000000000C04A40",
             ),
             28429.952194089583,
         ),
         (
-            Coordinate.from_hex(
+            Coordinate(
                 id=14081,
-                wkb_hex="0101000020E610000000000000008027400000000000C04A40",
+                coordinate="0101000020E610000000000000008027400000000000C04A40",
             ),
             29089.579082292785,
         ),

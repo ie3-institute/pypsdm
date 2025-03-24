@@ -1,12 +1,9 @@
-import binascii
 from datetime import datetime
 from typing import Any, ClassVar, Dict
 
-from geoalchemy2 import Geometry, WKBElement
 from shapely import Point
-from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps, loads
-from sqlalchemy import Column
+from sqlalchemy import Column, LargeBinary
 from sqlmodel import Field, SQLModel
 
 
@@ -63,15 +60,10 @@ class Coordinate(SQLModel, table=True):
     model_config: ClassVar[Dict[str, Any]] = {"arbitrary_types_allowed": True}
 
     id: int = Field(default=None, primary_key=True)
+    coordinate: bytes = Column(LargeBinary)
 
-    # Use Geometry for storing WKB data (binary format)
-    coordinate: WKBElement = Field(
-        sa_column=Column(
-            Geometry(geometry_type="POINT", srid=4326, from_text="ST_GeomFromWKB")
-        )
-    )
-
-    def __init__(self, id: int, coordinate: Geometry):
+    def __init__(self, id: int, coordinate: bytes, **data: Any):
+        super().__init__(**data)
         self.id = id
         self.coordinate = coordinate
 
@@ -82,13 +74,14 @@ class Coordinate(SQLModel, table=True):
         return hash(self.id)
 
     @property
-    def point(self) -> BaseGeometry:
-        if isinstance(self.coordinate, WKBElement):
-            wkb_str = str(self.coordinate)
-            coordinate = bytes.fromhex(wkb_str)
+    def point(self) -> Point:
+        wkb_data = self.coordinate
+        geom = loads(wkb_data)
+
+        if isinstance(geom, Point):
+            return geom
         else:
-            coordinate = self.coordinate
-        return loads(coordinate)
+            raise ValueError("Geometry is not a point")
 
     @property
     def latitude(self) -> float:
@@ -111,8 +104,3 @@ class Coordinate(SQLModel, table=True):
         point = Point(x, y)
         wkb_data = dumps(point)
         return Coordinate(id=id, coordinate=wkb_data)
-
-    @staticmethod
-    def from_hex(id: int, wkb_hex: str) -> "Coordinate":
-        bytes = binascii.unhexlify(wkb_hex)
-        return Coordinate(id=id, coordinate=bytes)
