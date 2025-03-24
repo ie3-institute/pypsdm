@@ -1,6 +1,6 @@
 import binascii
 from datetime import datetime
-from typing import Optional
+from typing import Any, ClassVar, Dict
 
 from geoalchemy2 import Geometry, WKBElement
 from shapely import Point
@@ -16,9 +16,7 @@ class WeatherValue(SQLModel, table=True):
     """
 
     time: datetime = Field(primary_key=True)
-    coordinate_id: Optional[int] = Field(
-        primary_key=True, default=None, foreign_key="coordinate.id"
-    )
+    coordinate_id: int = Field(primary_key=True, foreign_key="coordinate.id")
     aswdifd_s: float = Field()
     aswdir_s: float = Field()
     t2m: float = Field()
@@ -62,14 +60,18 @@ class WeatherValue(SQLModel, table=True):
 class Coordinate(SQLModel, table=True):
     """Represents a geographical coordinate."""
 
+    model_config: ClassVar[Dict[str, Any]] = {"arbitrary_types_allowed": True}
+
     id: int = Field(default=None, primary_key=True)
 
     # Use Geometry for storing WKB data (binary format)
-    coordinate: bytes = Field(
-        sa_column=Column(Geometry(geometry_type="POINT", srid=4326))
+    coordinate: WKBElement = Field(
+        sa_column=Column(
+            Geometry(geometry_type="POINT", srid=4326, from_text="ST_GeomFromWKB")
+        )
     )
 
-    def __init__(self, id: int, coordinate: bytes):
+    def __init__(self, id: int, coordinate: Geometry):
         self.id = id
         self.coordinate = coordinate
 

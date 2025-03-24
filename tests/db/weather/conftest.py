@@ -74,7 +74,7 @@ def db_engine(docker_postgres):
                 conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
                 conn.commit()
 
-            # If we get here, connection was successful
+            SQLModel.metadata.create_all(engine)
             break
 
         except sqlalchemy.exc.OperationalError as e:
@@ -88,9 +88,6 @@ def db_engine(docker_postgres):
                 raise Exception(
                     f"Failed to connect after {max_retries} attempts"
                 ) from e
-
-    # Create tables
-    SQLModel.metadata.create_all(engine)
 
     return engine
 
@@ -107,5 +104,6 @@ def db_session(db_engine):
 @pytest.fixture(scope="function", autouse=True)
 @pytest.mark.docker_required
 def reset_db(db_engine):
+    """Drop and recreate all tables before each test."""
     SQLModel.metadata.drop_all(db_engine)
     SQLModel.metadata.create_all(db_engine)
