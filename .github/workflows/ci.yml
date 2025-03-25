@@ -88,6 +88,12 @@ jobs:
       #    run test suite
       #----------------------------------------------
       - name: Run tests
+        if: matrix.os != 'windows-latest'
         run: |
           source $VENV
           pytest tests/
+      - name: Run tests (Windows - skip Docker tests)
+        if: matrix.os == 'windows-latest'
+        run: |
+          source $VENV
+          pytest tests/ -m "not docker_required"
