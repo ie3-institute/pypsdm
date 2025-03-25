@@ -1,9 +1,23 @@
 from datetime import datetime
+from typing import Any, ClassVar, Dict
 
+from geoalchemy2 import Geography, WKBElement
 from shapely import Point
 from shapely.wkb import loads
-from sqlalchemy import Column, LargeBinary
+from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
+
+
+def ensure_bytes(wkb_element):
+    # Get the data from the WKBElement
+    data = wkb_element.data
+    # Check if it's a memoryview and convert it to bytes if necessary
+    if isinstance(data, memoryview):
+        return data.tobytes()
+    elif isinstance(data, bytes):
+        return data
+    else:
+        raise TypeError("Unexpected data type for WKBElement data")
 
 
 class WeatherValue(SQLModel, table=True):
@@ -56,8 +70,19 @@ class WeatherValue(SQLModel, table=True):
 class Coordinate(SQLModel, table=True):
     """Represents a geographical coordinate."""
 
+    model_config: ClassVar[Dict[str, Any]] = {"arbitrary_types_allowed": True}
+
     id: int = Field(default=None, primary_key=True)
-    coordinate: bytes = Column(LargeBinary)
+
+    coordinate: Geography = Field(
+        sa_column=Column(
+            Geography(geometry_type="POINT", srid=4326, spatial_index=False)
+        )
+    )
+
+    def __init__(self, id: int, coordinate: Geography):
+        self.id = id
+        self.coordinate = coordinate
 
     def __eq__(self, other):
         return self.id == other.id
@@ -67,13 +92,8 @@ class Coordinate(SQLModel, table=True):
 
     @property
     def point(self) -> Point:
-        wkb_data = self.coordinate
-        geom = loads(wkb_data)
-
-        if isinstance(geom, Point):
-            return geom
-        else:
-            raise ValueError("Geometry is not a point")
+        point_bytes = ensure_bytes(self.coordinate)
+        return loads(point_bytes)
 
     @property
     def latitude(self) -> float:
@@ -93,5 +113,6 @@ class Coordinate(SQLModel, table=True):
 
     @staticmethod
     def from_xy(id: int, x: float, y: float) -> "Coordinate":
-        wkb = Point(x, y).wkb
-        return Coordinate(id=id, coordinate=wkb)
+        point = Point(x, y)
+        wkb = WKBElement(point.wkb, srid=4326)
+        return Coordinate(id, wkb)
