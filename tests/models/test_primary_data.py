@@ -65,7 +65,7 @@ def test_getitem():
 
 def test_filter_by_participants():
     pd = get_primary_data()
-    res = pd.filter_by_participants(["p_a", "p_b"])
+    res = pd.filter_by_assets(["p_a", "p_b"])
     assert len(res) == 2
     assert "a" in res
     assert "b" in res
