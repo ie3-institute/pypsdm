@@ -7,59 +7,35 @@ from pypsdm.db.weather.utils import weighted_interpolation_coordinates
 def test_weighted_interpolation_coordinates():
     nearest_coordinates = [
         (
-            Coordinate(
-                id=13890,
-                coordinate="0101000020E610000000000000008026400000000000E04A40",
-            ),
+            Coordinate.from_xy(13890, 11.25, 53.75),
             15336.967985536437,
         ),
         (
-            Coordinate(
-                id=13891,
-                coordinate="0101000020E610000000000000000027400000000000E04A40",
-            ),
+            Coordinate.from_xy(13891, 11.5, 53.75),
             15741.508288878984,
         ),
         (
-            Coordinate(
-                id=14079,
-                coordinate="0101000020E610000000000000008026400000000000C04A40",
-            ),
+            Coordinate.from_xy(14079, 11.25, 53.5),
             16606.405396805483,
         ),
         (
-            Coordinate(
-                id=14080,
-                coordinate="0101000020E610000000000000000027400000000000C04A40",
-            ),
+            Coordinate.from_xy(14080, 11.5, 53.5),
             16982.92952636213,
         ),
         (
-            Coordinate(
-                id=13889,
-                coordinate="0101000020E610000000000000000026400000000000E04A40",
-            ),
+            Coordinate.from_xy(13889, 11.0, 53.75),
             27650.80452994915,
         ),
         (
-            Coordinate(
-                id=13892,
-                coordinate="0101000020E610000000000000008027400000000000E04A40",
-            ),
+            Coordinate.from_xy(13892, 11.75, 53.75),
             28324.62399357631,
         ),
         (
-            Coordinate(
-                id=14078,
-                coordinate="0101000020E610000000000000000026400000000000C04A40",
-            ),
+            Coordinate.from_xy(14078, 11.0, 53.5),
             28429.952194089583,
         ),
         (
-            Coordinate(
-                id=14081,
-                coordinate="0101000020E610000000000000008027400000000000C04A40",
-            ),
+            Coordinate.from_xy(14081, 11.75, 53.5),
             29089.579082292785,
         ),
     ]
