@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Adapt to recent PSDM Version 6.0.0 [#278](https://github.com/ie3-institute/pypsdm/issue/278)
 
 ### Removed
 

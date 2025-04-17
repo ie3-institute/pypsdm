@@ -23,10 +23,6 @@ class Loads(SystemParticipants):
         return self.data["load_profile"]
 
     @property
-    def dsm(self):
-        return self.data["dsm"]
-
-    @property
     def e_cons_annual(self):
         return self.data["e_cons_annual"]
 
@@ -38,7 +34,6 @@ class Loads(SystemParticipants):
     def attributes() -> List[str]:
         return SystemParticipants.attributes() + [
             "load_profile",
-            "dsm",
             "e_cons_annual",
             "s_rated",
             "cos_phi_rated",

@@ -29,6 +29,14 @@ class ThermalHouse(Entities):
     def lower_temperature_limit(self):
         return self.data["lower_temperature_limit"]
 
+    @property
+    def housing_type(self):
+        return self.data["housing_type"]
+
+    @property
+    def number_inhabitants(self):
+        return self.data["number_inhabitants"]
+
     @staticmethod
     def attributes() -> List[str]:
         return Entities.attributes() + [
@@ -38,6 +46,8 @@ class ThermalHouse(Entities):
             "target_temperature",
             "upper_temperature_limit",
             "lower_temperature_limit",
+            "housing_type",
+            "number_inhabitants",
         ]
 
     @staticmethod
