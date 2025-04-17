@@ -14,6 +14,11 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 
+## 0.0.5
+
+### Changed
+- Cleaned up dependencies [#299](https://github.com/ie3-institute/pypsdm/issues/299)
+
 ## 0.0.4
 
 ### Added
