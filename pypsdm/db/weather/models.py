@@ -1,10 +1,23 @@
-import binascii
 from datetime import datetime
-from typing import Optional
+from typing import Any, ClassVar, Dict
 
+from geoalchemy2 import Geography, WKBElement
 from shapely import Point
 from shapely.wkb import loads
+from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
+
+
+def ensure_bytes(wkb_element):
+    # Get the data from the WKBElement
+    data = wkb_element.data
+    # Check if it's a memoryview and convert it to bytes if necessary
+    if isinstance(data, memoryview):
+        return data.tobytes()
+    elif isinstance(data, bytes):
+        return data
+    else:
+        raise TypeError("Unexpected data type for WKBElement data")
 
 
 class WeatherValue(SQLModel, table=True):
@@ -12,10 +25,8 @@ class WeatherValue(SQLModel, table=True):
     Represents the ICON weather model.
     """
 
-    time: Optional[datetime] = Field(primary_key=True)
-    coordinate_id: Optional[int] = Field(
-        primary_key=True, default=None, foreign_key="coordinate.id"
-    )
+    time: datetime = Field(primary_key=True)
+    coordinate_id: int = Field(primary_key=True, foreign_key="coordinate.id")
     aswdifd_s: float = Field()
     aswdir_s: float = Field()
     t2m: float = Field()
@@ -57,8 +68,21 @@ class WeatherValue(SQLModel, table=True):
 
 
 class Coordinate(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    coordinate: str = Field()
+    """Represents a geographical coordinate."""
+
+    model_config: ClassVar[Dict[str, Any]] = {"arbitrary_types_allowed": True}
+
+    id: int = Field(default=None, primary_key=True)
+
+    coordinate: Geography = Field(
+        sa_column=Column(
+            Geography(geometry_type="POINT", srid=4326, spatial_index=False)
+        )
+    )
+
+    def __init__(self, id: int, coordinate: Geography):
+        self.id = id
+        self.coordinate = coordinate
 
     def __eq__(self, other):
         return self.id == other.id
@@ -68,9 +92,8 @@ class Coordinate(SQLModel, table=True):
 
     @property
     def point(self) -> Point:
-        wkb_str = self.coordinate
-        wkb_bytes = binascii.unhexlify(wkb_str)
-        return loads(wkb_bytes)
+        point_bytes = ensure_bytes(self.coordinate)
+        return loads(point_bytes)
 
     @property
     def latitude(self) -> float:
@@ -89,6 +112,7 @@ class Coordinate(SQLModel, table=True):
         return self.point.x
 
     @staticmethod
-    def from_xy(id, x, y):
-        wkb = Point(x, y).wkb_hex
-        return Coordinate(id=id, coordinate=wkb)
+    def from_xy(id: int, x: float, y: float) -> "Coordinate":
+        point = Point(x, y)
+        wkb = WKBElement(point.wkb, srid=4326)
+        return Coordinate(id, wkb)
