@@ -108,9 +108,7 @@ class GridContainer(ContainerMixin):
         nodal_primary_data = dict()
         for node, participants_container in self.node_participants_map.items():
             participants_uuids = participants_container.uuids().tolist()
-            node_primary_data = self.primary_data.get_for_participants(
-                participants_uuids
-            )
+            node_primary_data = self.primary_data.get_for_assets(participants_uuids)
             time_series.extend(node_primary_data)
             node_primary_data_agg = ComplexPower.sum(node_primary_data)
             nodal_primary_data[node] = node_primary_data_agg
@@ -150,7 +148,7 @@ class GridContainer(ContainerMixin):
     def filter_by_nodes(self, nodes: str | list[str]):
         raw_grid = self.raw_grid.filter_by_nodes(nodes)
         participants = self.participants.filter_by_nodes(nodes)
-        primary_data = self.primary_data.filter_by_participants(
+        primary_data = self.primary_data.filter_by_assets(
             participants.uuids().tolist(),
             skip_missing=True,
         )

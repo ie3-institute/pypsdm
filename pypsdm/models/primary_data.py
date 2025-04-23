@@ -36,14 +36,12 @@ class TimeSeriesKey:
 class PrimaryData:
     # ts_key -> ts
     _time_series: ComplexPowerDict[TimeSeriesKey]
-    # participant_uuid -> ts_uuid
-    _participant_mapping: dict[str, str]
+    # asset_uuid -> ts_uuid
+    _asset_mapping: dict[str, str]
 
-    def __init__(
-        self, time_series: "ComplexPowerDict", participant_mapping: dict[str, str]
-    ):
+    def __init__(self, time_series: "ComplexPowerDict", asset_mapping: dict[str, str]):
         self._time_series = time_series
-        self._participant_mapping = participant_mapping
+        self._asset_mapping = asset_mapping
 
     def __eq__(self, other):
         try:
@@ -56,27 +54,27 @@ class PrimaryData:
         return len(self._time_series)
 
     def __contains__(self, uuid):
-        return uuid in self._time_series or uuid in self._participant_mapping
+        return uuid in self._time_series or uuid in self._asset_mapping
 
     def __getitem__(self, get: str | TimeSeriesKey) -> ComplexPower:
         match get:
             case str():
                 get_key = TimeSeriesKey(get, None)
-                if get in self._participant_mapping:
-                    ts_uuid = self._participant_mapping[get]
+                if get in self._asset_mapping:
+                    ts_uuid = self._asset_mapping[get]
                     key = TimeSeriesKey(ts_uuid, None)
                     return self._time_series[key]
                 elif get_key in self._time_series:
                     return self._time_series[get_key]
                 else:
                     raise KeyError(
-                        f"{get} neither a valid time series nor a participant uuid."
+                        f"{get} neither a valid time series nor a asset uuid."
                     )
             case TimeSeriesKey():
                 return self._time_series[get]
             case _:
                 raise ValueError(
-                    "Only str uuid of either time series or participant or TimeSeriesKey of time series are allowed as key for PrimaryData."
+                    "Only str uuid of either time series or asset or TimeSeriesKey of time series are allowed as key for PrimaryData."
                 )
 
     def p(self, ffill=True):
@@ -94,37 +92,33 @@ class PrimaryData:
     def sum(self) -> ComplexPower:
         return self._time_series.sum()
 
-    def add_time_series(
-        self, ts_key: TimeSeriesKey, ts: ComplexPower, participant: str
-    ):
+    def add_time_series(self, ts_key: TimeSeriesKey, ts: ComplexPower, asset: str):
         self._time_series[ts_key] = ts
-        self._participant_mapping[participant] = ts_key.ts_uuid
+        self._asset_mapping[asset] = ts_key.ts_uuid
 
-    def get_for_participants(self, participants) -> list[ComplexPower]:
+    def get_for_assets(self, assets) -> list[ComplexPower]:
         time_series = []
-        for participant in participants:
-            ts = self.get_for_participant(participant)
+        for asset in assets:
+            ts = self.get_for_asset(asset)
             if ts:
                 time_series.append(ts)
         return time_series
 
-    def filter_by_participants(
-        self, participants: list[str], skip_missing: bool = False
-    ):
+    def filter_by_assets(self, assets: list[str], skip_missing: bool = False):
         if skip_missing:
-            participants = [p for p in participants if p in self._participant_mapping]
+            assets = [p for p in assets if p in self._asset_mapping]
         try:
-            pm = {p: self._participant_mapping[p] for p in participants}
+            pm = {p: self._asset_mapping[p] for p in assets}
             ts = ComplexPowerDict({ts_uuid: self[ts_uuid] for ts_uuid in pm.values()})  # type: ignore
             return PrimaryData(ts, pm)
         except KeyError as e:
             missing_key = e.args[0]
             raise KeyError(
-                f"Participant with uuid: {missing_key} has no associated primary data."
+                f"Asset with uuid: {missing_key} has no associated primary data."
             ) from e
 
-    def get_for_participant(self, participant: str) -> ComplexPower | None:
-        ts_uuid = self._participant_mapping.get(participant)
+    def get_for_asset(self, asset: str) -> ComplexPower | None:
+        ts_uuid = self._asset_mapping.get(asset)
         if ts_uuid:
             return self[ts_uuid]  # type: ignore
         else:
@@ -132,11 +126,11 @@ class PrimaryData:
 
     def filter_by_date_time(self, time: Union[datetime, list[datetime]]):
         ts = self._time_series.filter_by_date_time(time)
-        return PrimaryData(ts, self._participant_mapping)
+        return PrimaryData(ts, self._asset_mapping)
 
     def interval(self, start: datetime, end: datetime):
         ts = self._time_series.interval(start, end)
-        return PrimaryData(ts, self._participant_mapping)
+        return PrimaryData(ts, self._asset_mapping)
 
     def to_csv(self, path: str, mkdirs=False, delimiter=","):
         write_ts = partial(PrimaryData._write_ts_df, path, mkdirs, delimiter)
@@ -153,11 +147,11 @@ class PrimaryData:
                     raise maybe_exception
 
         # write mapping data
-        index = [str(uuid.uuid4()) for _ in range(len(self._participant_mapping))]
+        index = [str(uuid.uuid4()) for _ in range(len(self._asset_mapping))]
         mapping_data = pd.DataFrame(
             {
-                "participant": self._participant_mapping.keys(),
-                "time_series": self._participant_mapping.values(),
+                "asset": self._asset_mapping.keys(),
+                "time_series": self._asset_mapping.values(),
             },
             index=index,
         )
@@ -205,21 +199,15 @@ class PrimaryData:
 
         errors = []
 
-        # Compare participant mapping
-        participant_ts_self = set(
-            [(p, t) for p, t in self._participant_mapping.items()]
-        )
-        participant_ts_other = set(
-            [(p, t) for p, t in other._participant_mapping.items()]
-        )
-        mapping_differences = participant_ts_self.symmetric_difference(
-            participant_ts_other
-        )
+        # Compare asset mapping
+        asset_ts_self = set([(p, t) for p, t in self._asset_mapping.items()])
+        asset_ts_other = set([(p, t) for p, t in other._asset_mapping.items()])
+        mapping_differences = asset_ts_self.symmetric_difference(asset_ts_other)
 
         if mapping_differences:
             errors.append(
                 ComparisonError(
-                    f"Differences in participant mapping. Following entries not in both dicts: {mapping_differences}"
+                    f"Differences in asset mapping. Following entries not in both dicts: {mapping_differences}"
                 )
             )
 
@@ -247,9 +235,9 @@ class PrimaryData:
         if ts_files:
             ts_mapping = utils.read_csv(str(path), "time_series_mapping.csv", delimiter)
 
-            participant_mapping = (
-                ts_mapping[["participant", "time_series"]]
-                .set_index("participant")
+            asset_mapping = (
+                ts_mapping[["asset", "time_series"]]
+                .set_index("asset")
                 .to_dict()["time_series"]
             )
 
@@ -265,7 +253,7 @@ class PrimaryData:
 
             time_series = ComplexPowerDict(time_series_dict)
 
-            return PrimaryData(time_series, participant_mapping)
+            return PrimaryData(time_series, asset_mapping)
 
         else:
             logger.debug(f"No primary data in path {path}")
