@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Congestion result [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 
 ### Changed
 - Adapt Coordinate type to use WKBElement Geography [#287](https://github.com/ie3-institute/pypsdm/issues/287)
