@@ -4,7 +4,7 @@ from enum import Enum
 
 from pandas import DataFrame
 
-from pypsdm import EntitiesResultDictMixin
+from pypsdm.models.result.participant.dict import EntitiesResultDictMixin
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.ts.base import (
     EntityKey,
