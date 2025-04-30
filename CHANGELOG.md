@@ -7,13 +7,17 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
-- Adapt Coordinate type to use WKBElement Geography [#287](https://github.com/ie3-institute/pypsdm/issues/287)
-- Adapt to recent PSDM Version 6.0.0 [#278](https://github.com/ie3-institute/pypsdm/issue/278)
 
 ### Removed
 
 ### Fixed
 
+
+## 0.0.6
+
+### Changed
+- Adapt Coordinate type to use WKBElement Geography [#287](https://github.com/ie3-institute/pypsdm/issues/287)
+- Adapt to recent PSDM Version 6.0.0 [#278](https://github.com/ie3-institute/pypsdm/issue/278)
 
 ## 0.0.5
 
