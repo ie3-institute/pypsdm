@@ -40,6 +40,7 @@ class EntitiesEnum(Enum):
     def get_result_type(self) -> type[TimeSeries]:
         # locally to avoid circular imports
         from pypsdm import FlexOption
+        from pypsdm.models.result.grid.congestions import CongestionResult
         from pypsdm.models.result.grid.connector import ConnectorCurrent
         from pypsdm.models.result.grid.switch import SwitchResult
         from pypsdm.models.result.grid.transformer import Transformer2WResult
@@ -66,6 +67,8 @@ class EntitiesEnum(Enum):
                     return ConnectorCurrent
                 case RawGridElementsEnum.SWITCH:
                     return SwitchResult
+                case RawGridElementsEnum.CONGESTION:
+                    return CongestionResult
                 case _:
                     raise NotImplementedError(
                         f"Result type {self} not implemented yet!"
@@ -74,6 +77,7 @@ class EntitiesEnum(Enum):
             raise ValueError(f"Entity type {self} not supported!")
 
     def get_result_dict_type(self) -> Type["EntitiesResultDictMixin"]:
+        from pypsdm.models.result.grid.congestions import CongestionsResult
         from pypsdm.models.result.grid.line import LinesResult
         from pypsdm.models.result.grid.node import NodesResult
         from pypsdm.models.result.grid.switch import SwitchesResult
@@ -100,6 +104,8 @@ class EntitiesEnum(Enum):
                 return Transformers2WResult
             case RawGridElementsEnum.SWITCH:
                 return SwitchesResult
+            case RawGridElementsEnum.CONGESTION:
+                return CongestionsResult
             case SystemParticipantsEnum.ELECTRIC_VEHICLE:
                 return EvsResult
             case SystemParticipantsEnum.EV_CHARGING_STATION:
@@ -161,6 +167,7 @@ class RawGridElementsEnum(EntitiesEnum):
     TRANSFROMER_3_W = "transformer_3_w"
     SWITCH = "switch"
     MEASUREMENT_UNIT = "measurement_unit"
+    CONGESTION = "congestion"
 
 
 class ThermalGridElementsEnum(EntitiesEnum):
