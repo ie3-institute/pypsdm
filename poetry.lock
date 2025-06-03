@@ -2516,14 +2516,14 @@ type = ["mypy (>=1.14.1)"]
 
 [[package]]
 name = "plotly"
-version = "6.1.1"
+version = "6.1.2"
 description = "An open-source interactive data visualization library for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "plotly-6.1.1-py3-none-any.whl", hash = "sha256:9cca7167406ebf7ff541422738402159ec3621a608ff7b3e2f025573a1c76225"},
-    {file = "plotly-6.1.1.tar.gz", hash = "sha256:84a4f3d36655f1328fa3155377c7e8a9533196697d5b79a4bc5e905bdd09a433"},
+    {file = "plotly-6.1.2-py3-none-any.whl", hash = "sha256:f1548a8ed9158d59e03d7fed548c7db5549f3130d9ae19293c8638c202648f6d"},
+    {file = "plotly-6.1.2.tar.gz", hash = "sha256:4fdaa228926ba3e3a213f4d1713287e69dcad1a7e66cf2025bd7d7026d5014b4"},
 ]
 
 [package.dependencies]
@@ -4032,4 +4032,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">3.11,<3.13"
-content-hash = "dda3fdd7cd92b09745867ecd2884221f7c8ea2fc80892037a91d1953d7bc0788"
+content-hash = "136589e7751b839c4754d142a1af5653682c02fc809b3c32a1037b208d552bed"
