@@ -8,7 +8,6 @@ from sqlmodel import Session, SQLModel, create_engine
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.docker_required
 def docker_postgres():
     """Start a PostgreSQL container for testing."""
     container_name = "test_weather"
@@ -58,7 +57,6 @@ def docker_postgres():
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.docker_required
 def db_engine(docker_postgres):
     """Create a database engine connected to the Docker PostgreSQL instance."""
     engine = create_engine(docker_postgres)
@@ -93,7 +91,6 @@ def db_engine(docker_postgres):
 
 
 @pytest.fixture
-@pytest.mark.docker_required
 def db_session(db_engine):
     """Create a new database session for a test."""
     with Session(db_engine) as session:
@@ -102,7 +99,6 @@ def db_session(db_engine):
 
 
 @pytest.fixture(scope="function", autouse=True)
-@pytest.mark.docker_required
 def reset_db(db_engine):
     """Drop and recreate all tables before each test."""
     SQLModel.metadata.drop_all(db_engine)
