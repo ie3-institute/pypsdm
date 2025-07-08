@@ -144,6 +144,14 @@ def test_to_csv(tmp_path):
     pd = get_primary_data()
     uuid_ts = {}
     asset_mapping = {}
+    for key, ts in pd._time_series.items():
+        ts_uuid = uuid.uuid4()
+        new_key = TimeSeriesKey(str(ts_uuid), key.ts_type)
+        uuid_ts[new_key] = ts
+        # Update asset mapping to use the new key
+        for asset, old_key in pd._asset_mapping.items():
+            if old_key.ts_uuid == key.ts_uuid:
+                asset_mapping[asset] = new_key
     pd._time_series = ComplexPowerDict(uuid_ts)
     pd._asset_mapping = asset_mapping
     pd.to_csv(tmp_path)

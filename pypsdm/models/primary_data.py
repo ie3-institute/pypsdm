@@ -159,23 +159,14 @@ class PrimaryData:
                     raise maybe_exception
 
         # write mapping data
-        index = [str(uuid.uuid4()) for _ in range(len(self._asset_mapping))]
         mapping_data = pd.DataFrame(
             {
                 "asset": self._asset_mapping.keys(),
-                "time_series": [
-                    ts_key.ts_uuid for ts_key in self._asset_mapping.values()
-                ],
+                "time_series": (ts.ts_uuid for ts in self._asset_mapping.values()),
             },
-            index=index,
         )
-        mapping_data.index.name = "uuid"
-        df_to_csv(
-            mapping_data,
-            path,
-            "time_series_mapping.csv",
-            delimiter=delimiter,
-            index_label="uuid",
+        mapping_data.to_csv(
+            os.path.join(path, "time_series_mapping.csv"), index=False, sep=delimiter
         )
 
     @staticmethod
