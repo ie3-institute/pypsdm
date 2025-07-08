@@ -36,10 +36,12 @@ class TimeSeriesKey:
 class PrimaryData:
     # ts_key -> ts
     _time_series: ComplexPowerDict[TimeSeriesKey]
-    # asset_uuid -> ts_uuid
-    _asset_mapping: dict[str, str]
+    # asset_uuid -> ts_key
+    _asset_mapping: dict[str, TimeSeriesKey]
 
-    def __init__(self, time_series: "ComplexPowerDict", asset_mapping: dict[str, str]):
+    def __init__(
+        self, time_series: "ComplexPowerDict", asset_mapping: dict[str, TimeSeriesKey]
+    ):
         self._time_series = time_series
         self._asset_mapping = asset_mapping
 
@@ -54,19 +56,27 @@ class PrimaryData:
         return len(self._time_series)
 
     def __contains__(self, uuid):
-        return uuid in self._time_series or uuid in self._asset_mapping
+        if isinstance(uuid, str):
+            # Check if it's a time series uuid
+            for ts_key in self._time_series.keys():
+                if ts_key.ts_uuid == uuid:
+                    return True
+            # Check if it's an asset uuid
+            return uuid in self._asset_mapping
+        else:
+            return uuid in self._time_series
 
     def __getitem__(self, get: str | TimeSeriesKey) -> ComplexPower:
         match get:
             case str():
-                get_key = TimeSeriesKey(get, None)
                 if get in self._asset_mapping:
-                    ts_uuid = self._asset_mapping[get]
-                    key = TimeSeriesKey(ts_uuid, None)
+                    key = self._asset_mapping[get]
                     return self._time_series[key]
-                elif get_key in self._time_series:
-                    return self._time_series[get_key]
                 else:
+                    # Look for time series uuid in loaded time series
+                    for ts_key in self._time_series.keys():
+                        if ts_key.ts_uuid == get:
+                            return self._time_series[ts_key]
                     raise KeyError(
                         f"{get} neither a valid time series nor a asset uuid."
                     )
@@ -94,7 +104,7 @@ class PrimaryData:
 
     def add_time_series(self, ts_key: TimeSeriesKey, ts: ComplexPower, asset: str):
         self._time_series[ts_key] = ts
-        self._asset_mapping[asset] = ts_key.ts_uuid
+        self._asset_mapping[asset] = ts_key
 
     def get_for_assets(self, assets) -> list[ComplexPower]:
         time_series = []
@@ -109,7 +119,9 @@ class PrimaryData:
             assets = [p for p in assets if p in self._asset_mapping]
         try:
             pm = {p: self._asset_mapping[p] for p in assets}
-            ts = ComplexPowerDict({ts_uuid: self[ts_uuid] for ts_uuid in pm.values()})  # type: ignore
+            ts = ComplexPowerDict(
+                {ts_key: self._time_series[ts_key] for ts_key in pm.values()}
+            )
             return PrimaryData(ts, pm)
         except KeyError as e:
             missing_key = e.args[0]
@@ -118,9 +130,9 @@ class PrimaryData:
             ) from e
 
     def get_for_asset(self, asset: str) -> ComplexPower | None:
-        ts_uuid = self._asset_mapping.get(asset)
-        if ts_uuid:
-            return self[ts_uuid]  # type: ignore
+        ts_key = self._asset_mapping.get(asset)
+        if ts_key:
+            return self._time_series[ts_key]
         else:
             return None
 
@@ -151,7 +163,9 @@ class PrimaryData:
         mapping_data = pd.DataFrame(
             {
                 "asset": self._asset_mapping.keys(),
-                "time_series": self._asset_mapping.values(),
+                "time_series": [
+                    ts_key.ts_uuid for ts_key in self._asset_mapping.values()
+                ],
             },
             index=index,
         )
@@ -200,8 +214,8 @@ class PrimaryData:
         errors = []
 
         # Compare asset mapping
-        asset_ts_self = set([(p, t) for p, t in self._asset_mapping.items()])
-        asset_ts_other = set([(p, t) for p, t in other._asset_mapping.items()])
+        asset_ts_self = set([(p, t.ts_uuid) for p, t in self._asset_mapping.items()])
+        asset_ts_other = set([(p, t.ts_uuid) for p, t in other._asset_mapping.items()])
         mapping_differences = asset_ts_self.symmetric_difference(asset_ts_other)
 
         if mapping_differences:
@@ -235,7 +249,7 @@ class PrimaryData:
         if ts_files:
             ts_mapping = utils.read_csv(str(path), "time_series_mapping.csv", delimiter)
 
-            asset_mapping = (
+            asset_mapping_raw = (
                 ts_mapping[["asset", "time_series"]]
                 .set_index("asset")
                 .to_dict()["time_series"]
@@ -250,6 +264,16 @@ class PrimaryData:
                 time_series = executor.map(pa_read_time_series, ts_files)
                 for ts_key, ts in time_series:
                     time_series_dict[ts_key] = ts
+
+            asset_mapping = {}
+            for asset, ts_uuid in asset_mapping_raw.items():
+                # Find the corresponding TimeSeriesKey from the loaded time series
+                ts_key = next(
+                    (key for key in time_series_dict.keys() if key.ts_uuid == ts_uuid),
+                    None,
+                )
+                if ts_key:
+                    asset_mapping[asset] = ts_key
 
             time_series = ComplexPowerDict(time_series_dict)
 
