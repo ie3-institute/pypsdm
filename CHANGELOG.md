@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 ### Fixed
+- Fix emInput from parent_em to controlling_em [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 
 
 ## 0.0.6
