@@ -352,7 +352,6 @@ def create_energy_management_systems_data(
     id,
     control_strategy,
     controlling_em=None,
-    q_characteristics=None,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -360,14 +359,11 @@ def create_energy_management_systems_data(
 ):
     if not uuid:
         uuid = str(uuid4())
-    if not q_characteristics:
-        q_characteristics = fixed_q_characteristics(0.9)
     return pd.Series(
         {
             "id": id,
             "control_strategy": control_strategy,
             "controlling_em": controlling_em,
-            "q_characteristics": q_characteristics,
             "operates_from": operates_from,
             "operates_until": operates_until,
             "operator": operator,
