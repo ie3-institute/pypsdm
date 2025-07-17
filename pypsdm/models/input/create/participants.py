@@ -351,7 +351,7 @@ def create_loads(data_dict):
 def create_energy_management_systems_data(
     id,
     control_strategy,
-    parent_em=None,
+    controlling_em=None,
     q_characteristics=None,
     uuid=None,
     operates_from=None,
@@ -366,7 +366,7 @@ def create_energy_management_systems_data(
         {
             "id": id,
             "control_strategy": control_strategy,
-            "parent_em": parent_em,
+            "controlling_em": controlling_em,
             "q_characteristics": q_characteristics,
             "operates_from": operates_from,
             "operates_until": operates_until,
