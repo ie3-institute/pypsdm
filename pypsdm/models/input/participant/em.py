@@ -21,12 +21,12 @@ class EnergyManagementSystems(Entities):
         return self.data["control_strategy"]
 
     @property
-    def parent_em(self) -> Series:
-        return self.data["parent_em"]
+    def controlling_em(self) -> Series:
+        return self.data["controlling_em"]
 
     @staticmethod
     def attributes() -> list[str]:
         return Entities.attributes() + [
             "control_strategy",
-            "parent_em",
+            "controlling_em",
         ]
