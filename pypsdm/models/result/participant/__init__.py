@@ -1,5 +1,5 @@
 from .dict import (
-    EmsResult,
+    ControllingEmsResult,
     EvcsResult,
     EvsResult,
     FixedFeedInsResult,
@@ -13,7 +13,7 @@ from .dict import (
 from .flex_options import FlexOption, FlexOptionsDict
 
 __all__ = [
-    "EmsResult",
+    "ControllingEmsResult",
     "LoadsResult",
     "FixedFeedInsResult",
     "PvsResult",

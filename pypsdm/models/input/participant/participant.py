@@ -20,13 +20,13 @@ class SystemParticipants(Entities, ABC):
         return self.data["node"]
 
     @property
-    def em(self) -> Series:
+    def controlling_em(self) -> Series:
         """
-        Returns: The ems to which the entities are connected.
+        Returns: The controlling_ems to which the entities are connected.
         """
         # EM column might not be present
-        if "em" in self.data:
-            return self.data["em"]
+        if "controlling_em" in self.data:
+            return self.data["controlling_em"]
         else:
             return Series()
 
@@ -43,7 +43,7 @@ class SystemParticipants(Entities, ABC):
 
     @staticmethod
     def attributes():
-        return Entities.attributes() + ["node", "q_characteristics", "em"]
+        return Entities.attributes() + ["node", "q_characteristics", "controlling_em"]
 
 
 @dataclass(frozen=True)

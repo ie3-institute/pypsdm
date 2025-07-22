@@ -79,7 +79,7 @@ class EntitiesEnum(Enum):
         from pypsdm.models.result.grid.switch import SwitchesResult
         from pypsdm.models.result.grid.transformer import Transformers2WResult
         from pypsdm.models.result.participant.dict import (
-            EmsResult,
+            ControllingEmsResult,
             EvcsResult,
             EvsResult,
             FixedFeedInsResult,
@@ -115,7 +115,7 @@ class EntitiesEnum(Enum):
             case SystemParticipantsEnum.STORAGE:
                 return StoragesResult
             case SystemParticipantsEnum.ENERGY_MANAGEMENT:
-                return EmsResult
+                return ControllingEmsResult
             case SystemParticipantsEnum.HEAT_PUMP:
                 return HpsResult
             case SystemParticipantsEnum.FLEX_OPTIONS:
