@@ -143,7 +143,7 @@ class EntitiesResultDictMixin:
             return (e, entity)
 
 
-class EmsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
+class ControllingEmsResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin):
     def __init__(self, data: dict[EntityKey, ComplexPower]):
         for key, value in data.items():
             if not isinstance(key, EntityKey):
