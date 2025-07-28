@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
+- Add example for Line Results to documentation [#341](https://github.com/ie3-institute/pypsdm/issues/341)
 
 ### Changed
 
