@@ -153,13 +153,14 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
         normalized_values = (
             (values - cmin) / (cmax - cmin) if cmax != cmin else np.zeros_like(values)
         )
-        normalized_dict = {uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)}
+        normalized_dict = {
+            uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)
+        }
 
         return normalized_dict, cmin, cmax
     else:
         value_dict = {uuid: value for uuid, value in zip(uuids, values)}
         return value_dict, cmin, cmax
-
 
 
 def _get_colormap_color(value, cmap):
@@ -178,9 +179,11 @@ def _get_colormap_color(value, cmap):
             g = 0  # Green remains at 0
             b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
 
-            rgb_color = f'rgb({r},{g},{b})'
+            rgb_color = f"rgb({r},{g},{b})"
             colorscale.append([factor, rgb_color])
-        index = int(value * (len(colorscale) - 1))  # This gives us an index between 0 and len(colorscale)-1
+        index = int(
+            value * (len(colorscale) - 1)
+        )  # This gives us an index between 0 and len(colorscale)-1
         rgb_string = colorscale[index][1]  # Get the corresponding RGB color
     else:
         # Use Plotly's colorscale to get the color
@@ -251,8 +254,6 @@ def _add_line_trace(
             line_color = rgb_to_hex(GREY)
             use_colorbar = False
 
-
-
     if cmap and colormap_value is not None:
         hover_text += f"<br>{cbar_title or 'Value'}: {value:.3f}"
 
@@ -271,9 +272,8 @@ def _add_line_trace(
                 )
             )
 
-
             custom_colorscale = [
-                [i / 10, f'rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})']
+                [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
                 for i in range(11)
             ]
 
@@ -287,15 +287,29 @@ def _add_line_trace(
                         size=0.1,
                         opacity=0,
                         color=[colormap_value],
-                        colorscale=(custom_colorscale if cmap == 'fixed_line_rating_scale' else cmap),
+                        colorscale=(
+                            custom_colorscale
+                            if cmap == "fixed_line_rating_scale"
+                            else cmap
+                        ),
                         # Conditional use of custom colorscale
-                        cmin=0.0 if cmap == 'fixed_line_rating_scale' else cmin,
-                        cmax=1.0 if cmap == 'fixed_line_rating_scale' else cmax, # fixme check for values > 1.0
+                        cmin=0.0 if cmap == "fixed_line_rating_scale" else cmin,
+                        cmax=(
+                            1.0 if cmap == "fixed_line_rating_scale" else cmax
+                        ),  # fixme check for values > 1.0
                         colorbar=dict(
                             title=cbar_title or "Value",
                             x=1.02,
-                            tickvals= [i / 10 for i in range(11)]  if cmap == 'fixed_line_rating_scale' else None,
-                            ticktext = [f"{round(i / 10.0, 2)}" for i in range(11)] if cmap == 'fixed_line_rating_scale' else None
+                            tickvals=(
+                                [i / 10 for i in range(11)]
+                                if cmap == "fixed_line_rating_scale"
+                                else None
+                            ),
+                            ticktext=(
+                                [f"{round(i / 10.0, 2)}" for i in range(11)]
+                                if cmap == "fixed_line_rating_scale"
+                                else None
+                            ),
                         ),
                         showscale=True,
                     ),
