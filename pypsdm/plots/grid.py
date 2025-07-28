@@ -56,33 +56,37 @@ def grid_plot(
     disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
-    # Process colormap values if provided
-    colormap_data = None
     if cmap and cmap_vals is not None:
         try:
-            colormap_data = _process_colormap_values(cmap_vals)
+            value_dict, cmin, cmax = _process_colormap_values(cmap_vals, cmap)
         except Exception as e:
             print(f"Error processing colormap values: {e}")
 
-    connected_lines.data.apply(
-        lambda line: _add_line_trace(
-            fig,
-            line,
-            highlights=line_highlights,
-            cmap=cmap,
-            colormap_data=colormap_data,
-            cbar_title=cbar_title,
-            show_colorbar=show_colorbar,
-        ),
-        axis=1,  # type: ignore
-    )
+        connected_lines.data.apply(
+            lambda line: _add_line_trace(
+                fig,
+                line,
+                highlights=line_highlights,
+                cmap=cmap,
+                value_dict=value_dict,
+                cmin=cmin,
+                cmax=cmax,
+                cbar_title=cbar_title,
+                show_colorbar=show_colorbar,
+            ),
+            axis=1,  # type: ignore
+        )
+    else:
+        connected_lines.data.apply(
+            lambda line: _add_line_trace(fig, line, is_disconnected=False, highlights=line_highlights), axis=1  # type: ignore
+        )
 
     disconnected_lines.data.apply(
         lambda line: _add_line_trace(
             fig,
             line,
-            highlights=line_highlights,
             is_disconnected=True,
+            highlights=line_highlights,
             highlight_disconnected=highlight_disconnected,
         ),  # type: ignore
         axis=1,
@@ -120,8 +124,8 @@ def grid_plot(
     return fig
 
 
-def _process_colormap_values(cmap_vals: dict) -> dict:
-    """Process colormap values and return normalized data."""
+def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
+    """Process colormap values and return a dictionary with original values in case of fixed scale or one with normalized data."""
     values = []
     uuids = []
 
@@ -144,30 +148,47 @@ def _process_colormap_values(cmap_vals: dict) -> dict:
     cmin = np.min(values)
     cmax = np.max(values)
 
-    # Normalize values to 0-1 range
-    normalized_values = (
-        (values - cmin) / (cmax - cmin) if cmax != cmin else np.zeros_like(values)
-    )
+    if cmap != "fixed_line_rating_scale":
+        # Normalize values to 0-1 range
+        normalized_values = (
+            (values - cmin) / (cmax - cmin) if cmax != cmin else np.zeros_like(values)
+        )
+        normalized_dict = {uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)}
 
-    return {
-        "values": values,
-        "normalized": normalized_values,
-        "cmin": cmin,
-        "cmax": cmax,
-        "original_dict": {uuid: inner_dict for uuid, inner_dict in cmap_vals.items()},
-    }
+        return normalized_dict, cmin, cmax
+    else:
+        value_dict = {uuid: value for uuid, value in zip(uuids, values)}
+        return value_dict, cmin, cmax
+
 
 
 def _get_colormap_color(value, cmap):
     """Get color from colormap based on value."""
     value = min(max(value, 0), 1)
 
-    # Use Plotly's colorscale to get the color
-    colorscale = px.colors.get_colorscale(cmap)
-    index = int(value * (len(colorscale) - 1))
+    if cmap == "fixed_line_rating_scale":
+        # Use Fixed Scale
+        colorscale = []
+        for i in range(11):
+            # Calculate the interpolation factor
+            factor = i / (11 - 1)
 
-    color_str = colorscale[index]
-    rgb_string = color_str[1]
+            # Interpolate RGB values
+            r = int(255 * factor)  # Red increases from 0 to 255
+            g = 0  # Green remains at 0
+            b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
+
+            rgb_color = f'rgb({r},{g},{b})'
+            colorscale.append([factor, rgb_color])
+        index = int(value * (len(colorscale) - 1))  # This gives us an index between 0 and len(colorscale)-1
+        rgb_string = colorscale[index][1]  # Get the corresponding RGB color
+    else:
+        # Use Plotly's colorscale to get the color
+        colorscale = px.colors.get_colorscale(cmap)
+        index = int(value * (len(colorscale) - 1))
+
+        color_str = colorscale[index]
+        rgb_string = color_str[1]
     # Remove 'rgb(' and ')' and split by commas
     rgb_values = list(map(int, rgb_string[4:-1].split(",")))
     hex_string = "#%02x%02x%02x" % (
@@ -185,7 +206,9 @@ def _add_line_trace(
     highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
-    colormap_data: Optional[dict] = None,
+    value_dict: Optional[dict] = None,
+    cmin: float = None,
+    cmax: float = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ):
@@ -193,57 +216,31 @@ def _add_line_trace(
     lons, lats = _get_lons_lats(line_data.geo_position)
     hover_text = line_data["id"]
 
-    color = GREEN
+    line_color = rgb_to_hex(GREEN)
     highlighted = False
-    use_colorbar = False
+
     colormap_value = None
 
-    # Check if we should use colormap
-    if cmap and colormap_data:
-        line_id = line_data.name if hasattr(line_data, "name") else line_data["id"]
-
-        if colormap_data["original_dict"] and line_id in colormap_data["original_dict"]:
-            raw_value = colormap_data["original_dict"][line_id]
-            value_index = list(colormap_data["original_dict"].keys()).index(line_id)
-            normalized_value = colormap_data["normalized"][value_index]
-            if isinstance(raw_value, dict) and len(raw_value) == 1:
-                colormap_value = list(raw_value.values())[0]
-            else:
-                raise ValueError(f"Colormap_value: {raw_value} causes some error")
-        elif not colormap_data["original_dict"] and hasattr(line_data, "name"):
-            try:
-                line_index = (
-                    int(line_data.name)
-                    if isinstance(line_data.name, str)
-                    else line_data.name
-                )
-                if line_index < len(colormap_data["normalized"]):
-                    normalized_value = colormap_data["normalized"][line_index]
-                    colormap_value = colormap_data["values"][line_index]
-                else:
-                    normalized_value = 0.5
-                    colormap_value = None
-            except (ValueError, TypeError):
-                normalized_value = 0.5
-                colormap_value = None
-        else:
-            normalized_value = 0.5
-            colormap_value = None
-
-        if colormap_value is not None:
-            color = _get_colormap_color(normalized_value, cmap)
+    line_id = line_data.name if hasattr(line_data, "name") else line_data["id"]
+    if not is_disconnected:
+        if cmap and value_dict and line_id in value_dict.keys():
+            value = value_dict[line_id]
+            colormap_value = _get_colormap_color(value, cmap)
             use_colorbar = True
+        else:
+            colormap_value = "#008000"
+            use_colorbar = False
 
     # Check for highlights (overrides colormap)
     if isinstance(highlights, dict):
-        for line_color, lines in highlights.items():
+        for color, lines in highlights.items():
             if line_data.name in lines:  # type: ignore
-                color = line_color
+                line_color = rgb_to_hex(color)
                 highlighted = True
                 use_colorbar = False
     elif highlights is not None:
         if line_data.name in highlights:
-            color = RED
+            line_color = rgb_to_hex(RED)
             highlighted = True
             use_colorbar = False
 
@@ -251,21 +248,13 @@ def _add_line_trace(
     if (highlight_disconnected is False) and is_disconnected:
         # Highlights override the disconnected status
         if not highlighted:
-            color = GREY
+            line_color = rgb_to_hex(GREY)
             use_colorbar = False
 
-    # Convert color to hex if it's RGB tuple
-    if isinstance(color, tuple) and len(color) == 3:  # Check for RGB tuple
-        line_color = rgb_to_hex(color)
-    elif isinstance(color, str):
-        line_color = color
-        if len(color) > 7:
-            raise ValueError(f"color code: {color} does not match hex format")
-    else:
-        line_color = rgb_to_hex(color)
 
-    if colormap_value is not None:
-        hover_text += f"<br>{cbar_title or 'Value'}: {colormap_value:.3f}"
+
+    if cmap and colormap_value is not None:
+        hover_text += f"<br>{cbar_title or 'Value'}: {value:.3f}"
 
     # Add the lines with or without colorbar
     if colormap_value is not None:
@@ -277,10 +266,16 @@ def _add_line_trace(
                     lon=lons,
                     lat=lats,
                     hoverinfo="skip",
-                    line=dict(color=line_color, width=2),
+                    line=dict(color=colormap_value, width=2),
                     showlegend=False,
                 )
             )
+
+
+            custom_colorscale = [
+                [i / 10, f'rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})']
+                for i in range(11)
+            ]
 
             # Add a separate trace for colorbar (using a single point)
             fig.add_trace(
@@ -292,12 +287,15 @@ def _add_line_trace(
                         size=0.1,
                         opacity=0,
                         color=[colormap_value],
-                        colorscale=cmap or "Viridis",
-                        cmin=colormap_data["cmin"],
-                        cmax=colormap_data["cmax"],
+                        colorscale=(custom_colorscale if cmap == 'fixed_line_rating_scale' else cmap),
+                        # Conditional use of custom colorscale
+                        cmin=0.0 if cmap == 'fixed_line_rating_scale' else cmin,
+                        cmax=1.0 if cmap == 'fixed_line_rating_scale' else cmax, # fixme check for values > 1.0
                         colorbar=dict(
                             title=cbar_title or "Value",
                             x=1.02,
+                            tickvals= [i / 10 for i in range(11)]  if cmap == 'fixed_line_rating_scale' else None,
+                            ticktext = [f"{round(i / 10.0, 2)}" for i in range(11)] if cmap == 'fixed_line_rating_scale' else None
                         ),
                         showscale=True,
                     ),
