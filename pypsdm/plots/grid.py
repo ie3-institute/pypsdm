@@ -177,8 +177,6 @@ def _get_colormap_color(value, cmap):
     )
     return hex_string
 
-    return "#008000"  # Default green in hex format
-
 
 def _add_line_trace(
     fig: go.Figure,
