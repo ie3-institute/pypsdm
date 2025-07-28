@@ -158,25 +158,24 @@ def _process_colormap_values(cmap_vals: dict) -> dict:
     }
 
 
-def _get_colormap_color(value, cmap, normalized=True):
+def _get_colormap_color(value, cmap):
     """Get color from colormap based on value."""
     value = min(max(value, 0), 1)
 
-    if normalized:
-        # Use Plotly's colorscale to get the color
-        colorscale = px.colors.get_colorscale(cmap)
-        index = int(value * (len(colorscale) - 1))
+    # Use Plotly's colorscale to get the color
+    colorscale = px.colors.get_colorscale(cmap)
+    index = int(value * (len(colorscale) - 1))
 
-        color_str = colorscale[index]
-        rgb_string = color_str[1]
-        # Remove 'rgb(' and ')' and split by commas
-        rgb_values = list(map(int, rgb_string[4:-1].split(",")))
-        hex_string = "#%02x%02x%02x" % (
-            int(rgb_values[0]),
-            int(rgb_values[1]),
-            int(rgb_values[2]),
-        )
-        return hex_string
+    color_str = colorscale[index]
+    rgb_string = color_str[1]
+    # Remove 'rgb(' and ')' and split by commas
+    rgb_values = list(map(int, rgb_string[4:-1].split(",")))
+    hex_string = "#%02x%02x%02x" % (
+        int(rgb_values[0]),
+        int(rgb_values[1]),
+        int(rgb_values[2]),
+    )
+    return hex_string
 
     return "#008000"  # Default green in hex format
 
