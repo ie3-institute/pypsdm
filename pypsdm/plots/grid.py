@@ -367,7 +367,7 @@ def _add_node_trace(
     grid: GridContainer,
     highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
 ):
-    """Node trace function (unchanged from original)."""
+    """Node trace function."""
     node_hover_data = grid.get_nodal_sp_count_and_power()
     nodes_data = grid.raw_grid.nodes.data
 
