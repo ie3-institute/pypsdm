@@ -21,12 +21,12 @@ def grid_plot(
     line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
-    cmap_vals: Optional[Union[list, dict]] = None,
+    cmap_line_values: Optional[Union[list, dict]] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ) -> go.Figure:
     """
-    Plots the grid on an OpenStreetMap. Lines that are disconnected due to open switches will be grey.
+    Plots the grid on an OpenStreetMap. Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
 
     ATTENTION:
     We currently consider the node_b of the switches to be the auxiliary switch node.
@@ -41,7 +41,7 @@ def grid_plot(
                                     List of uuids or dict[(r, g, b), str] with colors.
         highlight_disconnected (Optional[bool]): Whether to highlight disconnected lines.
         cmap (Optional[str]): Name of a colormap (e.g., 'Viridis', 'Jet', 'Blues', etc.)
-        cmap_vals (Optional[Union[list, dict]]): Values for colormap. Can be a list of values
+        cmap_line_values (Optional[Union[list, dict]]): Values for colormap. Can be a list of values
                                                  or dict mapping line IDs to values.
         cbar_title (Optional[str]): Title for the colorbar.
         show_colorbar (bool): Whether to show the colorbar.
@@ -56,9 +56,9 @@ def grid_plot(
     disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
-    if cmap and cmap_vals is not None:
+    if cmap and cmap_line_values is not None:
         try:
-            value_dict, cmin, cmax = _process_colormap_values(cmap_vals, cmap)
+            value_dict, cmin, cmax = _process_colormap_values(cmap_line_values, cmap)
         except Exception as e:
             print(f"Error processing colormap values: {e}")
 
