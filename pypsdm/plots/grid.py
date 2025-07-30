@@ -191,13 +191,7 @@ def _add_node_trace(
 
     if highlights is not None:
         if isinstance(highlights, dict):
-            rmd = []
-            for nodes in highlights.values():
-                rmd.extend(nodes)
-            rmd = nodes_data.drop(rmd)
-            _node_trace(rmd, BLUE)
-
-            # plot highlighted nodes second so they are on top
+            # plot not highlighted nodes first
             rmd = []
             for nodes in highlights.values():
                 rmd.extend(nodes)
