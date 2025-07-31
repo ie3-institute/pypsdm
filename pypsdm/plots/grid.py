@@ -109,9 +109,7 @@ def grid_plot(
                             if cmap == "fixed_line_rating_scale"
                             else cmap
                         ),
-                        cmin=(
-                            cmin if not cmap == "fixed_line_rating_scale" else 0.0
-                        ),
+                        cmin=(cmin if not cmap == "fixed_line_rating_scale" else 0.0),
                         cmax=(
                             cmax if not cmap == "fixed_line_rating_scale" else 1.0
                         ),  # fixme check for values > 1.0
