@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
-- Add colored Line Trace to plotting [#343](https://github.com/ie3-institute/pypsdm/issues/343)
+- Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
 
 ### Changed
 
