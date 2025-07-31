@@ -4,10 +4,10 @@ import json
 from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from pandas import Series
-import pandas as pd
 from shapely.geometry import LineString
 
 if TYPE_CHECKING:
