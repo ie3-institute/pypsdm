@@ -28,7 +28,7 @@ def grid_plot(
     cmap_nodes: Optional[str] = None,
     cmap_node_values: Optional[Union[list, dict]] = None,
     cbar_node_title: Optional[str] = None,
-    show_node_colorbar: bool = True,
+    mapbox_style: Optional[str] = "open-street-map",
 ) -> go.Figure:
     """
     Plots the grid on an OpenStreetMap. Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
@@ -54,6 +54,7 @@ def grid_plot(
         cmap_node_values (Optional[Union[list, dict]]): Values for colormap node trace. Can be a list of values
                                                  or dict mapping node IDs to values.
         cbar_node_title (Optional[str]): Title for the node colorbar.
+        mapbox_style (Optional[str]): Mapbox style. Defaults to open-street-map.
     Returns:
         Figure: Plotly figure.
     """
@@ -198,12 +199,12 @@ def grid_plot(
     fig.update_layout(
         # mapbox = {"zoom"=10},
         showlegend=False,
-        mapbox_style="open-street-map",
+        mapbox_style=mapbox_style,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         mapbox=dict(
             center=dict(lat=center_lat, lon=center_lon),
             zoom=zoom,  # Adjust the zoom level as per the calculated heuristic
-            style="open-street-map",
+            style=mapbox_style,
         ),
     )
 
