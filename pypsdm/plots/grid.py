@@ -76,6 +76,70 @@ def grid_plot(
             ),
             axis=1,  # type: ignore
         )
+
+        if show_colorbar is not None:
+            custom_colorscale = [
+                [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
+                for i in range(11)
+            ]
+            lons, lats = _get_lons_lats(grid.lines.geo_position.iloc[0])
+
+            fig.add_shape(
+                type="rect",
+                x0=0.95,
+                x1=1.00,
+                y0=0.0,
+                y1=1.0,
+                fillcolor="white",
+                line=dict(color="white"),
+            )
+
+            # Add a separate trace for line colorbar (using a single point)
+            fig.add_trace(
+                go.Scattermapbox(
+                    mode="markers",
+                    lon=[lons[0]],
+                    lat=[lats[0]],
+                    marker=dict(
+                        size=0.1,
+                        opacity=0,
+                        color="#008000",
+                        colorscale=(
+                            custom_colorscale
+                            if cmap == "fixed_line_rating_scale"
+                            else cmap
+                        ),
+                        cmin=(
+                            cmin if not cmap == "fixed_line_rating_scale" else 0.0
+                        ),
+                        cmax=(
+                            cmax if not cmap == "fixed_line_rating_scale" else 1.0
+                        ),  # fixme check for values > 1.0
+                        colorbar=dict(
+                            title=dict(
+                                text=cbar_title or "Line Value",
+                                font=dict(size=12, weight="normal", style="normal"),
+                            ),
+                            x=0.975,
+                            tickvals=(
+                                [i / 10 for i in range(11)]
+                                if cmap == "fixed_line_rating_scale"
+                                else None
+                            ),
+                            ticktext=(
+                                [f"{round(i / 10.0, 2)}" for i in range(11)]
+                                if cmap == "fixed_line_rating_scale"
+                                else None
+                            ),
+                            thickness=15,
+                            tickfont=dict(size=12, weight="normal", style="normal"),
+                        ),
+                        showscale=True,
+                    ),
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
     else:
         connected_lines.data.apply(
             lambda line: _add_line_trace(fig, line, is_disconnected=False, highlights=line_highlights), axis=1  # type: ignore
@@ -268,52 +332,6 @@ def _add_line_trace(
                     lat=lats,
                     hoverinfo="skip",
                     line=dict(color=colormap_value, width=2),
-                    showlegend=False,
-                )
-            )
-
-            custom_colorscale = [
-                [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
-                for i in range(11)
-            ]
-
-            # Add a separate trace for colorbar (using a single point)
-            fig.add_trace(
-                go.Scattermapbox(
-                    mode="markers",
-                    lon=[lons[0]],  # Use first point
-                    lat=[lats[0]],
-                    marker=dict(
-                        size=0.1,
-                        opacity=0,
-                        color=[colormap_value],
-                        colorscale=(
-                            custom_colorscale
-                            if cmap == "fixed_line_rating_scale"
-                            else cmap
-                        ),
-                        # Conditional use of custom colorscale
-                        cmin=0.0 if cmap == "fixed_line_rating_scale" else cmin,
-                        cmax=(
-                            1.0 if cmap == "fixed_line_rating_scale" else cmax
-                        ),  # fixme check for values > 1.0
-                        colorbar=dict(
-                            title=cbar_title or "Value",
-                            x=1.02,
-                            tickvals=(
-                                [i / 10 for i in range(11)]
-                                if cmap == "fixed_line_rating_scale"
-                                else None
-                            ),
-                            ticktext=(
-                                [f"{round(i / 10.0, 2)}" for i in range(11)]
-                                if cmap == "fixed_line_rating_scale"
-                                else None
-                            ),
-                        ),
-                        showscale=True,
-                    ),
-                    hoverinfo="skip",
                     showlegend=False,
                 )
             )
