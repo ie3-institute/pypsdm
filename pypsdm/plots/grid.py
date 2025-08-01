@@ -68,9 +68,8 @@ def grid_plot(
                 line,
                 highlights=line_highlights,
                 cmap=cmap,
-                value_dict=value_dict,
-                cmin=cmin,
-                cmax=cmax,
+                colormap_value_dict=value_dict,
+                line_data_dict=cmap_line_values,
                 cbar_title=cbar_title,
                 show_colorbar=show_colorbar,
             ),
@@ -271,9 +270,8 @@ def _add_line_trace(
     highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
-    value_dict: Optional[dict] = None,
-    cmin: float = None,
-    cmax: float = None,
+    colormap_value_dict: Optional[dict] = None,
+    line_data_dict: Optional[dict] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ):
@@ -288,8 +286,8 @@ def _add_line_trace(
 
     line_id = line_data.name if hasattr(line_data, "name") else line_data["id"]
     if not is_disconnected:
-        if cmap and value_dict and line_id in value_dict.keys():
-            value = value_dict[line_id]
+        if cmap and colormap_value_dict and line_id in colormap_value_dict.keys():
+            value = colormap_value_dict[line_id]
             colormap_value = _get_colormap_color(value, cmap)
             use_colorbar = True
         else:
@@ -317,7 +315,7 @@ def _add_line_trace(
             use_colorbar = False
 
     if cmap and colormap_value is not None:
-        hover_text += f"<br>{cbar_title or 'Value'}: {value:.3f}"
+        hover_text += f"<br>{cbar_title or 'Value'}: {line_data_dict[line_id][next(iter(line_data_dict[line_id]))] * 100:.1f}%"
 
     # Add the lines with or without colorbar
     if colormap_value is not None:
