@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
+- Enrich an existing grid container by EVs and EVCS [#355](https://github.com/ie3-institute/pypsdm/issues/355)
 
 ### Changed
 
