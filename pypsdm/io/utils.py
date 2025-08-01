@@ -1,8 +1,11 @@
 import os
+import shutil
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from random import normalvariate
 from typing import Optional, Union
+from uuid import UUID
 
 import pandas as pd
 from pandas import DataFrame
@@ -62,6 +65,21 @@ def read_csv(
         )
     else:
         return pd.read_csv(full_path, delimiter=delimiter, quotechar='"')
+
+
+def delete_all_files_in_directory(directory_path):
+    if os.path.exists(directory_path) and os.path.isdir(directory_path):
+        for filename in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")
+    else:
+        print(f"Directory {directory_path} does not exist or is not a directory.")
 
 
 def to_date_time(zoned_date_time: str) -> datetime:
@@ -164,3 +182,16 @@ def bool_converter(maybe_bool):
         return maybe_bool.lower() == "true"
     else:
         raise ValueError("Cannot convert to bool: " + str(maybe_bool))
+
+
+def normaldistribution(dist_params):
+    normal_variant = normalvariate(dist_params[0], dist_params[1])
+    return max(min(normal_variant, dist_params[3]), dist_params[2])
+
+
+def is_valid_uuid(uuid_string):
+    try:
+        uuid_obj = UUID(uuid_string)
+        return str(uuid_obj) == uuid_string
+    except ValueError:
+        return False

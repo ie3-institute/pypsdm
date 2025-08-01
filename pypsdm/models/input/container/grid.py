@@ -56,8 +56,8 @@ class GridContainer(ContainerMixin):
         return self.raw_grid.switches
 
     @property
-    def ems(self):
-        return self.participants.ems
+    def controlling_ems(self):
+        return self.participants.controlling_ems
 
     @property
     def loads(self):

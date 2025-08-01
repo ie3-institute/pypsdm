@@ -1,4 +1,4 @@
-uuid,albedo,azimuth,cos_phi_rated,elevation_angle,eta_conv,id,k_g,k_t,market_reaction,node,operates_from,operates_until,operator,q_characteristics,s_rated,em
+uuid,albedo,azimuth,cos_phi_rated,elevation_angle,eta_conv,id,k_g,k_t,market_reaction,node,operates_from,operates_until,operator,q_characteristics,s_rated,controlling_em
 19d949f2-54ff-483c-928b-2438fc760385,0.20000000298023224,-8.571032524108887,0.8999999761581421,33.3157844543457,96.0,NS_NET146_F3_(20)_PV,0.8999999761581421,1.0,false,0ebf0088-f596-4cd1-9ae0-5da02dc40335,,,,"cosPhiFixed:{(0.00,0.90)}",30.0,6fc12c35-f118-4c33-aecf-9f77e7639939
 83a0dcd8-d6ad-49bf-8cbc-5a5774ed18ac,0.20000000298023224,9.723748207092285,0.8999999761581421,51.525978088378906,98.0,NS_NET146_F2_(27)_PV,0.8999999761581421,1.0,false,b179c38b-5af0-4304-84b1-1dc03314fd80,,,,"cosPhiFixed:{(0.00,0.90)}",30.0,
 5206abaa-3abc-4a15-a8f2-778139a3fc65,0.20000000298023224,4.901591777801514,0.8999999761581421,42.587581634521484,98.0,NS_NET146_F3_(7)_PV,0.8999999761581421,1.0,false,f1e88392-3b2a-4ce8-a31f-c963f08f8043,,,,"cosPhiFixed:{(0.00,0.90)}",30.0,
