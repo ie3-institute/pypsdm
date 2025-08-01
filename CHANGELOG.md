@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
 - Fix emInput from parent_em to controlling_em [#333](https://github.com/ie3-institute/pypsdm/issues/333)
+- Fix error in `filter_data_for_time_interval()` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 
 
 ## 0.0.6
