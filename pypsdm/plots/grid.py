@@ -154,6 +154,7 @@ def grid_plot(
                                 else None
                             ),
                             thickness=15,
+                            len=0.85,
                             tickfont=dict(
                                 size=12,
                                 weight="normal",
@@ -514,6 +515,7 @@ def _add_node_trace(
                         ),
                         ticktext=([f"{round(0.9 + i*2 / 100, 2)}" for i in range(11)]),
                         thickness=10,
+                        len=0.85,
                         tickfont=dict(
                             size=12, weight="normal", style="normal", color="#000000"
                         ),
