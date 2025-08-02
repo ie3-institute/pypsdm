@@ -66,6 +66,23 @@ def grid_plot(
     disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
+    both_color_bars = (
+        show_line_colorbar and cmap_lines is not None and cmap_nodes is not None
+    )
+
+    if (show_line_colorbar and cmap_lines is not None) or cmap_nodes is not None:
+        # Plot white half transparent rectangle as background for color bars
+        x0_value = 0.85 if both_color_bars else 0.925
+        fig.add_shape(
+            type="rect",
+            x0=x0_value,
+            x1=1.0,
+            y0=0.0,
+            y1=1.0,
+            fillcolor="rgba(255, 255, 255, 0.5)",
+            line=dict(color="rgba(255, 255, 255, 0.0)"),
+        )
+
     if cmap_lines and cmap_line_values is not None:
         try:
             value_dict, cmin, cmax = _process_colormap_values(
@@ -81,30 +98,18 @@ def grid_plot(
                 highlights=line_highlights,
                 cmap=cmap_lines,
                 value_dict=value_dict,
-                cmin=cmin,
-                cmax=cmax,
                 cbar_title=cbar_line_title,
                 show_colorbar=show_line_colorbar,
             ),
             axis=1,  # type: ignore
         )
 
-        if show_line_colorbar is not None:
+        if show_line_colorbar:
             custom_colorscale = [
                 [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
                 for i in range(11)
             ]
             lons, lats = _get_lons_lats(grid.lines.geo_position.iloc[0])
-
-            fig.add_shape(
-                type="rect",
-                x0=0.95,
-                x1=1.00,
-                y0=0.0,
-                y1=1.0,
-                fillcolor="white",
-                line=dict(color="white"),
-            )
 
             # Add a separate trace for line colorbar (using a single point)
             fig.add_trace(
@@ -130,9 +135,14 @@ def grid_plot(
                         colorbar=dict(
                             title=dict(
                                 text=cbar_line_title or "Line Value",
-                                font=dict(size=12, weight="normal", style="normal"),
+                                font=dict(
+                                    size=12,
+                                    weight="normal",
+                                    style="normal",
+                                    color="#000000",
+                                ),
                             ),
-                            x=0.975,
+                            x=x0_value,
                             tickvals=(
                                 [i / 10 for i in range(11)]
                                 if cmap_lines == "fixed_line_rating_scale"
@@ -144,7 +154,12 @@ def grid_plot(
                                 else None
                             ),
                             thickness=15,
-                            tickfont=dict(size=12, weight="normal", style="normal"),
+                            tickfont=dict(
+                                size=12,
+                                weight="normal",
+                                style="normal",
+                                color="#000000",
+                            ),
                         ),
                         showscale=True,
                     ),
@@ -297,8 +312,6 @@ def _add_line_trace(
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
     value_dict: Optional[dict] = None,
-    cmin: float = None,
-    cmax: float = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ):
@@ -490,9 +503,10 @@ def _add_node_trace(
                     cmax=1.1,
                     colorbar=dict(
                         title=dict(
-                            text=cbar_node_title or "Node Value", font=dict(size=12)
+                            text=cbar_node_title or "Node Value",
+                            font=dict(size=12, color="#000000"),
                         ),
-                        x=1.025,
+                        x=0.925,
                         tickvals=(
                             [
                                 0.9 + i * 2 / 100 for i in range(11)
@@ -500,7 +514,9 @@ def _add_node_trace(
                         ),
                         ticktext=([f"{round(0.9 + i*2 / 100, 2)}" for i in range(11)]),
                         thickness=10,
-                        tickfont=dict(size=12, weight="normal", style="normal"),
+                        tickfont=dict(
+                            size=12, weight="normal", style="normal", color="#000000"
+                        ),
                     ),
                 ),
                 hoverinfo="skip",
