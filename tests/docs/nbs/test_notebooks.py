@@ -1,10 +1,13 @@
 import pytest
 
+from pypsdm.io.utils import ROOT_DIR
+
 
 def test_notebook_input_models():
     args = [
         "--nbval",
-        "docs/nbs/input_models.ipynb",
+        "-v",
+        ROOT_DIR + "/docs/nbs/input_models.ipynb",
     ]
 
     exit_code = pytest.main(args)
@@ -17,7 +20,8 @@ def test_notebook_input_models():
 def test_notebook_result_models():
     args = [
         "--nbval",
-        "docs/nbs/result_models.ipynb",
+        "-v",
+        ROOT_DIR + "/docs/nbs/result_models.ipynb",
     ]
 
     exit_code = pytest.main(args)
