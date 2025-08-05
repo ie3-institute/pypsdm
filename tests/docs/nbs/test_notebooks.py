@@ -1,9 +1,10 @@
 import pytest
 
+
 def test_notebook_result_models():
     args = [
-        '--nbval',
-        'docs/nbs/result_models.ipynb',
+        "--nbval",
+        "docs/nbs/result_models.ipynb",
     ]
 
     exit_code = pytest.main(args)
