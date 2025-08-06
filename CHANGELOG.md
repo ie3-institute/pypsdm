@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
 - Using `NBVAL` as validation for jupyter notebooks [#351](https://github.com/ie3-institute/pypsdm/issues/351) 
 - Add colored Line Trace to plotting [#343](https://github.com/ie3-institute/pypsdm/issues/343)
+- Add functionality to plot line traces without mapbox as vector graphic [#360](https://github.com/ie3-institute/pypsdm/issues/360)
 
 ### Changed
 
