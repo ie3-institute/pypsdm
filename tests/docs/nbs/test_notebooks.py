@@ -2,6 +2,7 @@ import pytest
 
 from pypsdm.io.utils import ROOT_DIR
 
+
 def test_notebook_check_notebook_except_skipped_cells():
     args = [
         "--nbval",
@@ -33,4 +34,3 @@ def test_notebook_only_for_errors_and_explicit_cell_checks():
     # Check if there were any failures
     if exit_code != 0:
         raise Exception(f"Notebook tests failed with exit code {exit_code}.")
-
