@@ -17,21 +17,21 @@ from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
 
 def grid_plot(
-        grid: GridContainer,
-        node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
-        line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
-        highlight_disconnected: Optional[bool] = False,
-        cmap_lines: Optional[str] = None,
-        cmap_line_values: Optional[Union[list, dict]] = None,
-        cbar_line_title: Optional[str] = None,
-        show_line_colorbar: bool = True,
-        cmap_nodes: Optional[str] = None,
-        cmap_node_values: Optional[Union[list, dict]] = None,
-        cbar_node_title: Optional[str] = None,
-        mapbox_style: Optional[str] = "open-street-map",
-        use_mapbox: bool = True,  # New parameter to control mapbox vs regular scatter
-        zoom_box: Optional[dict] = None,  # New parameter for zoom box
-        show_axes: bool = True,  # New parameter to control axis visibility
+    grid: GridContainer,
+    node_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+    line_highlights: Optional[Union[dict[RGB, list[str]], list[str]]] = None,
+    highlight_disconnected: Optional[bool] = False,
+    cmap_lines: Optional[str] = None,
+    cmap_line_values: Optional[Union[list, dict]] = None,
+    cbar_line_title: Optional[str] = None,
+    show_line_colorbar: bool = True,
+    cmap_nodes: Optional[str] = None,
+    cmap_node_values: Optional[Union[list, dict]] = None,
+    cbar_node_title: Optional[str] = None,
+    mapbox_style: Optional[str] = "open-street-map",
+    use_mapbox: bool = True,  # New parameter to control mapbox vs regular scatter
+    zoom_box: Optional[dict] = None,  # New parameter for zoom box
+    show_axes: bool = True,  # New parameter to control axis visibility
 ) -> go.Figure:
     """
     Unified grid plotting function that supports both mapbox and SVG-friendly modes.
@@ -75,7 +75,7 @@ def grid_plot(
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
     both_color_bars = (
-            show_line_colorbar and cmap_lines is not None and cmap_nodes is not None
+        show_line_colorbar and cmap_lines is not None and cmap_nodes is not None
     )
 
     # Add colorbar background if needed
@@ -122,10 +122,13 @@ def grid_plot(
     else:
         connected_lines.data.apply(
             lambda line: _add_line_trace(
-                fig, line, is_disconnected=False,
-                highlights=line_highlights, use_mapbox=use_mapbox
+                fig,
+                line,
+                is_disconnected=False,
+                highlights=line_highlights,
+                use_mapbox=use_mapbox,
             ),
-            axis=1
+            axis=1,
         )
 
     # Add disconnected lines
@@ -226,16 +229,16 @@ def _get_colormap_color(value, cmap):
 
 
 def _add_line_trace(
-        fig: go.Figure,
-        line_data: Series,
-        is_disconnected: bool = False,
-        highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
-        highlight_disconnected: Optional[bool] = False,
-        cmap: Optional[str] = None,
-        value_dict: Optional[dict] = None,
-        cbar_title: Optional[str] = None,
-        show_colorbar: bool = True,
-        use_mapbox: bool = True,
+    fig: go.Figure,
+    line_data: Series,
+    is_disconnected: bool = False,
+    highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    highlight_disconnected: Optional[bool] = False,
+    cmap: Optional[str] = None,
+    value_dict: Optional[dict] = None,
+    cbar_title: Optional[str] = None,
+    show_colorbar: bool = True,
+    use_mapbox: bool = True,
 ):
     """Unified line trace function supporting both mapbox and regular scatter."""
     lons, lats = _get_lons_lats(line_data.geo_position)
@@ -329,13 +332,13 @@ def _add_line_trace(
 
 
 def _add_node_trace(
-        fig: go.Figure,
-        grid: GridContainer,
-        highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
-        cmap: Optional[str] = None,
-        cmap_node_values: Optional[dict] = None,
-        cbar_node_title: Optional[str] = None,
-        use_mapbox: bool = True,
+    fig: go.Figure,
+    grid: GridContainer,
+    highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
+    cmap: Optional[str] = None,
+    cmap_node_values: Optional[dict] = None,
+    cbar_node_title: Optional[str] = None,
+    use_mapbox: bool = True,
 ):
     """Unified node trace function supporting both mapbox and regular scatter."""
 
@@ -362,9 +365,9 @@ def _add_node_trace(
                 return rgb_to_hex(RED)
 
         if (
-                cmap is not None
-                and cmap_node_values is not None
-                and node_uuid in cmap_node_values.keys()
+            cmap is not None
+            and cmap_node_values is not None
+            and node_uuid in cmap_node_values.keys()
         ):
             value = cmap_node_values[node_uuid]
             cmin, cmax = 0.9, 1.1  # Fixed range for nodes
@@ -415,7 +418,9 @@ def _add_node_trace(
         )
 
 
-def _add_line_colorbar(fig, grid, cmap_lines, cmin, cmax, cbar_line_title, x0_value, use_mapbox):
+def _add_line_colorbar(
+    fig, grid, cmap_lines, cmin, cmax, cbar_line_title, x0_value, use_mapbox
+):
     """Add line colorbar for both mapbox and regular plots."""
     custom_colorscale = [
         [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
@@ -435,10 +440,12 @@ def _add_line_colorbar(fig, grid, cmap_lines, cmin, cmax, cbar_line_title, x0_va
 
     # Add tick configuration for fixed scale
     if cmap_lines == "fixed_line_rating_scale":
-        colorbar_config.update({
-            'tickvals': [i / 10 for i in range(11)],
-            'ticktext': [f"{round(i / 10.0, 2)}" for i in range(11)]
-        })
+        colorbar_config.update(
+            {
+                "tickvals": [i / 10 for i in range(11)],
+                "ticktext": [f"{round(i / 10.0, 2)}" for i in range(11)],
+            }
+        )
 
     marker_config = dict(
         size=0.1,
@@ -533,8 +540,8 @@ def _configure_layout(fig, grid, use_mapbox, mapbox_style, zoom_box, show_axes):
     """Configure the figure layout based on mapbox usage and zoom settings."""
     # Determine zoom/extent settings
     if zoom_box is not None:
-        lat_min, lat_max = zoom_box['lat_min'], zoom_box['lat_max']
-        lon_min, lon_max = zoom_box['lon_min'], zoom_box['lon_max']
+        lat_min, lat_max = zoom_box["lat_min"], zoom_box["lat_max"]
+        lon_min, lon_max = zoom_box["lon_min"], zoom_box["lon_max"]
         center_lat = (lat_min + lat_max) / 2
         center_lon = (lon_min + lon_max) / 2
         lat_range = lat_max - lat_min
@@ -551,7 +558,11 @@ def _configure_layout(fig, grid, use_mapbox, mapbox_style, zoom_box, show_axes):
 
     if use_mapbox:
         # Mapbox layout
-        zoom = 14.5 - max(lat_range, lon_range) if zoom_box else 12 - max(lat_range, lon_range)
+        zoom = (
+            14.5 - max(lat_range, lon_range)
+            if zoom_box
+            else 12 - max(lat_range, lon_range)
+        )
         fig.update_layout(
             showlegend=False,
             mapbox_style=mapbox_style,
@@ -630,8 +641,13 @@ def _get_lons_lats(geojson: str):
     coordinates = json.loads(geojson)["coordinates"]
     return list(zip(*coordinates))  # returns lons, lats
 
-def create_zoom_box(upper_left_lat: float, upper_left_lon: float,
-                   bottom_right_lat: float, bottom_right_lon: float) -> dict:
+
+def create_zoom_box(
+    upper_left_lat: float,
+    upper_left_lon: float,
+    bottom_right_lat: float,
+    bottom_right_lon: float,
+) -> dict:
     """
     Create a zoom box dictionary from center coordinates and span.
 
@@ -645,8 +661,8 @@ def create_zoom_box(upper_left_lat: float, upper_left_lon: float,
         Dictionary with lat_min, lat_max, lon_min, lon_max keys
     """
     return {
-        'lat_min': bottom_right_lat,
-        'lat_max': upper_left_lat,
-        'lon_min': upper_left_lon,
-        'lon_max': bottom_right_lon,
+        "lat_min": bottom_right_lat,
+        "lat_max": upper_left_lat,
+        "lon_min": upper_left_lon,
+        "lon_max": bottom_right_lon,
     }
