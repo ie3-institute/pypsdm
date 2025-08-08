@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
-- Fix `emInput` from `parent_em` to `controlling_e` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
+- Fix `emInput` from `parent_em` to `controlling_em` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 - Fix also from `em` to `controlling_em` for all `SystemParticipants` [#337](https://github.com/ie3-institute/pypsdm/issues/337)
 
 

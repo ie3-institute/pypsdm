@@ -22,7 +22,7 @@ class SystemParticipants(Entities, ABC):
     @property
     def controlling_em(self) -> Series:
         """
-        Returns: The controlling_ems to which the entities are connected.
+        Returns: The controlling energy management system to which the entities are connected.
         """
         # EM column might not be present
         if "controlling_em" in self.data:
