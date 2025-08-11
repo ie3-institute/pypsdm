@@ -42,6 +42,10 @@ class GridResultContainer(ContainerMixin):
         return self.raw_grid.switches
 
     @property
+    def congestions(self):
+        return self.raw_grid.congestions
+
+    @property
     def controlling_ems(self):
         return self.participants.controlling_ems
 
