@@ -27,7 +27,7 @@ from pypsdm.models.ts.types import ComplexPower, ComplexPowerDict
 
 @dataclass
 class SystemParticipantsResultContainer(ResultContainerMixin):
-    ems: EmsResult
+    controlling_ems: EmsResult
     loads: LoadsResult
     fixed_feed_ins: FixedFeedInsResult
     pvs: PvsResult
@@ -45,7 +45,7 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
                 raise ValueError(f"Expected {dict_type} but got {type(value)}")
             return value
 
-        self.ems = get_or_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT, EmsResult)  # type: ignore
+        self.controlling_ems = get_or_empty(SystemParticipantsEnum.ENERGY_MANAGEMENT, EmsResult)  # type: ignore
         self.loads = get_or_empty(SystemParticipantsEnum.LOAD, LoadsResult)  # type: ignore
         self.fixed_feed_ins = get_or_empty(
             SystemParticipantsEnum.FIXED_FEED_IN, FixedFeedInsResult
@@ -137,7 +137,7 @@ class SystemParticipantsResultContainer(ResultContainerMixin):
         self, include_empty: bool = False
     ) -> dict[SystemParticipantsEnum, ComplexPowerDict]:
         dct = {
-            SystemParticipantsEnum.ENERGY_MANAGEMENT: self.ems,
+            SystemParticipantsEnum.ENERGY_MANAGEMENT: self.controlling_ems,
             SystemParticipantsEnum.LOAD: self.loads,
             SystemParticipantsEnum.FIXED_FEED_IN: self.fixed_feed_ins,
             SystemParticipantsEnum.PHOTOVOLTAIC_POWER_PLANT: self.pvs,
