@@ -223,7 +223,7 @@ def plot_em(
     hourly_mean: bool = False,
     resolution: Resolution | None = None,
 ):
-    em_uuid = list(em_participant_results.ems.data.keys())[0]
+    em_uuid = list(em_participant_results.controlling_ems.data.keys())[0]
 
     title = f"Household: {em_uuid}"
 
@@ -239,7 +239,7 @@ def plot_em(
     )
     ax_plot_active_power(
         axs[1],
-        em_participant_results.ems.sum(),
+        em_participant_results.controlling_ems.sum(),
         hourly_mean=hourly_mean,
         fill_from_index=True,
         resolution=resolution,
