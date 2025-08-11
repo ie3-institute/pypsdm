@@ -22,7 +22,7 @@ def test_node_participants_map(grid_container: GridContainer):
         "b7a5be0d-2662-41b2-99c6-3b8121a75e9e"
     ]
     assert len(node_participants.loads) == 1
-    assert len(node_participants.ems) == 1
+    assert len(node_participants.controlling_ems) == 1
     assert len(node_participants.pvs) == 1
 
 
