@@ -42,7 +42,7 @@ def create_pv_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not uuid:
         uuid = str(uuid4())
@@ -65,7 +65,7 @@ def create_pv_data(
             "k_t": k_t,
             "market_reaction": market_reaction,
             "cos_phi_rated": cos_phi_rated,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)
 
@@ -113,7 +113,7 @@ def create_storages_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not s_rated:
         s_rated = e_storage / 2
@@ -148,7 +148,7 @@ def create_storages_data(
             "dod": dod,
             "life_time": life_time,
             "life_cycle": life_cycle,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)
 
@@ -227,7 +227,7 @@ def create_ev_charging_stations_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not uuid:
         uuid = str(uuid4())
@@ -251,7 +251,7 @@ def create_ev_charging_stations_data(
             "location_type": location_type,
             "type": type,
             "v2g_support": v2g_support,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)
 
@@ -272,7 +272,7 @@ def create_heat_pumps_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not p_thermal:
         p_thermal = s_rated * 3
@@ -300,7 +300,7 @@ def create_heat_pumps_data(
             "s_rated": s_rated,
             "cos_phi_rated": cos_phi_rated,
             "p_thermal": p_thermal,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)
 
@@ -321,7 +321,7 @@ def create_loads_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not uuid:
         uuid = str(uuid4())
@@ -339,7 +339,7 @@ def create_loads_data(
             "e_cons_annual": e_cons_annual,
             "s_rated": s_rated,
             "cos_phi_rated": cos_phi_rated,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)
 
@@ -351,8 +351,7 @@ def create_loads(data_dict):
 def create_energy_management_systems_data(
     id,
     control_strategy,
-    parent_em=None,
-    q_characteristics=None,
+    controlling_em=None,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -360,14 +359,11 @@ def create_energy_management_systems_data(
 ):
     if not uuid:
         uuid = str(uuid4())
-    if not q_characteristics:
-        q_characteristics = fixed_q_characteristics(0.9)
     return pd.Series(
         {
             "id": id,
             "control_strategy": control_strategy,
-            "parent_em": parent_em,
-            "q_characteristics": q_characteristics,
+            "controlling_em": controlling_em,
             "operates_from": operates_from,
             "operates_until": operates_until,
             "operator": operator,
@@ -395,7 +391,7 @@ def create_fixed_feed_in_data(
     operates_from=None,
     operates_until=None,
     operator=None,
-    em=None,
+    controlling_em=None,
 ):
     if not uuid:
         uuid = str(uuid4())
@@ -411,6 +407,6 @@ def create_fixed_feed_in_data(
             "operates_from": operates_from,
             "operates_until": operates_until,
             "operator": operator,
-            "em": em,
+            "controlling_em": controlling_em,
         }
     ).rename(uuid)

@@ -46,8 +46,8 @@ class GridResultContainer(ContainerMixin):
         return self.raw_grid.congestions
 
     @property
-    def ems(self):
-        return self.participants.ems
+    def controlling_ems(self):
+        return self.participants.controlling_ems
 
     @property
     def loads(self):

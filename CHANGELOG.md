@@ -5,16 +5,25 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
-- Congestion result [#198](https://github.com/ie3-institute/pypsdm/issues/198)
+- Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
+- Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
+
+### Changed
+
+### Removed
+- Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
+
+### Fixed
+- Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
+- Fix `emInput` from `parent_em` to `controlling_em` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
+- Fix also from `em` to `controlling_em` for all `SystemParticipants` [#337](https://github.com/ie3-institute/pypsdm/issues/337)
+
+
+## 0.0.6
 
 ### Changed
 - Adapt Coordinate type to use WKBElement Geography [#287](https://github.com/ie3-institute/pypsdm/issues/287)
 - Adapt to recent PSDM Version 6.0.0 [#278](https://github.com/ie3-institute/pypsdm/issue/278)
-
-### Removed
-
-### Fixed
-
 
 ## 0.0.5
 
