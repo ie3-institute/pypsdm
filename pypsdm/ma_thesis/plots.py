@@ -176,15 +176,16 @@ def plot_voltage(
         subgrid: SubGridInfo,
         dotted: Union[float | list[float]] = None,
         width: int = 8,
-        height: int = 2
+        height: int = 4
 ):
-    fig, axes = create_fig(nrows=1, width=width, height=height)
-    hours_index(subgrid.node_min_max).plot(ax=axes)
-    ax_add_dotted(axes, dotted)
+    fig, axes = create_fig(nrows=2, width=width, height=height)
+    hours_index(subgrid.node_min_max).plot(ax=axes[0])
+    ax_add_dotted(axes[0], dotted)
 
-    axes.set_ylabel("Spannung in pu", fontsize=fontsize)
-    format_x_axis(axes, len(subgrid.node_min_max.index) - 1)
-    return fig
+    axes[0].set_ylabel("Spannung in pu", fontsize=fontsize)
+    format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
+    format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
+    return fig, axes
 
 
 def plot_line_utilization(
@@ -238,14 +239,10 @@ def format_x_axis(
     lim: int,
     step: int = 12,
 ):
-    if lim <= 168:
-        xticks = [i for i in range(0, lim, step)]
-        xticklabel = [x + 1 for x in xticks]
-        label = "Zeit in Stunden"
-    else:
-        xticks = [i for i in range(0, lim, 24*7*3)]
-        xticklabel = [i * 3 for i, _ in enumerate(xticks)]
-        label = "Zeit in Wochen"
+
+    xticks = [i for i in range(0, lim, step*4)]
+    xticklabel = [int(x / 4 + 1) for x in xticks]
+    label = "Time in hours"
 
     ax.set_xlim(0, lim)
     ax.set_xticks(xticks)
@@ -279,10 +276,12 @@ def ax_add_dotted(
             [axes.axhline(dot, color="red", linestyle="--") for dot in dotted]
 
 
-def ax_add_vlines(axes: Axes, values: list[float] = None):
-    if values:
-        [axes.axvline(x, color="purple", linestyle="--") for x in values]
-
+def ax_add_vlines(axes: Axes, values: list[float] = None, quater_hour: bool = False):
+    if values: 
+        if not quater_hour:
+            [axes.axvline(x, color="purple", linestyle="--") for x in values]
+        else:
+            [axes.axvline(x*4, color="purple", linestyle="--") for x in values]
 
 def ax_plot_congestion(
         axes: Axes,
@@ -300,14 +299,14 @@ def ax_plot_congestion(
 def ax_plot_tapping(
         axes: Axes,
         uuids: list[str],
-        transformers: Transformers2W,
+        uuid_to_id: dict[str, str],
         result: Transformers2WResult,
         tap_dotted: list[int, int] = None
 ):
-    tap_pos = pd.concat({transformers[uuid].id: result[uuid].data["tap_pos"] for uuid in uuids}, axis=1)
+    tap_pos = pd.concat({uuid_to_id[uuid]: result[uuid].data["tap_pos"] for uuid in uuids}, axis=1)
     hours_index(tap_pos).plot(ax=axes, drawstyle="steps-post")
 
-    values = tap_pos[transformers[uuids[0]].id].drop_duplicates()
+    values = tap_pos[uuid_to_id[uuids[0]].id].drop_duplicates()
     if len(values) == 1 and not tap_dotted:
         value = values[0]
         ticks = [value-1, value, value+1]
@@ -326,7 +325,7 @@ def plot_voltages_with_scenario(
         upper_limit: float = None,
         lower_limit: float = None,
         width: int = 16,
-        height: int = 6
+        height: int = 8
 ):
     fig, axes = create_fig(width=width, height=height)
 
@@ -338,6 +337,49 @@ def plot_voltages_with_scenario(
     ax_add_dotted(axes[1], lower_limit)
 
     return fig
+
+
+def plot_voltages_with_congestion_count(
+        subgrid: SubGridInfo,
+        congestions: DataFrame,
+        previous_res: SubGridInfo = None,
+        dotted: Union[float | list[float]] = None,
+        width: int = 8,
+        height: int = 4,
+        yMin: int = None,
+        yMax: int = None,
+        no_congestions = False,
+):
+    fig, axes = create_fig(nrows=2, width=width, height=height)
+    hours_index(subgrid.node_min_max).plot(ax=axes[0])
+    ax_add_dotted(axes[0], dotted)
+    
+    if previous_res is not None:
+        for column in subgrid.node_min_max.columns:
+            if "max" in str(column):    
+                hours_index(previous_res.node_min_max[column]).plot(ax=axes[0], legend=False, color="orange", linestyle=":", alpha=0.6)
+
+
+    if yMin is not None and yMax is not None:
+        axes[0].set_ylim(yMin, yMax)
+
+    axes[0].set_ylabel("Voltage in p.u.", fontsize=fontsize)
+    hours_index(congestions).plot(ax=axes[1], legend=False)
+    axes[1].set_ylabel("Number of\n voltage congestions", fontsize=fontsize)
+
+    if no_congestions:
+        axes[1].set_ylim(-1, 1)
+        axes[1].set_yticks([-1, 0, 1])
+        axes[1].set_yticklabels([-1, 0, 1])
+
+
+    axes[0].get_yaxis().set_label_coords(-0.075,0.5)
+    axes[1].get_yaxis().set_label_coords(-0.075,0.5)
+
+    format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
+    format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
+    return fig, axes[1]
+
 
 
 def plot_voltages_with_tapping(
