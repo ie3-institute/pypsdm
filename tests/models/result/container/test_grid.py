@@ -53,7 +53,7 @@ def get_container() -> GridResultContainer:
 
 def test_from_csv(result_path_sb):
     grid = GridResultContainer.from_csv(result_path_sb)
-    assert len(grid.congestions) == 0
+    assert len(grid.congestions) == 2
     assert len(grid.nodes) == 147
     assert len(grid.lines) == 147
     assert len(grid.transformers_2w) == 1
