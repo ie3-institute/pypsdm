@@ -15,5 +15,5 @@ repos:
   hooks:
       - id: convert-notebooks
         name: Convert Jupyter Notebooks Before Commit
-        entry: python scripts/custom_clear_preprocessor.py
+        entry: python scripts/convert_notebooks.py
         language: system
