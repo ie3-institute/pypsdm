@@ -23,7 +23,7 @@ from pypsdm.models.input.participant.wec import WindEnergyConverters
 
 @dataclass(frozen=True)
 class SystemParticipantsContainer(ContainerMixin):
-    ems: EnergyManagementSystems
+    controlling_ems: EnergyManagementSystems
     loads: Loads
     fixed_feed_ins: FixedFeedIns
     pvs: PhotovoltaicPowerPlants
@@ -36,7 +36,7 @@ class SystemParticipantsContainer(ContainerMixin):
 
     def to_list(self, include_empty=False) -> list[Entities]:
         participants = [
-            self.ems,
+            self.controlling_ems,
             self.loads,
             self.fixed_feed_ins,
             self.pvs,
@@ -74,20 +74,22 @@ class SystemParticipantsContainer(ContainerMixin):
 
         em_uuids = pd.concat(
             [
-                loads.em,
-                fixed_feed_ins.em,
-                pvs.em,
-                biomass_plants.em,
-                wecs.em,
-                storages.em,
-                evcs.em,
-                hps.em,
+                loads.controlling_em,
+                fixed_feed_ins.controlling_em,
+                pvs.controlling_em,
+                biomass_plants.controlling_em,
+                wecs.controlling_em,
+                storages.controlling_em,
+                evcs.controlling_em,
+                hps.controlling_em,
             ]
         )
-        ems = EnergyManagementSystems(self.ems.data[self.ems.data.index.isin(em_uuids)])
+        controlling_ems = EnergyManagementSystems(
+            self.controlling_ems.data[self.controlling_ems.data.index.isin(em_uuids)]
+        )
 
         return SystemParticipantsContainer(
-            ems,
+            controlling_ems,
             loads,
             fixed_feed_ins,
             pvs,
@@ -101,7 +103,7 @@ class SystemParticipantsContainer(ContainerMixin):
 
     def get_with_enum(self, sp_type: EntitiesEnum) -> Entities | None:
         if sp_type == SystemParticipantsEnum.ENERGY_MANAGEMENT:
-            return self.ems
+            return self.controlling_ems
         elif sp_type == SystemParticipantsEnum.LOAD:
             return self.loads
         elif sp_type == SystemParticipantsEnum.BIOMASS_PLANT:
@@ -134,8 +136,8 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.wecs.get(uuid)
         elif uuid in self.biomass_plants:
             return self.biomass_plants.get(uuid)
-        elif uuid in self.ems:
-            return self.ems.get(uuid)
+        elif uuid in self.controlling_ems:
+            return self.controlling_ems.get(uuid)
         elif uuid in self.storages:
             return self.storages.get(uuid)
         elif uuid in self.evs:
@@ -156,7 +158,7 @@ class SystemParticipantsContainer(ContainerMixin):
 
     def subset(self, uuids):
         return SystemParticipantsContainer(
-            self.ems.subset(uuids, intersection=True),
+            self.controlling_ems.subset(uuids, intersection=True),
             self.loads.subset(uuids, intersection=True),
             self.fixed_feed_ins.subset(uuids, intersection=True),
             self.pvs.subset(uuids, intersection=True),
@@ -178,12 +180,14 @@ class SystemParticipantsContainer(ContainerMixin):
         biomass_plants = BiomassPlants.from_csv(path, delimiter, must_exist=False)
         wecs = WindEnergyConverters.from_csv(path, delimiter, must_exist=False)
         storages = Storages.from_csv(path, delimiter, must_exist=False)
-        ems = EnergyManagementSystems.from_csv(path, delimiter, must_exist=False)
+        controlling_ems = EnergyManagementSystems.from_csv(
+            path, delimiter, must_exist=False
+        )
         evs = ElectricVehicles.from_csv(path, delimiter, must_exist=False)
         evcs = EvChargingStations.from_csv(path, delimiter, must_exist=False)
         hps = HeatPumps.from_csv(path, delimiter, must_exist=False)
         return SystemParticipantsContainer(
-            ems,
+            controlling_ems,
             loads,
             fixed_feed_ins,
             pvs,
@@ -198,7 +202,7 @@ class SystemParticipantsContainer(ContainerMixin):
     @classmethod
     def create(
         cls,
-        ems=EnergyManagementSystems.create_empty(),
+        controlling_ems=EnergyManagementSystems.create_empty(),
         loads=Loads.create_empty(),
         fixed_feed_ins=FixedFeedIns.create_empty(),
         pvs=PhotovoltaicPowerPlants.create_empty(),
@@ -210,7 +214,7 @@ class SystemParticipantsContainer(ContainerMixin):
         hps=HeatPumps.create_empty(),
     ):
         return cls(
-            ems=ems,
+            controlling_ems=controlling_ems,
             loads=loads,
             fixed_feed_ins=fixed_feed_ins,
             pvs=pvs,
