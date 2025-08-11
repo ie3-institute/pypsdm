@@ -1,4 +1,4 @@
-uuid,cos_phi_rated,e_cons_annual,id,node,operates_from,operates_until,operator,q_characteristics,s_rated,standard_load_profile,em
+uuid,cos_phi_rated,e_cons_annual,id,node,operates_from,operates_until,operator,q_characteristics,s_rated,standard_load_profile,controlling_em
 63374b45-aa28-4e06-85c2-704c00754ba8,0.949999988079071,4000.0,NS_NET146_L_F1_(20),7d45f0ab-1e6b-452f-b665-c4846cf046f5,,,,"cosPhiFixed:{(0.00,1.00)}",2.3157899379730225,h0,
 ee726dbd-8a70-4d50-8cc3-cdda596166c7,0.9700000286102295,4000.0,NS_NET136_L_S3_3(3),2c5d4eda-6b33-4ad5-a135-7037baa7d6eb,,,,"cosPhiFixed:{(0.00,1.00)}",4.1237101554870605,h0,
 6f97361f-d4e6-45b5-9bf2-d880d42eae25,0.949999988079071,4000.0,NS_NET126_L_F3_(17),462ca5a4-7ac1-4dbe-a1cf-0bb6b9b9b717,,,,"cosPhiFixed:{(0.00,1.00)}",2.3157899379730225,h0,

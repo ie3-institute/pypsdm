@@ -53,8 +53,8 @@ class GridWithResults(ContainerMixin):
         return self.grid.switches
 
     @property
-    def ems(self):
-        return self.participants.ems
+    def controlling_ems(self):
+        return self.participants.controlling_ems
 
     @property
     def loads(self):
@@ -113,12 +113,16 @@ class GridWithResults(ContainerMixin):
         return self.raw_grid_res.switches
 
     @property
+    def congestions_res(self):
+        return self.results.raw_grid.congestions
+
+    @property
     def participants_res(self):
         return self.results.participants
 
     @property
-    def ems_res(self):
-        return self.participants_res.ems
+    def controlling_ems_res(self):
+        return self.participants_res.controlling_ems
 
     @property
     def loads_res(self):
@@ -181,10 +185,10 @@ class GridWithResults(ContainerMixin):
             participants=participants,
         )
 
-    def em_results(
+    def controlling_em_results(
         self,
     ) -> list[Tuple[SystemParticipantsContainer, SystemParticipantsResultContainer]]:
-        uuid_to_connected_asset = self.ems.uuid_to_connected_assets()
+        uuid_to_connected_asset = self.controlling_ems.uuid_to_connected_assets()
         return [
             (
                 self.participants.subset(connected_assets + [em_uuid]),
