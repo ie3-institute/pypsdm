@@ -61,7 +61,7 @@ class HasTypeMixin(ABC):
     def attributes(cls, include_type_attrs: bool = True) -> list[str]:
         entity_attributes = cls.entity_attributes()
         if cls.get_enum() == SystemParticipantsEnum.ELECTRIC_VEHICLE:
-            entity_attributes.remove("em")
+            entity_attributes.remove("controlling_em")
 
         return (
             entity_attributes + cls.type_attributes()

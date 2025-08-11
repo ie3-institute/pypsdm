@@ -19,7 +19,7 @@ def test_filter_by_node(participants):
     filtered = participants.filter_by_nodes("b7a5be0d-2662-41b2-99c6-3b8121a75e9e")
     assert len(filtered.loads) == 1
     assert len(filtered.pvs) == 1
-    assert len(filtered.ems) == 1
+    assert len(filtered.controlling_ems) == 1
 
 
 def test_create_empty():
