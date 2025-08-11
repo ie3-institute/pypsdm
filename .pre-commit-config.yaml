@@ -8,6 +8,12 @@ repos:
   hooks:
       - id: flake8
 - repo: https://github.com/PyCQA/isort
-  rev: 5.10.1
+  rev: 6.0.1
   hooks:
       - id: isort
+- repo: local
+  hooks:
+      - id: convert-notebooks
+        name: Convert Jupyter Notebooks Before Commit
+        entry: python scripts/custom_clear_preprocessor.py
+        language: system
