@@ -18,5 +18,5 @@ repo:
       - id: nb-clean
         args:
           - --remove-empty-cells
-          - --preserve-cell-output
+          - --preserve-cell-outputs
           - --
