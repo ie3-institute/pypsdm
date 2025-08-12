@@ -11,13 +11,3 @@ repos:
   rev: 6.0.1
   hooks:
       - id: isort
-repo:
-  - repo: https://github.com/srstevenson/nb-clean
-    rev: 4.0.1
-    hooks:
-      - id: nb-clean
-        args:
-          - --remove-empty-cells
-          - --preserve-cell-outputs
-          - --remove-all-notebook-metadata
-          - --
