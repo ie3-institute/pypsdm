@@ -11,9 +11,14 @@ repos:
   rev: 6.0.1
   hooks:
       - id: isort
-- repo: local
-  hooks:
-      - id: convert-notebooks
-        name: Convert Jupyter Notebooks Before Commit
-        entry: python scripts/convert_notebooks.py
-        language: system
+repo:
+  - repo: https://github.com/srstevenson/nb-clean
+    rev: 4.0.1
+    hooks:
+      - id: nb-clean
+        args:
+          - --remove-empty-cells
+          - --preserve-cell-output
+          - tags
+          - slideshow
+          - --
