@@ -6,11 +6,11 @@ from typing import Optional, Self, Union
 from pypsdm.models.enums import RawGridElementsEnum
 from pypsdm.models.input.container.grid import GridContainer
 from pypsdm.models.input.container.mixins import ResultContainerMixin
+from pypsdm.models.result.grid.congestions import CongestionsResult
 from pypsdm.models.result.grid.line import LinesResult
 from pypsdm.models.result.grid.node import NodesResult
 from pypsdm.models.result.grid.switch import SwitchesResult
 from pypsdm.models.result.grid.transformer import Transformers2WResult
-from pypsdm.models.result.grid.congestions import CongestionsResult
 from pypsdm.models.ts.base import EntityKey
 
 
