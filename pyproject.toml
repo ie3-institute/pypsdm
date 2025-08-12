@@ -33,6 +33,8 @@ flake8-isort = "^6.0.0"
 pre-commit = "~=4.3.0"
 PyYAML = "^6.0"
 deptry = "^0.23.1" # find unused dependencies
+nbconvert = "^7.16.6"
+notebook = "^7.4.5"
 
 [tool.isort]
 profile = "black"
