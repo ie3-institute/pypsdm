@@ -11,9 +11,3 @@ repos:
   rev: 6.0.1
   hooks:
       - id: isort
-- repo: local
-  hooks:
-      - id: convert-notebooks
-        name: Convert Jupyter Notebooks Before Commit
-        entry: python scripts/convert_notebooks.py
-        language: system
