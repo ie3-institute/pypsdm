@@ -24,7 +24,6 @@ geoalchemy2 = "^0.18.0"
 psycopg2-binary = "^2.9.10"
 nbval = "^0.11.0"
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
 jupyter = "~=1.1.0"
