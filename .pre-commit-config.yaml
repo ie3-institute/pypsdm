@@ -19,4 +19,5 @@ repo:
         args:
           - --remove-empty-cells
           - --preserve-cell-outputs
+          - --remove-all-notebook-metadata
           - --
