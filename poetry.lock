@@ -2011,6 +2011,21 @@ pyspark-connect = ["pyspark[connect] (>=3.5.0)"]
 sqlframe = ["sqlframe (>=3.22.0)"]
 
 [[package]]
+name = "nb-clean"
+version = "4.0.1"
+description = "Clean Jupyter notebooks for versioning"
+optional = false
+python-versions = "<4.0,>=3.9"
+groups = ["dev"]
+files = [
+    {file = "nb_clean-4.0.1-py3-none-any.whl", hash = "sha256:6a673775523ad5ae18566bb0880012c169944a9357760dfcf993cdb14e2e5f82"},
+    {file = "nb_clean-4.0.1.tar.gz", hash = "sha256:f4af1bec3f25e7b18eb09024947bcc809efc97fd68bec482d219c304d850809f"},
+]
+
+[package.dependencies]
+nbformat = ">=5.9.2"
+
+[[package]]
 name = "nbclient"
 version = "0.10.2"
 description = "A client library for executing notebooks. Formerly nbconvert's ExecutePreprocessor."
@@ -4166,4 +4181,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">3.11,<3.13"
-content-hash = "6ab1cb52a5db9d1d256c021da536e679790e5df9b0716e01cb7cf690e1bdf07b"
+content-hash = "d0b5136083cebd28d41df40d66974b98c85d7d4aaf23dcb5b0e63929137734b8"
