@@ -69,7 +69,8 @@ def filter_data_for_time_interval(
     if all_after_start and all_after_end:
         return data.drop(data.index)
     elif all_after_start:
-        start_row = data.index[1]
+        start_row = data.index[0]
+        start = start_row
     else:
         before_start = data.index[data.index <= start]
         start_row = before_start[-1]
