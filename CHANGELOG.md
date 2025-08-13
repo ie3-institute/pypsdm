@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
+- Remove pre-commit hook for removing metadata from jupyter notebooks [#369](https://github.com/ie3-institute/pypsdm/issues/369)
 
 ### Fixed
 - Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
