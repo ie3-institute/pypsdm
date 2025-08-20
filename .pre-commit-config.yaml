@@ -17,8 +17,8 @@ repo:
     hooks:
       - id: nb-clean
         args:
+          - clean
           - --remove-empty-cells
           - --preserve-cell-output
-          - tags
-          - slideshow
           - --
+          - docs/nbs/*
