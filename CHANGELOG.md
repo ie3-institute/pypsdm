@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
 - Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 - Add pre-commit hook for removing metadata from jupyter notebooks [#363](https://github.com/ie3-institute/pypsdm/issues/363)
+- Using `NBVAL` as validation for jupyter notebooks [#351](https://github.com/ie3-institute/pypsdm/issues/351) 
 - Add example for Line Results to documentation [#341](https://github.com/ie3-institute/pypsdm/issues/341)
 
 ### Changed
