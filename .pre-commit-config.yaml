@@ -19,6 +19,8 @@ repo:
         args:
           - clean
           - --remove-empty-cells
-          - --preserve-cell-outputs
+          - --preserve-cell-output
+          - --remove-cell-metadata
+          - ExecuteTime
           - --
           - docs/nbs/*
