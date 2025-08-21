@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 - Add pre-commit hook for removing metadata from jupyter notebooks [#363](https://github.com/ie3-institute/pypsdm/issues/363)
 - Using `NBVAL` as validation for jupyter notebooks [#351](https://github.com/ie3-institute/pypsdm/issues/351) 
+- Switch to `nb-clean` for removing metadata from jupyter notebooks [#365](https://github.com/ie3-institute/pypsdm/issues/365)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
