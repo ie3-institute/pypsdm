@@ -8,11 +8,12 @@ All notable changes to this project will be documented in this file.
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
 - Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 - Add pre-commit hook for removing metadata from jupyter notebooks [#363](https://github.com/ie3-institute/pypsdm/issues/363)
-- Switch to `nb-clean` for removing metadata from jupyter notebooks [#365](https://github.com/ie3-institute/pypsdm/issues/365)
 - Using `NBVAL` as validation for jupyter notebooks [#351](https://github.com/ie3-institute/pypsdm/issues/351) 
+- Switch to `nb-clean` for removing metadata from jupyter notebooks [#365](https://github.com/ie3-institute/pypsdm/issues/365)
 - Add colored Line Trace to plotting [#343](https://github.com/ie3-institute/pypsdm/issues/343)
 
 ### Changed
+- Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
