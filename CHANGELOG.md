@@ -8,17 +8,23 @@ All notable changes to this project will be documented in this file.
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
 - Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 - Add pre-commit hook for removing metadata from jupyter notebooks [#363](https://github.com/ie3-institute/pypsdm/issues/363)
+- Using `NBVAL` as validation for jupyter notebooks [#351](https://github.com/ie3-institute/pypsdm/issues/351) 
+- Switch to `nb-clean` for removing metadata from jupyter notebooks [#365](https://github.com/ie3-institute/pypsdm/issues/365)
+- Add example for Line Results to documentation [#341](https://github.com/ie3-institute/pypsdm/issues/341)
 - Enrich an existing grid container by EVs and EVCS [#355](https://github.com/ie3-institute/pypsdm/issues/355)
 
 ### Changed
+- Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
+- Remove pre-commit hook for removing metadata from jupyter notebooks [#369](https://github.com/ie3-institute/pypsdm/issues/369)
 
 ### Fixed
 - Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
 - Fix `emInput` from `parent_em` to `controlling_em` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 - Fix also from `em` to `controlling_em` for all `SystemParticipants` [#337](https://github.com/ie3-institute/pypsdm/issues/337)
+- Fix error in `filter_data_for_time_interval()` [#357](https://github.com/ie3-institute/pypsdm/issues/357)
 
 
 ## 0.0.6
