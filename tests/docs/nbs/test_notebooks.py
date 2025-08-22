@@ -24,6 +24,7 @@ def test_notebook_only_for_errors_and_explicit_cell_checks():
         "--nbval-lax",
         "-v",
         ROOT_DIR + "/docs/nbs/plotting_utilities.ipynb",
+        ROOT_DIR + "/docs/nbs/plotting_utilities_colormap_lines.ipynb",
     ]
 
     exit_code = pytest.main(args)
