@@ -267,13 +267,19 @@ def ax_plot_both_voltages(
 
 def ax_add_dotted(
         axes: Axes,
-        dotted: Union[float | list[float]] = None
+        dotted: Union[float | list[float]] = None,
+        legend: bool = False
 ):
+    if not legend:
+        label ='_nolegend_'
+    else:
+        label = ""
+
     if dotted:
         if isinstance(dotted, float):
-            axes.axhline(dotted, color="red", linestyle="--")
+            axes.axhline(dotted, color="red", linestyle="--", label=label)
         else:
-            [axes.axhline(dot, color="red", linestyle="--") for dot in dotted]
+            [axes.axhline(dot, color="red", linestyle="--", label=label) for dot in dotted]
 
 
 def ax_add_vlines(axes: Axes, values: list[float] = None, quater_hour: bool = False):
@@ -352,12 +358,12 @@ def plot_voltages_with_congestion_count(
 ):
     fig, axes = create_fig(nrows=2, width=width, height=height)
     hours_index(subgrid.node_min_max).plot(ax=axes[0])
-    ax_add_dotted(axes[0], dotted)
+    ax_add_dotted(axes[0], dotted, legend=False)
     
     if previous_res is not None:
         for column in subgrid.node_min_max.columns:
             if "max" in str(column):    
-                hours_index(previous_res.node_min_max[column]).plot(ax=axes[0], legend=False, color="orange", linestyle=":", alpha=0.6)
+                hours_index(previous_res.node_min_max[column]).plot(ax=axes[0], color="orange", linestyle=":", alpha=0.6)
 
 
     if yMin is not None and yMax is not None:
@@ -378,7 +384,7 @@ def plot_voltages_with_congestion_count(
 
     format_x_axis(axes[0], len(subgrid.node_min_max.index) - 1)
     format_x_axis(axes[1], len(subgrid.node_min_max.index) - 1)
-    return fig, axes[1]
+    return fig, axes
 
 
 
