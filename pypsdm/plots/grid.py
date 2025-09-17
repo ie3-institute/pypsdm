@@ -322,43 +322,22 @@ def _add_line_trace(
         hover_text += f"<br>{cbar_title or 'Value'}:{value:.1f} %"
 
     # Add the lines with or without colorbar
-    if colormap_value is not None:
-        if use_colorbar and show_colorbar is not None:
-            # Add line with colorbar support
-            fig.add_trace(
-                go.Scattermapbox(
-                    mode="lines",
-                    lon=lons,
-                    lat=lats,
-                    hoverinfo="skip",
-                    line=dict(color=colormap_value, width=2),
-                    showlegend=False,
-                )
-            )
-        else:
-            # Add regular line without colorbar
-            fig.add_trace(
-                go.Scattermapbox(
-                    mode="lines",
-                    lon=lons,
-                    lat=lats,
-                    hoverinfo="skip",  # Skip hoverinfo for the lines
-                    line=dict(color=line_color, width=2),
-                    showlegend=False,
-                )
-            )
-    else:
-        # Add regular line without colormap
-        fig.add_trace(
-            go.Scattermapbox(
-                mode="lines",
-                lon=lons,
-                lat=lats,
-                hoverinfo="skip",  # Skip hoverinfo for the lines
-                line=dict(color=line_color, width=2),
-                showlegend=False,
-            )
+    line_color_to_use = (
+        colormap_value
+        if colormap_value is not None and use_colorbar and show_colorbar is not None
+        else line_color
+    )
+
+    fig.add_trace(
+        go.Scattermapbox(
+            mode="lines",
+            lon=lons,
+            lat=lats,
+            hoverinfo="skip",  # Skip hoverinfo for the lines
+            line=dict(color=line_color_to_use, width=2),
+            showlegend=False,
         )
+    )
 
     # Create a LineString object from the line's coordinates
     line = LineString(zip(lons, lats))
