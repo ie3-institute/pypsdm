@@ -78,7 +78,7 @@ def grid_plot(
 
         if show_colorbar is not None:
             custom_colorscale = [
-                [i / 10, f"rgb({int(255 * (i / 10))},0,{int(255 * (1 - i / 10))})"]
+                [i / 10, f"rgb({int(255 * (i / 10))}, 0, {int(255 * (1 - i / 10))})"]
                 for i in range(11)
             ]
             lons, lats = _get_lons_lats(grid.lines.geo_position.iloc[0])
@@ -231,16 +231,18 @@ def _get_colormap_color(value, cmap):
     if cmap == "fixed_line_rating_scale":
         # Use Fixed Scale
         colorscale = []
-        for i in range(11):
+        scale_segments = 10
+
+        for i in range(scale_segments + 1):
             # Calculate the interpolation factor
-            factor = i / (11 - 1)
+            factor = i / scale_segments
 
             # Interpolate RGB values
             r = int(255 * factor)  # Red increases from 0 to 255
             g = 0  # Green remains at 0
             b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
 
-            rgb_color = f"rgb({r},{g},{b})"
+            rgb_color = f"rgb({r}, {g}, {b})"
             colorscale.append([factor, rgb_color])
         index = int(
             value * (len(colorscale) - 1)
@@ -315,7 +317,8 @@ def _add_line_trace(
             use_colorbar = False
 
     if cmap and colormap_value is not None:
-        hover_text += f"<br>{cbar_title or 'Value'}: {line_data_dict[line_id][next(iter(line_data_dict[line_id]))] * 100:.1f}%"
+        value = line_data_dict[line_id][next(iter(line_data_dict[line_id]))] * 100
+        hover_text += f"<br>{cbar_title or 'Value'}:{value:.1f} %"
 
     # Add the lines with or without colorbar
     if colormap_value is not None:
