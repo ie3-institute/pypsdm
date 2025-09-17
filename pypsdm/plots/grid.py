@@ -109,9 +109,7 @@ def grid_plot(
                             else cmap
                         ),
                         cmin=(cmin if not cmap == "fixed_line_rating_scale" else 0.0),
-                        cmax=(
-                            cmax if not cmap == "fixed_line_rating_scale" else 1.0
-                        ),  # fixme check for values > 1.0
+                        cmax=(cmax if not cmap == "fixed_line_rating_scale" else 1.0),
                         colorbar=dict(
                             title=dict(
                                 text=cbar_title or "Line Value",
@@ -208,6 +206,9 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
 
     cmin = np.min(values)
     cmax = np.max(values)
+
+    if cmax > 1.0:
+        raise ValueError(f"Error: cmax ({cmax}) cannot be greater than 1.0.")
 
     if cmap != "fixed_line_rating_scale":
         # Normalize values to 0-1 range
