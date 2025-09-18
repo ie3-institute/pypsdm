@@ -131,7 +131,7 @@ def grid_plot(
                         ),
                         cmax=(
                             cmax if not cmap_lines == "fixed_line_rating_scale" else 1.0
-                        ),  # fixme check for values > 1.0
+                        ),
                         colorbar=dict(
                             title=dict(
                                 text=cbar_line_title or "Line Value",
@@ -251,6 +251,9 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
     cmin = np.min(values)
     cmax = np.max(values)
 
+    if cmax > 1.0:
+        raise ValueError(f"Error: cmax ({cmax}) cannot be greater than 1.0.")
+
     if cmap != "fixed_line_rating_scale":
         # Normalize values to 0-1 range
         normalized_values = (
@@ -273,16 +276,18 @@ def _get_colormap_color(value, cmap):
     if cmap == "fixed_line_rating_scale":
         # Use Fixed Scale
         colorscale = []
-        for i in range(11):
+        scale_segments = 10
+
+        for i in range(scale_segments + 1):
             # Calculate the interpolation factor
-            factor = i / (11 - 1)
+            factor = i / scale_segments
 
             # Interpolate RGB values
             r = int(255 * factor)  # Red increases from 0 to 255
             g = 0  # Green remains at 0
             b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
 
-            rgb_color = f"rgb({r},{g},{b})"
+            rgb_color = f"rgb({r}, {g}, {b})"
             colorscale.append([factor, rgb_color])
         index = int(
             value * (len(colorscale) - 1)
@@ -312,7 +317,8 @@ def _add_line_trace(
     highlights: Optional[Union[dict[tuple, str], list[str]]] = None,
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
-    value_dict: Optional[dict] = None,
+    colormap_value_dict: Optional[dict] = None,
+    line_data_dict: Optional[dict] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ):
@@ -327,8 +333,8 @@ def _add_line_trace(
 
     line_id = line_data.name if hasattr(line_data, "name") else line_data["id"]
     if not is_disconnected:
-        if cmap and value_dict and line_id in value_dict.keys():
-            value = value_dict[line_id]
+        if cmap and colormap_value_dict and line_id in colormap_value_dict.keys():
+            value = colormap_value_dict[line_id]
             colormap_value = _get_colormap_color(value, cmap)
             use_colorbar = True
         else:
@@ -356,46 +362,26 @@ def _add_line_trace(
             use_colorbar = False
 
     if cmap and colormap_value is not None:
-        hover_text += f"<br>{cbar_title or 'Value'}: {value:.3f}"
+        value = line_data_dict[line_id][next(iter(line_data_dict[line_id]))] * 100
+        hover_text += f"<br>{cbar_title or 'Value'}:{value:.1f} %"
 
     # Add the lines with or without colorbar
-    if colormap_value is not None:
-        if use_colorbar and show_colorbar is not None:
-            # Add line with colorbar support
-            fig.add_trace(
-                go.Scattermapbox(
-                    mode="lines",
-                    lon=lons,
-                    lat=lats,
-                    hoverinfo="skip",
-                    line=dict(color=colormap_value, width=2),
-                    showlegend=False,
-                )
-            )
-        else:
-            # Add regular line without colorbar
-            fig.add_trace(
-                go.Scattermapbox(
-                    mode="lines",
-                    lon=lons,
-                    lat=lats,
-                    hoverinfo="skip",  # Skip hoverinfo for the lines
-                    line=dict(color=line_color, width=2),
-                    showlegend=False,
-                )
-            )
-    else:
-        # Add regular line without colormap
-        fig.add_trace(
-            go.Scattermapbox(
-                mode="lines",
-                lon=lons,
-                lat=lats,
-                hoverinfo="skip",  # Skip hoverinfo for the lines
-                line=dict(color=line_color, width=2),
-                showlegend=False,
-            )
+    line_color_to_use = (
+        colormap_value
+        if colormap_value is not None and use_colorbar and show_colorbar is not None
+        else line_color
+    )
+
+    fig.add_trace(
+        go.Scattermapbox(
+            mode="lines",
+            lon=lons,
+            lat=lats,
+            hoverinfo="skip",  # Skip hoverinfo for the lines
+            line=dict(color=line_color_to_use, width=2),
+            showlegend=False,
         )
+    )
 
     # Create a LineString object from the line's coordinates
     line = LineString(zip(lons, lats))
