@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Switch to `nb-clean` for removing metadata from jupyter notebooks [#365](https://github.com/ie3-institute/pypsdm/issues/365)
 - Add example for Line Results to documentation [#341](https://github.com/ie3-institute/pypsdm/issues/341)
 - Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
+- Add colored Node Trace to plotting [#349](https://github.com/ie3-institute/pypsdm/issues/349)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
