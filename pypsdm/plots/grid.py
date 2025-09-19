@@ -492,11 +492,7 @@ def _add_node_trace(
                             font=dict(size=12, color="#000000"),
                         ),
                         x=0.925,
-                        tickvals=(
-                            [
-                                0.9 + i * 2 / 100 for i in range(11)
-                            ]  # FIXME maybe the upper and lower value is not at the max / min pos -> see lines...
-                        ),
+                        tickvals=([0.9 + i * 2 / 100 for i in range(11)]),
                         ticktext=([f"{round(0.9 + i*2 / 100, 2)}" for i in range(11)]),
                         thickness=10,
                         len=0.85,
