@@ -11,7 +11,7 @@ pandas = "~=2.3.2"
 matplotlib = "^3.10.6"
 seaborn = "0.13.2"
 plotly = "^6.3.0"
-numpy = "^2.2.6"
+numpy = "^2.3.3"
 python-dotenv = "^1.1.1"                              # Can probably be removed in the future
 shapely = "^2.1.1"
 networkx = "^3.5"
