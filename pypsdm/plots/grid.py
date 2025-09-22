@@ -71,6 +71,7 @@ def grid_plot(
 
     # Get disconnected lines via opened switches
     opened_switches = grid.raw_grid.switches.get_opened()
+
     disconnected_lines = grid.raw_grid.lines.filter_by_nodes(opened_switches.node_b)
     _, connected_lines = grid.raw_grid.lines.subset_split(disconnected_lines.uuid)
 
@@ -99,7 +100,6 @@ def grid_plot(
             )
         except Exception as e:
             print(f"Error processing colormap values: {e}")
-            value_dict = {}
 
         connected_lines.data.apply(
             lambda line: _add_line_trace(
@@ -112,7 +112,7 @@ def grid_plot(
                 show_colorbar=show_line_colorbar,
                 use_mapbox=use_mapbox,
             ),
-            axis=1,
+            axis=1,  # type: ignore
         )
 
         if show_line_colorbar:
@@ -172,6 +172,7 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float]
     if isinstance(cmap_vals, dict):
         for uuid, inner_dict in cmap_vals.items():
             if isinstance(inner_dict, dict) and len(inner_dict) == 1:
+                # Extract the first (and only) value from each inner dict
                 value = list(inner_dict.values())[0]
                 values.append(value)
                 uuids.append(uuid)
@@ -183,8 +184,12 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float]
         raise ValueError("Expected cmap_vals to be a dictionary.")
 
     values = np.array(values)
+
     cmin = np.min(values)
     cmax = np.max(values)
+
+    if cmax > 1.0:
+        raise ValueError(f"Error: cmax ({cmax}) cannot be greater than 1.0.")
 
     if cmap != "fixed_line_rating_scale":
         # Normalize values to 0-1 range
@@ -194,6 +199,7 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float]
         normalized_dict = {
             uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)
         }
+
         return normalized_dict, cmin, cmax
     else:
         value_dict = {uuid: value for uuid, value in zip(uuids, values)}
@@ -207,18 +213,28 @@ def _get_colormap_color(value, cmap):
     if cmap == "fixed_line_rating_scale":
         # Use Fixed Scale
         colorscale = []
-        for i in range(11):
-            factor = i / (11 - 1)
-            r = int(255 * factor)
-            g = 0
-            b = int(255 * (1 - factor))
-            rgb_color = f"rgb({r},{g},{b})"
+        scale_segments = 10
+
+        for i in range(scale_segments + 1):
+            # Calculate the interpolation factor
+            factor = i / scale_segments
+
+            # Interpolate RGB values
+            r = int(255 * factor)  # Red increases from 0 to 255
+            g = 0  # Green remains at 0
+            b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
+
+            rgb_color = f"rgb({r}, {g}, {b})"
             colorscale.append([factor, rgb_color])
-        index = int(value * (len(colorscale) - 1))
-        rgb_string = colorscale[index][1]
+        index = int(
+            value * (len(colorscale) - 1)
+        )  # This gives us an index between 0 and len(colorscale)-1
+        rgb_string = colorscale[index][1]  # Get the corresponding RGB color
     else:
+        # Use Plotly's colorscale to get the color
         colorscale = px.colors.get_colorscale(cmap)
         index = int(value * (len(colorscale) - 1))
+
         color_str = colorscale[index]
         rgb_string = color_str[1]
 
@@ -246,6 +262,7 @@ def _add_line_trace(
 
     line_color = rgb_to_hex(GREEN)
     highlighted = False
+
     colormap_value = None
 
     line_id = line_data.name if hasattr(line_data, "name") else line_data["id"]
@@ -357,12 +374,13 @@ def _add_node_trace(
 
     def _get_node_color(node_uuid):
         if highlights is not None:
+            # Handle explicit highlights first
             if isinstance(highlights, dict):
                 for color, nodes in highlights.items():
                     if node_uuid in nodes:
                         return rgb_to_hex(color)
             elif isinstance(highlights, list) and node_uuid in highlights:
-                return rgb_to_hex(RED)
+                return rgb_to_hex(RED)  # Default highlight color is red
 
         if (
             cmap is not None
