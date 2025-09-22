@@ -478,8 +478,8 @@ def _add_node_trace(
         fig.add_trace(
             go.Scattermapbox(
                 mode="markers",
-                lon=[nodes_data["longitude"].mean()],
-                lat=[nodes_data["latitude"].mean()],
+                lon=[nodes_data["longitude"][0]],
+                lat=[nodes_data["latitude"][0]],
                 marker=dict(
                     size=0.1,
                     opacity=0,
