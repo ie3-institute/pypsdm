@@ -296,37 +296,56 @@ def _add_line_trace(
     if cmap and colormap_value is not None and not highlighted:
         line_color = colormap_value
 
-    # Add the lines with or without colorbar
-    line_color_to_use = (
-        colormap_value
-        if colormap_value is not None and show_colorbar is not None
-        else line_color
-    )
-
-    fig.add_trace(
-        go.Scattermapbox(
-            mode="lines",
-            lon=lons,
-            lat=lats,
-            hoverinfo="skip",
-            line=dict(color=line_color_to_use, width=2),
-            showlegend=False,
+    # Add the line trace
+    if use_mapbox:
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="lines",
+                lon=lons,
+                lat=lats,
+                hoverinfo="skip",
+                line=dict(color=line_color, width=2),
+                showlegend=False,
+            )
         )
-    )
-    # Add hover point at midpoint
-    line = LineString(zip(lons, lats))
-    midpoint = line.interpolate(line.length / 2)
-    fig.add_trace(
-        go.Scattermapbox(
-            mode="markers",
-            lon=[midpoint.x],
-            lat=[midpoint.y],
-            hoverinfo="text",
-            hovertext=hover_text,
-            marker=dict(size=0, opacity=0, color=line_color_to_use),
-            showlegend=False,
+        # Add hover point at midpoint
+        line = LineString(zip(lons, lats))
+        midpoint = line.interpolate(line.length / 2)
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="markers",
+                lon=[midpoint.x],
+                lat=[midpoint.y],
+                hoverinfo="text",
+                hovertext=hover_text,
+                marker=dict(size=0, opacity=0, color=line_color),
+                showlegend=False,
+            )
         )
-    )
+    else:
+        fig.add_trace(
+            go.Scatter(
+                mode="lines",
+                x=lons,
+                y=lats,
+                hoverinfo="skip",
+                line=dict(color=line_color, width=2),
+                showlegend=False,
+            )
+        )
+        # Add hover point at midpoint
+        midpoint_idx = len(lons) // 2
+        fig.add_trace(
+            go.Scatter(
+                mode="markers",
+                x=[lons[midpoint_idx]],
+                y=[lats[midpoint_idx]],
+                hoverinfo="text",
+                hovertext=hover_text,
+                marker=dict(size=0, opacity=0, color=line_color),
+                showlegend=False,
+            )
+        )
 
 
 def _add_node_trace(
