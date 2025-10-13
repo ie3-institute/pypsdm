@@ -21,7 +21,7 @@ pyhocon = "^0.3.60"
 numba = "^0.62.1"
 scipy = "^1.16.2" # required by numba
 geoalchemy2 = "^0.18.0"
-psycopg2-binary = "^2.9.10"
+psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
