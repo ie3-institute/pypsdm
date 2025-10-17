@@ -7,21 +7,21 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">3.11,<3.13"
-pandas = "~=2.3.2"
-matplotlib = "^3.10.6"
+pandas = "~=2.3.3"
+matplotlib = "^3.10.7"
 seaborn = "0.13.2"
-plotly = "^6.3.0"
-numpy = "^2.3.3"
+plotly = "^6.3.1"
+numpy = "^2.3.4"
 python-dotenv = "^1.1.1"                              # Can probably be removed in the future
 shapely = "^2.1.2"
 networkx = "^3.5"
 loguru = "^0.7.2"
-sqlmodel = "^0.0.25"
+sqlmodel = "^0.0.27"
 pyhocon = "^0.3.60"
-numba = "^0.62.0"
+numba = "^0.62.1"
 scipy = "^1.16.2" # required by numba
 geoalchemy2 = "^0.18.0"
-psycopg2-binary = "^2.9.10"
+psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
