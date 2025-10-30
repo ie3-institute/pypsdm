@@ -12,14 +12,14 @@ matplotlib = "^3.10.7"
 seaborn = "0.13.2"
 plotly = "^6.3.1"
 numpy = "^2.3.4"
-python-dotenv = "^1.1.1"                              # Can probably be removed in the future
+python-dotenv = "^1.2.1"                              # Can probably be removed in the future
 shapely = "^2.1.2"
 networkx = "^3.5"
 loguru = "^0.7.2"
 sqlmodel = "^0.0.27"
 pyhocon = "^0.3.60"
 numba = "^0.62.1"
-scipy = "^1.16.2" # required by numba
+scipy = "^1.16.3" # required by numba
 geoalchemy2 = "^0.18.0"
 psycopg2-binary = "^2.9.11"
 
@@ -29,7 +29,7 @@ jupyter = "~=1.1.0"
 black = { extras = ["jupyter"], version = "~25.9.0" }
 flake8 = "^7.3.0"
 flake8-black = "^0.4.0"
-flake8-isort = "^6.0.0"
+flake8-isort = "^7.0.0"
 pre-commit = "~=4.3.0"
 PyYAML = "^6.0"
 deptry = "^0.23.1" # find unused dependencies

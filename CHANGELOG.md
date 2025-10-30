@@ -13,10 +13,12 @@ All notable changes to this project will be documented in this file.
 - Add example for Line Results to documentation [#341](https://github.com/ie3-institute/pypsdm/issues/341)
 - Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
 - Add colored Node Trace to plotting [#349](https://github.com/ie3-institute/pypsdm/issues/349)
+- Added Dependabot Patch Merge Automation [#399](https://github.com/ie3-institute/pypsdm/issues/399) 
 - Add functionality to plot line traces without mapbox as vector graphic [#360](https://github.com/ie3-institute/pypsdm/issues/360)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
+- Harmonized CI OS-Matrix and updated Actions [#401](https://github.com/ie3-institute/pypsdm/issues/401)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
