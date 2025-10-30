@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
+- Harmonized CI OS-Matrix and updated Actions [#401](https://github.com/ie3-institute/pypsdm/issues/401)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
