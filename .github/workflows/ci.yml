@@ -87,13 +87,20 @@ jobs:
       #----------------------------------------------
       #    run test suite
       #----------------------------------------------
-      - name: Run tests
-        if: matrix.os != 'windows-latest'
+      - name: Run tests (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          source $VENV
+          source .venv/bin/activate
           pytest tests/
+
+      - name: Run tests (macOS - skip Docker tests)
+        if: matrix.os == 'macos-latest'
+        run: |
+          source .venv/bin/activate
+          pytest tests/ -m "not docker_required"
+
       - name: Run tests (Windows - skip Docker tests)
         if: matrix.os == 'windows-latest'
         run: |
-          source $VENV
+          source .venv/Scripts/activate
           pytest tests/ -m "not docker_required"
