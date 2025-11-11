@@ -32,7 +32,7 @@ flake8-black = "^0.4.0"
 flake8-isort = "^7.0.0"
 pre-commit = "~=4.4.0"
 PyYAML = "^6.0"
-deptry = "^0.23.1" # find unused dependencies
+deptry = "^0.24.0" # find unused dependencies
 nbval = "^0.11.0"
 nbclean = "^0.3.2"
 
