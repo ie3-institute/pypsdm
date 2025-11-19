@@ -20,7 +20,7 @@ sqlmodel = "^0.0.27"
 pyhocon = "^0.3.60"
 numba = "^0.62.1"
 scipy = "^1.16.3" # required by numba
-geoalchemy2 = "^0.18.0"
+geoalchemy2 = "^0.18.1"
 psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
