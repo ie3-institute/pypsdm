@@ -30,7 +30,7 @@ black = { extras = ["jupyter"], version = "~25.11.0" }
 flake8 = "^7.3.0"
 flake8-black = "^0.4.0"
 flake8-isort = "^7.0.0"
-pre-commit = "~=4.4.0"
+pre-commit = "~=4.5.0"
 PyYAML = "^6.0"
 deptry = "^0.24.0" # find unused dependencies
 nbval = "^0.11.0"
