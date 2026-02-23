@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
 - Add colored Node Trace to plotting [#349](https://github.com/ie3-institute/pypsdm/issues/349)
 - Added Dependabot Patch Merge Automation [#399](https://github.com/ie3-institute/pypsdm/issues/399) 
+- Add functionality to plot line traces without mapbox as vector graphic [#360](https://github.com/ie3-institute/pypsdm/issues/360)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
