@@ -19,7 +19,7 @@ loguru = "^0.7.2"
 sqlmodel = "^0.0.37"
 pyhocon = "^0.3.60"
 numba = "^0.64.0"
-scipy = "^1.17.0" # required by numba
+scipy = "^1.17.1" # required by numba
 geoalchemy2 = "^0.18.1"
 psycopg2-binary = "^2.9.11"
 
