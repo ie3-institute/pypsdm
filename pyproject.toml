@@ -24,7 +24,7 @@ geoalchemy2 = "^0.18.4"
 psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^9.0.2"
+pytest = "^9.0.3"
 jupyter = "~=1.1.0"
 black = { extras = ["jupyter"], version = "~26.3.1" }
 flake8 = "^7.3.0"
