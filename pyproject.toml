@@ -10,29 +10,29 @@ python = ">3.11,<3.13"
 pandas = "~=2.3.3"
 matplotlib = "^3.10.8"
 seaborn = "0.13.2"
-plotly = "^6.5.2"
-numpy = "^2.3.5"
-python-dotenv = "^1.2.1"                              # Can probably be removed in the future
+plotly = "^6.7.0"
+numpy = "^2.4.4"
+python-dotenv = "^1.2.2"                              # Can probably be removed in the future
 shapely = "^2.1.2"
 networkx = "^3.6"
 loguru = "^0.7.2"
-sqlmodel = "^0.0.33"
-pyhocon = "^0.3.60"
-numba = "^0.63.1"
-scipy = "^1.17.0" # required by numba
-geoalchemy2 = "^0.18.1"
+sqlmodel = "^0.0.38"
+pyhocon = "^0.3.63"
+numba = "^0.65.0"
+scipy = "^1.17.1" # required by numba
+geoalchemy2 = "^0.19.0"
 psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^9.0.2"
+pytest = "^9.0.3"
 jupyter = "~=1.1.0"
-black = { extras = ["jupyter"], version = "~26.1.0" }
+black = { extras = ["jupyter"], version = "~26.3.1" }
 flake8 = "^7.3.0"
 flake8-black = "^0.4.0"
 flake8-isort = "^7.0.0"
 pre-commit = "~=4.5.1"
 PyYAML = "^6.0"
-deptry = "^0.24.0" # find unused dependencies
+deptry = "^0.25.1" # find unused dependencies
 nbval = "^0.11.0"
 nbclean = "^0.3.2"
 

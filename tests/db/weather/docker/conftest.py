@@ -43,7 +43,7 @@ def docker_postgres():
         "-p",
         "5433:5432",
         "-d",
-        "postgis/postgis:17-3.4",
+        "postgis/postgis:18-3.6",
     ]
     subprocess.run(run_cmd, check=True)
 
