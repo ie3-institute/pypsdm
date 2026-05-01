@@ -106,7 +106,6 @@ def create_storages_data(
     p_max=None,
     active_power_gradient=100,
     eta=100,  # efficiency of the electrical inverter
-    dod=10,  # depth of discharge
     life_time=9999999,  # permissible hours of full use
     life_cycle=9999999,  # permissible amount of full cycles
     uuid=None,
@@ -145,7 +144,6 @@ def create_storages_data(
             "active_power_gradient": active_power_gradient,
             "e_storage": e_storage,
             "eta": eta,
-            "dod": dod,
             "life_time": life_time,
             "life_cycle": life_cycle,
             "controlling_em": controlling_em,
