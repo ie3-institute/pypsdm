@@ -85,7 +85,7 @@ class SystemParticipantsContainer(ContainerMixin):
 
         em_entries = [e for e in em_entries if not e.empty]
 
-        em_uuids = pd.concat(em_entries)
+        em_uuids = pd.concat(em_entries) if em_entries else pd.Series(dtype=object)
 
         controlling_ems = EnergyManagementSystems(
             self.controlling_ems.data[self.controlling_ems.data.index.isin(em_uuids)]
