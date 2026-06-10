@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - Fix `emInput` from `parent_em` to `controlling_em` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 - Fix also from `em` to `controlling_em` for all `SystemParticipants` [#337](https://github.com/ie3-institute/pypsdm/issues/337)
 - Fix error in `filter_data_for_time_interval()` [#357](https://github.com/ie3-institute/pypsdm/issues/357)
+- Fixed empty Em entries before concat data frames [#271](https://github.com/ie3-institute/pypsdm/issues/271)
 
 
 ## 0.0.6
