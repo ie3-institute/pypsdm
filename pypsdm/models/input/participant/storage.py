@@ -30,10 +30,6 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
         return self.data["eta"]
 
     @property
-    def dod(self) -> Series:
-        return self.data["dod"]
-
-    @property
     def life_time(self) -> Series:
         return self.data["life_time"]
 
@@ -52,7 +48,6 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
             "active_power_gradient",
             "e_storage",
             "eta",
-            "dod",
             "life_time",
             "life_cycle",
         ]
