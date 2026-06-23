@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
 - Harmonized CI OS-Matrix and updated Actions [#401](https://github.com/ie3-institute/pypsdm/issues/401)
 - Updated `postgis` version in tests [#455](https://github.com/ie3-institute/pypsdm/issues/455)
+- Updated the enrich_simbench_grid based on updated EvModel [#441](https://github.com/ie3-institute/pypsdm/issues/441)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
