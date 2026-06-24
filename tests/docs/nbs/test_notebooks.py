@@ -27,6 +27,7 @@ def test_notebook_only_for_errors_and_explicit_cell_checks():
         ROOT_DIR + "/docs/nbs/plotting_utilities_colormap_lines.ipynb",
         ROOT_DIR + "/docs/nbs/plotting_utilities_colormap_nodes.ipynb",
         ROOT_DIR + "/docs/nbs/plotting_utilities_colormap_lines_and_nodes.ipynb",
+        ROOT_DIR + "/docs/nbs/plotting_utilities_trace_vector_graphic.ipynb",
     ]
 
     exit_code = pytest.main(args)
