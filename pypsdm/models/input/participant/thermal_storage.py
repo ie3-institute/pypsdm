@@ -47,3 +47,4 @@ class ThermalStorages(SystemParticipants):
             "c",
             "p_thermal_max",
         ]
+
