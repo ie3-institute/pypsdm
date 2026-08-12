@@ -72,18 +72,21 @@ class SystemParticipantsContainer(ContainerMixin):
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
 
-        em_uuids = pd.concat(
-            [
-                loads.controlling_em,
-                fixed_feed_ins.controlling_em,
-                pvs.controlling_em,
-                biomass_plants.controlling_em,
-                wecs.controlling_em,
-                storages.controlling_em,
-                evcs.controlling_em,
-                hps.controlling_em,
-            ]
-        )
+        em_entries = [
+            loads.controlling_em,
+            fixed_feed_ins.controlling_em,
+            pvs.controlling_em,
+            biomass_plants.controlling_em,
+            wecs.controlling_em,
+            storages.controlling_em,
+            evcs.controlling_em,
+            hps.controlling_em,
+        ]
+
+        em_entries = [e for e in em_entries if not e.empty]
+
+        em_uuids = pd.concat(em_entries) if em_entries else pd.Series(dtype=object)
+
         controlling_ems = EnergyManagementSystems(
             self.controlling_ems.data[self.controlling_ems.data.index.isin(em_uuids)]
         )
