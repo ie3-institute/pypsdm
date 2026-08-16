@@ -19,6 +19,7 @@ from pypsdm.models.input.participant.load import Loads
 from pypsdm.models.input.participant.pv import PhotovoltaicPowerPlants
 from pypsdm.models.input.participant.storage import Storages
 from pypsdm.models.input.participant.wec import WindEnergyConverters
+from pypsdm.models.input.participant.thermal_storage import ThermalStorages
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,7 @@ class SystemParticipantsContainer(ContainerMixin):
     evs: ElectricVehicles
     evcs: EvChargingStations
     hps: HeatPumps
+    thermal_storages: ThermalStorages
 
     def to_list(self, include_empty=False) -> list[Entities]:
         participants = [
@@ -46,6 +48,7 @@ class SystemParticipantsContainer(ContainerMixin):
             self.evs,
             self.evcs,
             self.hps,
+            self.thermal_storages,
         ]
         return (
             participants
@@ -71,6 +74,7 @@ class SystemParticipantsContainer(ContainerMixin):
         evs = self.evs.filter_by_nodes(node_uuids)
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
+        thermal_storages = self.thermal_storages.filter_by_nodes(node_uuids)
 
         em_entries = [
             loads.controlling_em,
@@ -81,6 +85,7 @@ class SystemParticipantsContainer(ContainerMixin):
             storages.controlling_em,
             evcs.controlling_em,
             hps.controlling_em,
+            thermal_storages.controlling_em,
         ]
 
         em_entries = [e for e in em_entries if not e.empty]
@@ -102,6 +107,7 @@ class SystemParticipantsContainer(ContainerMixin):
             evs,
             evcs,
             hps,
+            thermal_storages,
         )
 
     def get_with_enum(self, sp_type: EntitiesEnum) -> Entities | None:
@@ -125,6 +131,8 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.evs
         elif sp_type == SystemParticipantsEnum.HEAT_PUMP:
             return self.hps
+        elif sp_type == SystemParticipantsEnum.THERMAL_STORAGE:
+            return self.thermal_storages
         else:
             return None
 
@@ -149,6 +157,8 @@ class SystemParticipantsContainer(ContainerMixin):
             return self.evcs.get(uuid)
         elif uuid in self.hps:
             return self.hps.get(uuid)
+        elif uuid in self.thermal_storages:
+            return self.thermal_storages.get(uuid)
         else:
             raise ValueError(
                 f"Particpant with uuid {uuid} could not be found among participants."
@@ -171,6 +181,7 @@ class SystemParticipantsContainer(ContainerMixin):
             self.evs.subset(uuids, intersection=True),
             self.evcs.subset(uuids, intersection=True),
             self.hps.subset(uuids, intersection=True),
+            self.thermal_storages.subset(uuids, intersection=True),
         )
 
     @staticmethod
@@ -189,6 +200,7 @@ class SystemParticipantsContainer(ContainerMixin):
         evs = ElectricVehicles.from_csv(path, delimiter, must_exist=False)
         evcs = EvChargingStations.from_csv(path, delimiter, must_exist=False)
         hps = HeatPumps.from_csv(path, delimiter, must_exist=False)
+        thermal_storages = ThermalStorages.from_csv(path, delimiter, must_exist=False)
         return SystemParticipantsContainer(
             controlling_ems,
             loads,
@@ -200,6 +212,7 @@ class SystemParticipantsContainer(ContainerMixin):
             evs,
             evcs,
             hps,
+            thermal_storages,
         )
 
     @classmethod
@@ -215,6 +228,7 @@ class SystemParticipantsContainer(ContainerMixin):
         evs=ElectricVehicles.create_empty(),
         evcs=EvChargingStations.create_empty(),
         hps=HeatPumps.create_empty(),
+        thermal_storages=ThermalStorages.create_empty(),
     ):
         return cls(
             controlling_ems=controlling_ems,
@@ -227,6 +241,7 @@ class SystemParticipantsContainer(ContainerMixin):
             evs=evs,
             evcs=evcs,
             hps=hps,
+            thermal_storages=thermal_storages,
         )
 
     @classmethod
@@ -242,4 +257,5 @@ class SystemParticipantsContainer(ContainerMixin):
             ElectricVehicles.create_empty(),
             EvChargingStations.create_empty(),
             HeatPumps.create_empty(),
+            ThermalStorages.create_empty(),
         )

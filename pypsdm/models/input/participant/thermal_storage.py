@@ -28,8 +28,6 @@ class ThermalStorages(SystemParticipants):
     def return_temp(self) -> Series:
         return self.data["return_temp"]
 
-    """specific heat capacity"""
-
     @property
     def c(self) -> Series:
         return self.data["c"]
