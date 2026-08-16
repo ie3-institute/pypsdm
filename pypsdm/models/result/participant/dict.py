@@ -337,6 +337,7 @@ class ThermalStoragesResult(ComplexPowerDict[EntityKey], EntitiesResultDictMixin
     def entity_type(cls) -> EntitiesEnum:
         return SystemParticipantsEnum.THERMAL_STORAGE
 
+
 class FlexResult(TimeSeriesDict[EntityKey], EntitiesResultDictMixin):
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
