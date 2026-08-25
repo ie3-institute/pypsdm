@@ -19,7 +19,6 @@ class EntitiesEnum(Enum):
             SystemParticipantsEnum.WIND_ENERGY_CONVERTER,
             SystemParticipantsEnum.STORAGE,
             SystemParticipantsEnum.HEAT_PUMP,
-            SystemParticipantsEnum.THERMAL_STORAGE,
         }:
             return True
         else:
