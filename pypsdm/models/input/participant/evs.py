@@ -23,8 +23,8 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
         return self.data["s_rated_dc"]
 
     @property
-        def s_rated_ac(self):
-            return self.data["s_rated_ac"]
+    def s_rated_ac(self):
+        return self.data["s_rated_ac"]
 
     @property
     def e_storage(self):
