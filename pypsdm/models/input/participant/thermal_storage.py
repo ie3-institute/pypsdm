@@ -36,8 +36,8 @@ class ThermalStorages(SystemParticipants):
     def p_thermal_max(self) -> Series:
         return self.data["p_thermal_max"]
 
-    @classmethod
-    def entity_attributes(cls) -> list[str]:
+    @staticmethod
+    def attributes() -> list[str]:
         return SystemParticipants.attributes() + [
             "thermal_bus",
             "storage_volume_lvl",
