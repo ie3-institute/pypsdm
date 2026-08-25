@@ -85,7 +85,6 @@ class SystemParticipantsContainer(ContainerMixin):
             storages.controlling_em,
             evcs.controlling_em,
             hps.controlling_em,
-            thermal_storages.controlling_em,
         ]
 
         em_entries = [e for e in em_entries if not e.empty]
