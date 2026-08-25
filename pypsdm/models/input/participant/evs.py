@@ -23,6 +23,10 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
         return self.data["s_rated_dc"]
 
     @property
+        def s_rated_ac(self):
+            return self.data["s_rated_ac"]
+
+    @property
     def e_storage(self):
         return self.data["e_storage"]
 
@@ -38,6 +42,7 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
     def type_attributes() -> list[str]:
         return SpTypeMixin.type_attributes() + [
             "s_rated_dc",
+            "s_rated_ac",
             "e_storage",
             "e_cons",
         ]
