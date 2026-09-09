@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Rollback `scipy` dependency to v1.13.1 [#523](https://github.com/ie3-institute/pypsdm/issues/523)
 
 ### Removed
 
