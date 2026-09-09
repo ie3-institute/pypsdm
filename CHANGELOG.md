@@ -14,11 +14,13 @@ All notable changes to this project will be documented in this file.
 - Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
 - Add colored Node Trace to plotting [#349](https://github.com/ie3-institute/pypsdm/issues/349)
 - Added Dependabot Patch Merge Automation [#399](https://github.com/ie3-institute/pypsdm/issues/399) 
+- Added thermal storage in participants [#279](https://github.com/ie3-institute/pypsdm/issues/279)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
 - Harmonized CI OS-Matrix and updated Actions [#401](https://github.com/ie3-institute/pypsdm/issues/401)
 - Updated `postgis` version in tests [#455](https://github.com/ie3-institute/pypsdm/issues/455)
+- Updated the enrich_simbench_grid based on updated EvModel [#441](https://github.com/ie3-institute/pypsdm/issues/441)
 - Rollback `numpy` dependency to v2.3.5 [#499](https://github.com/ie3-institute/pypsdm/issues/499)
 
 ### Removed

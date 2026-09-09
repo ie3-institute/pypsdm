@@ -92,6 +92,7 @@ class EntitiesEnum(Enum):
             PvsResult,
             StoragesResult,
             WecsResult,
+            ThermalStoragesResult,
         )
         from pypsdm.models.result.participant.flex_options import FlexOptionsDict
 
@@ -124,6 +125,8 @@ class EntitiesEnum(Enum):
                 return EmsResult
             case SystemParticipantsEnum.HEAT_PUMP:
                 return HpsResult
+            case SystemParticipantsEnum.THERMAL_STORAGE:
+                return ThermalStoragesResult
             case SystemParticipantsEnum.FLEX_OPTIONS:
                 return FlexOptionsDict
             case sp:
@@ -145,6 +148,7 @@ class SystemParticipantsEnum(EntitiesEnum):
     STORAGE = "storage"
     ENERGY_MANAGEMENT = "em"
     HEAT_PUMP = "hp"
+    THERMAL_STORAGE = "thermal_storage"
     FLEX_OPTIONS = "flex_options"
     PRIMARY_DATA = "primary_data"
     PARTICIPANTS_SUM = "participants_sum"

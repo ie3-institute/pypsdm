@@ -1,0 +1,3 @@
+uuid,id,operator,operationTime,thermalBus,storageVolumeLvl,inletTemp,returnTemp,c,pThermalMax
+7bc01091-cd8c-5424-8994-02c10c95a2c2,ThermalStorage_LV4.101 Bus 33,,,7bc48029-dd8c-4542-9984-06c16c29a2f1,3,23,21,2,7
+201bcae4-89b8-90d6-98bd-bec920105cae,ThermalStorage_LV4.101 Bus 8,,,505abcd3-03a9-40b5-98bb-eaf110724bda,2.5,23,21,2,7
