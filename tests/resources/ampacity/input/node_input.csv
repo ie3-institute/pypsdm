@@ -1,0 +1,9 @@
+uuid,geo_position,id,operates_from,operates_until,operator,slack,subnet,v_rated,v_target,volt_lvl
+745bc9b4-6443-4913-af3e-560361ffb86d,"{""type"":""Point"",""coordinates"":[7.612785,51.961814],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",HV1 Bus 1,,,,true,1,110.0,1.0,Hochspannung
+a798b9c6-1738-420d-9bbf-28f78eb7659a,"{""type"":""Point"",""coordinates"":[7.612766,51.961908],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 1,,,,false,2,20.0,1.0,Mittelspannung
+380ea3a4-c79d-4807-a3ff-4a9475ebf899,"{""type"":""Point"",""coordinates"":[7.612796,51.962244],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 2,,,,false,2,20.0,1.0,Mittelspannung
+b72ed441-9a34-485e-bef6-e14ec428048d,"{""type"":""Point"",""coordinates"":[7.608644,51.961635],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 3,,,,false,2,20.0,1.0,Mittelspannung
+3ed3a294-5017-4de5-a121-4da55162632d,"{""type"":""Point"",""coordinates"":[7.606273,51.963817],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 4,,,,false,2,20.0,1.0,Mittelspannung
+f9d9e92b-9127-44b8-acbd-92f0e9a916ea,"{""type"":""Point"",""coordinates"":[7.609068,51.965790],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 5,,,,false,2,20.0,1.0,Mittelspannung
+8fc0d761-2cf2-4108-8e8c-f9481be35919,"{""type"":""Point"",""coordinates"":[7.612946,51.964815],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 6,,,,false,2,20.0,1.0,Mittelspannung
+dd0bd119-e5ea-4e62-a013-6edbd91b50be,"{""type"":""Point"",""coordinates"":[7.612849,51.963562],""crs"":{""type"":""name"",""properties"":{""name"":""EPSG:4326""}}}",MV1 Bus 7,,,,false,2,20.0,1.0,Mittelspannung

@@ -37,6 +37,7 @@ def grid_plot(
     cmap_node_values: Optional[Union[list, dict]] = None,
     cbar_node_title: Optional[str] = None,
     mapbox_style: Optional[str] = "open-street-map",
+    line_color: Optional[str] = None,
 ) -> go.Figure:
     """
     Plots the grid on an OpenStreetMap. Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
@@ -67,6 +68,8 @@ def grid_plot(
                                                  or dict mapping node IDs to values.
         cbar_node_title (Optional[str]): Title for the node colorbar.
         mapbox_style (Optional[str]): Mapbox style. Defaults to open-street-map.
+        line_color (Optional[str]): Base color (hex string) for the line traces that are
+            not part of the line colormap. Defaults to green.
     Returns:
         Figure: Plotly figure.
     """
@@ -121,6 +124,7 @@ def grid_plot(
                 overloaded=overloaded,
                 cbar_title=cbar_line_title,
                 show_colorbar=show_line_colorbar,
+                line_color=line_color,
             ),
             axis=1,  # type: ignore
         )
@@ -191,7 +195,7 @@ def grid_plot(
             )
     else:
         connected_lines.data.apply(
-            lambda line: _add_line_trace(fig, line, is_disconnected=False, highlights=line_highlights), axis=1  # type: ignore
+            lambda line: _add_line_trace(fig, line, is_disconnected=False, highlights=line_highlights, line_color=line_color), axis=1  # type: ignore
         )
 
     disconnected_lines.data.apply(
@@ -201,6 +205,7 @@ def grid_plot(
             is_disconnected=True,
             highlights=line_highlights,
             highlight_disconnected=highlight_disconnected,
+            line_color=line_color,
         ),  # type: ignore
         axis=1,
     )
@@ -297,7 +302,11 @@ def _process_colormap_values(
 
 
 def _get_colormap_color(value, cmap):
-    """Get color from colormap based on value."""
+    """Get color from colormap based on a normalized value in the 0-1 range.
+
+    The color is interpolated between the surrounding stops of the colorscale
+    so that it matches the continuously interpolated colorbar.
+    """
     value = min(max(value, 0), 1)
 
     if cmap == "fixed_line_rating_scale":
@@ -314,31 +323,46 @@ def _get_colormap_color(value, cmap):
             g = 0  # Green remains at 0
             b = int(255 * (1 - factor))  # Blue decreases from 255 to 0
 
-            rgb_color = f"rgb({r}, {g}, {b})"
-            colorscale.append([factor, rgb_color])
-        index = int(
-            value * (len(colorscale) - 1)
-        )  # This gives us an index between 0 and len(colorscale)-1
-        rgb_string = colorscale[index][1]  # Get the corresponding RGB color
+            colorscale.append([factor, f"rgb({r}, {g}, {b})"])
     else:
-        # Use Plotly's colorscale to get the color
+        # Use Plotly's colorscale
         colorscale = px.colors.get_colorscale(cmap)
-        index = int(value * (len(colorscale) - 1))
 
-        color_str = colorscale[index]
-        rgb_string = color_str[1]
-
-    if rgb_string.startswith("rgb("):
-        rgb_values = list(map(int, rgb_string[4:-1].replace(" ", "").split(",")))
+    # Interpolate between the two surrounding stops of the scale
+    if value <= colorscale[0][0]:
+        rgb_values = _parse_color(colorscale[0][1])
+    elif value >= colorscale[-1][0]:
+        rgb_values = _parse_color(colorscale[-1][1])
     else:
-        hex_color = rgb_string.lstrip("#")
-        rgb_values = [int(hex_color[i : i + 2], 16) for i in (0, 2, 4)]
+        rgb_values = None
+        for (pos0, color0), (pos1, color1) in zip(colorscale, colorscale[1:]):
+            if pos0 <= value <= pos1:
+                if pos1 == pos0:
+                    rgb_values = _parse_color(color0)
+                else:
+                    t = (value - pos0) / (pos1 - pos0)
+                    rgb0 = _parse_color(color0)
+                    rgb1 = _parse_color(color1)
+                    rgb_values = [
+                        int(round(rgb0[i] + (rgb1[i] - rgb0[i]) * t)) for i in range(3)
+                    ]
+                break
+
     hex_string = "#%02x%02x%02x" % (
         int(rgb_values[0]),
         int(rgb_values[1]),
         int(rgb_values[2]),
     )
     return hex_string
+
+
+def _parse_color(color_str):
+    """Parse a plotly color (rgb string or hex string) into a list of (r, g, b) values."""
+    color_str = color_str.strip()
+    if color_str.startswith("rgb("):
+        return list(map(int, color_str[4:-1].replace(" ", "").split(",")))
+    hex_color = color_str.lstrip("#")
+    return [int(hex_color[i : i + 2], 16) for i in (0, 2, 4)]
 
 
 def _add_line_trace(
@@ -353,12 +377,13 @@ def _add_line_trace(
     overloaded: Optional[dict] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
+    line_color: Optional[str] = None,
 ):
     """Enhanced line trace function with colormap support."""
     lons, lats = _get_lons_lats(line_data.geo_position)
     hover_text = line_data["id"]
 
-    line_color = rgb_to_hex(GREEN)
+    line_color = line_color or rgb_to_hex(GREEN)
     highlighted = False
 
     colormap_value = None
@@ -582,3 +607,152 @@ def _get_lons_lats(geojson: str):
     """Extract longitude and latitude coordinates from GeoJSON string."""
     coordinates = json.loads(geojson)["coordinates"]
     return list(zip(*coordinates))  # returns lons, lats
+
+
+def thermal_line_segment_plot(
+    grid: GridContainer,
+    segments: pd.DataFrame,
+    segment_values: Optional[dict] = None,
+    cmap: Optional[str] = "Jet",
+    cbar_title: Optional[str] = None,
+    show_colorbar: bool = True,
+    mapbox_style: Optional[str] = "open-street-map",
+    line_width: int = 4,
+    value_range: Optional[tuple[float, float]] = None,
+) -> go.Figure:
+    """
+    Plots the thermal line segments (created during an ampacity simulation)
+    on top of the grid. Each segment is a sub-part of a line with its own
+    thermal state.
+
+    Args:
+        grid (GridContainer): Grid to plot.
+        segments (pd.DataFrame): Thermal line segments as loaded from
+            ``thermal_line_segments.csv``. Expected columns are
+            ``segmentUuid``, ``lineUuid``, ``startX``, ``startY``, ``endX``,
+            ``endY`` and (optionally) ``limitTemperature``.
+        segment_values (Optional[dict]): Dictionary mapping segment UUIDs to
+            values (e.g. segment temperature in °C) used for the colormap.
+            Without values, each segment gets an individual color from a
+            qualitative palette so that the segments can be differentiated.
+        cmap (Optional[str]): Name of a colormap (e.g. 'Jet', 'Viridis', etc.).
+        cbar_title (Optional[str]): Title for the colorbar.
+        show_colorbar (bool): Whether to show the colorbar. Defaults to True.
+        mapbox_style (Optional[str]): Mapbox style. Defaults to open-street-map.
+        line_width (int): Line width for the segment traces. Defaults to 4.
+        value_range (Optional[tuple[float, float]]): Fixed (min, max) range of
+            the colormap scale. If None, the range is derived from the values
+            themselves. Use a fixed range (e.g. (0, 100) for temperatures in
+            °C) if the colors should stay comparable between different
+            timestamps.
+    Returns:
+        Figure: Plotly figure.
+    """
+    fig = grid_plot(
+        grid,
+        mapbox_style=mapbox_style,
+        show_line_colorbar=False,
+        line_color="#000000",
+    )
+
+    if segments.empty:
+        return fig
+
+    cmin, cmax = 0.0, 1.0
+    if segment_values:
+        values = pd.Series(segment_values)
+        cmin, cmax = float(values.min()), float(values.max())
+        # Avoid a degenerated colorbar (single value) - expand the range
+        # slightly so that the colors still match the colorbar
+        if cmin == cmax:
+            cmin, cmax = cmin - 1.0, cmax + 1.0
+        if value_range is not None:
+            cmin, cmax = value_range
+
+    limit_temperature_column = (
+        "limitTemperature" if "limitTemperature" in segments.columns else None
+    )
+
+    # Without values, sample an individual color per segment from a qualitative
+    # palette so that the segments can be visually differentiated
+    distinct_colors = px.colors.qualitative.Plotly
+
+    for color_idx, (_, seg) in enumerate(segments.iterrows()):
+        value = segment_values.get(seg["segmentUuid"]) if segment_values else None
+        if value is not None:
+            norm = (value - cmin) / (cmax - cmin) if cmax != cmin else 0.5
+            color = _get_colormap_color(norm, cmap)
+        else:
+            color = distinct_colors[color_idx % len(distinct_colors)]
+
+        hover_text = f"Segment: {seg['segmentUuid']}<br>Line: {seg['lineUuid']}"
+        if value is not None:
+            hover_text += f"<br>{cbar_title or 'Value'}: {value:.4f}"
+        if limit_temperature_column is not None:
+            hover_text += f"<br>Limit Temperature: {seg['limitTemperature']} °C"
+
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="lines",
+                lon=[seg["startX"], seg["endX"]],
+                lat=[seg["startY"], seg["endY"]],
+                line=dict(color=color, width=line_width),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+        # Add a transparent marker at the midpoint of the segment for the hover text
+        mid_lon = (seg["startX"] + seg["endX"]) / 2
+        mid_lat = (seg["startY"] + seg["endY"]) / 2
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="markers",
+                lon=[mid_lon],
+                lat=[mid_lat],
+                hoverinfo="text",
+                hovertext=hover_text,
+                marker=dict(size=0, opacity=0, color=color),
+                showlegend=False,
+            )
+        )
+
+    if segment_values and show_colorbar:
+        first = segments.iloc[0]
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="markers",
+                lon=[first["startX"]],
+                lat=[first["startY"]],
+                marker=dict(
+                    size=0.1,
+                    opacity=0,
+                    color="#008000",
+                    colorscale=px.colors.get_colorscale(cmap),
+                    cmin=cmin,
+                    cmax=cmax,
+                    colorbar=dict(
+                        title=dict(
+                            text=cbar_title or "Segment Value",
+                            font=dict(
+                                size=12,
+                                weight="normal",
+                                style="normal",
+                                color="#000000",
+                            ),
+                        ),
+                        x=0.925,
+                        thickness=15,
+                        len=0.85,
+                        tickfont=dict(
+                            size=12, weight="normal", style="normal", color="#000000"
+                        ),
+                    ),
+                    showscale=True,
+                ),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+    return fig
