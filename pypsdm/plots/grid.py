@@ -13,7 +13,15 @@ from shapely.geometry import LineString
 if TYPE_CHECKING:
     from pypsdm.models.input.container.grid import GridContainer
 
-from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
+from pypsdm.plots.common.utils import (
+    BLUE,
+    GREEN,
+    GREY,
+    OVERLOAD_COLOR,
+    RED,
+    RGB,
+    rgb_to_hex,
+)
 
 
 def grid_plot(
@@ -32,6 +40,10 @@ def grid_plot(
 ) -> go.Figure:
     """
     Plots the grid on an OpenStreetMap. Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
+
+    When using ``cmap_lines="fixed_line_rating_scale"`` with values above 1.0
+    (e.g. line utilisation where the current exceeds ``i_max``), the
+    overloaded lines are highlighted with a dedicated magenta color.
 
     ATTENTION:
     We currently consider the node_b of the switches to be the auxiliary switch node.
@@ -85,11 +97,12 @@ def grid_plot(
 
     if cmap_lines and cmap_line_values is not None:
         try:
-            value_dict, cmin, cmax = _process_colormap_values(
+            value_dict, cmin, cmax, overloaded = _process_colormap_values(
                 cmap_line_values, cmap_lines
             )
         except Exception as e:
             print(f"Error processing colormap values: {e}")
+            value_dict, cmin, cmax, overloaded = None, 0.0, 1.0, {}
 
         connected_lines.data.apply(
             lambda line: _add_line_trace(
@@ -98,6 +111,7 @@ def grid_plot(
                 highlights=line_highlights,
                 cmap=cmap_lines,
                 value_dict=value_dict,
+                overloaded=overloaded,
                 cbar_title=cbar_line_title,
                 show_colorbar=show_line_colorbar,
             ),
@@ -227,7 +241,7 @@ def grid_plot(
     return fig
 
 
-def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
+def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float, dict]:
     """Process colormap values and return a dictionary with original values in case of fixed scale or one with normalized data."""
     values = []
     uuids = []
@@ -251,9 +265,6 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
     cmin = np.min(values)
     cmax = np.max(values)
 
-    if cmax > 1.0:
-        raise ValueError(f"Error: cmax ({cmax}) cannot be greater than 1.0.")
-
     if cmap != "fixed_line_rating_scale":
         # Normalize values to 0-1 range
         normalized_values = (
@@ -263,10 +274,16 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> (dict, float, float):
             uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)
         }
 
-        return normalized_dict, cmin, cmax
+        return normalized_dict, cmin, cmax, {}
     else:
+        # Values must be in the 0-1 range on the fixed scale.
+        # Lines exceeding 1.0 (i.e. current above i_max) are treated
+        # as overloaded and highlighted with a dedicated color.
+        overloaded = {
+            uuid: float(value) for uuid, value in zip(uuids, values) if value > 1.0
+        }
         value_dict = {uuid: value for uuid, value in zip(uuids, values)}
-        return value_dict, cmin, cmax
+        return value_dict, cmin, cmax, overloaded
 
 
 def _get_colormap_color(value, cmap):
@@ -300,8 +317,12 @@ def _get_colormap_color(value, cmap):
 
         color_str = colorscale[index]
         rgb_string = color_str[1]
-    # Remove 'rgb(' and ')' and split by commas
-    rgb_values = list(map(int, rgb_string[4:-1].split(",")))
+
+    if rgb_string.startswith("rgb("):
+        rgb_values = list(map(int, rgb_string[4:-1].replace(" ", "").split(",")))
+    else:
+        hex_color = rgb_string.lstrip("#")
+        rgb_values = [int(hex_color[i : i + 2], 16) for i in (0, 2, 4)]
     hex_string = "#%02x%02x%02x" % (
         int(rgb_values[0]),
         int(rgb_values[1]),
@@ -318,6 +339,7 @@ def _add_line_trace(
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
     value_dict: Optional[dict] = None,
+    overloaded: Optional[dict] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
 ):
@@ -334,8 +356,16 @@ def _add_line_trace(
     if not is_disconnected:
         if cmap and value_dict and line_id in value_dict.keys():
             value = value_dict[line_id]
-            colormap_value = _get_colormap_color(value, cmap)
-            use_colorbar = True
+            if (
+                cmap == "fixed_line_rating_scale"
+                and overloaded
+                and line_id in overloaded
+            ):
+                colormap_value = rgb_to_hex(OVERLOAD_COLOR)
+                use_colorbar = True
+            else:
+                colormap_value = _get_colormap_color(value, cmap)
+                use_colorbar = True
         else:
             colormap_value = "#008000"
             use_colorbar = False
