@@ -97,12 +97,18 @@ def grid_plot(
 
     if cmap_lines and cmap_line_values is not None:
         try:
-            value_dict, cmin, cmax, overloaded = _process_colormap_values(
-                cmap_line_values, cmap_lines
+            value_dict, cmin, cmax, overloaded, raw_value_dict = (
+                _process_colormap_values(cmap_line_values, cmap_lines)
             )
         except Exception as e:
             print(f"Error processing colormap values: {e}")
-            value_dict, cmin, cmax, overloaded = None, 0.0, 1.0, {}
+            value_dict, cmin, cmax, overloaded, raw_value_dict = (
+                None,
+                0.0,
+                1.0,
+                {},
+                None,
+            )
 
         connected_lines.data.apply(
             lambda line: _add_line_trace(
@@ -111,6 +117,7 @@ def grid_plot(
                 highlights=line_highlights,
                 cmap=cmap_lines,
                 value_dict=value_dict,
+                raw_value_dict=raw_value_dict,
                 overloaded=overloaded,
                 cbar_title=cbar_line_title,
                 show_colorbar=show_line_colorbar,
@@ -241,7 +248,9 @@ def grid_plot(
     return fig
 
 
-def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float, dict]:
+def _process_colormap_values(
+    cmap_vals: dict, cmap
+) -> tuple[dict, float, float, dict, dict]:
     """Process colormap values and return a dictionary with original values in case of fixed scale or one with normalized data."""
     values = []
     uuids = []
@@ -273,8 +282,9 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float,
         normalized_dict = {
             uuid: norm_value for uuid, norm_value in zip(uuids, normalized_values)
         }
+        raw_dict = {uuid: float(value) for uuid, value in zip(uuids, values)}
 
-        return normalized_dict, cmin, cmax, {}
+        return normalized_dict, cmin, cmax, {}, raw_dict
     else:
         # Values must be in the 0-1 range on the fixed scale.
         # Lines exceeding 1.0 (i.e. current above i_max) are treated
@@ -283,7 +293,7 @@ def _process_colormap_values(cmap_vals: dict, cmap) -> tuple[dict, float, float,
             uuid: float(value) for uuid, value in zip(uuids, values) if value > 1.0
         }
         value_dict = {uuid: value for uuid, value in zip(uuids, values)}
-        return value_dict, cmin, cmax, overloaded
+        return value_dict, cmin, cmax, overloaded, value_dict
 
 
 def _get_colormap_color(value, cmap):
@@ -339,6 +349,7 @@ def _add_line_trace(
     highlight_disconnected: Optional[bool] = False,
     cmap: Optional[str] = None,
     value_dict: Optional[dict] = None,
+    raw_value_dict: Optional[dict] = None,
     overloaded: Optional[dict] = None,
     cbar_title: Optional[str] = None,
     show_colorbar: bool = True,
@@ -391,7 +402,9 @@ def _add_line_trace(
             use_colorbar = False
 
     if cmap and colormap_value is not None:
-        hover_text += f"<br>{cbar_title or 'Value'}: {value:.3f}"
+        # Show the original (un-normalized) value in the hover text
+        hover_value = raw_value_dict[line_id] if raw_value_dict else value
+        hover_text += f"<br>{cbar_title or 'Value'}: {hover_value:.3f}"
 
     # Add the lines with or without colorbar
     line_color_to_use = (
