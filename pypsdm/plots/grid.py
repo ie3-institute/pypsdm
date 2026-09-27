@@ -365,6 +365,12 @@ def _parse_color(color_str):
     return [int(hex_color[i : i + 2], 16) for i in (0, 2, 4)]
 
 
+def _with_alpha(color: str, alpha: float) -> str:
+    """Convert a plotly color to an rgba string with the given alpha (0.0 - 1.0)."""
+    r, g, b = _parse_color(color)
+    return f"rgba({r}, {g}, {b}, {alpha})"
+
+
 def _add_line_trace(
     fig: go.Figure,
     line_data: Series,
@@ -609,6 +615,81 @@ def _get_lons_lats(geojson: str):
     return list(zip(*coordinates))  # returns lons, lats
 
 
+def _add_soil_layer_trace(
+    fig: go.Figure,
+    soil_layers: pd.DataFrame,
+    soil_types: Optional[pd.DataFrame] = None,
+    depth: float = 0.0,
+    opacity: float = 0.4,
+) -> None:
+    """
+    Draws the soil layer polygons that are present at a given depth on top of
+    the figure. Each area (polygon) gets an individual color from a qualitative
+    palette so that the different areas can be differentiated easily.
+
+    Args:
+        fig (go.Figure): The Plotly figure object to draw on.
+        soil_layers (pd.DataFrame): Soil layers as loaded from ``soilLayers.csv``.
+            Expected columns are ``uuid``, ``geometry`` (GeoJSON string),
+            ``z_from``, ``z_to`` and ``soil_type``.
+        soil_types (Optional[pd.DataFrame]): Soil types as loaded from
+            ``soilTypes.csv`` to enrich the hover text.
+        depth (float): Depth in m (negative values below the surface, e.g. -0.8).
+            Only layers with ``z_from >= depth >= z_to`` are shown.
+        opacity (float): Fill opacity of the polygons. Defaults to 0.4.
+    """
+    if soil_layers.empty:
+        return
+
+    # Only keep the layers that cover the requested depth
+    # (z_from is closer to the surface, z_to is deeper, both negative or 0)
+    mask = (soil_layers["z_from"] >= depth) & (soil_layers["z_to"] <= depth)
+    layers = soil_layers.loc[mask]
+    if layers.empty:
+        return
+
+    soil_type_names = {}
+    if soil_types is not None and len(soil_types) > 0:
+        # Column names may contain whitespace (e.g. " id"), normalize them
+        soil_types = soil_types.rename(columns=str.strip)
+        if "id" in soil_types.columns:
+            soil_type_names = {
+                str(uuid).strip(): str(name).strip()
+                for uuid, name in zip(soil_types["uuid"], soil_types["id"])
+            }
+
+    distinct_colors = px.colors.qualitative.Set2
+
+    for color_idx, (_, layer) in enumerate(layers.iterrows()):
+        color = distinct_colors[color_idx % len(distinct_colors)]
+        # The geometry is a GeoJSON polygon: coordinates[0] is the outer ring
+        coordinates = json.loads(layer["geometry"])["coordinates"][0]
+        lons = [coord[0] for coord in coordinates]
+        lats = [coord[1] for coord in coordinates]
+
+        soil_type = layer.get("soil_type")
+        soil_type_name = soil_type_names.get(str(soil_type).strip(), soil_type)
+        hover_text = (
+            f"Soil Layer: {layer['uuid']}<br>"
+            f"Soil Type: {soil_type_name}<br>"
+            f"Depth Range: {layer['z_from']:.2f} m to {layer['z_to']:.2f} m"
+        )
+
+        fig.add_trace(
+            go.Scattermapbox(
+                mode="lines",
+                lon=lons,
+                lat=lats,
+                fill="toself",
+                fillcolor=_with_alpha(color, opacity),
+                line=dict(color=_with_alpha(color, min(1.0, opacity + 0.3)), width=1),
+                hoverinfo="text",
+                hovertext=hover_text,
+                showlegend=False,
+            )
+        )
+
+
 def thermal_line_segment_plot(
     grid: GridContainer,
     segments: pd.DataFrame,
@@ -619,11 +700,20 @@ def thermal_line_segment_plot(
     mapbox_style: Optional[str] = "open-street-map",
     line_width: int = 4,
     value_range: Optional[tuple[float, float]] = None,
+    soil_layers: Optional[pd.DataFrame] = None,
+    soil_types: Optional[pd.DataFrame] = None,
+    soil_depth: Optional[float] = None,
+    soil_opacity: float = 0.4,
 ) -> go.Figure:
     """
     Plots the thermal line segments (created during an ampacity simulation)
     on top of the grid. Each segment is a sub-part of a line with its own
     thermal state.
+
+    Optionally, the soil layer areas that are present at a given depth
+    (e.g. the cable burial depth) can be drawn on top of the segments.
+    Each area is filled with an individual color so that the different areas
+    can be differentiated easily.
 
     Args:
         grid (GridContainer): Grid to plot.
@@ -645,6 +735,15 @@ def thermal_line_segment_plot(
             themselves. Use a fixed range (e.g. (0, 100) for temperatures in
             °C) if the colors should stay comparable between different
             timestamps.
+        soil_layers (Optional[pd.DataFrame]): Soil layers as loaded from
+            ``soilLayers.csv``. If given together with ``soil_depth``, the
+            layer areas that are present at that depth are drawn on the map.
+        soil_types (Optional[pd.DataFrame]): Soil types as loaded from
+            ``soilTypes.csv`` to enrich the hover text of the soil layers.
+        soil_depth (Optional[float]): Depth in m (negative values below the
+            surface, e.g. -0.8) at which the soil layer areas are shown.
+        soil_opacity (float): Fill opacity of the soil layer polygons.
+            Defaults to 0.4.
     Returns:
         Figure: Plotly figure.
     """
@@ -654,6 +753,16 @@ def thermal_line_segment_plot(
         show_line_colorbar=False,
         line_color="#000000",
     )
+
+    # Draw the soil layer areas first so that the segments are on top
+    if soil_layers is not None and soil_depth is not None:
+        _add_soil_layer_trace(
+            fig,
+            soil_layers,
+            soil_types=soil_types,
+            depth=soil_depth,
+            opacity=soil_opacity,
+        )
 
     if segments.empty:
         return fig
@@ -734,6 +843,7 @@ def thermal_line_segment_plot(
                     colorbar=dict(
                         title=dict(
                             text=cbar_title or "Segment Value",
+                            side="right",
                             font=dict(
                                 size=12,
                                 weight="normal",
@@ -742,6 +852,8 @@ def thermal_line_segment_plot(
                             ),
                         ),
                         x=0.925,
+                        y=0.5,
+                        yanchor="middle",
                         thickness=15,
                         len=0.85,
                         tickfont=dict(
