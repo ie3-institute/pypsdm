@@ -27,7 +27,7 @@ psycopg2-binary = "^2.9.13"
 pytest = "^9.1.1"
 jupyter = "~=1.1.0"
 black = { extras = ["jupyter"], version = "~26.5.1" }
-flake8 = "^7.3.0"
+flake8 = "^7.4.1"
 flake8-black = "^0.4.0"
 flake8-isort = "^7.0.0"
 pre-commit = "~=4.6.2"
