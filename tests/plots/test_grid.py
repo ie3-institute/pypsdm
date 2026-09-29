@@ -5,10 +5,9 @@ import pytest
 from definitions import ROOT_DIR
 from pypsdm.models.gwr import GridWithResults
 from pypsdm.plots.grid import (
-    BASE_MAPS,
+    BASE_MAP_STYLES,
     _get_colormap_color,
     _get_lons_lats,
-    _mapbox_style_to_base_map,
     _process_colormap_values,
     grid_plot,
 )
@@ -34,10 +33,10 @@ def filtered_data(gwr):
 def test_grid_plot_default(gwr):
     fig = grid_plot(gwr.grid)
     assert len(fig.data) > 0
-    assert fig.layout.geo.scope == "world"
-    assert fig.layout.geo.center is not None
-    assert fig.layout.geo.lataxis.range is not None
-    assert fig.layout.geo.lonaxis.range is not None
+    assert "map" in fig.layout
+    assert fig.layout.map.style == "open-street-map"
+    assert fig.layout.map.center is not None
+    assert fig.layout.map.zoom is not None
 
 
 def test_grid_plot_highlights(gwr):
@@ -71,9 +70,9 @@ def test_grid_plot_node_colormap(gwr):
 
 
 def test_grid_plot_base_maps(gwr):
-    for name in BASE_MAPS:
+    for name in BASE_MAP_STYLES:
         fig = grid_plot(gwr.grid, base_map=name)
-        assert fig.layout.geo.landcolor == BASE_MAPS[name]["landcolor"]
+        assert fig.layout.map.style == BASE_MAP_STYLES[name]
 
 
 def test_grid_plot_unknown_base_map_raises(gwr):
@@ -86,23 +85,13 @@ def test_grid_plot_mapbox_style_deprecated(gwr):
         warnings.simplefilter("always")
         fig = grid_plot(gwr.grid, mapbox_style="white-bg")
     assert any(issubclass(x.category, DeprecationWarning) for x in w)
-    assert fig.layout.geo.landcolor == BASE_MAPS["white"]["landcolor"]
+    assert fig.layout.map.style == "white-bg"
 
 
 def test_grid_plot_no_warning_without_mapbox_style(gwr):
     with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
         grid_plot(gwr.grid)
-
-
-def test_mapbox_style_to_base_map():
-    assert _mapbox_style_to_base_map("open-street-map") == "open-street-map"
-    assert _mapbox_style_to_base_map("streets") == "open-street-map"
-    assert _mapbox_style_to_base_map("carto-positron") == "carto-positron"
-    assert _mapbox_style_to_base_map("dark") == "dark"
-    assert _mapbox_style_to_base_map("satellite") == "dark"
-    assert _mapbox_style_to_base_map("white-bg") == "white"
-    assert _mapbox_style_to_base_map("unknown-style") == "open-street-map"
 
 
 def test_process_colormap_values_normalized():

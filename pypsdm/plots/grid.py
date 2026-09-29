@@ -16,53 +16,30 @@ if TYPE_CHECKING:
 
 from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
-BASE_MAPS = {
-    "open-street-map": {
-        "showland": True,
-        "landcolor": "rgba(247, 247, 247, 1)",
-        "showocean": True,
-        "oceancolor": "rgba(255, 255, 255, 1)",
-        "showrivers": True,
-        "rivercolor": "rgba(220, 230, 240, 1)",
-        "showcoastlines": False,
-        "showcountries": False,
-        "showlakes": False,
-    },
-    "white": {
-        "showland": True,
-        "landcolor": "rgba(255, 255, 255, 1)",
-        "showocean": True,
-        "oceancolor": "rgba(255, 255, 255, 1)",
-        "showrivers": False,
-        "showcoastlines": False,
-        "showcountries": False,
-        "showlakes": False,
-    },
-    "carto-positron": {
-        "showland": True,
-        "landcolor": "rgba(255, 255, 255, 1)",
-        "showocean": True,
-        "oceancolor": "rgba(233, 238, 240, 1)",
-        "showrivers": True,
-        "rivercolor": "rgba(171, 217, 233, 1)",
-        "showcoastlines": True,
-        "coastlinecolor": "rgba(200, 215, 225, 1)",
-        "showcountries": True,
-        "countrycolor": "rgba(200, 215, 225, 1)",
-        "showlakes": True,
-        "lakecolor": "rgba(171, 217, 233, 1)",
-    },
-    "dark": {
-        "showland": True,
-        "landcolor": "rgba(50, 50, 50, 1)",
-        "showocean": True,
-        "oceancolor": "rgba(15, 15, 15, 1)",
-        "showrivers": False,
-        "showcoastlines": True,
-        "coastlinecolor": "rgba(90, 90, 90, 1)",
-        "showcountries": False,
-        "showlakes": False,
-    },
+BASE_MAP_STYLES = {
+    "open-street-map": "open-street-map",
+    "white": "white-bg",
+    "carto-positron": "carto-positron",
+    "dark": "carto-darkmatter",
+    "terrain": "stamen-terrain",
+    "toner": "stamen-toner",
+    "watercolor": "stamen-watercolor",
+}
+
+# Map former mapbox_style values onto the new base_map names for backwards
+# compatibility.
+_MAPBOX_STYLE_TO_BASE_MAP = {
+    "open-street-map": "open-street-map",
+    "streets": "open-street-map",
+    "light": "carto-positron",
+    "basic": "white",
+    "white-bg": "white",
+    "white": "white",
+    "carto-positron": "carto-positron",
+    "dark": "dark",
+    "satellite": "dark",
+    "satellite-streets": "open-street-map",
+    "outdoors": "terrain",
 }
 
 
@@ -82,7 +59,7 @@ def grid_plot(
     mapbox_style: Optional[str] = None,
 ) -> go.Figure:
     """
-    Plots the grid on a geographic base map (Plotly geo traces). Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
+    Plots the grid on a map with a tile underlay (Plotly MapLibre traces). Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
 
     ATTENTION:
     We currently consider the node_b of the switches to be the auxiliary switch node.
@@ -105,12 +82,10 @@ def grid_plot(
         cmap_node_values (Optional[Union[list, dict]]): Values for colormap node trace. Can be a list of values
                                                   or dict mapping node IDs to values.
         cbar_node_title (Optional[str]): Title for node colorbar.
-        base_map (str): Name of the base map to draw below the traces. Must be one of
-            the keys of `BASE_MAPS` ("open-street-map", "white", "carto-positron", "dark").
-            Defaults to "open-street-map".
-        mapbox_style (Optional[str]): Deprecated. Kept for backwards compatibility only;
-            Plotly >= 6 removed Mapbox support, use `base_map` instead. If given, its
-            value is mapped onto the closest `base_map`.
+        base_map (str): Name of the base map style. Must be one of the keys of
+            `BASE_MAP_STYLES`: "open-street-map" (default), "white", "carto-positron",
+            "dark", "terrain", "toner", "watercolor".
+        mapbox_style (Optional[str]): Deprecated alias for `base_map`.
     Returns:
         Figure: Plotly figure.
     """
@@ -121,13 +96,13 @@ def grid_plot(
             category=DeprecationWarning,
             stacklevel=2,
         )
-        base_map = _mapbox_style_to_base_map(mapbox_style)
+        base_map = _MAPBOX_STYLE_TO_BASE_MAP.get(mapbox_style, base_map)
 
-    if base_map not in BASE_MAPS:
+    if base_map not in BASE_MAP_STYLES:
         raise ValueError(
-            f"Unknown base_map '{base_map}'. Use one of: {sorted(BASE_MAPS)}"
+            f"Unknown base_map '{base_map}'. Use one of: {sorted(BASE_MAP_STYLES)}"
         )
-    geo_preset = BASE_MAPS[base_map]
+    map_style = BASE_MAP_STYLES[base_map]
 
     fig = go.Figure()
 
@@ -184,7 +159,7 @@ def grid_plot(
 
             # Add a separate trace for line colorbar (using a single point)
             fig.add_trace(
-                go.Scattergeo(
+                go.Scattermap(
                     mode="markers",
                     lon=[lons[0]],
                     lat=[lats[0]],
@@ -268,35 +243,28 @@ def grid_plot(
     else:
         _add_node_trace(fig, grid, highlights=node_highlights)
 
-    center_lat = grid.raw_grid.nodes.data["latitude"].mean()
-    center_lon = grid.raw_grid.nodes.data["longitude"].mean()
+    center_lat = float(grid.raw_grid.nodes.data["latitude"].mean())
+    center_lon = float(grid.raw_grid.nodes.data["longitude"].mean())
 
     # Dynamically calculate the zoom level
-    lat_range = (
+    lat_range = float(
         grid.raw_grid.nodes.data["latitude"].max()
         - grid.raw_grid.nodes.data["latitude"].min()
     )
-    lon_range = (
+    lon_range = float(
         grid.raw_grid.nodes.data["longitude"].max()
         - grid.raw_grid.nodes.data["longitude"].min()
     )
 
     zoom = 12 - max(lat_range, lon_range)
 
-    # Derive the visible extent from the heuristic zoom level (geo traces have no
-    # 'zoom' attribute, the viewport is controlled via lon/lat ranges)
-    half_lat = 10.0 / zoom
-    half_lon = 10.0 / zoom
-
     fig.update_layout(
         showlegend=False,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        geo=dict(
-            scope="world",
+        map=dict(
+            style=map_style,
             center=dict(lat=center_lat, lon=center_lon),
-            lataxis=dict(range=[center_lat - half_lat, center_lat + half_lat]),
-            lonaxis=dict(range=[center_lon - half_lon, center_lon + half_lon]),
-            **geo_preset,
+            zoom=zoom,
         ),
     )
 
@@ -447,7 +415,7 @@ def _add_line_trace(
     )
 
     fig.add_trace(
-        go.Scattergeo(
+        go.Scattermap(
             mode="lines",
             lon=lons,
             lat=lats,
@@ -465,7 +433,7 @@ def _add_line_trace(
 
     # Add a transparent marker at the midpoint of the line for hover text
     fig.add_trace(
-        go.Scattergeo(
+        go.Scattermap(
             mode="markers",
             lon=[midpoint.x],
             lat=[midpoint.y],
@@ -552,10 +520,10 @@ def _add_node_trace(
         custom_colorscale = px.colors.get_colorscale(cmap)
         # Add a separate trace for colorbar
         fig.add_trace(
-            go.Scattergeo(
+            go.Scattermap(
                 mode="markers",
-                lon=[nodes_data["longitude"][0]],
-                lat=[nodes_data["latitude"][0]],
+                lon=[nodes_data["longitude"].iloc[0]],
+                lat=[nodes_data["latitude"].iloc[0]],
                 marker=dict(
                     size=0.1,
                     opacity=0,
@@ -599,7 +567,7 @@ def _add_node_trace(
         color_list.append(color)
 
     fig.add_trace(
-        go.Scattergeo(
+        go.Scattermap(
             mode="markers",
             lon=nodes_data["longitude"],
             lat=nodes_data["latitude"],
@@ -615,21 +583,3 @@ def _get_lons_lats(geojson: str):
     """Extract longitude and latitude coordinates from GeoJSON string."""
     coordinates = json.loads(geojson)["coordinates"]
     return list(zip(*coordinates))  # returns lons, lats
-
-
-_MAPBOX_STYLE_TO_BASE_MAP = {
-    "open-street-map": "open-street-map",
-    "streets": "open-street-map",
-    "light": "open-street-map",
-    "carto-positron": "carto-positron",
-    "satellite": "dark",
-    "dark": "dark",
-    "outdoors": "carto-positron",
-    "white-bg": "white",
-    "white": "white",
-}
-
-
-def _mapbox_style_to_base_map(mapbox_style: str) -> str:
-    """Map a former mapbox_style value onto the closest supported base_map."""
-    return _MAPBOX_STYLE_TO_BASE_MAP.get(mapbox_style, "open-street-map")
