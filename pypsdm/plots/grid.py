@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
@@ -15,6 +16,32 @@ if TYPE_CHECKING:
 
 from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
+BASE_MAP_STYLES = {
+    "open-street-map": "open-street-map",
+    "white": "white-bg",
+    "carto-positron": "carto-positron",
+    "dark": "carto-darkmatter",
+    "terrain": "stamen-terrain",
+    "toner": "stamen-toner",
+    "watercolor": "stamen-watercolor",
+}
+
+# Map former mapbox_style values onto the new base_map names for backwards
+# compatibility.
+_MAPBOX_STYLE_TO_BASE_MAP = {
+    "open-street-map": "open-street-map",
+    "streets": "open-street-map",
+    "light": "carto-positron",
+    "basic": "white",
+    "white-bg": "white",
+    "white": "white",
+    "carto-positron": "carto-positron",
+    "dark": "dark",
+    "satellite": "dark",
+    "satellite-streets": "open-street-map",
+    "outdoors": "terrain",
+}
+
 
 def grid_plot(
     grid: GridContainer,
@@ -28,10 +55,11 @@ def grid_plot(
     cmap_nodes: Optional[str] = None,
     cmap_node_values: Optional[Union[list, dict]] = None,
     cbar_node_title: Optional[str] = None,
-    mapbox_style: Optional[str] = "open-street-map",
+    base_map: str = "open-street-map",
+    mapbox_style: Optional[str] = None,
 ) -> go.Figure:
     """
-    Plots the grid on an OpenStreetMap. Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
+    Plots the grid on a map with a tile underlay (Plotly MapLibre traces). Supports Line and Node highlighting as well as colored map for line traces. Lines that are disconnected due to open switches will be grey.
 
     ATTENTION:
     We currently consider the node_b of the switches to be the auxiliary switch node.
@@ -47,17 +75,35 @@ def grid_plot(
         highlight_disconnected (Optional[bool]): Whether to highlight disconnected lines.
         cmap_lines (Optional[str]): Name of a colormap (e.g., 'Viridis', 'Jet', 'Blues', etc.) used for the lines
         cmap_line_values (Optional[Union[list, dict]]): Values for colormap line trace. Can be a list of values
-                                                 or dict mapping line IDs to values.
-        cbar_line_title (Optional[str]): Title for the line colorbar.
+                                                  or dict mapping line IDs to values.
+        cbar_line_title (Optional[str]): Title for line colorbar.
         show_line_colorbar (bool): Whether to show the colorbar for line colors. Defaults to True.
         cmap_nodes (Optional[str]): Name of a colormap (e.g., 'Viridis', 'Jet', 'Blues', etc.) used for the nodes
         cmap_node_values (Optional[Union[list, dict]]): Values for colormap node trace. Can be a list of values
-                                                 or dict mapping node IDs to values.
-        cbar_node_title (Optional[str]): Title for the node colorbar.
-        mapbox_style (Optional[str]): Mapbox style. Defaults to open-street-map.
+                                                  or dict mapping node IDs to values.
+        cbar_node_title (Optional[str]): Title for node colorbar.
+        base_map (str): Name of the base map style. Must be one of the keys of
+            `BASE_MAP_STYLES`: "open-street-map" (default), "white", "carto-positron",
+            "dark", "terrain", "toner", "watercolor".
+        mapbox_style (Optional[str]): Deprecated alias for `base_map`.
     Returns:
         Figure: Plotly figure.
     """
+    if mapbox_style is not None:
+        warnings.warn(
+            "mapbox_style is deprecated and will be removed in a future version. "
+            "Use `base_map` instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        base_map = _MAPBOX_STYLE_TO_BASE_MAP.get(mapbox_style, base_map)
+
+    if base_map not in BASE_MAP_STYLES:
+        raise ValueError(
+            f"Unknown base_map '{base_map}'. Use one of: {sorted(BASE_MAP_STYLES)}"
+        )
+    map_style = BASE_MAP_STYLES[base_map]
+
     fig = go.Figure()
 
     # Get disconnected lines via opened switches
@@ -113,7 +159,7 @@ def grid_plot(
 
             # Add a separate trace for line colorbar (using a single point)
             fig.add_trace(
-                go.Scattermapbox(
+                go.Scattermap(
                     mode="markers",
                     lon=[lons[0]],
                     lat=[lats[0]],
@@ -197,15 +243,15 @@ def grid_plot(
     else:
         _add_node_trace(fig, grid, highlights=node_highlights)
 
-    center_lat = grid.raw_grid.nodes.data["latitude"].mean()
-    center_lon = grid.raw_grid.nodes.data["longitude"].mean()
+    center_lat = float(grid.raw_grid.nodes.data["latitude"].mean())
+    center_lon = float(grid.raw_grid.nodes.data["longitude"].mean())
 
     # Dynamically calculate the zoom level
-    lat_range = (
+    lat_range = float(
         grid.raw_grid.nodes.data["latitude"].max()
         - grid.raw_grid.nodes.data["latitude"].min()
     )
-    lon_range = (
+    lon_range = float(
         grid.raw_grid.nodes.data["longitude"].max()
         - grid.raw_grid.nodes.data["longitude"].min()
     )
@@ -213,14 +259,12 @@ def grid_plot(
     zoom = 12 - max(lat_range, lon_range)
 
     fig.update_layout(
-        # mapbox = {"zoom"=10},
         showlegend=False,
-        mapbox_style=mapbox_style,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        mapbox=dict(
+        map=dict(
+            style=map_style,
             center=dict(lat=center_lat, lon=center_lon),
-            zoom=zoom,  # Adjust the zoom level as per the calculated heuristic
-            style=mapbox_style,
+            zoom=zoom,
         ),
     )
 
@@ -371,7 +415,7 @@ def _add_line_trace(
     )
 
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattermap(
             mode="lines",
             lon=lons,
             lat=lats,
@@ -389,7 +433,7 @@ def _add_line_trace(
 
     # Add a transparent marker at the midpoint of the line for hover text
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattermap(
             mode="markers",
             lon=[midpoint.x],
             lat=[midpoint.y],
@@ -476,10 +520,10 @@ def _add_node_trace(
         custom_colorscale = px.colors.get_colorscale(cmap)
         # Add a separate trace for colorbar
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattermap(
                 mode="markers",
-                lon=[nodes_data["longitude"][0]],
-                lat=[nodes_data["latitude"][0]],
+                lon=[nodes_data["longitude"].iloc[0]],
+                lat=[nodes_data["latitude"].iloc[0]],
                 marker=dict(
                     size=0.1,
                     opacity=0,
@@ -523,7 +567,7 @@ def _add_node_trace(
         color_list.append(color)
 
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattermap(
             mode="markers",
             lon=nodes_data["longitude"],
             lat=nodes_data["latitude"],
