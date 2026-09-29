@@ -31,6 +31,7 @@ PINK: RGB = COLOR_PALETTE[6]  # type: ignore
 GREY: RGB = COLOR_PALETTE[7]  # type: ignore
 YELLOW: RGB = COLOR_PALETTE[8]  # type: ignore
 LIGHT_BLUE: RGB = COLOR_PALETTE[9]  # type: ignore
+MAGENTA: RGB = (1, 0, 1)  # type: ignore
 
 # === COLOR MATCHING ===
 
@@ -47,6 +48,7 @@ UNKNOWN_COLOR = GREY
 FLEX_MAX = BLUE
 FLEX_MIN = GREEN
 FLEX_REF = YELLOW
+OVERLOAD_COLOR = MAGENTA
 
 
 def get_label_and_color(sp_type: EntitiesEnum | None) -> Tuple[str, RGB]:
