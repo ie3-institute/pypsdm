@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Migrate `grid_plot` from Plotly Mapbox traces to geo traces for Plotly >= 6 compatibility [#529](https://github.com/ie3-institute/pypsdm/issues/529)
 
 ### Removed
 

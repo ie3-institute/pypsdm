@@ -16,6 +16,55 @@ if TYPE_CHECKING:
 
 from pypsdm.plots.common.utils import BLUE, GREEN, GREY, RED, RGB, rgb_to_hex
 
+BASE_MAPS = {
+    "open-street-map": {
+        "showland": True,
+        "landcolor": "rgba(247, 247, 247, 1)",
+        "showocean": True,
+        "oceancolor": "rgba(255, 255, 255, 1)",
+        "showrivers": True,
+        "rivercolor": "rgba(220, 230, 240, 1)",
+        "showcoastlines": False,
+        "showcountries": False,
+        "showlakes": False,
+    },
+    "white": {
+        "showland": True,
+        "landcolor": "rgba(255, 255, 255, 1)",
+        "showocean": True,
+        "oceancolor": "rgba(255, 255, 255, 1)",
+        "showrivers": False,
+        "showcoastlines": False,
+        "showcountries": False,
+        "showlakes": False,
+    },
+    "carto-positron": {
+        "showland": True,
+        "landcolor": "rgba(255, 255, 255, 1)",
+        "showocean": True,
+        "oceancolor": "rgba(233, 238, 240, 1)",
+        "showrivers": True,
+        "rivercolor": "rgba(171, 217, 233, 1)",
+        "showcoastlines": True,
+        "coastlinecolor": "rgba(200, 215, 225, 1)",
+        "showcountries": True,
+        "countrycolor": "rgba(200, 215, 225, 1)",
+        "showlakes": True,
+        "lakecolor": "rgba(171, 217, 233, 1)",
+    },
+    "dark": {
+        "showland": True,
+        "landcolor": "rgba(50, 50, 50, 1)",
+        "showocean": True,
+        "oceancolor": "rgba(15, 15, 15, 1)",
+        "showrivers": False,
+        "showcoastlines": True,
+        "coastlinecolor": "rgba(90, 90, 90, 1)",
+        "showcountries": False,
+        "showlakes": False,
+    },
+}
+
 
 def grid_plot(
     grid: GridContainer,
@@ -29,6 +78,7 @@ def grid_plot(
     cmap_nodes: Optional[str] = None,
     cmap_node_values: Optional[Union[list, dict]] = None,
     cbar_node_title: Optional[str] = None,
+    base_map: str = "open-street-map",
     mapbox_style: Optional[str] = None,
 ) -> go.Figure:
     """
@@ -55,18 +105,29 @@ def grid_plot(
         cmap_node_values (Optional[Union[list, dict]]): Values for colormap node trace. Can be a list of values
                                                   or dict mapping node IDs to values.
         cbar_node_title (Optional[str]): Title for node colorbar.
+        base_map (str): Name of the base map to draw below the traces. Must be one of
+            the keys of `BASE_MAPS` ("open-street-map", "white", "carto-positron", "dark").
+            Defaults to "open-street-map".
         mapbox_style (Optional[str]): Deprecated. Kept for backwards compatibility only;
-            Plotly >= 6 removed Mapbox support, so the style is ignored.
+            Plotly >= 6 removed Mapbox support, use `base_map` instead. If given, its
+            value is mapped onto the closest `base_map`.
     Returns:
         Figure: Plotly figure.
     """
     if mapbox_style is not None:
         warnings.warn(
-            "mapbox_style is deprecated and has no effect: Plotly >= 6 removed "
-            "Mapbox support. Base map style cannot be customized anymore.",
+            "mapbox_style is deprecated and will be removed in a future version. "
+            "Use `base_map` instead.",
             category=DeprecationWarning,
             stacklevel=2,
         )
+        base_map = _mapbox_style_to_base_map(mapbox_style)
+
+    if base_map not in BASE_MAPS:
+        raise ValueError(
+            f"Unknown base_map '{base_map}'. Use one of: {sorted(BASE_MAPS)}"
+        )
+    geo_preset = BASE_MAPS[base_map]
 
     fig = go.Figure()
 
@@ -235,13 +296,7 @@ def grid_plot(
             center=dict(lat=center_lat, lon=center_lon),
             lataxis=dict(range=[center_lat - half_lat, center_lat + half_lat]),
             lonaxis=dict(range=[center_lon - half_lon, center_lon + half_lon]),
-            showcoastlines=False,
-            showland=True,
-            showocean=True,
-            landcolor="rgba(247, 247, 247, 1)",
-            oceancolor="rgba(255, 255, 255, 1)",
-            showcountries=False,
-            countrycolor="rgba(200, 200, 200, 1)",
+            **geo_preset,
         ),
     )
 
@@ -560,3 +615,21 @@ def _get_lons_lats(geojson: str):
     """Extract longitude and latitude coordinates from GeoJSON string."""
     coordinates = json.loads(geojson)["coordinates"]
     return list(zip(*coordinates))  # returns lons, lats
+
+
+_MAPBOX_STYLE_TO_BASE_MAP = {
+    "open-street-map": "open-street-map",
+    "streets": "open-street-map",
+    "light": "open-street-map",
+    "carto-positron": "carto-positron",
+    "satellite": "dark",
+    "dark": "dark",
+    "outdoors": "carto-positron",
+    "white-bg": "white",
+    "white": "white",
+}
+
+
+def _mapbox_style_to_base_map(mapbox_style: str) -> str:
+    """Map a former mapbox_style value onto the closest supported base_map."""
+    return _MAPBOX_STYLE_TO_BASE_MAP.get(mapbox_style, "open-street-map")
