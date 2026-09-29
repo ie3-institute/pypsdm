@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Highlight lines at colormap plotting that exceed rated line current instead of raising an error [#532](https://github.com/ie3-institute/pypsdm/issues/532)
 
 ### Removed
 
