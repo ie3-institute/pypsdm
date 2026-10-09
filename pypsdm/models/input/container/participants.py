@@ -18,8 +18,8 @@ from pypsdm.models.input.participant.hp import HeatPumps
 from pypsdm.models.input.participant.load import Loads
 from pypsdm.models.input.participant.pv import PhotovoltaicPowerPlants
 from pypsdm.models.input.participant.storage import Storages
-from pypsdm.models.input.participant.wec import WindEnergyConverters
 from pypsdm.models.input.participant.thermal_storage import ThermalStorages
+from pypsdm.models.input.participant.wec import WindEnergyConverters
 
 
 @dataclass(frozen=True)
