@@ -91,8 +91,8 @@ class EntitiesEnum(Enum):
             LoadsResult,
             PvsResult,
             StoragesResult,
-            WecsResult,
             ThermalStoragesResult,
+            WecsResult,
         )
         from pypsdm.models.result.participant.flex_options import FlexOptionsDict
 
