@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Added jupyter notebook for (price) timeseries conversion [#438](https://github.com/ie3-institute/pypsdm/issues/438)
+
+### Changed
+
+### Removed
+
+### Fixed
+
+## 0.0.8
+
+### Added
+
+### Changed
+- Rollback `scipy` dependency to v1.13.1 [#523](https://github.com/ie3-institute/pypsdm/issues/523)
+- Rollback `numpy` dependency to v1.26.4 [#525](https://github.com/ie3-institute/pypsdm/issues/525)
+
+### Removed
+
+### Fixed
+
+## 0.0.7
+
+### Added
 - Add project-level `CLAUDE.md` file [#329](https://github.com/ie3-institute/pypsdm/issues/329)
 - Adding congestion result handling [#198](https://github.com/ie3-institute/pypsdm/issues/198)
 - Add pre-commit hook for removing metadata from jupyter notebooks [#363](https://github.com/ie3-institute/pypsdm/issues/363)
@@ -14,22 +37,26 @@ All notable changes to this project will be documented in this file.
 - Add colored Line Trace to plotting [#348](https://github.com/ie3-institute/pypsdm/issues/348)
 - Add colored Node Trace to plotting [#349](https://github.com/ie3-institute/pypsdm/issues/349)
 - Added Dependabot Patch Merge Automation [#399](https://github.com/ie3-institute/pypsdm/issues/399) 
-- Added jupyter notebook for (price) timeseries conversion [#438](https://github.com/ie3-institute/pypsdm/issues/438)
+- Added thermal storage in participants [#279](https://github.com/ie3-institute/pypsdm/issues/279)
 
 ### Changed
 - Move `NBVAL` to dev dependencies [#374](https://github.com/ie3-institute/pypsdm/issues/374)
 - Harmonized CI OS-Matrix and updated Actions [#401](https://github.com/ie3-institute/pypsdm/issues/401)
 - Updated `postgis` version in tests [#455](https://github.com/ie3-institute/pypsdm/issues/455)
+- Updated the enrich_simbench_grid based on updated EvModel [#441](https://github.com/ie3-institute/pypsdm/issues/441)
+- Rollback `numpy` dependency to v2.3.5 [#499](https://github.com/ie3-institute/pypsdm/issues/499)
 
 ### Removed
 - Removed duplicated code within `plots.grid` [#346](https://github.com/ie3-institute/pypsdm/issues/346)
 - Remove pre-commit hook for removing metadata from jupyter notebooks [#369](https://github.com/ie3-institute/pypsdm/issues/369)
+- Removed dod from storage type input from grid csvs [#336](https://github.com/ie3-institute/pypsdm/issues/336)
 
 ### Fixed
 - Removed `q_characteristics` from `create_energy_management_systems_data` [#326](https://github.com/ie3-institute/pypsdm/issues/326)
 - Fix `emInput` from `parent_em` to `controlling_em` [#333](https://github.com/ie3-institute/pypsdm/issues/333)
 - Fix also from `em` to `controlling_em` for all `SystemParticipants` [#337](https://github.com/ie3-institute/pypsdm/issues/337)
 - Fix error in `filter_data_for_time_interval()` [#357](https://github.com/ie3-institute/pypsdm/issues/357)
+- Fixed empty Em entries before concat data frames [#271](https://github.com/ie3-institute/pypsdm/issues/271)
 
 
 ## 0.0.6
