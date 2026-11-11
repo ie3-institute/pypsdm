@@ -95,6 +95,10 @@ class GridContainer(ContainerMixin):
     def hps(self):
         return self.participants.hps
 
+    @property
+    def thermal_storages(self):
+        return self.participants.thermal_storages
+
     def to_list(self, include_empty: bool = False, include_primary_data: bool = False):
         grid = (
             [self.raw_grid, self.participants, self.primary_data]

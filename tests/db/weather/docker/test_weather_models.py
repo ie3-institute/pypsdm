@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -40,7 +40,7 @@ def test_create_weather_value(db_session):
     db_session.add(berlin)
     db_session.commit()
 
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     weather = WeatherValue(
         time=now,
         coordinate_id=berlin.id,
