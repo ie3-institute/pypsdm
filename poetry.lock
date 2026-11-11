@@ -1201,14 +1201,14 @@ files = [
 
 [[package]]
 name = "geoalchemy2"
-version = "0.20.0"
+version = "0.21.0"
 description = "Using SQLAlchemy with Spatial Databases"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "geoalchemy2-0.20.0-py3-none-any.whl", hash = "sha256:1489a1d106519542a79c97cd0b4c537d80462c353610ebc2429cf2c43daac717"},
-    {file = "geoalchemy2-0.20.0.tar.gz", hash = "sha256:450f427f4bc3cf2d5ddee0af3763aed0f3eea2384e7c9a99798d8f1508279322"},
+    {file = "geoalchemy2-0.21.0-py3-none-any.whl", hash = "sha256:be189cf948a5987fa1d2ac8c8729330194f1c9c92efdbfb07a3df32854841b34"},
+    {file = "geoalchemy2-0.21.0.tar.gz", hash = "sha256:f6e458b7b6af6194d698a5bd4a45550b8f851bf3e4326b0d61b2a7b83ec1c6a4"},
 ]
 
 [package.dependencies]
@@ -1217,6 +1217,7 @@ SQLAlchemy = ">=1.4"
 
 [package.extras]
 shapely = ["Shapely (>=1.7)"]
+wkb-wkt-converter = ["wkb-wkt-converter (>=0.6.3)"]
 
 [[package]]
 name = "greenlet"
@@ -5083,4 +5084,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">3.11,<3.13"
-content-hash = "f6d642fd382700580908146e8b30a8fa00f9e856b6c6d94202063f1e99ef7110"
+content-hash = "e214ff1fef63798e7cf636cf55bf713e53744bb4937591ba7053672ad076f6ff"
