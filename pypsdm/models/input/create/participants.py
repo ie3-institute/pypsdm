@@ -37,7 +37,6 @@ def create_pv_data(
     q_characteristics=None,
     k_g=0.9,
     k_t=1,
-    market_reaction=False,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -63,7 +62,6 @@ def create_pv_data(
             "eta_conv": eta_conv,
             "k_g": k_g,
             "k_t": k_t,
-            "market_reaction": market_reaction,
             "cos_phi_rated": cos_phi_rated,
             "controlling_em": controlling_em,
         }
@@ -97,7 +95,6 @@ def create_storages_data(
     e_storage,
     s_rated=None,
     q_characteristics=None,
-    behaviour="self",
     type_uuid=None,
     type_id=None,
     capex=0,
@@ -105,9 +102,8 @@ def create_storages_data(
     cos_phi_rated=0.9,
     p_max=None,
     active_power_gradient=100,
-    eta=100,  # efficiency of the electrical inverter
-    life_time=9999999,  # permissible hours of full use
-    life_cycle=9999999,  # permissible amount of full cycles
+    eta_charging=100,
+    eta_discharging=100,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -143,9 +139,8 @@ def create_storages_data(
             "p_max": p_max,
             "active_power_gradient": active_power_gradient,
             "e_storage": e_storage,
-            "eta": eta,
-            "life_time": life_time,
-            "life_cycle": life_cycle,
+            "eta_charging": eta_charging,
+            "eta_discharging": eta_discharging,
             "controlling_em": controlling_em,
         }
     ).rename(uuid)
@@ -157,7 +152,6 @@ def create_electric_vehicles(data_dict):
 
 def create_electric_vehicles_data(
     id,
-    node,
     s_rated,
     s_ratedDC,
     e_storage,
@@ -168,6 +162,8 @@ def create_electric_vehicles_data(
     capex=0,
     opex=0,
     cos_phi_rated=1,
+    eta_charging=100,
+    eta_discharging=100,
     uuid=None,
     operates_from=None,
     operates_until=None,
@@ -185,7 +181,6 @@ def create_electric_vehicles_data(
             "operates_from": operates_from,
             "operates_until": operates_until,
             "operator": operator,
-            "node": node,
             "q_characteristics": q_characteristics,
             "type_uuid": type_uuid,
             "type_id": type_id,
@@ -196,6 +191,8 @@ def create_electric_vehicles_data(
             "cos_phi_rated": cos_phi_rated,
             "e_storage": e_storage,
             "e_cons": e_cons,
+            "eta_charging": eta_charging,
+            "eta_discharging": eta_discharging,
         }
     ).rename(uuid)
 
@@ -213,7 +210,7 @@ def create_ev_charging_stations(data_dict):
 def create_ev_charging_stations_data(
     id,
     node,
-    location_type,
+    location_types,
     s_rated,
     v2g_support=False,
     charging_points=1,
@@ -246,7 +243,7 @@ def create_ev_charging_stations_data(
             "q_characteristics": q_characteristics,
             "cos_phi_rated": cos_phi,
             "charging_points": charging_points,
-            "location_type": location_type,
+            "location_types": location_types,
             "type": type,
             "v2g_support": v2g_support,
             "controlling_em": controlling_em,

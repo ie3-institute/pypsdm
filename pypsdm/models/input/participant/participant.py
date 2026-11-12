@@ -17,7 +17,11 @@ class SystemParticipants(Entities, ABC):
         """
         Returns: The nodes to which the entities are connected.
         """
-        return self.data["node"]
+        # node column might not be present
+        if "node" in self.data:
+            return self.data["node"]
+        else:
+            return Series()
 
     @property
     def controlling_em(self) -> Series:

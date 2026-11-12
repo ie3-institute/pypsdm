@@ -373,3 +373,7 @@ tests/temp/
 # can be removed later
 pypsdm/projects/
 nbs/simple_grid
+
+# input and output
+input/*
+output/*

@@ -153,7 +153,7 @@ class ResultContainerMixin(ContainerMixin):
                     raise IOError(
                         f"Error reading participant result for: {participant}"
                     ) from e
-                participant_result_map[participant_result.entity_type()] = (
-                    participant_result
-                )
+                participant_result_map[
+                    participant_result.entity_type()
+                ] = participant_result
         return participant_result_map

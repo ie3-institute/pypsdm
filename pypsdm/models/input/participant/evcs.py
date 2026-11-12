@@ -20,8 +20,8 @@ class EvChargingStations(SystemParticipants):
         return self.data["charging_points"]
 
     @property
-    def location_type(self):
-        return self.data["location_type"]
+    def location_types(self):
+        return self.data["location_types"]
 
     @property
     def electric_current_type(self):
@@ -37,19 +37,32 @@ class EvChargingStations(SystemParticipants):
 
     def get_public_evcs(self):
         return self.data[
-            self.location_type.isin(
-                [EvcsLocationType.CUSTOMER_PARKING.value, EvcsLocationType.WORK.value]
+            self.location_types.str.split(r",\s*").apply(
+                lambda values: any(
+                    value
+                    in {
+                        EvcsLocationType.CUSTOMER_PARKING.value,
+                        EvcsLocationType.WORK.value,
+                    }
+                    for value in values
+                )
             )
         ]
 
     def get_home_evcs(self):
-        return self.data[self.location_type.isin([EvcsLocationType.HOME.value])]
+        return self.data[
+            self.location_types.str.split(r",\s*").apply(
+                lambda values: any(
+                    value in {EvcsLocationType.HOME.value} for value in values
+                )
+            )
+        ]
 
     @staticmethod
     def attributes() -> list[str]:
         return SystemParticipants.attributes() + [
             "charging_points",
-            "location_type",
+            "location_types",
             "type",
             "v2g_support",
             "cos_phi_rated",
