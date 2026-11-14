@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from pypsdm.models.enums import EntitiesEnum, SystemParticipantsEnum
+from pypsdm.models.input.entity import Entities
 from pypsdm.models.input.participant.mixins import SpTypeMixin
 from pypsdm.models.input.participant.participant import SystemParticipantsWithCapacity
 
@@ -32,7 +33,7 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return SystemParticipantsWithCapacity.attributes()
+        return Entities.attributes() + ["q_characteristics"]
 
     @staticmethod
     def type_attributes() -> list[str]:
@@ -40,4 +41,6 @@ class ElectricVehicles(SpTypeMixin, SystemParticipantsWithCapacity):
             "s_rated_dc",
             "e_storage",
             "e_cons",
+            "eta_charging",
+            "eta_discharging",
         ]

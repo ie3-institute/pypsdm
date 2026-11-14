@@ -130,9 +130,9 @@ def test_compare():
     pd = get_primary_data()
     pd2 = get_primary_data()
     pd.compare(pd2)
-    pd2._time_series[TimeSeriesKey("a", TimeSeriesEnum.P_TIME_SERIES)] = (
-        get_sample_data(q=False)
-    )
+    pd2._time_series[
+        TimeSeriesKey("a", TimeSeriesEnum.P_TIME_SERIES)
+    ] = get_sample_data(q=False)
     try:
         pd.compare(pd2)
         assert False

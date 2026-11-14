@@ -43,10 +43,6 @@ class PhotovoltaicPowerPlants(SystemParticipants):
         return self.data["k_t"]
 
     @property
-    def market_reaction(self):
-        return self.data["market_reaction"]
-
-    @property
     def cos_phi_rated(self):
         return self.data["cos_phi_rated"]
 
@@ -60,6 +56,5 @@ class PhotovoltaicPowerPlants(SystemParticipants):
             "eta_conv",
             "k_g",
             "k_t",
-            "market_reaction",
             "cos_phi_rated",
         ]

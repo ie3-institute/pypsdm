@@ -21,7 +21,6 @@ def sample_pvs():
             "elevation_angle": [30, 45, 60],
             "k_g": [0.5, 0.6, 0.7],
             "k_t": [0.8, 0.9, 1.0],
-            "market_reaction": [True, False, True],
             "cos_phi_rated": [0.95, 0.98, 0.99],
         },
     )
@@ -45,7 +44,6 @@ def test_add_entities(sample_pvs, caplog):
             "elevation_angle": [50, 60],
             "k_g": [0.7, 0.8],
             "k_t": [0.95, 1.0],
-            "market_reaction": [False, True],
             "cos_phi_rated": [0.99, 1.0],
         },
         index=["uuid4", "uuid5"],
@@ -187,7 +185,6 @@ def test_copy_method(sample_pvs):
                 "elevation_angle": [75],
                 "k_g": [0.8],
                 "k_t": [1.1],
-                "market_reaction": [False],
                 "cos_phi_rated": [0.97],
             },
             index=["uuid4"],

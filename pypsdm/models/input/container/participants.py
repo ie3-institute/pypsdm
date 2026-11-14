@@ -71,7 +71,6 @@ class SystemParticipantsContainer(ContainerMixin):
         biomass_plants = self.biomass_plants.filter_by_nodes(node_uuids)
         wecs = self.wecs.filter_by_nodes(node_uuids)
         storages = self.storages.filter_by_nodes(node_uuids)
-        evs = self.evs.filter_by_nodes(node_uuids)
         evcs = self.evcs.filter_by_nodes(node_uuids)
         hps = self.hps.filter_by_nodes(node_uuids)
         thermal_storages = self.thermal_storages.filter_by_nodes(node_uuids)
@@ -103,7 +102,7 @@ class SystemParticipantsContainer(ContainerMixin):
             biomass_plants,
             wecs,
             storages,
-            evs,
+            self.evs,
             evcs,
             hps,
             thermal_storages,

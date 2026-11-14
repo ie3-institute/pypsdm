@@ -102,7 +102,6 @@ class Transformer2WCurrentDict(BaseCurrentDict[K, Transformer2WResult]):
 class Transformers2WResult(
     Transformer2WCurrentDict[EntityKey], EntitiesResultDictMixin
 ):
-
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 
