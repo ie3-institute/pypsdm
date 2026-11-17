@@ -15,10 +15,6 @@ class WindEnergyConverters(SpTypeMixin, SystemParticipants):
         return SystemParticipantsEnum.WIND_ENERGY_CONVERTER
 
     @property
-    def market_reaction(self):
-        return self.data["market_reaction"]
-
-    @property
     def eta_conv(self):
         return self.data["eta_conv"]
 
@@ -32,7 +28,7 @@ class WindEnergyConverters(SpTypeMixin, SystemParticipants):
 
     @staticmethod
     def entity_attributes() -> list[str]:
-        return SystemParticipants.attributes() + ["market_reaction"]
+        return SystemParticipants.attributes()
 
     @staticmethod
     def type_attributes() -> list[str]:

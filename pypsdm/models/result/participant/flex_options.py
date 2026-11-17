@@ -16,7 +16,6 @@ from pypsdm.processing.series import hourly_mean_resample
 
 @dataclass
 class FlexOption(TimeSeries):
-
     def __init__(self, data: pd.DataFrame, end: datetime | None = None):
         super().__init__(data, end)
 
@@ -71,7 +70,6 @@ class FlexOption(TimeSeries):
 
 
 class FlexOptionsDict(TimeSeriesDict[EntityKey, FlexOption], EntitiesResultDictMixin):
-
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 

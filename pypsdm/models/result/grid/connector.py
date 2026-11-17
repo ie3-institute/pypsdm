@@ -15,7 +15,6 @@ from pypsdm.models.ts.types import ComplexCurrent, ComplexVoltage
 
 @dataclass
 class ConnectorCurrent(TimeSeries):
-
     def __init__(self, data: DataFrame, end: datetime | None = None):
         super().__init__(data, end)
 
