@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Added jupyter notebook for (price) timeseries conversion [#438](https://github.com/ie3-institute/pypsdm/issues/438)
 
 ### Changed
 
