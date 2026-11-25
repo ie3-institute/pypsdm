@@ -12,7 +12,6 @@ from pypsdm.models.ts.base import EntityKey
 
 
 class LinesResult(ConnectorCurrentDict[EntityKey], EntitiesResultDictMixin):
-
     def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
 

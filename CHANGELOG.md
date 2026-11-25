@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Adapt to current PSDM schemas [#567](https://github.com/ie3-institute/pypsdm/issues/567)
 
 ### Removed
 
@@ -14,15 +15,9 @@ All notable changes to this project will be documented in this file.
 
 ## 0.0.8
 
-### Added
-
 ### Changed
 - Rollback `scipy` dependency to v1.13.1 [#523](https://github.com/ie3-institute/pypsdm/issues/523)
 - Rollback `numpy` dependency to v1.26.4 [#525](https://github.com/ie3-institute/pypsdm/issues/525)
-
-### Removed
-
-### Fixed
 
 ## 0.0.7
 

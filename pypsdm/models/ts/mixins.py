@@ -60,7 +60,6 @@ class ActivePowerMixin(AttributeMixin):
 
 
 class ActivePowerDictMixin(TimeSeriesDictMixin):
-
     def p(
         self,
         ffill=True,
@@ -90,7 +89,6 @@ class ReactivePowerMixin(AttributeMixin):
 
 
 class ReactivePowerDictMixin(TimeSeriesDictMixin):
-
     def q(
         self,
         ffill=True,
@@ -113,7 +111,6 @@ class ComplexPowerMixin(ActivePowerMixin, ReactivePowerMixin):
 
 
 class ComplexPowerDictMixin(ActivePowerDictMixin, ReactivePowerDictMixin):
-
     def complex_power(self, ffill=True, favor_ids=True) -> DataFrame:
         return self.p(ffill, favor_ids) + 1j * self.q(ffill, favor_ids)
 
@@ -125,45 +122,38 @@ class SocMixin(AttributeMixin):
 
 
 class SocDictMixin(TimeSeriesDictMixin):
-
     def soc(self, ffill=True, favor_ids=True) -> DataFrame:
         return self.attr_df("soc", ffill, favor_ids)
 
 
 class CurrentAngleMixin(AttributeMixin):
-
     @property
     def i_ang(self):
         return self.data["i_ang"]  # type: ignore
 
 
 class CurrentAngleDictMixin(TimeSeriesDictMixin):
-
     def i_ang(self, ffill: bool = True, favor_ids: bool = True) -> DataFrame:
         return self.attr_df("i_ang", ffill, favor_ids)
 
 
 class CurrentMagnitudeMixin(AttributeMixin):
-
     @property
     def i_mag(self):
         return self.data["i_mag"]  # type: ignore
 
 
 class CurrentMagnitudeDictMixin(TimeSeriesDictMixin):
-
     def i_mag(self, ffill: bool = True, favor_ids: bool = True) -> DataFrame:
         return self.attr_df("i_mag", ffill, favor_ids)
 
 
 class ComplexCurrentMixin(CurrentMagnitudeMixin, CurrentAngleMixin):
-
     def i_complex(self) -> Series:
         return self.i_mag * np.exp(1j * np.radians(self.i_ang))
 
 
 class ComplexCurrentDictMixin(CurrentMagnitudeDictMixin, CurrentAngleDictMixin):
-
     def i_complex(self, favor_ids: bool = True) -> DataFrame:
         return self.attr_df("i_complex", False, favor_ids)
 
@@ -213,7 +203,6 @@ class ComplexVoltageDictMixin(VoltageMagnitudeDictMixin, VoltageAngleDictMixin):
 
 
 class WeatherDataMixin(AttributeMixin):
-
     @property
     def diffuse_irradiance(self):
         return self.data["diffuse_irradiance"]  # type: ignore
@@ -236,7 +225,6 @@ class WeatherDataMixin(AttributeMixin):
 
 
 class WeatherDataDictMixin(TimeSeriesDictMixin):
-
     def diffuse_irradiance(self, ffill=True, favor_ids=True) -> DataFrame:
         return self.attr_df("diffuse_irradiance", ffill, favor_ids)
 

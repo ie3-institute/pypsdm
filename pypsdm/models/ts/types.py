@@ -182,7 +182,6 @@ class ComplexVoltagePowerDict(
 
 
 class CoordinateWeather(TimeSeries, WeatherDataMixin):
-
     def __add__(self, other) -> Self:
         return self.__class__(add_df(self.data, other.data))
 
@@ -221,7 +220,6 @@ class CoordinateWeather(TimeSeries, WeatherDataMixin):
 
 
 class WeatherDict(TimeSeriesDict[int, CoordinateWeather], WeatherDataDictMixin):
-
     @classmethod
     def from_value_list(cls, values: list[WeatherValue]):
         df = CoordinateWeather.df_from_value_list(values)

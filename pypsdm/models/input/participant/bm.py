@@ -15,10 +15,6 @@ class BiomassPlants(SpTypeMixin, SystemParticipants):
         return SystemParticipantsEnum.BIOMASS_PLANT
 
     @property
-    def market_reaction(self):
-        return self.data["market_reaction"]
-
-    @property
     def cost_controlled(self):
         return self.data["cost_controlled"]
 
@@ -37,7 +33,6 @@ class BiomassPlants(SpTypeMixin, SystemParticipants):
     @staticmethod
     def entity_attributes() -> list[str]:
         return SystemParticipants.attributes() + [
-            "market_reaction",
             "cost_controlled",
             "feed_in_tariff",
         ]

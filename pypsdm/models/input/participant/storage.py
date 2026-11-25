@@ -26,16 +26,12 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
         return self.data["active_power_gradient"]
 
     @property
-    def eta(self) -> Series:
-        return self.data["eta"]
+    def eta_charging(self) -> Series:
+        return self.data["eta_charging"]
 
     @property
-    def life_time(self) -> Series:
-        return self.data["life_time"]
-
-    @property
-    def life_cycle(self) -> Series:
-        return self.data["life_cycle"]
+    def eta_discharging(self) -> Series:
+        return self.data["eta_discharging"]
 
     @classmethod
     def entity_attributes(cls) -> list[str]:
@@ -47,7 +43,6 @@ class Storages(SpTypeMixin, SystemParticipantsWithCapacity):
             "p_max",
             "active_power_gradient",
             "e_storage",
-            "eta",
-            "life_time",
-            "life_cycle",
+            "eta_charging",
+            "eta_discharging",
         ]
