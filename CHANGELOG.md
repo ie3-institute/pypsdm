@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Add functionality to plot line traces without mapbox as vector graphic [#360](https://github.com/ie3-institute/pypsdm/issues/360)
 
 ### Changed
 
