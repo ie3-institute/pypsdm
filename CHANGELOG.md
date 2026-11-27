@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Add `thermal_line_segment_plot` to plot thermal line segments created during ampacity simulations [#534](https://github.com/ie3-institute/pypsdm/issues/534)
 
 ### Changed
+- Highlight lines at colormap plotting that exceed rated line current instead of raising an error [#532](https://github.com/ie3-institute/pypsdm/issues/532)
 
 ### Removed
 
